@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ecosystem Event Bus &amp; Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "trust-amber": "#F59E0B",
+                        "on-secondary-container": "#5c6274",
+                        "surface-container-highest": "#e1e2e4",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#404758",
+                        "inverse-primary": "#59df89",
+                        "canvas-pure": "#FFFFFF",
+                        "on-error": "#ffffff",
+                        "outline": "#6d7b6e",
+                        "security-crimson": "#EF4444",
+                        "inverse-surface": "#2e3132",
+                        "surface-container-low": "#f3f4f6",
+                        "secondary": "#575e70",
+                        "inverse-on-surface": "#f0f1f3",
+                        "on-secondary-fixed": "#141b2b",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#edeef0",
+                        "background": "#f8f9fb",
+                        "surface-dim": "#d9dadc",
+                        "primary-fixed-dim": "#59df89",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#3d4a3f",
+                        "surface": "#f8f9fb",
+                        "on-primary-container": "#003317",
+                        "trust-amber-surface": "#FEF3C7",
+                        "security-crimson-surface": "#FEE2E2",
+                        "secondary-fixed-dim": "#c0c6db",
+                        "on-background": "#191c1e",
+                        "on-primary-fixed": "#00210d",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "on-primary-fixed-variant": "#005228",
+                        "tertiary-container": "#638cff",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#006d38",
+                        "on-tertiary-fixed": "#00174b",
+                        "on-tertiary-container": "#00256c",
+                        "outline-variant": "#bccabc",
+                        "on-tertiary-fixed-variant": "#003ea8",
+                        "primary-container": "#00a859",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#191c1e",
+                        "tertiary-fixed": "#dbe1ff",
+                        "primary-fixed": "#77fca3",
+                        "surface-container-high": "#e7e8ea",
+                        "surface-variant": "#e1e2e4",
+                        "text-muted": "#4B5563",
+                        "tertiary": "#0053db",
+                        "surface-bright": "#f8f9fb",
+                        "secondary-container": "#d9dff5",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#dce2f7",
+                        "primary": "#006d38"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "margin-mobile": "16px",
+                        "gutter-mobile": "16px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "touch-target-min": "48px",
+                        "touch-target-primary": "52px"
+                    },
+                    "fontFamily": {
+                        "price-display": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "display-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-caps": ["Inter"],
+                        "body-bold": ["Inter"],
+                        "body-base": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "price-display": ["20px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "800" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-bold": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600" }],
+                        "body-base": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }],
+                        "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .live-pulse {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(0, 109, 56, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(0, 109, 56, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 109, 56, 0); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-base overflow-hidden flex h-screen">
+<!-- SideNavBar (Shared Component) -->
+<nav class="bg-surface-container-low dark:bg-inverse-surface shadow-sm h-full w-72 flex-col fixed left-0 top-0 flex flex-col p-4 space-y-2 z-50 hidden md:flex">
+<div class="mb-8 px-4 py-2">
+<h1 class="font-display-lg text-display-lg font-black text-primary dark:text-primary-fixed">Aura Command</h1>
+<p class="text-secondary dark:text-secondary-fixed-dim text-sm mt-1">Super App Admin</p>
+</div>
+<div class="flex-1 space-y-2">
+<!-- Inactive -->
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-secondary px-4 py-3 rounded-lg transition-colors hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Ecosystem Overview</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-secondary px-4 py-3 rounded-lg transition-colors hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-all duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Vertical Reports</span>
+</a>
+<!-- Active - Intent Match (Analytics/Event Bus) -->
+<a class="flex items-center gap-3 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-lg px-4 py-3 font-bold hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-all duration-200 scale-[0.98] transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-caps text-label-caps">AI BI Studio</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-secondary px-4 py-3 rounded-lg transition-colors hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-all duration-200" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-caps text-label-caps">Custom Reports</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-secondary px-4 py-3 rounded-lg transition-colors hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-all duration-200" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span class="font-label-caps text-label-caps">Financial Audits</span>
+</a>
+</div>
+<button class="bg-primary text-on-primary w-full py-3 rounded-lg font-body-bold shadow-sm h-[52px] mb-4">
+            Generate PDF Report
+        </button>
+<div class="mt-auto space-y-2 border-t border-surface-variant pt-4">
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high px-4 py-2 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high px-4 py-2 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-caps text-label-caps">Support</span>
+</a>
+<div class="flex items-center gap-3 px-4 py-2 mt-2">
+<img alt="Admin User Profile" class="w-8 h-8 rounded-full border border-surface-variant" data-alt="A small, circular avatar portrait of a professional African male administrator wearing glasses, set against a clean studio background, illustrating a modern corporate identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSchynySCOGZBRnT6KukHASVbVl3j8k-G4v7uYtH9LiVIgZBQrTfrtecQo7tA7j39SSO_qP4UfBVS_d2oFfK7T9GBTnzJAdgDbWMO_OlUPCY-Fa4zTlNbgJhMGZzX0za_IVuWv7wZdMn4W3Q_x3KTMzn8bHTcBgrHN3PhOUrCpAgfdqZlHDV2amGVZVp6_w_lZCH_yrnL2OR9chFB-UkxGPk3ph5vnXT2aSYxeD-OFS91zkxIaiu1XXLgpmjWHAiQkXsoYxTyRX2x4"/>
+<span class="font-label-caps text-label-caps text-secondary">Admin User</span>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-72 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-canvas-pure dark:bg-background border-b border-surface-variant dark:border-outline-variant docked full-width top-0 z-40 flex justify-between items-center h-16 px-6 w-full">
+<div class="flex items-center gap-4">
+<h2 class="font-display-lg text-display-lg font-extrabold text-primary dark:text-primary-fixed hidden md:block">NaijaDeals Analytics</h2>
+<div class="flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-full md:ml-4">
+<div class="w-2 h-2 rounded-full bg-primary live-pulse"></div>
+<span class="font-label-caps text-label-caps text-primary">Live Bus</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined">history</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined">cloud_download</span>
+</button>
+<img alt="Admin Avatar" class="w-8 h-8 rounded-full border border-surface-variant ml-2 md:hidden" data-alt="A small, circular avatar portrait of a professional African male administrator wearing glasses, set against a clean studio background, illustrating a modern corporate identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWcEvXewdlIKck3ByxyyLxLxCFCM0csU6_8BG3LmwalUwQwgurfIC5m6AEo6iOgSM0JEZ155udjZvJNl0xL1yQfGj29mg05Ho6yj8-uN5qg0jzHk59cj2uQsBBdZ0gWrJnKBD4O04tBEf9N-PFcriiHEzcuONLxAJ-4p0KBGGdohGbbQl2i_xuho1LM1VuOYTUUGsK4tJmJG-3ecLwz7RIivObd3rVGbmMptwJLYvCBP0c2GxYmJ4ZwiZ9f3-so4bhGCdZFJQLY0d-"/>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="flex-1 overflow-y-auto p-4 md:p-6 bg-surface-bright scrollbar-hide">
+<div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Ecosystem Telemetry</h3>
+<p class="text-text-muted text-sm mt-1">Real-time observability across all super-app verticals</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-canvas-pure border border-surface-variant rounded-lg text-sm font-body-bold hover:bg-surface-container-low transition-colors">Last 15m</button>
+<button class="px-4 py-2 bg-primary-container text-on-primary-container rounded-lg text-sm font-body-bold hover:opacity-90 transition-opacity">Export Log</button>
+</div>
+</div>
+<div class="bento-grid">
+<!-- KPI Row -->
+<div class="col-span-12 md:col-span-3 glass-panel rounded-xl p-4 shadow-sm border border-surface-variant">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-text-muted">Total Events/sec</span>
+<span class="material-symbols-outlined text-tertiary">speed</span>
+</div>
+<div class="mt-4 font-price-display text-price-display text-on-surface">4,821</div>
+<div class="mt-2 text-xs text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +12% vs last hour
+                    </div>
+</div>
+<div class="col-span-12 md:col-span-3 glass-panel rounded-xl p-4 shadow-sm border border-surface-variant">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-text-muted">Avg Latency</span>
+<span class="material-symbols-outlined text-trust-amber">timer</span>
+</div>
+<div class="mt-4 font-price-display text-price-display text-on-surface">42<span class="text-sm font-normal text-text-muted">ms</span></div>
+<div class="mt-2 text-xs text-trust-amber font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span> P99: 120ms
+                    </div>
+</div>
+<div class="col-span-12 md:col-span-6 glass-panel rounded-xl p-4 shadow-sm border border-surface-variant relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-50"></div>
+<div class="relative z-10 flex justify-between items-center h-full">
+<div>
+<span class="font-label-caps text-label-caps text-primary-container">System Health Score</span>
+<div class="mt-2 font-display-lg text-display-lg text-primary">A+ Verified</div>
+<div class="text-xs text-text-muted mt-1">All core nodes operational across Lagos &amp; Abuja AZs</div>
+</div>
+<div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-primary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+</div>
+</div>
+<!-- Recent Events Table (High Density) -->
+<div class="col-span-12 lg:col-span-8 glass-panel rounded-xl p-0 shadow-sm border border-surface-variant overflow-hidden flex flex-col">
+<div class="p-4 border-b border-surface-variant bg-canvas-pure/50 flex justify-between items-center">
+<h4 class="font-body-bold text-body-bold text-on-surface">Event Firehose</h4>
+<span class="px-2 py-1 bg-surface-container-highest rounded text-xs font-mono">Filter: ALL</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-xs font-label-caps text-text-muted">
+<th class="p-3 border-b border-surface-variant">Timestamp</th>
+<th class="p-3 border-b border-surface-variant">Vertical</th>
+<th class="p-3 border-b border-surface-variant">Event Type</th>
+<th class="p-3 border-b border-surface-variant">Status</th>
+<th class="p-3 border-b border-surface-variant text-right">Latency</th>
+</tr>
+</thead>
+<tbody class="text-sm font-mono text-on-surface-variant">
+<tr class="hover:bg-surface-container-lowest/50 transition-colors border-b border-surface-variant/50">
+<td class="p-3">14:02:45.102</td>
+<td class="p-3"><span class="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-sans font-bold">Pay</span></td>
+<td class="p-3 truncate max-w-[150px]">Wallet Funding</td>
+<td class="p-3"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span></td>
+<td class="p-3 text-right">18ms</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest/50 transition-colors border-b border-surface-variant/50">
+<td class="p-3">14:02:44.981</td>
+<td class="p-3"><span class="px-2 py-1 bg-trust-amber/10 text-trust-amber rounded-full text-xs font-sans font-bold">Eats</span></td>
+<td class="p-3 truncate max-w-[150px]">Order Creation</td>
+<td class="p-3"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span></td>
+<td class="p-3 text-right">45ms</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest/50 transition-colors border-b border-surface-variant/50 bg-security-crimson/5">
+<td class="p-3 text-security-crimson">14:02:44.550</td>
+<td class="p-3"><span class="px-2 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-sans font-bold">Identity</span></td>
+<td class="p-3 truncate max-w-[150px]">KYC Verification</td>
+<td class="p-3"><span class="material-symbols-outlined text-security-crimson text-[16px]">error</span></td>
+<td class="p-3 text-right text-security-crimson font-bold">1204ms</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest/50 transition-colors border-b border-surface-variant/50">
+<td class="p-3">14:02:43.112</td>
+<td class="p-3"><span class="px-2 py-1 bg-tertiary/10 text-tertiary rounded-full text-xs font-sans font-bold">Shop</span></td>
+<td class="p-3 truncate max-w-[150px]">Checkout Auth</td>
+<td class="p-3"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span></td>
+<td class="p-3 text-right">32ms</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest/50 transition-colors border-b border-surface-variant/50">
+<td class="p-3">14:02:42.890</td>
+<td class="p-3"><span class="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-sans font-bold">Pay</span></td>
+<td class="p-3 truncate max-w-[150px]">P2P Transfer</td>
+<td class="p-3"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span></td>
+<td class="p-3 text-right">24ms</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Automation ROI & Heatmap (Right Column) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-4">
+<!-- Automation ROI -->
+<div class="glass-panel rounded-xl p-4 shadow-sm border border-surface-variant flex-1">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-body-bold text-body-bold text-on-surface">Automation ROI</h4>
+<span class="material-symbols-outlined text-text-muted text-[20px]">show_chart</span>
+</div>
+<div class="h-32 w-full bg-surface-container-low rounded-lg relative overflow-hidden flex items-end p-2 gap-1">
+<!-- Placeholder for actual chart, using CSS bars for now -->
+<div class="w-1/6 bg-surface-variant h-[40%] rounded-t-sm"></div>
+<div class="w-1/6 bg-surface-variant h-[55%] rounded-t-sm"></div>
+<div class="w-1/6 bg-surface-variant h-[45%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/40 h-[70%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/70 h-[85%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary h-[100%] rounded-t-sm"></div>
+</div>
+<div class="mt-4 flex justify-between items-center">
+<div>
+<div class="text-xs text-text-muted uppercase tracking-wider">Est. Savings (YTD)</div>
+<div class="font-price-display text-on-surface">₦42.5M</div>
+</div>
+<div class="text-right">
+<div class="text-xs text-text-muted uppercase tracking-wider">Ops Deflection</div>
+<div class="font-body-bold text-primary">84%</div>
+</div>
+</div>
+</div>
+<!-- Workflow Success Map -->
+<div class="glass-panel rounded-xl p-4 shadow-sm border border-surface-variant flex-1">
+<div class="flex justify-between items-center mb-2">
+<h4 class="font-body-bold text-body-bold text-on-surface">Regional Success</h4>
+<span class="material-symbols-outlined text-text-muted text-[20px]">map</span>
+</div>
+<div class="text-xs text-text-muted mb-3">Workflow completion rate by zone</div>
+<div class="space-y-3">
+<div>
+<div class="flex justify-between text-xs mb-1"><span>Lagos (SW)</span> <span class="font-bold text-primary">99.2%</span></div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 99.2%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1"><span>Abuja (NC)</span> <span class="font-bold text-primary">98.5%</span></div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 98.5%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1"><span>Kano (NW)</span> <span class="font-bold text-trust-amber">94.1%</span></div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-trust-amber h-full" style="width: 94.1%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1"><span>Port Harcourt (SS)</span> <span class="font-bold text-primary">97.8%</span></div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 97.8%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom spacing for mobile if needed -->
+<div class="h-20 md:h-8"></div>
+</div>
+</main>
+</body></html>

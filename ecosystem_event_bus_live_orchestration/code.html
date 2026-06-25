@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ecosystem Event Bus | NaijaDeals Orchestrator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-surface": "#2e3132",
+                    "inverse-on-surface": "#f0f1f3",
+                    "primary-fixed-dim": "#59df89",
+                    "tertiary": "#0053db",
+                    "secondary-fixed-dim": "#c0c6db",
+                    "surface-container-high": "#e7e8ea",
+                    "tertiary-fixed-dim": "#b4c5ff",
+                    "on-tertiary-fixed": "#00174b",
+                    "on-primary": "#ffffff",
+                    "text-muted": "#4B5563",
+                    "on-surface": "#191c1e",
+                    "error-container": "#ffdad6",
+                    "canvas-pure": "#FFFFFF",
+                    "on-surface-variant": "#3d4a3f",
+                    "on-primary-container": "#003317",
+                    "on-secondary-fixed": "#141b2b",
+                    "surface-container": "#edeef0",
+                    "tertiary-fixed": "#dbe1ff",
+                    "surface-bright": "#f8f9fb",
+                    "trust-amber": "#F59E0B",
+                    "on-error-container": "#93000a",
+                    "security-crimson": "#EF4444",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f3f4f6",
+                    "on-secondary-container": "#5c6274",
+                    "outline": "#6d7b6e",
+                    "surface-container-highest": "#e1e2e4",
+                    "surface-dim": "#d9dadc",
+                    "on-tertiary-fixed-variant": "#003ea8",
+                    "surface-variant": "#e1e2e4",
+                    "primary-fixed": "#77fca3",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#00210d",
+                    "on-primary-fixed-variant": "#005228",
+                    "outline-variant": "#bccabc",
+                    "on-error": "#ffffff",
+                    "on-background": "#191c1e",
+                    "inverse-primary": "#59df89",
+                    "on-tertiary-container": "#00256c",
+                    "tertiary-container": "#638cff",
+                    "primary-container": "#00a859",
+                    "on-tertiary": "#ffffff",
+                    "background": "#f8f9fb",
+                    "on-secondary-fixed-variant": "#404758",
+                    "primary": "#006d38",
+                    "secondary": "#575e70",
+                    "surface-tint": "#006d38",
+                    "secondary-fixed": "#dce2f7",
+                    "surface": "#f8f9fb",
+                    "error": "#ba1a1a",
+                    "security-crimson-surface": "#FEE2E2",
+                    "trust-amber-surface": "#FEF3C7",
+                    "secondary-container": "#d9dff5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "32px",
+                    "lg": "24px",
+                    "xs": "4px",
+                    "touch-target-primary": "52px",
+                    "unit": "4px",
+                    "gutter-mobile": "16px",
+                    "touch-target-min": "48px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "price-display": ["Plus Jakarta Sans"],
+                    "body-base": ["Inter"],
+                    "body-bold": ["Inter"],
+                    "display-lg-mobile": ["Plus Jakarta Sans"],
+                    "label-caps": ["Inter"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "price-display": ["20px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "800"}],
+                    "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                    "body-bold": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600"}],
+                    "display-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Subtle scrollbar for firehose */
+        .firehose-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .firehose-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .firehose-scroll::-webkit-scrollbar-thumb {
+            background-color: #d9dadc;
+            border-radius: 20px;
+        }
+        
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #E5E7EB;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-base antialiased flex h-screen overflow-hidden">
+<!-- SideNavBar (Shared Component JSON) -->
+<nav class="h-screen w-64 fixed left-0 top-0 z-40 border-r border-outline-variant dark:border-outline flat no shadows bg-surface-container-low dark:bg-inverse-surface flex flex-col h-full py-lg">
+<!-- Header -->
+<div class="px-lg mb-xl">
+<div class="flex items-center gap-sm mb-xs">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-on-primary text-sm" data-icon="hub">hub</span>
+</div>
+<h1 class="font-display-lg text-[20px] text-primary">System Health</h1>
+</div>
+<p class="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">ROI: +24% this week</p>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 px-sm space-y-xs overflow-y-auto">
+<!-- Events (Active) -->
+<a class="flex items-center gap-md bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-lg px-md py-sm font-label-caps text-label-caps uppercase tracking-wider transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="event_upcoming">event_upcoming</span>
+<span>Events</span>
+</a>
+<!-- Workflows -->
+<a class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant font-label-caps text-label-caps uppercase tracking-wider transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span>Workflows</span>
+</a>
+<!-- Agents -->
+<a class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant font-label-caps text-label-caps uppercase tracking-wider transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span>Agents</span>
+</a>
+<!-- Marketplace -->
+<a class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant font-label-caps text-label-caps uppercase tracking-wider transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span>Marketplace</span>
+</a>
+<!-- Recovery -->
+<a class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant font-label-caps text-label-caps uppercase tracking-wider transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="restore_page">restore_page</span>
+<span>Recovery</span>
+</a>
+</div>
+<!-- Footer -->
+<div class="px-sm mt-auto space-y-xs">
+<button class="w-full mb-md bg-primary text-on-primary h-[52px] rounded-lg font-body-bold flex items-center justify-center gap-sm shadow-sm hover:bg-primary-container hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                New Workflow
+            </button>
+<a class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant font-label-caps text-label-caps uppercase tracking-wider transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant font-label-caps text-label-caps uppercase tracking-wider transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span>Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 flex flex-col h-screen relative">
+<!-- TopNavBar (Shared Component JSON) -->
+<header class="w-full h-16 sticky top-0 z-50 border-b border-outline-variant dark:border-outline flat no shadows bg-canvas-pure dark:bg-inverse-surface flex justify-between items-center px-lg w-full">
+<div class="flex items-center gap-md">
+<!-- Search on left -->
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-body-base font-body-base focus:ring-2 focus:ring-primary focus:bg-canvas-pure transition-all w-64 md:w-96 text-on-surface placeholder:text-on-surface-variant" placeholder="Search events, IDs, or payloads..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<!-- Trailing Actions -->
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface-variant transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="monitor_heart">monitor_heart</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface-variant transition-colors active:scale-95 duration-150 relative">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border border-canvas-pure"></span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface-variant transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+</button>
+<div class="h-8 w-px bg-outline-variant mx-2"></div>
+<!-- Profile -->
+<button class="flex items-center gap-sm hover:bg-surface-container dark:hover:bg-inverse-surface-variant transition-colors p-1 rounded-full pr-3 active:scale-95 duration-150">
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="System Administrator Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a system administrator. The lighting is bright and modern, suggesting a high-end corporate tech environment. The mood is confident and secure, aligning with the trusted NaijaDeals brand identity. The background is slightly blurred but clearly an office setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8RnEGVJD5Vja6jErZX_aBPhDfeY49fRjULfcVbU5ZQvTC1jcKmLikyEZrL20_ZH5DT-Gtf9gM2qNU19uNAx24hTNGlczVhYgWaEtiAgB-oPzWiGh44vytomeI8fN3TmVHvt2CfdVI2MP_9XlyfOxBDci8GshVl8urE61S8qEL5SWA-zTgLoUvOBlhQUACAyg5_RnZp0sNGc8Y_oQLwtQtQ_B89vJIr0eSzMD7rCjxvn8vOGzCeexQ9BwbTAKNoPiiMUL6GtMKTNFP"/>
+</div>
+<span class="font-body-bold text-body-bold text-primary dark:text-primary-fixed-dim">Admin</span>
+</button>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<div class="flex-1 overflow-hidden flex flex-col p-lg gap-lg bg-surface">
+<!-- KPIs Header -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md shrink-0">
+<!-- KPI 1: Events/sec -->
+<div class="glass-panel rounded-xl p-md flex items-center justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-1">Throughput</p>
+<div class="flex items-baseline gap-2">
+<h2 class="font-display-lg text-display-lg text-on-surface">1,245</h2>
+<span class="font-body-base text-body-base text-text-muted">evts/sec</span>
+</div>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" data-icon="speed">speed</span>
+</div>
+</div>
+<!-- KPI 2: Latency -->
+<div class="glass-panel rounded-xl p-md flex items-center justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-1">Queue Latency</p>
+<div class="flex items-baseline gap-2">
+<h2 class="font-display-lg text-display-lg text-on-surface">14<span class="text-xl">ms</span></h2>
+<span class="text-sm text-primary font-body-bold flex items-center"><span class="material-symbols-outlined text-sm" data-icon="arrow_downward">arrow_downward</span> 2ms</span>
+</div>
+</div>
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="timer">timer</span>
+</div>
+</div>
+<!-- KPI 3: Success Rate -->
+<div class="glass-panel rounded-xl p-md flex items-center justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-1">Global Success</p>
+<div class="flex items-baseline gap-2">
+<h2 class="font-display-lg text-display-lg text-on-surface">99.8%</h2>
+</div>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Main Firehose Table Area -->
+<div class="flex-1 glass-panel rounded-xl flex flex-col overflow-hidden relative">
+<!-- Table Header -->
+<div class="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-canvas-pure/50 shrink-0">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+</span>
+                        Live Event Bus
+                    </h3>
+<div class="flex gap-sm">
+<button class="px-4 py-2 rounded border border-outline-variant text-body-bold font-body-bold text-on-surface hover:bg-surface-container transition-colors flex items-center gap-2 text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span> Filter
+                        </button>
+<button class="px-4 py-2 rounded bg-surface-variant text-on-surface text-body-bold font-body-bold hover:bg-surface-dim transition-colors flex items-center gap-2 text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="pause">pause</span> Pause Feed
+                        </button>
+</div>
+</div>
+<!-- Table Content -->
+<div class="flex-1 overflow-auto firehose-scroll p-md">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-canvas-pure/95 backdrop-blur z-10">
+<tr>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider border-b border-outline-variant">Timestamp</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider border-b border-outline-variant">Event Name</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider border-b border-outline-variant">Source</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider border-b border-outline-variant">Status</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider border-b border-outline-variant">Payload Preview</th>
+</tr>
+</thead>
+<tbody class="font-body-base text-sm divide-y divide-outline-variant/50">
+<!-- Row 1: Success -->
+<tr class="hover:bg-surface-bright transition-colors cursor-pointer group" onclick="toggleDrawer()">
+<td class="py-3 px-4 text-text-muted font-mono text-xs">10:42:01.842</td>
+<td class="py-3 px-4 font-body-bold text-on-surface">Order Created</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary-container text-on-secondary-container text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]" data-icon="shopping_bag">shopping_bag</span> Shop
+                                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-primary font-body-bold">
+<span class="w-2 h-2 rounded-full bg-primary"></span> Success
+                                    </span>
+</td>
+<td class="py-3 px-4 text-text-muted font-mono text-xs truncate max-w-[200px]">
+                                    {"orderId":"ORD-992-A","amount":45000,...}
+                                </td>
+</tr>
+<!-- Row 2: Retrying -->
+<tr class="hover:bg-surface-bright transition-colors cursor-pointer group">
+<td class="py-3 px-4 text-text-muted font-mono text-xs">10:42:01.750</td>
+<td class="py-3 px-4 font-body-bold text-on-surface">Settlement Released</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-tertiary-container text-on-tertiary-container text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]" data-icon="payments">payments</span> Pay
+                                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-trust-amber font-body-bold">
+<span class="w-2 h-2 rounded-full bg-trust-amber"></span> Retrying (2/3)
+                                    </span>
+</td>
+<td class="py-3 px-4 text-text-muted font-mono text-xs truncate max-w-[200px]">
+                                    {"vendorId":"VND-44","bankCode":"058",...}
+                                </td>
+</tr>
+<!-- Row 3: Failed -->
+<tr class="hover:bg-surface-bright transition-colors cursor-pointer group bg-security-crimson-surface/20">
+<td class="py-3 px-4 text-text-muted font-mono text-xs">10:42:01.611</td>
+<td class="py-3 px-4 font-body-bold text-on-surface">KYC Approved</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-surface-variant text-on-surface-variant text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]" data-icon="person">person</span> Auth
+                                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-security-crimson font-body-bold">
+<span class="w-2 h-2 rounded-full bg-security-crimson"></span> Failed
+                                    </span>
+</td>
+<td class="py-3 px-4 text-text-muted font-mono text-xs truncate max-w-[200px]">
+                                    {"userId":"USR-991","docType":"NIN","error":"Timeout"}
+                                </td>
+</tr>
+<!-- Row 4: Success -->
+<tr class="hover:bg-surface-bright transition-colors cursor-pointer group">
+<td class="py-3 px-4 text-text-muted font-mono text-xs">10:42:01.500</td>
+<td class="py-3 px-4 font-body-bold text-on-surface">Delivery Completed</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-primary-container text-on-primary-container text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]" data-icon="local_shipping">local_shipping</span> Eats
+                                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-primary font-body-bold">
+<span class="w-2 h-2 rounded-full bg-primary"></span> Success
+                                    </span>
+</td>
+<td class="py-3 px-4 text-text-muted font-mono text-xs truncate max-w-[200px]">
+                                    {"deliveryId":"DEL-112","riderId":"RDR-88",...}
+                                </td>
+</tr>
+<!-- Row 5: Success -->
+<tr class="hover:bg-surface-bright transition-colors cursor-pointer group">
+<td class="py-3 px-4 text-text-muted font-mono text-xs">10:42:01.210</td>
+<td class="py-3 px-4 font-body-bold text-on-surface">Wallet Funded</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-tertiary-container text-on-tertiary-container text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]" data-icon="payments">payments</span> Pay
+                                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-primary font-body-bold">
+<span class="w-2 h-2 rounded-full bg-primary"></span> Success
+                                    </span>
+</td>
+<td class="py-3 px-4 text-text-muted font-mono text-xs truncate max-w-[200px]">
+                                    {"walletId":"WAL-001","amount":150000,"ref":"TRX-..."}
+                                </td>
+</tr>
+<!-- Row 6: Success -->
+<tr class="hover:bg-surface-bright transition-colors cursor-pointer group">
+<td class="py-3 px-4 text-text-muted font-mono text-xs">10:42:00.998</td>
+<td class="py-3 px-4 font-body-bold text-on-surface">User Registered</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-surface-variant text-on-surface-variant text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]" data-icon="person">person</span> Auth
+                                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-primary font-body-bold">
+<span class="w-2 h-2 rounded-full bg-primary"></span> Success
+                                    </span>
+</td>
+<td class="py-3 px-4 text-text-muted font-mono text-xs truncate max-w-[200px]">
+                                    {"userId":"USR-992","phone":"+234803...","role":"buyer"}
+                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Event Inspector Drawer (Hidden by default, toggled via JS) -->
+<div class="fixed right-0 top-16 bottom-0 w-[400px] bg-canvas-pure border-l border-outline-variant shadow-[-8px_0_24px_rgba(0,0,0,0.05)] transform translate-x-full transition-transform duration-300 ease-in-out z-40 flex flex-col" id="inspector-drawer">
+<!-- Drawer Header -->
+<div class="p-lg border-b border-outline-variant flex justify-between items-start bg-surface-bright">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary-container text-on-secondary-container text-[10px] uppercase font-bold tracking-wider">
+<span class="material-symbols-outlined text-[12px]" data-icon="shopping_bag">shopping_bag</span> Shop
+                        </span>
+<span class="text-xs text-text-muted font-mono">10:42:01.842</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Order Created</h2>
+<span class="inline-flex items-center gap-1 text-primary font-body-bold text-sm mt-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span> Processed Successfully
+                    </span>
+</div>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant transition-colors" onclick="toggleDrawer()">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Drawer Content (Scrollable) -->
+<div class="flex-1 overflow-y-auto p-lg space-y-xl bg-canvas-pure">
+<!-- Linked Workflow -->
+<div>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-sm">Linked Workflow</h4>
+<div class="border border-outline-variant rounded-lg p-md bg-surface-bright flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-[#ff6d5a]/10 flex items-center justify-center text-[#ff6d5a]">
+<!-- n8n generic icon placeholder -->
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+</div>
+<div>
+<p class="font-body-bold text-sm text-on-surface">Shop_Order_Routing_v2</p>
+<p class="text-xs text-text-muted">Exec ID: 882910-A</p>
+</div>
+</div>
+<button class="text-primary text-sm font-body-bold hover:underline">View in n8n</button>
+</div>
+</div>
+<!-- Raw JSON Payload -->
+<div>
+<div class="flex justify-between items-center mb-sm">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Raw Payload</h4>
+<button class="text-xs text-primary font-body-bold hover:underline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="content_copy">content_copy</span> Copy
+                        </button>
+</div>
+<div class="bg-inverse-surface rounded-lg p-md overflow-x-auto">
+<pre class="text-inverse-on-surface font-mono text-xs leading-relaxed">{
+  "eventId": "evt_01H9X...",
+  "type": "order.created",
+  "timestamp": 1693564921842,
+  "source": "naijashop-core",
+  "data": {
+    "orderId": "ORD-992-A",
+    "buyerId": "USR-441",
+    "vendorId": "VND-82",
+    "items": [
+      {
+        "sku": "SKU-GEN-01",
+        "qty": 1,
+        "price": 45000
+      }
+    ],
+    "totalAmount": 45000,
+    "currency": "NGN",
+    "paymentStatus": "pending_escrow",
+    "deliveryMode": "dispatch"
+  },
+  "metadata": {
+    "ip": "102.89.x.x",
+    "userAgent": "NaijaDeals/2.1.0 Android"
+  }
+}
+</pre>
+</div>
+</div>
+<!-- Retry History -->
+<div>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-sm">Execution Timeline</h4>
+<div class="relative border-l-2 border-surface-variant ml-3 space-y-4 pb-2">
+<!-- Step 1 -->
+<div class="relative pl-6">
+<div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-canvas-pure border-2 border-primary"></div>
+<p class="text-sm font-body-bold text-on-surface">Event Received</p>
+<p class="text-xs text-text-muted font-mono">10:42:01.842</p>
+</div>
+<!-- Step 2 -->
+<div class="relative pl-6">
+<div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-canvas-pure border-2 border-primary"></div>
+<p class="text-sm font-body-bold text-on-surface">Schema Validated</p>
+<p class="text-xs text-text-muted font-mono">10:42:01.845</p>
+</div>
+<!-- Step 3 -->
+<div class="relative pl-6">
+<div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-canvas-pure border-2 border-primary"></div>
+<p class="text-sm font-body-bold text-on-surface">Pushed to n8n Webhook</p>
+<p class="text-xs text-text-muted font-mono">10:42:01.860</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Drawer Footer Actions -->
+<div class="p-lg border-t border-outline-variant bg-surface-bright flex gap-sm">
+<button class="flex-1 border border-outline-variant text-on-surface h-[48px] rounded font-body-bold hover:bg-surface-container transition-colors">
+                    Replay Event
+                </button>
+<button class="flex-1 bg-surface-variant text-on-surface h-[48px] rounded font-body-bold hover:bg-surface-dim transition-colors">
+                    Download Log
+                </button>
+</div>
+</div>
+</main>
+<script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('inspector-drawer');
+            if (drawer.classList.contains('translate-x-full')) {
+                drawer.classList.remove('translate-x-full');
+            } else {
+                drawer.classList.add('translate-x-full');
+            }
+        }
+    </script>
+</body></html>
