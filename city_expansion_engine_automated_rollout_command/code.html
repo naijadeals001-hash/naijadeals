@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>City Expansion Engine | Awareness Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid #E5E7EB;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#edeef0",
+                        "secondary-fixed-dim": "#c0c6db",
+                        "inverse-surface": "#2e3132",
+                        "on-primary-container": "#003317",
+                        "canvas-pure": "#FFFFFF",
+                        "inverse-primary": "#59df89",
+                        "surface-variant": "#e1e2e4",
+                        "on-tertiary-container": "#00256c",
+                        "surface-dim": "#d9dadc",
+                        "tertiary": "#0053db",
+                        "on-surface": "#191c1e",
+                        "surface-container-high": "#e7e8ea",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#bccabc",
+                        "outline": "#6d7b6e",
+                        "on-tertiary-fixed-variant": "#003ea8",
+                        "on-tertiary-fixed": "#00174b",
+                        "secondary": "#575e70",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f8f9fb",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#404758",
+                        "on-secondary": "#ffffff",
+                        "security-crimson": "#EF4444",
+                        "primary-fixed-dim": "#59df89",
+                        "tertiary-container": "#638cff",
+                        "on-secondary-container": "#5c6274",
+                        "primary-container": "#00a859",
+                        "error": "#ba1a1a",
+                        "security-crimson-surface": "#FEE2E2",
+                        "on-primary-fixed-variant": "#005228",
+                        "surface-tint": "#006d38",
+                        "tertiary-fixed": "#dbe1ff",
+                        "surface-container-highest": "#e1e2e4",
+                        "trust-amber": "#F59E0B",
+                        "on-surface-variant": "#3d4a3f",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#f0f1f3",
+                        "on-secondary-fixed": "#141b2b",
+                        "secondary-fixed": "#dce2f7",
+                        "on-primary-fixed": "#00210d",
+                        "primary": "#006d38",
+                        "background": "#f8f9fb",
+                        "secondary-container": "#d9dff5",
+                        "surface-bright": "#f8f9fb",
+                        "trust-amber-surface": "#FEF3C7",
+                        "text-muted": "#4B5563",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#77fca3",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "on-background": "#191c1e",
+                        "surface-container-low": "#f3f4f6",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter-mobile": "16px",
+                        "xl": "32px",
+                        "touch-target-min": "48px",
+                        "md": "16px",
+                        "unit": "4px",
+                        "touch-target-primary": "52px",
+                        "margin-mobile": "16px",
+                        "lg": "24px",
+                        "xs": "4px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "price-display": ["Plus Jakarta Sans"],
+                        "body-base": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "display-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-bold": ["Inter"]
+                    },
+                    "fontSize": {
+                        "price-display": ["20px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "800"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-bold": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background font-body-base text-on-surface overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<nav class="sticky top-0 z-50 flex justify-between items-center w-full px-lg py-sm bg-canvas-pure border-b border-outline-variant transition-all duration-200">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-bold text-primary">Awareness Engine</span>
+<span class="hidden md:block h-6 w-[1px] bg-outline-variant"></span>
+<span class="hidden md:block font-body-base text-on-surface-variant italic">City Expansion Terminal</span>
+</div>
+<div class="flex items-center gap-lg">
+<div class="relative hidden lg:flex items-center">
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full w-64 focus:ring-2 focus:ring-primary transition-all" placeholder="Search operational data..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant">search</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-full cursor-pointer">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-full cursor-pointer">
+<span class="material-symbols-outlined text-primary">settings</span>
+</button>
+<div class="flex items-center gap-xs ml-md border-l pl-md border-outline-variant">
+<img alt="Administrator profile photo" class="w-8 h-8 rounded-full border border-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSuFc0kZazoesOEb7r9m47H_Jd7w54_DKsV8BppF4tCpL39d9lsQuEPTOAbXx4Buaa4eNv7cYCSoAKCAMWWLV8mSICPRtG4JuwoqzTaxLyOW2-qvRhJCcXycAmD1714cZmlLhJsFwbQAqMgluBSZMpVzWH7X6NbJ0eJQhuf_GExDrEUKjn7DXMvKa7bmZQWr6N9WHbIGw4uGAIED4YMGSfNJArAimqByCYAPO-BknRYSfQzfcf9mmuXZ7JMSrRDLpVZw4ScEo199X6"/>
+<span class="hidden sm:inline font-body-bold text-body-bold">Institutional Admin</span>
+</div>
+</div>
+</div>
+</nav>
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Side Navigation Bar -->
+<aside class="flex flex-col h-full sticky left-0 top-0 overflow-y-auto w-64 pb-lg bg-surface-container-low border-r border-outline-variant shadow-sm hidden md:flex">
+<div class="px-lg py-lg flex flex-col items-center border-b border-outline-variant mb-md">
+<div class="w-16 h-16 bg-primary-container rounded-xl flex items-center justify-center mb-sm shadow-sm">
+<span class="material-symbols-outlined text-on-primary-container text-4xl" data-weight="fill">hub</span>
+</div>
+<h3 class="font-headline-md text-headline-md font-extrabold text-primary text-center">Awareness Engine</h3>
+<p class="font-body-base text-on-surface-variant text-sm text-center">v2.4 Expansion Protocol</p>
+</div>
+<nav class="flex-1 px-2 space-y-1">
+<a class="flex items-center px-4 py-3 mx-2 my-1 text-secondary hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mr-md">dashboard</span>
+<span class="font-body-bold">Ecosystem Overview</span>
+</a>
+<!-- Active Item for City Expansion -->
+<a class="flex items-center px-4 py-3 bg-primary-container text-on-primary-container rounded-lg mx-2 my-1 transition-all" href="#">
+<span class="material-symbols-outlined mr-md" data-weight="fill">campaign</span>
+<span class="font-body-bold">Campaign Center</span>
+</a>
+<a class="flex items-center px-4 py-3 mx-2 my-1 text-secondary hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mr-md">storefront</span>
+<span class="font-body-bold">Retail Operations</span>
+</a>
+<a class="flex items-center px-4 py-3 mx-2 my-1 text-secondary hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mr-md">local_shipping</span>
+<span class="font-body-bold">Logistics Fleet</span>
+</a>
+<a class="flex items-center px-4 py-3 mx-2 my-1 text-secondary hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mr-md">account_balance</span>
+<span class="font-body-bold">Financial Ledger</span>
+</a>
+<a class="flex items-center px-4 py-3 mx-2 my-1 text-secondary hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mr-md">public</span>
+<span class="font-body-bold">Social Command</span>
+</a>
+</nav>
+<div class="px-4 mt-lg">
+<button class="w-full bg-primary text-on-primary py-3 rounded-xl font-body-bold shadow-lg flex items-center justify-center gap-xs hover:opacity-90 active:opacity-80 transition-all">
+<span class="material-symbols-outlined">add</span>
+                    Launch New Campaign
+                </button>
+</div>
+<div class="mt-auto border-t border-outline-variant pt-md">
+<a class="flex items-center px-4 py-3 mx-2 my-1 text-secondary hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mr-md">support_agent</span>
+<span class="font-body-bold">Support</span>
+</a>
+<a class="flex items-center px-4 py-3 mx-2 my-1 text-secondary hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mr-md">logout</span>
+<span class="font-body-bold">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-md md:p-lg bg-surface scroll-smooth">
+<header class="mb-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface font-extrabold tracking-tight">City Expansion Engine</h1>
+<p class="text-on-surface-variant font-body-base max-w-2xl mt-sm">Strategic deployment console for automated multi-vertical scaling across Nigerian metropolises. Control fleet, logistics, and merchant pipelines.</p>
+</div>
+<div class="flex gap-sm">
+<div class="px-4 py-2 bg-trust-amber-surface border border-trust-amber/20 rounded-lg flex items-center gap-xs">
+<span class="material-symbols-outlined text-trust-amber">verified_user</span>
+<span class="font-label-caps text-trust-amber">ADMIN AUTHORIZATION: LEVEL 5</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Grid System -->
+<div class="bento-grid">
+<!-- City Selector (Span 12 for wide selection) -->
+<section class="col-span-12 glass-card rounded-xl p-lg overflow-hidden relative">
+<div class="absolute top-0 right-0 w-64 h-64 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[12rem]">map</span>
+</div>
+<h2 class="font-headline-md text-headline-md mb-md text-on-surface">Target City Selection</h2>
+<div class="flex flex-wrap gap-md">
+<!-- City Cards -->
+<button class="flex-1 min-w-[160px] group relative bg-primary-container text-on-primary-container p-lg rounded-xl border-2 border-primary shadow-lg transform scale-[1.02] transition-all">
+<span class="material-symbols-outlined text-3xl mb-xs" data-weight="fill">location_city</span>
+<div class="font-display-lg text-xl font-bold">Lagos</div>
+<div class="text-xs font-label-caps opacity-70">Active Launch</div>
+<span class="absolute top-4 right-4 material-symbols-outlined text-primary">check_circle</span>
+</button>
+<button class="flex-1 min-w-[160px] group bg-canvas-pure hover:bg-surface-container-low p-lg rounded-xl border border-outline-variant transition-all hover:-translate-y-1">
+<span class="material-symbols-outlined text-3xl mb-xs text-primary">castle</span>
+<div class="font-display-lg text-xl font-bold">Abuja</div>
+<div class="text-xs font-label-caps text-on-surface-variant">Scheduled: Q4</div>
+</button>
+<button class="flex-1 min-w-[160px] group bg-canvas-pure hover:bg-surface-container-low p-lg rounded-xl border border-outline-variant transition-all hover:-translate-y-1">
+<span class="material-symbols-outlined text-3xl mb-xs text-primary">anchor</span>
+<div class="font-display-lg text-xl font-bold">Port Harcourt</div>
+<div class="text-xs font-label-caps text-on-surface-variant">Readiness: 64%</div>
+</button>
+<button class="flex-1 min-w-[160px] group bg-canvas-pure hover:bg-surface-container-low p-lg rounded-xl border border-outline-variant transition-all hover:-translate-y-1">
+<span class="material-symbols-outlined text-3xl mb-xs text-primary">mosque</span>
+<div class="font-display-lg text-xl font-bold">Kano</div>
+<div class="text-xs font-label-caps text-on-surface-variant">In Review</div>
+</button>
+<button class="flex-1 min-w-[160px] group bg-canvas-pure hover:bg-surface-container-low p-lg rounded-xl border border-outline-variant transition-all hover:-translate-y-1">
+<span class="material-symbols-outlined text-3xl mb-xs text-primary">mountain_flag</span>
+<div class="font-display-lg text-xl font-bold">Enugu</div>
+<div class="text-xs font-label-caps text-on-surface-variant">Pre-Flight</div>
+</button>
+</div>
+</section>
+<!-- Performance Projections (Span 4) -->
+<section class="col-span-12 lg:col-span-4 space-y-md">
+<div class="bg-inverse-surface text-canvas-pure rounded-xl p-lg relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-label-caps opacity-70 mb-sm">ESTIMATED LAGOS REACH</h3>
+<div class="font-display-lg text-4xl font-extrabold text-primary-fixed">12.4M</div>
+<p class="text-sm opacity-60 mt-xs">Projected active users within first 90 days of full deployment.</p>
+</div>
+
+</div>
+<div class="glass-card rounded-xl p-md border border-outline-variant">
+<div class="flex items-center justify-between mb-sm">
+<span class="font-body-bold text-sm">Target Merchants</span>
+<span class="text-primary font-body-bold">8,500</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 72%"></div>
+</div>
+</div>
+<div class="glass-card rounded-xl p-md border border-outline-variant">
+<div class="flex items-center justify-between mb-sm">
+<span class="font-body-bold text-sm">Required Fleet Size</span>
+<span class="text-primary font-body-bold">12,000</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 45%"></div>
+</div>
+</div>
+</section>
+<!-- Auto-Launch Protocol (Span 8) -->
+<section class="col-span-12 lg:col-span-8 bg-canvas-pure border border-outline-variant rounded-xl p-lg">
+<div class="flex items-center justify-between mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface">Auto-Launch Protocol</h2>
+<div class="px-3 py-1 bg-primary-container/20 text-primary border border-primary/20 rounded-full text-xs font-body-bold animate-pulse">EXECUTING SEQUENCES</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div class="flex gap-md p-md bg-surface rounded-xl border-l-4 border-primary shadow-sm">
+<div class="w-12 h-12 bg-primary-container rounded-lg flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary-container" data-weight="fill">ads_click</span>
+</div>
+<div>
+<h4 class="font-body-bold">Social Media Campaigns</h4>
+<p class="text-xs text-on-surface-variant">FB/IG/TikTok live ads targeting Lagos demographics.</p>
+<div class="mt-xs text-[10px] font-label-caps text-primary">BURNING: $2,400 / DAY</div>
+</div>
+</div>
+<div class="flex gap-md p-md bg-surface rounded-xl border-l-4 border-primary shadow-sm">
+<div class="w-12 h-12 bg-primary-container rounded-lg flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary-container" data-weight="fill">handshake</span>
+</div>
+<div>
+<h4 class="font-body-bold">Vendor Recruitment</h4>
+<p class="text-xs text-on-surface-variant">Automated merchant outreach via NaijaShop API.</p>
+<div class="mt-xs text-[10px] font-label-caps text-primary">124 NEW SIGNUPS TODAY</div>
+</div>
+</div>
+<div class="flex gap-md p-md bg-surface rounded-xl border-l-4 border-secondary shadow-sm opacity-70">
+<div class="w-12 h-12 bg-surface-container-highest rounded-lg flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-secondary">moped</span>
+</div>
+<div>
+<h4 class="font-body-bold">Driver Recruitment</h4>
+<p class="text-xs text-on-surface-variant">Onboarding fleet partners for NaijaDrive/Send.</p>
+<div class="mt-xs text-[10px] font-label-caps text-on-surface-variant">PENDING VERIFICATION</div>
+</div>
+</div>
+<div class="flex gap-md p-md bg-surface rounded-xl border-l-4 border-secondary shadow-sm opacity-70">
+<div class="w-12 h-12 bg-surface-container-highest rounded-lg flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-secondary">redeem</span>
+</div>
+<div>
+<h4 class="font-body-bold">Customer Acquisition</h4>
+<p class="text-xs text-on-surface-variant">Promo/Coupon disbursement sequence.</p>
+<div class="mt-xs text-[10px] font-label-caps text-on-surface-variant">SCHEDULED FOR T+48H</div>
+</div>
+</div>
+</div>
+</section>
+<!-- City Readiness Tracker (Span 6) -->
+<section class="col-span-12 lg:col-span-6 glass-card rounded-xl p-lg">
+<h2 class="font-headline-md text-headline-md mb-lg text-on-surface">Lagos Rollout Status</h2>
+<div class="space-y-lg">
+<div>
+<div class="flex justify-between items-center mb-xs">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-sm">restaurant</span>
+<span class="font-body-bold text-sm">NaijaEats Manager</span>
+</div>
+<span class="text-primary font-body-bold text-sm">94%</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full w-[94%] transition-all duration-1000 shadow-[0_0_8px_rgba(0,109,56,0.5)]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-xs">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-sm">shopping_bag</span>
+<span class="font-body-bold text-sm">NaijaShop Retail</span>
+</div>
+<span class="text-primary font-body-bold text-sm">78%</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full w-[78%] transition-all duration-1000"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-xs">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-sm">commute</span>
+<span class="font-body-bold text-sm">NaijaDrive Transport</span>
+</div>
+<span class="text-trust-amber font-body-bold text-sm">42%</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-trust-amber h-full rounded-full w-[42%] transition-all duration-1000"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-xs">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-sm">package_2</span>
+<span class="font-body-bold text-sm">NaijaSend Logistics</span>
+</div>
+<span class="text-security-crimson font-body-bold text-sm">18%</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-security-crimson h-full rounded-full w-[18%] transition-all duration-1000"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Regional Hub Pre-flight Checklist (Span 6) -->
+<section class="col-span-12 lg:col-span-6 bg-canvas-pure border border-outline-variant rounded-xl p-lg">
+<h2 class="font-headline-md text-headline-md mb-lg text-on-surface">Regional Hub Pre-flight</h2>
+<div class="space-y-md">
+<div class="flex items-center gap-md p-md hover:bg-surface-container-low rounded-xl transition-all cursor-pointer group">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-weight="fill">wb_sunny</span>
+</div>
+<div class="flex-1">
+<h4 class="font-body-bold">Solar Grid Infrastructure</h4>
+<p class="text-xs text-on-surface-variant">Lagos Main Hub energy independence verification.</p>
+</div>
+<div class="px-3 py-1 bg-primary text-on-primary rounded-full text-[10px] font-label-caps">STABLE</div>
+</div>
+<div class="flex items-center gap-md p-md hover:bg-surface-container-low rounded-xl transition-all cursor-pointer group border-t border-outline-variant/50 pt-md">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-weight="fill">inventory_2</span>
+</div>
+<div class="flex-1">
+<h4 class="font-body-bold">Logistics Hub Readiness</h4>
+<p class="text-xs text-on-surface-variant">Sorting facility equipment &amp; bandwidth audit.</p>
+</div>
+<div class="px-3 py-1 bg-trust-amber text-on-surface rounded-full text-[10px] font-label-caps">PENDING</div>
+</div>
+<div class="flex items-center gap-md p-md hover:bg-surface-container-low rounded-xl transition-all cursor-pointer group border-t border-outline-variant/50 pt-md">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-weight="fill">security</span>
+</div>
+<div class="flex-1">
+<h4 class="font-body-bold">Security Personnel Vetting</h4>
+<p class="text-xs text-on-surface-variant">Background checks for local security units.</p>
+</div>
+<div class="px-3 py-1 bg-security-crimson text-on-error rounded-full text-[10px] font-label-caps">CRITICAL</div>
+</div>
+<div class="flex items-center gap-md p-md hover:bg-surface-container-low rounded-xl transition-all cursor-pointer group border-t border-outline-variant/50 pt-md">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-weight="fill">verified</span>
+</div>
+<div class="flex-1">
+<h4 class="font-body-bold">Local Authority Permit</h4>
+<p class="text-xs text-on-surface-variant">Legal compliance &amp; trade licenses secured.</p>
+</div>
+<span class="material-symbols-outlined text-primary">check_circle</span>
+</div>
+</div>
+</section>
+<!-- Operations Map Preview (Span 12) -->
+<section class="col-span-12 h-96 relative rounded-xl overflow-hidden border border-outline-variant shadow-lg group">
+<img class="w-full h-full object-cover transition-transform duration-[5000ms] group-hover:scale-110" data-alt="A highly detailed 3D digital map of Lagos, Nigeria, showing simplified urban street layouts with glowing neon green paths indicating active delivery routes. The aesthetic is clean, modern, and data-driven, featuring subtle elevation indicators and micro-chip like geometric patterns. The lighting is low-key with vibrant primary green accents highlighting operational nodes and logistics hubs." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7kft-roHskWM_h8D6mmrEQ5hg5Z2xobceZUf1sR2PVlobXJ6U4_TtT2bSsueM98UPTxJTe2x6g1tywoTatFU1oE7vRwQW2o4bzE79tCbk2OQj3rYcpb2V1shea3075qT2GC2987Q6R7qeYAPa1SflwJDYlOuC1IufsXsMczPlZn8-DM-81_oZosBCL7UlLOcIOsgSPU5Vay4QozSsamcZsdOmu4q66xjR3dpR1ICcZInnu2IpvUnVp80PT-HmJVQM80lKZZ7IMHik"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface via-transparent to-transparent opacity-60"></div>
+<div class="absolute bottom-lg left-lg p-lg bg-canvas-pure/90 backdrop-blur-md rounded-xl border border-outline-variant max-w-sm">
+<div class="flex items-center gap-sm mb-xs">
+<span class="w-3 h-3 rounded-full bg-primary animate-ping"></span>
+<span class="font-body-bold">Lagos Metropolitan Node</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-md">Operational density is concentrated in Ikeja, Lekki, and Surulere. Expansion to Ikorodu scheduled for Phase 3.</p>
+<div class="flex gap-sm">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-body-bold">Live Fleet Monitor</button>
+<button class="bg-surface-container-highest px-4 py-2 rounded-lg text-sm font-body-bold">Expand View</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer Spacing -->
+<div class="h-16"></div>
+</main>
+</div>
+<!-- Mobile Navigation (Suppressed per task guidance for task-focused administrative shell, but keeping logic for responsiveness if needed) -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-canvas-pure border-t border-outline-variant flex justify-around items-center z-50">
+<span class="material-symbols-outlined text-primary" data-weight="fill">dashboard</span>
+<span class="material-symbols-outlined text-on-surface-variant">campaign</span>
+<div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center -mt-8 shadow-lg border-4 border-background">
+<span class="material-symbols-outlined text-on-primary">add</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">analytics</span>
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+<script>
+        // Simple micro-interactions for city selection
+        document.querySelectorAll('section:first-of-type button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Reset all
+                document.querySelectorAll('section:first-of-type button').forEach(b => {
+                    b.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary', 'shadow-lg', 'scale-[1.02]');
+                    b.classList.add('bg-canvas-pure', 'border-outline-variant');
+                    const icon = b.querySelector('.material-symbols-outlined:last-child');
+                    if(icon && icon.textContent === 'check_circle') icon.remove();
+                });
+                
+                // Set active
+                button.classList.remove('bg-canvas-pure', 'border-outline-variant');
+                button.classList.add('bg-primary-container', 'text-on-primary-container', 'border-primary', 'shadow-lg', 'scale-[1.02]');
+                
+                const check = document.createElement('span');
+                check.className = 'absolute top-4 right-4 material-symbols-outlined text-primary';
+                check.textContent = 'check_circle';
+                button.appendChild(check);
+            });
+        });
+    </script>
+</body></html>
