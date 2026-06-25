@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Universal Transaction Registry | Ledger Brain</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "security-crimson-surface": "#FEE2E2",
+                    "primary-fixed": "#77fca3",
+                    "tertiary": "#0053db",
+                    "inverse-primary": "#59df89",
+                    "on-background": "#191c1e",
+                    "text-muted": "#4B5563",
+                    "tertiary-fixed-dim": "#b4c5ff",
+                    "outline": "#6d7b6e",
+                    "on-surface-variant": "#3d4a3f",
+                    "on-tertiary": "#ffffff",
+                    "outline-variant": "#bccabc",
+                    "surface": "#f8f9fb",
+                    "background": "#f8f9fb",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2e3132",
+                    "secondary-container": "#d9dff5",
+                    "on-secondary-fixed": "#141b2b",
+                    "trust-amber-surface": "#FEF3C7",
+                    "surface-container-highest": "#e1e2e4",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#e1e2e4",
+                    "on-secondary-container": "#5c6274",
+                    "on-primary-fixed-variant": "#005228",
+                    "tertiary-container": "#638cff",
+                    "surface-container-lowest": "#ffffff",
+                    "trust-amber": "#F59E0B",
+                    "secondary-fixed-dim": "#c0c6db",
+                    "primary": "#006d38",
+                    "security-crimson": "#EF4444",
+                    "secondary-fixed": "#dce2f7",
+                    "on-primary-container": "#003317",
+                    "secondary": "#575e70",
+                    "on-tertiary-fixed-variant": "#003ea8",
+                    "on-secondary-fixed-variant": "#404758",
+                    "inverse-on-surface": "#f0f1f3",
+                    "canvas-pure": "#FFFFFF",
+                    "primary-container": "#00a859",
+                    "surface-container": "#edeef0",
+                    "on-tertiary-fixed": "#00174b",
+                    "on-primary-fixed": "#00210d",
+                    "surface-container-low": "#f3f4f6",
+                    "tertiary-fixed": "#dbe1ff",
+                    "surface-dim": "#d9dadc",
+                    "on-secondary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-bright": "#f8f9fb",
+                    "on-tertiary-container": "#00256c",
+                    "surface-tint": "#006d38",
+                    "primary-fixed-dim": "#59df89",
+                    "on-surface": "#191c1e",
+                    "surface-container-high": "#e7e8ea"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "touch-target-primary": "52px",
+                    "unit": "4px",
+                    "sm": "8px",
+                    "gutter-mobile": "16px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "touch-target-min": "48px",
+                    "md": "16px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "display-lg-mobile": ["Plus Jakarta Sans"],
+                    "label-caps": ["Inter"],
+                    "price-display": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-bold": ["Inter"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "body-base": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "price-display": ["20px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "800"}],
+                    "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-bold": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #bccabc; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<aside class="hidden md:flex flex-col p-md gap-lg fixed left-0 top-0 h-full w-64 bg-surface-container dark:bg-inverse-surface border-r border-outline-variant z-50">
+<div class="flex flex-col gap-sm">
+<h1 class="font-display-lg text-primary text-xl tracking-tight">Ledger Brain</h1>
+<div class="flex items-center gap-md p-sm bg-surface-container-low rounded-lg border border-outline-variant mt-md">
+<div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center text-white font-bold">SN</div>
+<div>
+<p class="font-body-bold text-sm text-on-surface">Master Registry</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">V.2.0.4 - Secured</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-unit">
+<p class="text-label-caps text-on-surface-variant font-label-caps mb-sm">MAIN MENU</p>
+<a class="flex items-center gap-md bg-secondary-container text-on-secondary-container rounded-lg px-md py-sm active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-body-base">Registry</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg px-md py-sm hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="security_update_good">security_update_good</span>
+<span class="font-body-base">Audit Trail</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg px-md py-sm hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="policy">policy</span>
+<span class="font-body-base">Compliance</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg px-md py-sm hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dns">dns</span>
+<span class="font-body-base">Node Status</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg px-md py-sm hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-body-base">Analytics</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant pt-lg flex flex-col gap-unit">
+<button class="bg-primary text-on-primary w-full py-md rounded-xl font-body-bold flex items-center justify-center gap-sm mb-lg shadow-sm active:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                New Audit
+            </button>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg px-md py-sm transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-base">Settings</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg px-md py-sm transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-body-base">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col">
+<!-- TopNavBar (Shared Component) -->
+<header class="sticky top-0 z-40 bg-surface dark:bg-on-background border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile md:px-lg h-touch-target-primary">
+<div class="flex items-center gap-md">
+<span class="md:hidden material-symbols-outlined text-primary cursor-pointer">menu</span>
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant scale-75">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-xl pr-md py-xs text-sm w-64 focus:ring-1 focus:ring-primary" placeholder="Search Master Registry..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="hover:bg-surface-container-low p-xs rounded-full transition-colors active:opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="verified_user">verified_user</span>
+</button>
+<button class="hover:bg-surface-container-low p-xs rounded-full transition-colors active:opacity-80 relative">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="hover:bg-surface-container-low p-xs rounded-full transition-colors active:opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="account_balance_wallet">account_balance_wallet</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwmtwb-AxU1NxgXxGuGkXv-or4DzagDVj9Pb59MU6EWI2iRyyt_Bd-YxLdUu2BixGfBAdoZcqdmwT1p-5rVrbWF7cQVxgGcXplls1v_e92ddzf3ytM_X5-UeDWSAZaaP0_iMzHPBM_Fd8Htfm97ZW3fxd3fJkJqiyMrzNpgFY6W5uH7Wug7MXUoiZuCjAJ3fYCEI93b2nYAtlNQusnqcr0lU7ccrx6DiGvBnfb8qof-HVg6mf_QA2LlDe-Om4CFlzbLBbPtmC8Cq5P"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<div class="p-gutter-mobile md:p-lg flex flex-col gap-lg">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-md">
+<div>
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-background">Universal Transaction Registry</h2>
+<p class="font-body-base text-on-surface-variant">Real-time ledger orchestration for NaijaDeals Super App ecosystem.</p>
+</div>
+<div class="flex items-center gap-sm">
+<button class="bg-surface-container-high px-md py-sm rounded-lg font-body-bold text-on-surface-variant flex items-center gap-xs border border-outline-variant active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-lg">download</span>
+                        Export CSV
+                    </button>
+<button class="bg-primary px-md py-sm rounded-lg font-body-bold text-on-primary flex items-center gap-xs active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-lg">bolt</span>
+                        Force Sync
+                    </button>
+</div>
+</div>
+<!-- KPI Cards - Bento Grid Style -->
+<div class="bento-grid">
+<!-- KPI 1 -->
+<div class="bg-canvas-pure p-lg rounded-xl border border-outline-variant flex flex-col gap-sm relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[120px] text-primary">speed</span>
+</div>
+<p class="text-label-caps text-on-surface-variant">24H THROUGHPUT</p>
+<h3 class="font-price-display text-price-display text-primary">₦1,420,850,000</h3>
+<div class="flex items-center gap-xs text-xs font-body-bold text-primary">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                        +14.2% from yesterday
+                    </div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-canvas-pure p-lg rounded-xl border border-outline-variant flex flex-col gap-sm relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[120px] text-trust-amber">shield</span>
+</div>
+<p class="text-label-caps text-on-surface-variant">TOTAL HELD IN ESCROW</p>
+<h3 class="font-price-display text-price-display text-on-surface">₦412,205,000</h3>
+<div class="flex items-center gap-xs text-xs font-body-bold text-on-surface-variant">
+<span class="material-symbols-outlined text-xs">info</span>
+                        Secured in Master Vault
+                    </div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-canvas-pure p-lg rounded-xl border border-outline-variant flex flex-col gap-sm relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[120px] text-tertiary">payments</span>
+</div>
+<p class="text-label-caps text-on-surface-variant">PENDING PAYOUTS</p>
+<h3 class="font-price-display text-price-display text-on-surface">₦89,140,000</h3>
+<div class="flex items-center gap-xs text-xs font-body-bold text-tertiary">
+<span class="material-symbols-outlined text-xs">timer</span>
+                        Processing 412 batches
+                    </div>
+</div>
+</div>
+<!-- Content Split: Main Table & Analysis Sidebar -->
+<div class="flex flex-col xl:flex-row gap-lg">
+<!-- Filters Sidebar (Embedded in flow) -->
+<aside class="xl:w-72 flex flex-col gap-lg order-2 xl:order-1">
+<div class="bg-canvas-pure p-md rounded-xl border border-outline-variant flex flex-col gap-md">
+<h4 class="font-body-bold text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined">filter_list</span>
+                            Advanced Filters
+                        </h4>
+<div class="flex flex-col gap-sm">
+<label class="text-label-caps text-on-surface-variant">VERTICAL</label>
+<select class="w-full bg-surface-container-low border-outline-variant rounded-lg font-body-base text-sm px-sm py-xs">
+<option>All Verticals</option>
+<option>NaijaShop</option>
+<option>NaijaEats</option>
+<option>Gigs &amp; Logistics</option>
+<option>NaijaStay</option>
+</select>
+</div>
+<div class="flex flex-col gap-sm">
+<label class="text-label-caps text-on-surface-variant">REGION</label>
+<div class="grid grid-cols-2 gap-xs">
+<button class="px-sm py-xs rounded bg-primary-container text-white text-xs font-body-bold">Nigeria</button>
+<button class="px-sm py-xs rounded bg-surface-container text-on-surface-variant text-xs font-body-bold">Gabon</button>
+<button class="px-sm py-xs rounded bg-surface-container text-on-surface-variant text-xs font-body-bold">Ghana</button>
+<button class="px-sm py-xs rounded bg-surface-container text-on-surface-variant text-xs font-body-bold">Kenya</button>
+</div>
+</div>
+<div class="flex flex-col gap-sm">
+<label class="text-label-caps text-on-surface-variant">CURRENCY</label>
+<div class="flex flex-wrap gap-xs">
+<span class="bg-secondary-container px-sm py-xs rounded text-[10px] font-body-bold">NGN</span>
+<span class="bg-surface-container px-sm py-xs rounded text-[10px] font-body-bold text-on-surface-variant">GHS</span>
+<span class="bg-surface-container px-sm py-xs rounded text-[10px] font-body-bold text-on-surface-variant">USD</span>
+<span class="bg-surface-container px-sm py-xs rounded text-[10px] font-body-bold text-on-surface-variant">KES</span>
+</div>
+</div>
+<div class="flex flex-col gap-sm">
+<label class="text-label-caps text-on-surface-variant">DATE RANGE</label>
+<input class="w-full bg-surface-container-low border-outline-variant rounded-lg font-body-base text-xs mb-xs" type="date"/>
+<input class="w-full bg-surface-container-low border-outline-variant rounded-lg font-body-base text-xs" type="date"/>
+</div>
+<button class="w-full bg-on-background text-white py-sm rounded-lg font-body-bold text-sm mt-md hover:bg-black transition-colors">
+                            Apply Registry Filter
+                        </button>
+</div>
+<!-- AI Anomaly Detection -->
+<div class="bg-security-crimson-surface p-md rounded-xl border border-security-crimson/20 flex flex-col gap-md">
+<div class="flex items-center gap-sm text-security-crimson">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+<h4 class="font-body-bold text-on-background">AI Anomaly Alert</h4>
+</div>
+<p class="text-xs text-on-surface-variant">3 high-velocity nodes detected in Lagos South-West cluster.</p>
+<div class="flex flex-col gap-sm">
+<div class="bg-white/60 p-sm rounded-lg border border-security-crimson/10">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-bold text-xs text-on-surface">@Ven_X42</span>
+<span class="bg-security-crimson text-white text-[10px] px-sm py-xs rounded-full">RISK: 98%</span>
+</div>
+<p class="text-[10px] text-on-surface-variant">Velocity: 42 tx/sec</p>
+</div>
+<div class="bg-white/60 p-sm rounded-lg border border-security-crimson/10 opacity-70">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-bold text-xs text-on-surface">@Node_209</span>
+<span class="bg-trust-amber text-white text-[10px] px-sm py-xs rounded-full">RISK: 65%</span>
+</div>
+<p class="text-[10px] text-on-surface-variant">Atypical Cross-border route</p>
+</div>
+</div>
+<button class="w-full border border-security-crimson text-security-crimson py-xs rounded-lg font-body-bold text-xs hover:bg-security-crimson hover:text-white transition-all">
+                            Investigate All Risks
+                        </button>
+</div>
+</aside>
+<!-- Registry Master Table -->
+<div class="flex-1 overflow-hidden bg-canvas-pure rounded-xl border border-outline-variant order-1 xl:order-2 flex flex-col">
+<div class="p-md border-b border-outline-variant flex items-center justify-between">
+<h4 class="font-body-bold text-on-background">Master Transaction Feed</h4>
+<div class="flex items-center gap-sm">
+<span class="flex items-center gap-xs text-xs text-primary font-body-bold">
+<span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                                Live Syncing
+                            </span>
+</div>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="px-md py-sm text-label-caps text-on-surface-variant whitespace-nowrap">Transaction ID</th>
+<th class="px-md py-sm text-label-caps text-on-surface-variant whitespace-nowrap">Vertical</th>
+<th class="px-md py-sm text-label-caps text-on-surface-variant whitespace-nowrap">Region</th>
+<th class="px-md py-sm text-label-caps text-on-surface-variant whitespace-nowrap">Value</th>
+<th class="px-md py-sm text-label-caps text-on-surface-variant whitespace-nowrap">Status</th>
+<th class="px-md py-sm text-label-caps text-on-surface-variant whitespace-nowrap">Proof</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group">
+<td class="px-md py-md">
+<span class="font-body-bold text-sm text-on-background">#TX-904223</span>
+<p class="text-[10px] text-on-surface-variant">14:22:11 • 20 Oct</p>
+</td>
+<td class="px-md py-md">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded text-[11px] font-body-bold uppercase">NaijaShop</span>
+</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs text-sm">
+<span class="material-symbols-outlined text-xs text-on-surface-variant">location_on</span>
+                                            Lagos, NG
+                                        </div>
+</td>
+<td class="px-md py-md">
+<span class="font-price-display text-sm">₦142,500</span>
+</td>
+<td class="px-md py-md">
+<span class="flex items-center gap-xs text-[11px] font-body-bold text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                            SETTLED
+                                        </span>
+</td>
+<td class="px-md py-md">
+<button class="opacity-40 group-hover:opacity-100 transition-opacity bg-surface-container-high p-xs rounded hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group">
+<td class="px-md py-md">
+<span class="font-body-bold text-sm text-on-background">#TX-904221</span>
+<p class="text-[10px] text-on-surface-variant">14:19:45 • 20 Oct</p>
+</td>
+<td class="px-md py-md">
+<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-sm py-xs rounded text-[11px] font-body-bold uppercase">NaijaEats</span>
+</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs text-sm">
+<span class="material-symbols-outlined text-xs text-on-surface-variant">location_on</span>
+                                            Accra, GH
+                                        </div>
+</td>
+<td class="px-md py-md">
+<span class="font-price-display text-sm">₵840</span>
+</td>
+<td class="px-md py-md">
+<span class="flex items-center gap-xs text-[11px] font-body-bold text-trust-amber">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">lock</span>
+                                            HELD
+                                        </span>
+</td>
+<td class="px-md py-md">
+<button class="opacity-40 group-hover:opacity-100 transition-opacity bg-surface-container-high p-xs rounded hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group">
+<td class="px-md py-md">
+<span class="font-body-bold text-sm text-on-background">#TX-904118</span>
+<p class="text-[10px] text-on-surface-variant">14:15:02 • 20 Oct</p>
+</td>
+<td class="px-md py-md">
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-sm py-xs rounded text-[11px] font-body-bold uppercase">Logistics</span>
+</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs text-sm">
+<span class="material-symbols-outlined text-xs text-on-surface-variant">location_on</span>
+                                            Nairobi, KE
+                                        </div>
+</td>
+<td class="px-md py-md">
+<span class="font-price-display text-sm">KSh 12,400</span>
+</td>
+<td class="px-md py-md">
+<span class="flex items-center gap-xs text-[11px] font-body-bold text-security-crimson">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">gavel</span>
+                                            AUDIT
+                                        </span>
+</td>
+<td class="px-md py-md">
+<button class="opacity-40 group-hover:opacity-100 transition-opacity bg-surface-container-high p-xs rounded hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group">
+<td class="px-md py-md">
+<span class="font-body-bold text-sm text-on-background">#TX-904002</span>
+<p class="text-[10px] text-on-surface-variant">14:02:11 • 20 Oct</p>
+</td>
+<td class="px-md py-md">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded text-[11px] font-body-bold uppercase">NaijaShop</span>
+</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs text-sm">
+<span class="material-symbols-outlined text-xs text-on-surface-variant">location_on</span>
+                                            Lagos, NG
+                                        </div>
+</td>
+<td class="px-md py-md">
+<span class="font-price-display text-sm">₦54,000</span>
+</td>
+<td class="px-md py-md">
+<span class="flex items-center gap-xs text-[11px] font-body-bold text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                            SETTLED
+                                        </span>
+</td>
+<td class="px-md py-md">
+<button class="opacity-40 group-hover:opacity-100 transition-opacity bg-surface-container-high p-xs rounded hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group">
+<td class="px-md py-md">
+<span class="font-body-bold text-sm text-on-background">#TX-903998</span>
+<p class="text-[10px] text-on-surface-variant">13:58:20 • 20 Oct</p>
+</td>
+<td class="px-md py-md">
+<span class="bg-surface-container-highest text-on-surface-variant px-sm py-xs rounded text-[11px] font-body-bold uppercase">NaijaStay</span>
+</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs text-sm">
+<span class="material-symbols-outlined text-xs text-on-surface-variant">location_on</span>
+                                            Abuja, NG
+                                        </div>
+</td>
+<td class="px-md py-md">
+<span class="font-price-display text-sm">₦1,200,000</span>
+</td>
+<td class="px-md py-md">
+<span class="flex items-center gap-xs text-[11px] font-body-bold text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                            SETTLED
+                                        </span>
+</td>
+<td class="px-md py-md">
+<button class="opacity-40 group-hover:opacity-100 transition-opacity bg-surface-container-high p-xs rounded hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-md bg-surface-container-low flex items-center justify-between border-t border-outline-variant">
+<span class="text-xs text-on-surface-variant">Showing 1-10 of 12,402 entries</span>
+<div class="flex items-center gap-xs">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-white border border-outline-variant text-on-surface-variant hover:bg-primary hover:text-white transition-all"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white font-body-bold text-xs">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-white border border-outline-variant text-on-surface-variant hover:bg-primary hover:text-white transition-all text-xs">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-white border border-outline-variant text-on-surface-variant hover:bg-primary hover:text-white transition-all text-xs">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-white border border-outline-variant text-on-surface-variant hover:bg-primary hover:text-white transition-all"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Data Graphic Section (Visual interest) -->
+<section class="mt-lg">
+<div class="bg-canvas-pure rounded-xl border border-outline-variant overflow-hidden relative min-h-[300px] flex items-center p-xl">
+<div class="relative z-10 max-w-lg">
+<h4 class="font-display-lg text-headline-md text-on-background mb-md">Regional Liquidity Heatmap</h4>
+<p class="font-body-base text-on-surface-variant mb-lg">Visualizing real-time capital flows across the pan-African corridor. Darker zones indicate high-velocity settlements.</p>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-sm">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-xs font-body-bold">Active Corridor</span>
+</div>
+<div class="flex items-center gap-sm">
+<div class="w-3 h-3 rounded-full bg-trust-amber"></div>
+<span class="text-xs font-body-bold">Holding/Escrow</span>
+</div>
+</div>
+</div>
+<!-- Simplified Visual Decoration simulating a Map/Graph -->
+<div class="absolute right-0 top-0 w-1/2 h-full bg-surface-container-low flex items-center justify-center opacity-40 group">
+<img alt="Abstract Data Visualization Map" class="w-4/5 h-4/5 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="A futuristic, high-tech abstract map of Africa rendered in a minimalist line-art style. The map features glowing green connection nodes representing financial transaction hubs, with flowing digital data streams moving between major cities. The aesthetic is clean and corporate, using a palette of deep emerald greens, charcoal grays, and crisp whites, set against a subtle grid-textured background to emphasize security and technological precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ_FHVh-ZpLHWl-Vf0aSvrswi_6t9vH5dSwu4CBlJQOed_MMYHDB3bPceUyhnMTmsnoL66O7X22xf-vS6HvM4OW-q1GPmDOEYpKpfMd2mgvFR7bedbtNdVg2_FUOwYThZ0peoP7yywXlG0l5IsHBim2p88YGMR3a3oa3Z2sJT2l8zGr06j_K8jdyYKq6wGkyoMn35BjPc3bgyb4uGLh16yhPkEyp35NHqIDe3wPCAFuk8odkF7mPRaX1Na0wBZ7NGALpyKH_87ocAf"/>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation Mobile (Shared Component Logic) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-canvas-pure border-t border-outline-variant h-touch-target-primary flex items-center justify-around z-50">
+<a class="flex flex-col items-center gap-xs text-primary font-body-bold" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="text-[10px]">Registry</span>
+</a>
+<a class="flex flex-col items-center gap-xs text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-[10px]">Stats</span>
+</a>
+<div class="mb-touch-target-min">
+<button class="bg-primary text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-xs text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="text-[10px]">Alerts</span>
+</a>
+<a class="flex flex-col items-center gap-xs text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px]">Config</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                const txId = row.querySelector('.font-body-bold').innerText;
+                console.log(`Inspecting Transaction: ${txId}`);
+                // In a real app, this would open a side panel or modal
+            });
+        });
+
+        // Search bar interaction
+        const searchInput = document.querySelector('input[placeholder="Search Master Registry..."]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.classList.add('w-96');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.classList.remove('w-96');
+        });
+    </script>
+</body></html>
