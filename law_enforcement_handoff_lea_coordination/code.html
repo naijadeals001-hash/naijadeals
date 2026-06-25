@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Emergency Handoff Workflow | AdminSafe HQ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        
+        /* Pulse Animation for Critical Alerts */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .critical-pulse {
+            animation: pulse-red 2s infinite;
+        }
+
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #bccabc;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#006d38",
+                        "on-primary-container": "#003317",
+                        "primary-fixed-dim": "#59df89",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f3f4f6",
+                        "outline-variant": "#bccabc",
+                        "on-primary": "#ffffff",
+                        "canvas-pure": "#FFFFFF",
+                        "on-secondary-fixed": "#141b2b",
+                        "outline": "#6d7b6e",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "secondary-fixed": "#dce2f7",
+                        "on-surface": "#191c1e",
+                        "trust-amber": "#F59E0B",
+                        "secondary-fixed-dim": "#c0c6db",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#edeef0",
+                        "on-background": "#191c1e",
+                        "on-surface-variant": "#3d4a3f",
+                        "security-crimson-surface": "#FEE2E2",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#00210d",
+                        "surface-container-highest": "#e1e2e4",
+                        "surface": "#f8f9fb",
+                        "trust-amber-surface": "#FEF3C7",
+                        "surface-tint": "#006d38",
+                        "on-tertiary-fixed-variant": "#003ea8",
+                        "surface-bright": "#f8f9fb",
+                        "security-crimson": "#EF4444",
+                        "on-tertiary-container": "#00256c",
+                        "tertiary-container": "#638cff",
+                        "on-secondary-fixed-variant": "#404758",
+                        "surface-container-lowest": "#ffffff",
+                        "text-muted": "#4B5563",
+                        "on-secondary-container": "#5c6274",
+                        "inverse-on-surface": "#f0f1f3",
+                        "inverse-primary": "#59df89",
+                        "background": "#f8f9fb",
+                        "surface-variant": "#e1e2e4",
+                        "tertiary": "#0053db",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#00a859",
+                        "on-primary-fixed-variant": "#005228",
+                        "secondary": "#575e70",
+                        "secondary-container": "#d9dff5",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e7e8ea",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d9dadc",
+                        "tertiary-fixed": "#dbe1ff",
+                        "primary-fixed": "#77fca3",
+                        "on-tertiary-fixed": "#00174b"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "touch-target-min": "48px",
+                        "xl": "32px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "touch-target-primary": "52px",
+                        "sm": "8px",
+                        "gutter-mobile": "16px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-base": ["Inter"],
+                        "price-display": ["Plus Jakarta Sans"],
+                        "body-bold": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-base overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center px-lg py-sm w-full z-50 bg-surface-container-highest dark:bg-surface-container-high shadow-sm fixed top-0 left-0">
+<div class="flex items-center gap-md">
+<span class="font-display-lg-mobile text-display-lg-mobile font-extrabold text-primary dark:text-primary-fixed-dim">AdminSafe HQ</span>
+<div class="hidden md:flex bg-security-crimson text-white px-md py-xs rounded-full items-center gap-xs font-bold text-sm animate-pulse">
+<span class="material-symbols-outlined text-[18px]">emergency</span>
+                LIVE INCIDENT: LEA-GH-902
+            </div>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden md:block">
+<input class="bg-surface-container border-none rounded-full px-lg py-xs w-64 text-sm focus:ring-2 focus:ring-primary" placeholder="Search case ID..." type="text"/>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-xs hover:bg-primary-container/20 transition-colors rounded-full relative">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications_active">notifications_active</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-xs hover:bg-primary-container/20 transition-colors rounded-full">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="emergency">emergency</span>
+</button>
+<button class="p-xs hover:bg-primary-container/20 transition-colors rounded-full">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="person">person</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Side Navigation Bar -->
+<aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 pt-[64px] bg-surface-container-low border-r border-outline-variant z-40">
+<div class="flex flex-col h-full py-md px-sm">
+<div class="mb-lg px-md">
+<p class="font-headline-md text-headline-md text-primary font-bold">Command Ops</p>
+<p class="text-xs text-on-surface-variant">Region: Lagos West</p>
+</div>
+<nav class="flex-1 space-y-xs">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-primary-container/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-bold">Command Center</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-primary-container/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="videocam">videocam</span>
+<span class="font-body-bold">Live Monitor</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-primary-container/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+<span class="font-body-bold">Asset Fleet</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm bg-primary-container text-on-primary-container font-bold rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="report_problem">report_problem</span>
+<span class="font-body-bold">Incidents</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-primary-container/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-body-bold">Reports</span>
+</a>
+</nav>
+<button class="w-full mt-md bg-primary text-white py-md rounded-xl font-bold flex items-center justify-center gap-sm active:translate-x-1 transition-all">
+<span class="material-symbols-outlined">send</span>
+                New Dispatch
+            </button>
+<div class="mt-auto border-t border-outline-variant pt-md space-y-xs">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-primary-container/10 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-bold">System Settings</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-error hover:bg-error/10 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-body-bold">Secure Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 pt-[64px] pb-[72px] md:pb-0 h-screen overflow-y-auto bg-surface relative">
+<div class="p-md md:p-lg">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-lg gap-md">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface">Emergency Handoff Workflow</h1>
+<div class="flex items-center gap-sm mt-xs">
+<span class="bg-trust-amber-surface text-trust-amber px-sm py-xs rounded-full text-xs font-bold flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+                            VERIFIED: Nigeria-Gabon Corridors
+                        </span>
+<span class="text-on-surface-variant text-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+                            Victoria Island Handoff Point B
+                        </span>
+</div>
+</div>
+<div class="flex gap-sm w-full md:w-auto">
+<button class="flex-1 md:flex-none px-lg py-sm bg-security-crimson text-white rounded-xl font-bold flex items-center justify-center gap-sm shadow-lg critical-pulse">
+<span class="material-symbols-outlined">gavel</span>
+                        FORCE HANDOFF
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-md">
+<!-- Live Briefing & Video Feeds -->
+<div class="lg:col-span-8 flex flex-col gap-md">
+<div class="bg-canvas-pure border border-outline-variant rounded-xl overflow-hidden shadow-sm h-[500px] flex flex-col">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h2 class="font-headline-md text-headline-md text-primary flex items-center gap-sm">
+<span class="material-symbols-outlined">sync</span>
+                                Live Handoff Briefing
+                            </h2>
+<div class="flex gap-xs">
+<span class="w-3 h-3 bg-error rounded-full animate-ping"></span>
+<span class="text-xs font-bold text-error">LIVE 1080p</span>
+</div>
+</div>
+<div class="flex-1 grid grid-cols-2 gap-[2px] bg-black">
+<div class="relative group">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A professional security monitoring dashboard view of a dark urban street corner in Lagos at night, illuminated by blue and red emergency vehicle lights. The atmosphere is high-tension and cinematic with digital data overlays indicating heat signatures and vehicle registration numbers. Modern light-mode branding elements are integrated into the UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuArH2k4f1Vv5QyxjxOiuTUiByUGpjIlBjAErkLpTnjJMT40wqPLG-p0BNViVqEIPGw7j6HV81GvbmL73cVME36-IKo8ILirUv_PTIF6I6bXjkhTmPt9hcgW9EtxyyO1flaXUz1ggUB1LcTcVboCR069LzqyKVviqLUSZRxillaD-a6QL-4sLUhi2tXv-X0lZhnF693rx3u8NB2HDJPZZbYbdKu60FerzYMCcysLS3qmoR0ns8FHukIVkBPAeA9sHj7SAFOJV1Cm0-R6"/>
+<div class="absolute top-sm left-sm bg-black/50 text-white text-[10px] px-xs py-[2px] rounded uppercase font-bold tracking-widest backdrop-blur-md">CAM-01: EXTERIOR PERIMETER</div>
+<div class="absolute bottom-sm right-sm flex gap-xs">
+<button class="p-xs bg-white/20 backdrop-blur-md rounded hover:bg-white/40"><span class="material-symbols-outlined text-white text-sm">fullscreen</span></button>
+</div>
+</div>
+<div class="relative group">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="High-resolution close-up of a secure military-grade equipment case being opened, showing specialized logistics gear inside. The lighting is crisp and neutral, highlighting metallic textures and unboxing seals. The scene is presented as a synchronized evidence video feed in a professional security operations center with data telemetry watermarks." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMIRfWiYRePSfwp88RKGcqHzeEvWKV5JoGMyanlwMqmCGPaS_azrs7Jqv25c6d94tRlMUY0GTjoq-yktCQAysCIhMjBVhBUv-81Pfkrf5D9Ee0TC27jS3XtVRrT4RvvoWzjL09gHB4NHBJrYYmjJlhq46L2D2w7-fGkD7Sta_DUqAyT3PWBKB104t7ZboEN_-3WWKb3BozBC58PJIwWrG2jAKL49Q9L89rqVkCI4Um6aldEEbSnGfzFyYfjJLqfxzYNLqTKX4tFM0R"/>
+<div class="absolute top-sm left-sm bg-black/50 text-white text-[10px] px-xs py-[2px] rounded uppercase font-bold tracking-widest backdrop-blur-md">CAM-02: UNBOXING VERIFICATION</div>
+<div class="absolute bottom-sm right-sm flex gap-xs text-white">
+<span class="text-[10px] font-mono bg-error px-xs py-[2px] rounded uppercase">Critical Motion</span>
+</div>
+</div>
+<div class="relative group">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A professional law enforcement officer in a clean, high-contrast tactical uniform discussing logistics on a digital tablet. The setting is a modern, high-tech command center in Africa with glass panels and soft accent lighting. The mood is calm, authoritative, and efficient, reflecting a high-trust security ecosystem." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVIrTis2luQLVai-fq2eamPItMKNKWQqKnodqQHEydd8OcFVqW3gdNA11R2GH7KLLPDD3tUh2IwdFlboEc3eV9FBhyglB-LM_DWQ_NQYrQ1kVsQ1r__qHa55NuAd4wzvVrhTVcco7c3oDOfJcq74U0Im-F7yBkGegiZu08N9vvX35yyuvat4AmFjrHRkB5EbUQOo-qPbYyiS6ziJYsll5ntKuTkQKcDsg9KloaqbalHnOWearsuk_D9Vn_fFfAfAPQCmS-zOc0wWoC"/>
+<div class="absolute top-sm left-sm bg-black/50 text-white text-[10px] px-xs py-[2px] rounded uppercase font-bold tracking-widest backdrop-blur-md">CAM-03: LEA INTERFACE (GABON)</div>
+</div>
+<div class="relative bg-surface-container-highest flex items-center justify-center">
+<div class="text-center p-md">
+<div class="bg-primary/10 text-primary w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-sm">
+<span class="material-symbols-outlined text-3xl">add</span>
+</div>
+<p class="text-sm font-bold text-on-surface-variant">Add Secure Feed</p>
+<p class="text-[10px] text-on-surface-variant/60">LEA Credential Required</p>
+</div>
+</div>
+</div>
+<div class="bg-secondary-container/30 p-sm flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 bg-primary rounded-full"></span>
+<span class="text-xs font-bold text-on-surface">GPS: 6.4281° N, 3.4219° E</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 bg-primary rounded-full"></span>
+<span class="text-xs font-bold text-on-surface">Signal: 480ms (Sat-Link)</span>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="bg-white px-md py-xs rounded-lg text-xs font-bold shadow-sm border border-outline-variant">VIEW TELEMETRY</button>
+</div>
+</div>
+</div>
+<!-- Evidence Vault (Asymmetric Section) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="bg-canvas-pure p-md rounded-xl border border-outline-variant shadow-sm">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-body-bold text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">inventory_2</span>
+                                    Evidence Vault
+                                </h3>
+<button class="text-primary text-xs font-bold">BATCH EXPORT</button>
+</div>
+<div class="space-y-sm">
+<div class="flex items-center justify-between p-sm bg-surface-container rounded-lg border border-outline-variant/50">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 bg-white rounded border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">image</span>
+</div>
+<div>
+<p class="text-xs font-bold">UNBOX_LOG_001.JPG</p>
+<p class="text-[10px] text-on-surface-variant">Timestamp: 04:12:01</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" data-weight="fill">verified</span>
+</div>
+<div class="flex items-center justify-between p-sm bg-surface-container rounded-lg border border-outline-variant/50">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 bg-white rounded border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">description</span>
+</div>
+<div>
+<p class="text-xs font-bold">WAYBILL_DIGITAL_SIG.PDF</p>
+<p class="text-[10px] text-on-surface-variant">Verified by Customs</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" data-weight="fill">verified</span>
+</div>
+<button class="w-full py-sm border-2 border-dashed border-outline-variant rounded-lg text-xs font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors">
+                                    + Upload Chain of Custody
+                                </button>
+</div>
+</div>
+<div class="bg-canvas-pure p-md rounded-xl border border-outline-variant shadow-sm">
+<h3 class="font-body-bold text-on-surface flex items-center gap-sm mb-md">
+<span class="material-symbols-outlined text-primary">map</span>
+                                Asset Deployment
+                            </h3>
+<div class="h-32 bg-surface-container-highest rounded-lg overflow-hidden relative mb-sm">
+<img class="w-full h-full object-cover grayscale opacity-50" data-location="Lagos" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK49Jnfb7oKO9LDKTr8WE0ezp87CDnkEv-IKZwUvtHWY9xWTWGXCwZCi_uXzHrqgc9HJ4-XLdm1HC82souKtQkRi7wumVQObPDMFJHzSSikxtWsM4AMF-s7r4iyAro-3C7EJEHztlDXD9JFc3hB5XjFpjS5Rvc2JvMdBG8lKC6RQmDX_QoU-AWmALVlfbFBf20SO8TBObUuwUPuiJuNoxo3y1NJF7qdhHCE2f9P1Vewvhvnh0rlOcSGcPkCLSTwRhON6lE-eyIF5EE"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-4 h-4 bg-primary rounded-full animate-ping"></div>
+<div class="w-4 h-4 bg-primary rounded-full absolute"></div>
+</div>
+<div class="absolute bottom-xs left-xs bg-white/80 backdrop-blur-md px-xs py-[2px] rounded text-[10px] font-bold">ZONE: IKOTUN SECTOR</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase font-bold">Estimated Arrival</span>
+<span class="text-lg font-display-lg text-primary">04:12 mins</span>
+</div>
+<div class="flex gap-xs">
+<span class="bg-primary/10 text-primary px-sm py-xs rounded text-[10px] font-bold uppercase">Rapid Response</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secure Comms Sidebar -->
+<div class="lg:col-span-4 flex flex-col gap-md">
+<div class="bg-canvas-pure border border-outline-variant rounded-xl shadow-sm flex-1 flex flex-col overflow-hidden min-h-[600px]">
+<div class="p-md bg-inverse-surface text-inverse-on-surface flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-fixed-dim">lock</span>
+<span class="font-body-bold">Secure Comms Sidebar</span>
+</div>
+<span class="bg-primary-fixed text-on-primary-fixed text-[10px] px-sm py-[2px] rounded-full font-bold">ENCRYPTED</span>
+</div>
+<div class="flex-1 p-md space-y-md overflow-y-auto">
+<!-- Agency Selector -->
+<div class="flex gap-xs overflow-x-auto pb-sm no-scrollbar">
+<button class="flex-shrink-0 px-md py-xs bg-primary text-white rounded-full text-xs font-bold">NPF-HQ</button>
+<button class="flex-shrink-0 px-md py-xs bg-surface-container text-on-surface-variant rounded-full text-xs font-bold border border-outline-variant">GABON-GN</button>
+<button class="flex-shrink-0 px-md py-xs bg-surface-container text-on-surface-variant rounded-full text-xs font-bold border border-outline-variant">CUSTOMS</button>
+</div>
+<!-- Chat Feed -->
+<div class="space-y-md">
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-bold text-primary">NPF Liaison Okoro</span>
+<span class="text-[10px] text-on-surface-variant">03:45</span>
+</div>
+<div class="bg-surface-container p-sm rounded-tr-xl rounded-br-xl rounded-bl-xl text-sm">
+                                        Units are in position at Corridor B. Ready for the handoff protocol. Confirm package seals are intact?
+                                    </div>
+</div>
+<div class="flex flex-col gap-xs items-end">
+<div class="flex justify-between items-center w-full">
+<span class="text-[10px] text-on-surface-variant">03:47</span>
+<span class="text-[10px] font-bold text-on-secondary-container">AdminSafe Dispatch</span>
+</div>
+<div class="bg-primary-container text-on-primary-container p-sm rounded-tl-xl rounded-br-xl rounded-bl-xl text-sm">
+                                        Confirming seals. GPS telemetry shows transit vehicle is 300m away. Transitioning to 'Bargain-Hold' mode for manual inspection.
+                                    </div>
+</div>
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-bold text-security-crimson">Alert Service</span>
+<span class="text-[10px] text-on-surface-variant">03:50</span>
+</div>
+<div class="bg-security-crimson-surface p-sm rounded-tr-xl rounded-br-xl rounded-bl-xl text-sm text-on-error-container border border-security-crimson/20 italic">
+                                        PROTOCOL UPDATE: Gabon Gendarmerie has requested secondary verification of 'unboxing_01.mp4'.
+                                    </div>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-md border-t border-outline-variant bg-surface-container-low">
+<div class="flex items-center gap-sm bg-white border border-outline-variant rounded-xl p-xs">
+<button class="p-xs text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">attach_file</span></button>
+<input class="flex-1 border-none focus:ring-0 text-sm py-xs" placeholder="Type encrypted message..." type="text"/>
+<button class="bg-primary text-white p-sm rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</div>
+<div class="flex justify-between mt-sm">
+<label class="flex items-center gap-xs cursor-pointer">
+<input class="rounded text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-[10px] font-bold text-on-surface-variant">Record Audio Log</span>
+</label>
+<span class="text-[10px] font-mono text-on-surface-variant/50">AES-256 Enabled</span>
+</div>
+</div>
+</div>
+<!-- Quick Actions Widget -->
+<div class="bg-surface-container-highest rounded-xl p-md border border-outline-variant">
+<h4 class="text-xs font-bold text-on-surface mb-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm">bolt</span>
+                            RAPID RESPONSES
+                        </h4>
+<div class="grid grid-cols-2 gap-xs">
+<button class="bg-white p-sm rounded-lg text-[10px] font-bold border border-outline-variant hover:border-primary transition-all text-left">
+                                RE-VERIFY SEALS
+                            </button>
+<button class="bg-white p-sm rounded-lg text-[10px] font-bold border border-outline-variant hover:border-primary transition-all text-left">
+                                ESCALATE TO HQ
+                            </button>
+<button class="bg-white p-sm rounded-lg text-[10px] font-bold border border-outline-variant hover:border-primary transition-all text-left">
+                                FREEZE TRANSIT
+                            </button>
+<button class="bg-white p-sm rounded-lg text-[10px] font-bold border border-outline-variant hover:border-error transition-all text-left text-error">
+                                ABORT MISSION
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile pb-safe bg-surface-container-highest h-[72px] rounded-t-xl shadow-lg">
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-md py-xs">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-md py-xs">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+<span class="font-label-caps text-label-caps">Dispatch</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-md py-xs">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-label-caps text-label-caps">Status</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-md py-xs">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps">Account</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for mission alerts
+        document.querySelector('.critical-pulse')?.addEventListener('click', () => {
+            alert('PROTOCOL INITIATED: Direct Law Enforcement Handoff engaged. All evidence logs locked and transmitted.');
+        });
+
+        // Simple tab switching simulation for quick responses
+        const quickResponses = document.querySelectorAll('.grid-cols-2 button');
+        quickResponses.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const message = btn.innerText;
+                const chatContainer = document.querySelector('.space-y-md');
+                const newMsg = document.createElement('div');
+                newMsg.className = 'flex flex-col gap-xs items-end';
+                newMsg.innerHTML = `
+                    <div class="flex justify-between items-center w-full">
+                        <span class="text-[10px] text-on-surface-variant">Just now</span>
+                        <span class="text-[10px] font-bold text-on-secondary-container">AdminSafe Dispatch</span>
+                    </div>
+                    <div class="bg-primary-container text-on-primary-container p-sm rounded-tl-xl rounded-br-xl rounded-bl-xl text-sm">
+                        [QUICK ACTION] ${message}
+                    </div>
+                `;
+                chatContainer.appendChild(newMsg);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        });
+    </script>
+</body></html>
