@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaDeals Brain: Fare Calculation Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 109, 56, 0.1);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#638cff",
+                      "secondary-fixed-dim": "#c0c6db",
+                      "trust-amber": "#F59E0B",
+                      "security-crimson": "#EF4444",
+                      "primary": "#006d38",
+                      "secondary": "#575e70",
+                      "on-tertiary-fixed-variant": "#003ea8",
+                      "secondary-fixed": "#dce2f7",
+                      "on-primary-container": "#003317",
+                      "on-secondary-fixed-variant": "#404758",
+                      "inverse-on-surface": "#f0f1f3",
+                      "canvas-pure": "#FFFFFF",
+                      "primary-container": "#00a859",
+                      "surface-container": "#edeef0",
+                      "on-tertiary-fixed": "#00174b",
+                      "on-primary-fixed": "#00210d",
+                      "surface-container-low": "#f3f4f6",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed": "#dbe1ff",
+                      "surface-dim": "#d9dadc",
+                      "surface-bright": "#f8f9fb",
+                      "surface-tint": "#006d38",
+                      "primary-fixed-dim": "#59df89",
+                      "on-tertiary-container": "#00256c",
+                      "on-surface": "#191c1e",
+                      "surface-container-high": "#e7e8ea",
+                      "primary-fixed": "#77fca3",
+                      "security-crimson-surface": "#FEE2E2",
+                      "on-background": "#191c1e",
+                      "tertiary": "#0053db",
+                      "inverse-primary": "#59df89",
+                      "text-muted": "#4B5563",
+                      "tertiary-fixed-dim": "#b4c5ff",
+                      "outline": "#6d7b6e",
+                      "on-tertiary": "#ffffff",
+                      "on-surface-variant": "#3d4a3f",
+                      "outline-variant": "#bccabc",
+                      "surface": "#f8f9fb",
+                      "error-container": "#ffdad6",
+                      "background": "#f8f9fb",
+                      "inverse-surface": "#2e3132",
+                      "secondary-container": "#d9dff5",
+                      "trust-amber-surface": "#FEF3C7",
+                      "on-secondary-fixed": "#141b2b",
+                      "surface-container-highest": "#e1e2e4",
+                      "on-error-container": "#93000a",
+                      "error": "#ba1a1a",
+                      "on-primary": "#ffffff",
+                      "on-secondary-container": "#5c6274",
+                      "on-primary-fixed-variant": "#005228",
+                      "surface-variant": "#e1e2e4"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "touch-target-primary": "52px",
+                      "unit": "4px",
+                      "sm": "8px",
+                      "gutter-mobile": "16px",
+                      "xl": "32px",
+                      "lg": "24px",
+                      "touch-target-min": "48px",
+                      "md": "16px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "label-caps": ["Inter"],
+                      "price-display": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-bold": ["Inter"],
+                      "body-base": ["Inter"]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-base antialiased min-h-screen flex overflow-hidden">
+<!-- Sidebar Navigation (NaijaDeals Brain Anchor) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low flex flex-col py-lg px-md border-r border-outline-variant z-50">
+<div class="mb-xl px-md">
+<h1 class="text-headline-md font-black text-primary">NaijaDeals Brain</h1>
+<p class="text-label-caps text-on-surface-variant">Administrative Engine</p>
+</div>
+<nav class="flex-1 space-y-sm overflow-y-auto no-scrollbar">
+<!-- Navigation Items Mapping from JSON -->
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-label-caps">Ranking</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="handshake">handshake</span>
+<span class="font-label-caps">Matching</span>
+</a>
+<a class="flex items-center gap-md bg-primary-container text-on-primary-container rounded-lg px-md py-sm scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-label-caps">Pricing</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps">Reputation</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-label-caps">Search</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+<span class="font-label-caps">Dispatch</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="gpp_bad">gpp_bad</span>
+<span class="font-label-caps">Fraud</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-label-caps">Insights</span>
+</a>
+</nav>
+<div class="mt-auto space-y-sm pt-lg border-t border-outline-variant">
+<button class="w-full bg-error text-on-error py-sm rounded-lg font-body-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined text-sm" data-icon="lock_open">lock_open</span>
+                Emergency Lock
+            </button>
+<div class="flex flex-col gap-xs mt-md">
+<a class="flex items-center gap-md text-on-surface-variant px-md py-xs text-xs" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="support_agent">support_agent</span> Support
+                </a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-xs text-xs" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span> Logs
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 overflow-y-auto no-scrollbar pb-xl">
+<!-- TopAppBar Anchor -->
+<header class="flex justify-between items-center w-full px-lg h-touch-target-primary sticky top-0 z-40 bg-surface-container-lowest shadow-sm">
+<div class="flex items-center gap-md">
+<span class="text-headline-md font-extrabold text-primary">Brain Terminal</span>
+<div class="h-6 w-px bg-outline-variant"></div>
+<span class="text-body-base font-body-base text-on-surface-variant">Fare Calculation Engine</span>
+</div>
+<div class="flex items-center gap-lg">
+<div class="relative">
+<input class="bg-surface-container border-none rounded-full px-lg py-sm text-sm w-64 focus:ring-2 focus:ring-primary" placeholder="Search parameters..." type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-2 text-on-surface-variant" data-icon="search">search</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="monitor_heart">monitor_heart</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="shield_person">shield_person</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="settings">settings</button>
+</div>
+<img alt="Administrator Level 5 Profile" class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" data-alt="A professional headshot of a high-level system administrator with a confident and focused expression. The person is dressed in modern professional attire, set against a blurred background of a high-tech control center with emerald green and white lighting. The image exudes authority, intelligence, and high-trust leadership within a corporate-digital environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzZmjabLFxYOxm395L__5VGOWtqrkNk98nbnFGtJg3ZT3iZ8UdzoRj916EzrZmy-AyQ4tkfqCNy11DV9pW0v1z9HLnDJiqK9GJ07aX1qBFdzipnKB5kNrYocorx4E1OHxPvtCcELH9NdosZvpP_qYGm6UuzlKdHytxO7qgtG-CNLjg-YbYJ7GXMtnFRk63dzenZs_uWSpJPJsLLgz_3-EO4OJOp6bpXoe6yD7fEWApY0fDeOYHPPnUE_U6pUo3hE2KInNb7-Afp7AY"/>
+</div>
+</header>
+<div class="px-lg py-lg space-y-xl">
+<!-- Dashboard Grid -->
+<div class="bento-grid">
+<!-- 1. Fare Formula Sandbox (6 Cols) -->
+<section class="col-span-12 lg:col-span-7 space-y-md">
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm flex flex-col gap-lg h-full">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="text-headline-md font-bold text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="function">functions</span>
+                                    Fare Formula Sandbox
+                                </h2>
+<p class="text-on-surface-variant text-sm">Simulate live fare configurations with real-time variables.</p>
+</div>
+<span class="bg-primary-container/10 text-primary px-md py-xs rounded-full text-xs font-bold border border-primary/20">LIVE SIMULATOR</span>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div class="space-y-xs">
+<label class="text-label-caps text-xs text-on-surface-variant">Origin</label>
+<div class="bg-surface p-sm border border-outline-variant rounded-lg flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="location_on">location_on</span>
+<span class="text-sm font-medium">MMIA Terminal 2</span>
+</div>
+</div>
+<div class="space-y-xs">
+<label class="text-label-caps text-xs text-on-surface-variant">Destination</label>
+<div class="bg-surface p-sm border border-outline-variant rounded-lg flex items-center gap-sm">
+<span class="material-symbols-outlined text-security-crimson text-sm" data-icon="flag">flag</span>
+<span class="text-sm font-medium">Victoria Island</span>
+</div>
+</div>
+</div>
+<div class="bg-primary-container text-on-primary-container p-lg rounded-xl flex flex-col items-center justify-center gap-md">
+<div class="text-center">
+<p class="text-label-caps text-on-primary-fixed opacity-80 uppercase tracking-widest">Total Simulated Fare</p>
+<h3 class="text-display-lg font-black mt-xs">₦8,120.00</h3>
+</div>
+<div class="w-full h-px bg-on-primary-container/20"></div>
+<div class="bg-on-primary-container/10 p-md rounded-lg w-full text-center">
+<code class="text-xs font-mono font-bold">
+                                    (Base ₦1,200 + (18km × ₦250) + (45min × ₦40)) × 1.4x Surge
+                                </code>
+</div>
+</div>
+<div class="flex items-center justify-between gap-md">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-surface-container border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold">E</div>
+<div class="w-8 h-8 rounded-full bg-surface-container border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold">S</div>
+<div class="w-8 h-8 rounded-full bg-primary border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold text-white shadow-lg">EX</div>
+<div class="w-8 h-8 rounded-full bg-surface-container border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold">LX</div>
+</div>
+<button class="bg-primary text-white px-lg py-sm rounded-lg font-bold text-sm flex items-center gap-sm">
+<span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+                                Re-Calculate
+                            </button>
+</div>
+</div>
+</section>
+<!-- 2. Active Surge Heatmap (5 Cols) -->
+<section class="col-span-12 lg:col-span-5">
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm h-full flex flex-col">
+<div class="flex justify-between items-center mb-md">
+<h2 class="text-headline-md font-bold text-on-surface">Surge Heatmap</h2>
+<div class="flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-security-crimson animate-pulse"></span>
+<span class="text-xs font-bold text-on-surface-variant">Lagos Mainland</span>
+</div>
+</div>
+<div class="relative flex-1 rounded-xl overflow-hidden min-h-[320px]">
+<img class="w-full h-full object-cover" data-alt="A highly detailed satellite-style heatmap of Lagos, Nigeria, showing intricate road networks and urban density. Overlaid on the map are glowing pulse points of vibrant amber and crimson representing high-demand zones. The visual style is professional and administrative, with transparent UI overlays indicating surge multipliers like 1.5x and 2.2x. The lighting is dark and moody to make the glowing surge data pop." data-location="Lagos" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4uecXtP15Z4S9Mb2k3LJHPgthFwD4LSeTQSpaPbK7OljNBAlFgikREUhn1j8suXseLvu9OffsDX3KKmutCN4KN1Cq3FsY0q0xr0Hh1KDj4qoUnWUFAffX-UvBUr4ngdz7VfJp22obrHw43VqA-U4S1uf1f0FRmEtnis-zw3lPC5h7caJbX0T9AGXZrcfsk6tSipxr66BpmeKue1BDR1vBmlYhSpO1CtBveZiCfnM5Kyb3aJQok6jotIHcru1vHrLRf3EBtEjsiJJM"/>
+<!-- AI Overlay UI -->
+<div class="absolute top-4 left-4 glass-panel p-md rounded-lg flex flex-col gap-xs">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-trust-amber text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Aura AI Monitor</span>
+</div>
+<div class="text-xs font-bold">Ikeja Under-Served</div>
+<div class="text-[10px] text-on-surface-variant">Est. wait: 14 mins</div>
+</div>
+<div class="absolute bottom-4 right-4 flex flex-col gap-xs">
+<div class="bg-white/90 p-xs px-sm rounded-md shadow-lg border border-outline-variant">
+<div class="text-[10px] font-bold text-security-crimson">2.5x</div>
+<div class="text-[8px] text-on-surface-variant">Surulere Peak</div>
+</div>
+<div class="bg-white/90 p-xs px-sm rounded-md shadow-lg border border-outline-variant">
+<div class="text-[10px] font-bold text-trust-amber">1.4x</div>
+<div class="text-[8px] text-on-surface-variant">Maryland</div>
+</div>
+</div>
+</div>
+<div class="mt-md flex justify-between items-center px-sm">
+<span class="text-xs font-medium text-on-surface-variant">1.0x</span>
+<div class="flex-1 h-1 mx-md bg-gradient-to-r from-primary via-trust-amber to-security-crimson rounded-full"></div>
+<span class="text-xs font-medium text-on-surface-variant">2.5x+</span>
+</div>
+</div>
+</section>
+<!-- 3. Global Variable Control (8 Cols) -->
+<section class="col-span-12 lg:col-span-8">
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm space-y-lg">
+<div class="flex justify-between items-center">
+<div>
+<h2 class="text-headline-md font-bold text-on-surface">Global Rates Control</h2>
+<p class="text-sm text-on-surface-variant">System-wide variables for mobility verticals.</p>
+</div>
+<div class="flex items-center gap-md bg-surface-container-low px-md py-sm rounded-xl">
+<div class="flex flex-col">
+<span class="text-[10px] font-black text-primary">DRIVER-FIRST MODEL</span>
+<span class="text-[8px] text-on-surface-variant">6-15% Commission Cap</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="border-b border-outline-variant">
+<tr>
+<th class="py-sm font-label-caps text-[10px] text-on-surface-variant">Tier</th>
+<th class="py-sm font-label-caps text-[10px] text-on-surface-variant">Base Rate</th>
+<th class="py-sm font-label-caps text-[10px] text-on-surface-variant">Per KM</th>
+<th class="py-sm font-label-caps text-[10px] text-on-surface-variant">Per Min</th>
+<th class="py-sm font-label-caps text-[10px] text-on-surface-variant text-right">Commission</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/50">
+<tr>
+<td class="py-md flex items-center gap-sm">
+<div class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></div>
+<span class="font-body-bold text-sm">Economy</span>
+</td>
+<td class="py-md text-sm">₦500</td>
+<td class="py-md text-sm">₦120</td>
+<td class="py-md text-sm">₦15</td>
+<td class="py-md text-sm text-right text-primary font-bold">10.0%</td>
+</tr>
+<tr>
+<td class="py-md flex items-center gap-sm">
+<div class="w-2 h-2 rounded-full bg-tertiary-container"></div>
+<span class="font-body-bold text-sm">Standard</span>
+</td>
+<td class="py-md text-sm">₦800</td>
+<td class="py-md text-sm">₦180</td>
+<td class="py-md text-sm">₦25</td>
+<td class="py-md text-sm text-right text-primary font-bold">12.5%</td>
+</tr>
+<tr class="bg-primary/5">
+<td class="py-md flex items-center gap-sm px-sm">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="font-body-bold text-sm">Executive</span>
+</td>
+<td class="py-md text-sm">₦1,200</td>
+<td class="py-md text-sm">₦250</td>
+<td class="py-md text-sm">₦40</td>
+<td class="py-md text-sm text-right text-primary font-bold">15.0%</td>
+</tr>
+<tr>
+<td class="py-md flex items-center gap-sm">
+<div class="w-2 h-2 rounded-full bg-trust-amber"></div>
+<span class="font-body-bold text-sm">Luxury</span>
+</td>
+<td class="py-md text-sm">₦2,500</td>
+<td class="py-md text-sm">₦450</td>
+<td class="py-md text-sm">₦80</td>
+<td class="py-md text-sm text-right text-primary font-bold">15.0%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- 4. Ecosystem Parity Chart (4 Cols) -->
+<section class="col-span-12 lg:col-span-4">
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm h-full flex flex-col">
+<h2 class="text-headline-md font-bold text-on-surface mb-md">Economic Parity</h2>
+<p class="text-xs text-on-surface-variant mb-lg">Comparing avg. trip cost across logistics verticals.</p>
+<div class="flex-1 space-y-lg">
+<div class="space-y-sm">
+<div class="flex justify-between text-xs font-body-bold">
+<span>NaijaDrive (Mobility)</span>
+<span class="text-primary">₦4,200 avg</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-3">
+<div class="bg-primary h-full rounded-full" style="width: 85%;"></div>
+</div>
+</div>
+<div class="space-y-sm">
+<div class="flex justify-between text-xs font-body-bold">
+<span>NaijaSend (Logistics)</span>
+<span class="text-tertiary">₦3,100 avg</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-3">
+<div class="bg-tertiary h-full rounded-full" style="width: 65%;"></div>
+</div>
+</div>
+<div class="space-y-sm">
+<div class="flex justify-between text-xs font-body-bold">
+<span>NaijaEats (Food)</span>
+<span class="text-trust-amber">₦1,250 avg</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-3">
+<div class="bg-trust-amber h-full rounded-full" style="width: 35%;"></div>
+</div>
+</div>
+</div>
+<div class="mt-xl p-md bg-surface border border-outline-variant rounded-lg">
+<p class="text-[10px] text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[12px]" data-icon="info">info</span>
+                                Parity check: Current logic maintains a 15% distance-normalized variance across verticals.
+                            </p>
+</div>
+</div>
+</section>
+<!-- 5. Aura AI Insights Feed (12 Cols) -->
+<section class="col-span-12">
+<div class="bg-on-surface-variant text-white p-lg rounded-xl flex items-center gap-xl relative overflow-hidden group">
+<div class="absolute -right-16 -top-16 opacity-10 scale-150 group-hover:rotate-12 transition-transform duration-700">
+<span class="material-symbols-outlined text-[200px]" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="flex items-center gap-lg border-r border-white/20 pr-xl">
+<div class="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-primary-fixed flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-4xl" data-icon="psychology">psychology</span>
+</div>
+<div>
+<h3 class="text-headline-md font-black">Aura AI Insights</h3>
+<p class="text-white/60 text-xs uppercase tracking-widest font-bold">Predictive Pricing Engine</p>
+</div>
+</div>
+<div class="flex-1 flex gap-lg overflow-x-auto no-scrollbar py-sm">
+<div class="min-w-[300px] glass-panel bg-white/10 p-md rounded-xl border border-white/10 flex flex-col gap-sm">
+<div class="flex items-center justify-between">
+<span class="bg-trust-amber text-on-secondary px-sm py-xs rounded text-[10px] font-bold">DEMAND SPIKE</span>
+<span class="text-[10px] opacity-60">2 mins ago</span>
+</div>
+<p class="text-sm font-medium">Demand spike detected in Ikeja; Recommend 1.2x multiplier for Standard tier to improve driver availability.</p>
+<button class="mt-sm text-primary-fixed text-[10px] font-bold uppercase flex items-center gap-xs">Execute Recommendation <span class="material-symbols-outlined text-[12px]" data-icon="chevron_right">chevron_right</span></button>
+</div>
+<div class="min-w-[300px] glass-panel bg-white/10 p-md rounded-xl border border-white/10 flex flex-col gap-sm">
+<div class="flex items-center justify-between">
+<span class="bg-primary-container text-white px-sm py-xs rounded text-[10px] font-bold">OPTIMIZATION</span>
+<span class="text-[10px] opacity-60">15 mins ago</span>
+</div>
+<p class="text-sm font-medium">Lekki Phase 1 logistics corridor showing 92% efficiency. Maintain current base rates for 2 hours.</p>
+<button class="mt-sm text-primary-fixed text-[10px] font-bold uppercase flex items-center gap-xs">View Data Set <span class="material-symbols-outlined text-[12px]" data-icon="chevron_right">chevron_right</span></button>
+</div>
+<div class="min-w-[300px] glass-panel bg-white/10 p-md rounded-xl border border-white/10 flex flex-col gap-sm">
+<div class="flex items-center justify-between">
+<span class="bg-security-crimson text-white px-sm py-xs rounded text-[10px] font-bold">SUPPLY GAP</span>
+<span class="text-[10px] opacity-60">1 hour ago</span>
+</div>
+<p class="text-sm font-medium">Yaba student area: Driver density low. Suggesting ₦200 base incentive for the next 45 minutes.</p>
+<button class="mt-sm text-primary-fixed text-[10px] font-bold uppercase flex items-center gap-xs">Apply Incentive <span class="material-symbols-outlined text-[12px]" data-icon="chevron_right">chevron_right</span></button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interactions for sandbox recalculation
+        document.querySelector('button:contains("Re-Calculate")')?.addEventListener('click', () => {
+            const fareDisplay = document.querySelector('h3.text-display-lg');
+            fareDisplay.style.opacity = '0.5';
+            setTimeout(() => {
+                fareDisplay.textContent = '₦' + (Math.random() * 1000 + 7500).toFixed(2);
+                fareDisplay.style.opacity = '1';
+            }, 300);
+        });
+
+        // Add vanilla CSS contains selector polyfill logic if needed
+        // For now, let's target by class
+        const calcBtn = document.querySelector('.bg-primary.text-white.px-lg');
+        if(calcBtn) {
+            calcBtn.addEventListener('click', () => {
+                const fareDisplay = document.querySelector('h3.text-display-lg');
+                fareDisplay.classList.add('animate-pulse');
+                setTimeout(() => {
+                    fareDisplay.textContent = '₦' + (Math.floor(Math.random() * 500) + 8000).toLocaleString() + '.00';
+                    fareDisplay.classList.remove('animate-pulse');
+                }, 400);
+            });
+        }
+    </script>
+</body></html>
