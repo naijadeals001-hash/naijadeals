@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ESCROW_LIFECYCLE_WF-006 | System Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --grid-color: rgba(59, 75, 55, 0.2);
+            --dot-size: 1px;
+            --grid-spacing: 24px;
+        }
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(var(--grid-color) var(--dot-size), transparent 0);
+            background-size: var(--grid-spacing) var(--grid-spacing);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+        }
+
+        .swimlane-row {
+            min-height: 120px;
+            border-bottom: 1px solid #3b4b37;
+            position: relative;
+        }
+
+        .node-connector {
+            position: absolute;
+            background: #84967e;
+            z-index: 0;
+        }
+
+        .node-connector-horizontal { height: 1px; }
+        .node-connector-vertical { width: 1px; }
+
+        .flow-node {
+            transition: all 0.2s ease-in-out;
+            z-index: 10;
+        }
+        
+        .flow-node:hover {
+            box-shadow: 0 0 15px rgba(114, 255, 112, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .diamond {
+            width: 80px;
+            height: 80px;
+            transform: rotate(45deg);
+            border: 1px solid #84967e;
+            background: #0f0f0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .diamond-content {
+            transform: rotate(-45deg);
+            text-align: center;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #010f1f; }
+        ::-webkit-scrollbar-thumb { background: #273647; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b4b37; }
+
+        @keyframes pulse-line {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        .path-active {
+            animation: pulse-line 2s infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-12 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<h1 class="font-code-sm text-code-sm font-bold text-primary-fixed tracking-tight">ENGINE: ESCROW_LIFECYCLE_WF-006</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-4 h-full">
+<span class="font-code-sm text-code-sm text-primary-fixed border-b-2 border-primary-fixed h-12 flex items-center px-2 cursor-pointer">DIAGRAM_VIEW</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors h-12 flex items-center px-2 cursor-pointer">LIVE_METRICS</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors h-12 flex items-center px-2 cursor-pointer">CONFIG_YAML</span>
+</nav>
+<div class="px-3 py-1 bg-surface-container-high rounded border border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">V.4.2.1-STABLE</span>
+</div>
+</div>
+</header>
+<div class="flex h-screen pt-12">
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] flex flex-col py-4 bg-surface-container-low border-r border-outline-variant w-64 z-40">
+<div class="px-6 mb-6">
+<p class="font-label-caps text-label-caps text-primary-fixed">SYSTEM_INDEX</p>
+</div>
+<nav class="flex flex-col flex-grow">
+<div class="flex items-center gap-4 px-6 py-3 bg-surface-container-highest text-primary-fixed border-l-4 border-primary-container transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow Index</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-label-caps text-label-caps">State Machine</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data Models</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-label-caps text-label-caps">Logic Connectors</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</div>
+</nav>
+<div class="mt-auto px-6 py-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_8px_#72ff70]"></div>
+<span class="font-code-xs text-code-xs text-on-surface">SYSTEM_HEALTH: NOMINAL</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant opacity-50">LATENCY: 14ms</p>
+</div>
+</aside>
+<!-- Main Diagram Canvas -->
+<main class="ml-64 flex-grow overflow-auto bg-surface relative">
+<div class="min-w-[1400px] h-full p-8">
+<!-- BPMN Grid Container -->
+<div class="relative border-l border-t border-outline-variant bg-surface-container-lowest/50">
+<!-- SWIMLANES -->
+<!-- 1. BUYER -->
+<div class="swimlane-row flex">
+<div class="w-48 bg-surface-container-low border-r border-outline-variant sticky left-0 z-20 flex items-center px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+<span class="font-label-caps text-label-caps">Buyer</span>
+</div>
+</div>
+<div class="flex-grow flex items-center gap-16 px-12 relative">
+<!-- START NODE -->
+<div class="w-10 h-10 rounded-full border-2 border-primary-fixed-dim bg-surface flex items-center justify-center relative flow-node">
+<div class="w-4 h-4 bg-primary-fixed-dim rounded-full"></div>
+<span class="absolute -bottom-6 font-code-xs text-code-xs whitespace-nowrap">START</span>
+</div>
+<!-- INITIATE NODE -->
+<div class="w-40 h-16 bg-[#0f0f0f] border border-primary-fixed-dim rounded flex flex-col p-2 relative flow-node">
+<span class="font-label-caps text-[9px] text-primary-fixed opacity-70">TASK_INIT</span>
+<span class="font-code-sm text-code-sm mt-1">Initiate Escrow</span>
+<div class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-[1px] bg-primary-fixed-dim"></div>
+</div>
+<!-- Spacer for vertical flow -->
+<div class="w-40 h-16 opacity-0"></div>
+<!-- REVIEW NODE -->
+<div class="w-40 h-16 bg-[#0f0f0f] border border-secondary text-secondary rounded flex flex-col p-2 relative ml-[400px] flow-node">
+<span class="font-label-caps text-[9px] opacity-70">TASK_AUTH</span>
+<span class="font-code-sm text-code-sm mt-1">Review/Approve</span>
+</div>
+</div>
+</div>
+<!-- 2. SELLER -->
+<div class="swimlane-row flex">
+<div class="w-48 bg-surface-container-low border-r border-outline-variant sticky left-0 z-20 flex items-center px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">store</span>
+<span class="font-label-caps text-label-caps">Seller</span>
+</div>
+</div>
+<div class="flex-grow flex items-center px-12 relative">
+<div class="ml-[450px] flex gap-12">
+<div class="w-40 h-16 bg-[#0f0f0f] border border-tertiary-fixed-dim text-tertiary-fixed-dim rounded flex flex-col p-2 flow-node">
+<span class="font-label-caps text-[9px] opacity-70">TASK_WORK</span>
+<span class="font-code-sm text-code-sm mt-1">Perform Service</span>
+</div>
+<div class="w-40 h-16 bg-[#0f0f0f] border border-tertiary-fixed-dim text-tertiary-fixed-dim rounded flex flex-col p-2 flow-node">
+<span class="font-label-caps text-[9px] opacity-70">TASK_DATA</span>
+<span class="font-code-sm text-code-sm mt-1">Upload Evidence</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. ESCROW SERVICE -->
+<div class="swimlane-row flex">
+<div class="w-48 bg-surface-container-low border-r border-outline-variant sticky left-0 z-20 flex items-center px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">account_balance</span>
+<span class="font-label-caps text-label-caps">Escrow Service</span>
+</div>
+</div>
+<div class="flex-grow flex items-center px-12 relative">
+<div class="flex gap-16 ml-[56px]">
+<div class="w-40 h-16 bg-[#0f0f0f] border border-on-surface-variant text-on-surface-variant rounded flex flex-col p-2 flow-node">
+<span class="font-label-caps text-[9px] opacity-70">SERVICE_CALL</span>
+<span class="font-code-sm text-code-sm mt-1">Create Account</span>
+</div>
+<div class="w-40 h-16 bg-[#0f0f0f] border border-on-surface-variant text-on-surface-variant rounded flex flex-col p-2 flow-node">
+<span class="font-label-caps text-[9px] opacity-70">VAL_ASYNC</span>
+<span class="font-code-sm text-code-sm mt-1">Validate Funding</span>
+</div>
+</div>
+<div class="ml-[510px] w-40 h-16 bg-[#0f0f0f] border border-on-surface-variant text-on-surface-variant rounded flex flex-col p-2 flow-node">
+<span class="font-label-caps text-[9px] opacity-70">CORE_HOLD</span>
+<span class="font-code-sm text-code-sm mt-1">Manage Hold</span>
+</div>
+</div>
+</div>
+<!-- 4. NAIJAPAY -->
+<div class="swimlane-row flex">
+<div class="w-48 bg-surface-container-low border-r border-outline-variant sticky left-0 z-20 flex items-center px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">payments</span>
+<span class="font-label-caps text-label-caps">NaijaPay</span>
+</div>
+</div>
+<div class="flex-grow flex items-center px-12 relative">
+<div class="ml-[280px] flex gap-8">
+<div class="w-40 h-16 bg-[#0f0f0f] border border-secondary-container text-secondary rounded flex flex-col p-2 flow-node">
+<span class="font-label-caps text-[9px] opacity-70">GATEWAY_TX</span>
+<span class="font-code-sm text-code-sm mt-1">Process Transaction</span>
+</div>
+<div class="w-40 h-16 bg-[#0f0f0f] border border-secondary-container text-secondary rounded flex flex-col p-2 flow-node">
+<span class="font-label-caps text-[9px] opacity-70">LEDGER_SYNC</span>
+<span class="font-code-sm text-code-sm mt-1">Fund Ledger</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 5. AURA AI -->
+<div class="swimlane-row flex">
+<div class="w-48 bg-surface-container-low border-r border-outline-variant sticky left-0 z-20 flex items-center px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">auto_awesome</span>
+<span class="font-label-caps text-label-caps">Aura AI</span>
+</div>
+</div>
+<div class="flex-grow flex items-center px-12 relative">
+<!-- PARALLEL CHECK -->
+<div class="ml-[750px] flex gap-12">
+<div class="w-40 h-20 bg-surface-container-highest/20 border-dashed border-primary-fixed border rounded flex flex-col p-2 flow-node">
+<div class="flex justify-between">
+<span class="font-label-caps text-[9px] text-primary-fixed">AI_VAL</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">98% CONF</span>
+</div>
+<span class="font-code-sm text-code-sm mt-1">Milestone Validation</span>
+</div>
+<div class="w-40 h-20 bg-surface-container-highest/20 border-dashed border-error border rounded flex flex-col p-2 flow-node">
+<div class="flex justify-between">
+<span class="font-label-caps text-[9px] text-error">AI_RISK</span>
+<span class="font-code-xs text-code-xs text-error">SCORE: 0.12</span>
+</div>
+<span class="font-code-sm text-code-sm mt-1">Fraud Scoring</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 6. n8n -->
+<div class="swimlane-row flex">
+<div class="w-48 bg-surface-container-low border-r border-outline-variant sticky left-0 z-20 flex items-center px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">hub</span>
+<span class="font-label-caps text-label-caps">n8n Orchestrator</span>
+</div>
+</div>
+<div class="flex-grow flex items-center px-12 relative">
+<div class="diamond flow-node">
+<div class="diamond-content">
+<span class="font-code-xs text-code-xs block text-primary-fixed">VALID?</span>
+</div>
+<span class="absolute -right-8 top-1/2 -translate-y-1/2 font-code-xs text-code-xs">YES</span>
+<span class="absolute right-1/2 translate-x-1/2 -bottom-6 font-code-xs text-code-xs text-error">NO</span>
+</div>
+<div class="ml-32 w-48 h-16 bg-[#0f0f0f] border border-primary-fixed text-primary-fixed rounded flex flex-col p-2 flow-node">
+<span class="font-label-caps text-[9px] opacity-70">WORKFLOW_ORCH</span>
+<span class="font-code-sm text-code-sm mt-1">Global Orchestration</span>
+</div>
+<!-- Timer Gate -->
+<div class="ml-12 w-12 h-12 rounded-full border border-on-surface-variant flex items-center justify-center flow-node">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">schedule</span>
+<span class="absolute -top-6 font-code-xs text-code-xs">24h_TTL</span>
+</div>
+</div>
+</div>
+<!-- 7. AUDIT SERVICE -->
+<div class="swimlane-row flex bg-surface-container-lowest">
+<div class="w-48 bg-surface-container-low border-r border-outline-variant sticky left-0 z-20 flex items-center px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit Service</span>
+</div>
+</div>
+<div class="flex-grow flex items-center px-12">
+<div class="flex gap-4">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+<div class="w-2 h-2 rounded-full bg-outline"></div>
+<div class="w-2 h-2 rounded-full bg-outline"></div>
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+<span class="font-code-xs text-code-xs opacity-50 ml-2">PERSISTENT_LOGGING_ACTIVE</span>
+</div>
+</div>
+</div>
+<!-- CONNECTORS (Simulated with div absolute positioning) -->
+<!-- Path 1: Buyer to Escrow -->
+<div class="node-connector node-connector-vertical h-24 top-[60px] left-[328px]"></div>
+<div class="node-connector node-connector-horizontal w-12 top-[84px] left-[328px]"></div>
+<!-- Path 2: Escrow to NaijaPay -->
+<div class="node-connector node-connector-vertical h-24 top-[300px] left-[520px]"></div>
+<!-- Path 3: Success flow to orchestration -->
+<div class="node-connector node-connector-horizontal w-[800px] top-[660px] left-[100px] path-active" style="background: linear-gradient(90deg, #72ff70 0%, transparent 100%)"></div>
+</div>
+</div>
+<!-- Side Overlay: Node Details -->
+<div class="fixed right-6 top-20 w-80 bg-surface-container-high/90 backdrop-blur-xl border border-outline-variant p-4 z-30 shadow-2xl rounded-lg">
+<div class="flex justify-between items-center mb-4 border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed">NODE_INSPECTOR</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer">close</span>
+</div>
+<div class="space-y-4">
+<div class="p-3 bg-surface-container rounded border border-outline-variant">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-1">SELECTED_ENTITY</p>
+<p class="font-code-sm text-code-sm text-primary-fixed font-bold">WF_STEP: MILESTONE_VAL</p>
+</div>
+<div class="space-y-2">
+<p class="font-label-caps text-[10px] text-on-surface-variant">TELEMETRY_LOG</p>
+<div class="mono text-[10px] leading-relaxed bg-[#010f1f] p-2 rounded text-on-surface/80">
+                            [08:44:21] REQ_RECEIVED: ID_992<br/>
+                            [08:44:22] AURA_PROMPT_SENT...<br/>
+                            [08:44:24] CONFIDENCE: 0.982<br/>
+                            [08:44:24] STATE -&gt; RESOLVED
+                        </div>
+</div>
+<button class="w-full py-2 bg-primary-container text-on-primary-container font-label-caps text-label-caps rounded hover:opacity-90 transition-opacity">
+                        RE-TRIGGER NODE
+                    </button>
+</div>
+</div>
+<!-- Bottom Floating Action Bar -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-surface-container-highest p-2 rounded-full border border-outline-variant shadow-lg z-30">
+<button class="flex items-center gap-2 px-4 py-2 hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined text-primary-fixed">play_arrow</span>
+<span class="font-label-caps text-label-caps text-on-surface">Execute Workflow</span>
+</button>
+<div class="w-[1px] h-6 bg-outline-variant"></div>
+<button class="p-2 hover:bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined text-on-surface-variant">zoom_in</span>
+</button>
+<button class="p-2 hover:bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined text-on-surface-variant">zoom_out</span>
+</button>
+<button class="p-2 hover:bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined text-on-surface-variant">center_focus_strong</span>
+</button>
+<div class="w-[1px] h-6 bg-outline-variant"></div>
+<button class="flex items-center gap-2 px-4 py-2 hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">share</span>
+<span class="font-label-caps text-label-caps">Export JSON</span>
+</button>
+</div>
+</main>
+</div>
+<!-- Micro-Telemetry HUD -->
+<div class="fixed bottom-2 right-2 flex flex-col items-end gap-1 pointer-events-none opacity-40">
+<span class="font-code-xs text-[9px]">MTU: 1500</span>
+<span class="font-code-xs text-[9px]">THREADS: 128_ACTIVE</span>
+<span class="font-code-xs text-[9px]">ENCRYPTION: AES-256-GCM</span>
+</div>
+<script>
+        // Simple micro-interaction for nodes
+        document.querySelectorAll('.flow-node').forEach(node => {
+            node.addEventListener('click', () => {
+                // Shake effect on click
+                node.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    node.style.transform = 'translateY(-1px)';
+                }, 100);
+            });
+        });
+
+        // Add small decorative dots to connector junctions
+        const junctions = [
+            { t: '60px', l: '328px' },
+            { t: '156px', l: '340px' },
+            { t: '300px', l: '520px' }
+        ];
+
+        junctions.forEach(j => {
+            const dot = document.createElement('div');
+            dot.className = 'absolute w-1 h-1 bg-primary-fixed rounded-full z-10';
+            dot.style.top = j.t;
+            dot.style.left = j.l;
+            document.querySelector('.relative.border-l').appendChild(dot);
+        });
+    </script>
+</body></html>

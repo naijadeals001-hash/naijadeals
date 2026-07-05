@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ENGINE: ESCROW_LIFECYCLE_WF-006 - Event Bus Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#72ff70",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary": "#490080",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#0d1c2d",
+                    "outline-variant": "#3b4b37",
+                    "on-surface": "#d4e4fa",
+                    "on-primary-container": "#007117",
+                    "surface-container-lowest": "#010f1f",
+                    "tertiary-container": "#ecd3ff",
+                    "on-secondary": "#002388",
+                    "inverse-primary": "#006e16",
+                    "surface": "#051424",
+                    "surface-dim": "#051424",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-tint": "#00e639",
+                    "on-error": "#690005",
+                    "error-container": "#93000a",
+                    "outline": "#84967e",
+                    "on-tertiary-container": "#862ed4",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-highest": "#273647",
+                    "surface-container": "#122131",
+                    "on-secondary-fixed": "#001356",
+                    "secondary-container": "#0043eb",
+                    "on-primary-fixed-variant": "#00530e",
+                    "surface-variant": "#273647",
+                    "surface-bright": "#2c3a4c",
+                    "primary": "#ebffe2",
+                    "primary-container": "#00ff41",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-container-high": "#1c2b3c",
+                    "on-primary-fixed": "#002203",
+                    "inverse-on-surface": "#233143",
+                    "secondary": "#b8c3ff",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "tertiary": "#fff6ff",
+                    "on-surface-variant": "#b9ccb2",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "background": "#051424",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "inverse-surface": "#d4e4fa",
+                    "on-secondary-container": "#c6ceff",
+                    "on-background": "#d4e4fa",
+                    "on-primary": "#003907"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .flow-connector {
+            stroke: #3b4b37;
+            stroke-width: 2;
+            fill: none;
+        }
+        .flow-connector-active {
+            stroke: #72ff70;
+            stroke-dasharray: 4 2;
+            animation: flowDash 20s linear infinite;
+        }
+        @keyframes flowDash {
+            to { stroke-dashoffset: -100; }
+        }
+        .node-glass {
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-background">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-node-gutter h-12 bg-surface-container-lowest text-primary-fixed border-b border-outline-variant font-code-sm text-code-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="terminal">terminal</span>
+<span class="font-headline-md text-headline-md font-bold text-primary-fixed tracking-tight">ENGINE: ESCROW_LIFECYCLE_WF-006</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="px-2 py-1 bg-surface-container-highest rounded border border-outline-variant flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="text-primary-fixed">LIVE_STREAM</span>
+</div>
+<div class="cursor-pointer active:opacity-80 hover:bg-surface-container-highest transition-colors px-3 py-1">V.4.2.1-STABLE</div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container-low border-r border-outline-variant flex flex-col py-4 z-40">
+<div class="px-6 mb-6">
+<h2 class="font-label-caps text-label-caps text-primary-fixed opacity-60">SYSTEM_INDEX</h2>
+</div>
+<nav class="flex-1">
+<ul class="space-y-1">
+<li class="px-4">
+<a class="flex items-center gap-3 py-2 px-3 transition-all duration-150 ease-in-out text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow Index</span>
+</a>
+</li>
+<li class="px-4">
+<a class="flex items-center gap-3 py-2 px-3 transition-all duration-150 ease-in-out bg-surface-container-highest text-primary-fixed border-l-4 border-primary-container group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps">State Machine</span>
+</a>
+</li>
+<li class="px-4">
+<a class="flex items-center gap-3 py-2 px-3 transition-all duration-150 ease-in-out text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data Models</span>
+</a>
+</li>
+<li class="px-4">
+<a class="flex items-center gap-3 py-2 px-3 transition-all duration-150 ease-in-out text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">Logic Connectors</span>
+</a>
+</li>
+<li class="px-4">
+<a class="flex items-center gap-3 py-2 px-3 transition-all duration-150 ease-in-out text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed group" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="history">history</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</a>
+</li>
+</ul>
+</nav>
+<div class="mt-auto px-6 pt-4 border-t border-outline-variant/30">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="dns">dns</span>
+<span class="font-code-xs text-code-xs uppercase tracking-widest">Node_Cluster_01</span>
+</div>
+<div class="space-y-2">
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-3/4"></div>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">CPU: 74.2% | RAM: 12GB</p>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 mt-12 p-node-gutter relative min-h-[calc(100vh-48px)]">
+<!-- Canvas Toolbar -->
+<div class="flex items-center justify-between mb-8">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-1">Event Bus &amp; n8n Automation Map</h1>
+<p class="font-body-md text-on-surface-variant">Real-time visualization of WF-006 service inter-connectivity.</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high border border-outline-variant px-4 py-2 flex items-center gap-2 hover:bg-primary-container hover:text-on-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-[18px]" data-icon="refresh">refresh</span>
+<span class="font-label-caps text-label-caps">Resync Nodes</span>
+</button>
+<button class="bg-primary-fixed text-on-primary-fixed px-4 py-2 flex items-center gap-2 font-label-caps text-label-caps font-bold">
+<span class="material-symbols-outlined text-[18px]" data-icon="play_arrow">play_arrow</span>
+                    DEPLOY CHANGES
+                </button>
+</div>
+</div>
+<!-- Automation Map Container -->
+<div class="relative w-full border border-outline-variant bg-[#090909] rounded overflow-hidden min-h-[800px]">
+<!-- Subtle WebGL-like Background Animation (Simulated) -->
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+
+</div>
+<!-- SVG Connector Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
+<!-- Connectors between Services and Bus -->
+<path class="flow-connector" d="M 280 200 L 400 200"></path>
+<path class="flow-connector" d="M 280 400 L 400 400"></path>
+<path class="flow-connector" d="M 280 600 L 400 600"></path>
+<!-- Bus to n8n -->
+<path class="flow-connector flow-connector-active" d="M 520 400 L 680 250"></path>
+<path class="flow-connector flow-connector-active" d="M 520 400 L 680 550"></path>
+<!-- n8n to Services (Callbacks) -->
+<path class="flow-connector" d="M 920 250 L 1050 250 L 1050 400 L 520 400" stroke-dasharray="5 5"></path>
+<!-- Bus to Queues -->
+<path class="flow-connector" d="M 460 550 L 460 700"></path>
+<path class="flow-connector" d="M 460 780 L 460 850" stroke="#ffb4ab"></path>
+</svg>
+<!-- Swimlanes / Zones -->
+<div class="absolute top-0 left-0 w-80 h-full border-r border-outline-variant/30 px-4 py-6">
+<div class="flex items-center gap-2 mb-8 opacity-40">
+<span class="material-symbols-outlined text-[16px]" data-icon="microservices">medical_services</span>
+<span class="font-label-caps text-label-caps">SERVICE_LAYER</span>
+</div>
+<!-- Services -->
+<div class="space-y-32">
+<!-- Service Node: Escrow Core -->
+<div class="border border-primary-fixed-dim node-glass p-3 relative z-10 w-64">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">SRV-ESCROW-01</span>
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim" data-icon="online_prediction">online_prediction</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-4">Escrow Core Controller</h3>
+<div class="space-y-2">
+<div class="flex items-center justify-between text-code-xs font-code-xs bg-surface-container px-2 py-1">
+<span class="text-on-surface-variant">PUB: EscrowCreated</span>
+<span class="text-primary-fixed">OK</span>
+</div>
+<div class="flex items-center justify-between text-code-xs font-code-xs bg-surface-container px-2 py-1">
+<span class="text-on-surface-variant">PUB: EscrowFunded</span>
+<span class="text-primary-fixed">OK</span>
+</div>
+</div>
+</div>
+<!-- Service Node: Fulfillment -->
+<div class="border border-outline node-glass p-3 relative z-10 w-64">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SRV-FULFILL-04</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-4">Milestone Manager</h3>
+<div class="space-y-2">
+<div class="flex items-center justify-between text-code-xs font-code-xs bg-surface-container px-2 py-1">
+<span class="text-on-surface-variant">PUB: MilestoneCompleted</span>
+<span class="text-primary-fixed">OK</span>
+</div>
+<div class="flex items-center justify-between text-code-xs font-code-xs bg-surface-container px-2 py-1">
+<span class="text-on-surface-variant">PUB: DeliveryConfirmed</span>
+<span class="text-primary-fixed">OK</span>
+</div>
+</div>
+</div>
+<!-- Service Node: Dispute -->
+<div class="border border-error node-glass p-3 relative z-10 w-64">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-label-caps text-error">SRV-DISPUTE-09</span>
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="warning">warning</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-4">Conflict Resolution</h3>
+<div class="space-y-2">
+<div class="flex items-center justify-between text-code-xs font-code-xs bg-surface-container px-2 py-1">
+<span class="text-on-surface-variant">PUB: DisputeOpened</span>
+<span class="text-primary-fixed">OK</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Central Event Bus Zone -->
+<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-48 h-[600px] flex flex-col items-center justify-center pointer-events-none">
+<div class="relative">
+<!-- Message Queue Visual -->
+<div class="w-32 h-32 border-4 border-primary-fixed-dim flex items-center justify-center rounded-xl bg-surface mb-4 z-20 relative">
+<div class="text-center">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[40px]" data-icon="hub">hub</span>
+<div class="font-label-caps text-label-caps mt-1">RABBIT_MQ</div>
+</div>
+</div>
+<!-- Pulsing Glow for Active Traffic -->
+<div class="absolute inset-0 bg-primary-fixed blur-3xl opacity-10 animate-pulse"></div>
+<!-- Telemetry Data -->
+<div class="absolute -right-24 top-0 space-y-2 pointer-events-auto">
+<div class="bg-surface-container-high border border-outline-variant p-2 w-32">
+<p class="font-label-caps text-[9px] opacity-60">THROUGHPUT</p>
+<p class="font-code-sm text-primary-fixed">1,420 eps</p>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-2 w-32">
+<p class="font-label-caps text-[9px] opacity-60">LATENCY</p>
+<p class="font-code-sm text-primary-fixed">12ms</p>
+</div>
+</div>
+</div>
+</div>
+<!-- n8n Automation Zone -->
+<div class="absolute right-0 top-0 w-[400px] h-full border-l border-outline-variant/30 px-8 py-6">
+<div class="flex items-center gap-2 mb-8 opacity-40">
+<span class="material-symbols-outlined text-[16px]" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">n8n_WORKFLOWS</span>
+</div>
+<div class="space-y-48 mt-12">
+<!-- n8n Node: Orchestrator -->
+<div class="border-2 border-primary node-glass p-5 relative z-10 w-full group hover:border-primary-container transition-all">
+<div class="absolute -top-3 -left-3 bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded">TRIGGERED</div>
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-code-sm text-code-sm text-primary">WF-006-ORCH-01</h3>
+<span class="font-label-caps text-[10px] opacity-50">ORCHESTRATOR</span>
+</div>
+<div class="space-y-4">
+<div class="p-2 bg-surface-container-high flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed text-[18px]" data-icon="webhook">webhook</span>
+<span class="font-code-xs text-code-xs">Event_Hook_Listener</span>
+</div>
+<div class="p-2 bg-surface-container flex flex-col gap-1 border-l-2 border-outline">
+<span class="font-code-xs text-code-xs opacity-50">IF: MilestoneCompleted</span>
+<div class="flex items-center justify-between">
+<span class="font-code-xs text-code-xs">Call Settlement_Service</span>
+<span class="text-primary-fixed font-bold text-[10px]">DONE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- n8n Node: Notifications -->
+<div class="border border-outline node-glass p-5 relative z-10 w-full opacity-80 hover:opacity-100 transition-opacity">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-code-sm text-code-sm text-on-surface">WF-006-NOTIF-02</h3>
+<span class="font-label-caps text-[10px] opacity-50">COMMUNICATION</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="p-2 bg-surface-container flex flex-col items-center justify-center gap-1 border border-outline-variant">
+<span class="material-symbols-outlined text-[16px]" data-icon="mail">mail</span>
+<span class="font-code-xs text-[9px]">Email_Service</span>
+</div>
+<div class="p-2 bg-surface-container flex flex-col items-center justify-center gap-1 border border-outline-variant">
+<span class="material-symbols-outlined text-[16px]" data-icon="chat">chat</span>
+<span class="font-code-xs text-[9px]">Slack_Bot</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom: Queues & Workers -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-start gap-8 z-20">
+<!-- DLQ Node -->
+<div class="border border-error-container bg-surface-container-lowest p-3 w-48 text-center">
+<div class="flex items-center justify-center gap-2 mb-2">
+<span class="material-symbols-outlined text-error text-[18px]" data-icon="warning">warning</span>
+<span class="font-label-caps text-label-caps text-error">DLQ_QUEUE</span>
+</div>
+<p class="font-code-sm text-error font-bold">12 ERRORS</p>
+<p class="font-code-xs text-on-surface-variant opacity-60">Dead Letter Store</p>
+</div>
+<!-- Workers Cluster -->
+<div class="border border-outline-variant bg-surface-container-lowest p-3 w-64">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-caps text-label-caps">BACKGROUND_WORKERS</span>
+<div class="flex gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+</div>
+</div>
+<div class="space-y-1">
+<div class="h-1.5 bg-surface-container-highest rounded-full flex">
+<div class="h-full bg-primary-fixed w-2/3"></div>
+</div>
+<div class="flex justify-between font-code-xs text-[9px] opacity-60">
+<span>POOL_SIZE: 08</span>
+<span>ACTIVE: 05</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- System Logs / Audit Stubs (Right Slide-out Style) -->
+<div class="fixed right-6 bottom-6 w-80 bg-[#0f0f0f] border border-outline-variant p-4 z-50">
+<div class="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps">AUDIT_LOG_STUB</span>
+<span class="material-symbols-outlined text-[16px] cursor-pointer" data-icon="close">close</span>
+</div>
+<div class="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+<div class="border-l-2 border-primary-fixed pl-3 py-1">
+<p class="font-code-xs text-[10px] text-primary-fixed opacity-60">12:04:15.002</p>
+<p class="font-code-sm text-on-surface">Event: SettlementCompleted published</p>
+<p class="font-code-xs text-on-surface-variant">Trace: 0x82...3f12</p>
+</div>
+<div class="border-l-2 border-primary-fixed pl-3 py-1">
+<p class="font-code-xs text-[10px] text-primary-fixed opacity-60">12:03:59.841</p>
+<p class="font-code-sm text-on-surface">n8n: WF-006-ORCH-01 success</p>
+<p class="font-code-xs text-on-surface-variant">Exec: 12ms</p>
+</div>
+<div class="border-l-2 border-error pl-3 py-1">
+<p class="font-code-xs text-[10px] text-error opacity-60">12:03:45.110</p>
+<p class="font-code-sm text-on-surface">DLQ: Retry logic failed (x3)</p>
+<p class="font-code-xs text-error">Status: Terminated</p>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interactions for node hovering
+        document.querySelectorAll('.node-glass').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px)';
+                node.style.boxShadow = '0 10px 20px -10px rgba(114, 255, 112, 0.2)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0)';
+                node.style.boxShadow = 'none';
+            });
+        });
+
+        // Simple pulsing telemetry
+        setInterval(() => {
+            const telemetryValue = document.querySelector('.font-code-sm.text-primary-fixed');
+            if(telemetryValue) {
+                const randomVal = 1400 + Math.floor(Math.random() * 50);
+                telemetryValue.innerText = `${randomVal.toLocaleString()} eps`;
+            }
+        }, 3000);
+    </script>
+</body></html>

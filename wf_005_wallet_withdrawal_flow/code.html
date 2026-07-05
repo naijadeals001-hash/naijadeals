@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-005: WALLET_WITHDRAWAL_ORCHESTRATION</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .workflow-connector {
+            position: relative;
+            z-index: 1;
+        }
+        .workflow-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+        }
+        .glow-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#1c2b3c",
+                      "surface": "#051424",
+                      "inverse-on-surface": "#233143",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-primary": "#003907",
+                      "surface-dim": "#051424",
+                      "outline": "#84967e",
+                      "secondary-fixed": "#dde1ff",
+                      "surface-container": "#122131",
+                      "surface-container-low": "#0d1c2d",
+                      "surface-container-lowest": "#010f1f",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-primary-fixed": "#002203",
+                      "tertiary": "#fff6ff",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary-fixed": "#001356",
+                      "surface-tint": "#00e639",
+                      "on-background": "#d4e4fa",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-tertiary": "#490080",
+                      "primary": "#ebffe2",
+                      "surface-variant": "#273647",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "secondary": "#b8c3ff",
+                      "on-primary-container": "#007117",
+                      "surface-container-highest": "#273647",
+                      "background": "#051424",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "primary-fixed-dim": "#00e639",
+                      "secondary-container": "#0043eb",
+                      "on-tertiary-container": "#862ed4",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "inverse-primary": "#006e16",
+                      "primary-container": "#00ff41",
+                      "on-secondary-container": "#c6ceff",
+                      "on-tertiary-fixed": "#2c0051",
+                      "tertiary-fixed": "#f0dbff",
+                      "error": "#ffb4ab",
+                      "error-container": "#93000a",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary": "#002388",
+                      "inverse-surface": "#d4e4fa",
+                      "on-error": "#690005",
+                      "on-surface": "#d4e4fa",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-bright": "#2c3a4c",
+                      "primary-fixed": "#72ff70"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lane-margin": "32px",
+                      "grid-unit": "8px",
+                      "node-gutter": "24px",
+                      "stack-gap": "4px"
+              },
+              "fontFamily": {
+                      "code-sm": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md overflow-hidden flex flex-col h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 flex justify-between items-center w-full px-lane-margin h-16 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-headline-md" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary dark:text-primary">WF-005: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6 h-full">
+<nav class="hidden md:flex h-full items-center gap-8">
+<a class="h-full flex items-center px-2 text-label-caps font-label-caps text-on-surface-variant hover:bg-surface-container-high transition-opacity" href="#">OVERVIEW</a>
+<a class="h-full flex items-center px-2 text-label-caps font-label-caps text-primary dark:text-primary border-b-2 border-primary" href="#">TOPOLOGY</a>
+<a class="h-full flex items-center px-2 text-label-caps font-label-caps text-on-surface-variant hover:bg-surface-container-high transition-opacity" href="#">INCIDENTS</a>
+</nav>
+<span class="text-label-caps font-label-caps text-primary/60 border border-primary/30 px-3 py-1 rounded">v4.2.0 LIVE</span>
+</div>
+</header>
+<div class="flex flex-1 pt-16 pb-12 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant w-64">
+<div class="px-6 mb-6">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</h2>
+</div>
+<nav class="flex-1 space-y-1 terminal-scroll overflow-y-auto px-2">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="payments">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="security">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="mail">mail</span>
+<span class="text-code-sm font-code-sm">WF-004: NOTIF</span>
+</a>
+<a class="bg-surface-variant dark:bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 flex items-center gap-3 translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="database">database</span>
+<span class="text-code-sm font-code-sm">WF-005: DATA</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="sync">sync</span>
+<span class="text-code-sm font-code-sm">WF-006: SYNC</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="history">history</span>
+<span class="text-code-sm font-code-sm">WF-007: LOGS</span>
+</a>
+</nav>
+</aside>
+<!-- Main Workflow Canvas -->
+<main class="ml-64 flex-1 relative overflow-auto p-12 bg-surface-lowest">
+<!-- Swimlane: CLIENT LAYER -->
+<div class="relative mb-24">
+<div class="absolute -left-12 top-0 bottom-0 w-8 border-r border-outline-variant flex items-center justify-center">
+<span class="rotate-90 text-label-caps font-label-caps text-on-surface-variant whitespace-nowrap">ACTOR: CLIENT</span>
+</div>
+<!-- START: Withdrawal Request -->
+<div class="flex items-center gap-24">
+<div class="w-64 bg-surface-container p-[1px] border border-primary shadow-lg shadow-primary/5">
+<div class="bg-primary/10 px-3 py-1 flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-primary">01: TRIGGER</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="input">input</span>
+</div>
+<div class="p-3">
+<h3 class="text-code-sm font-code-sm text-primary mb-1 uppercase">WITHDRAWAL_REQUEST</h3>
+<div class="flex justify-between items-center text-code-xs font-code-xs text-on-surface-variant opacity-60">
+<span>LATENCY: 4ms</span>
+<span>ID: TX-900</span>
+</div>
+</div>
+</div>
+<!-- Connector: Forward -->
+<div class="flex-1 h-px bg-outline-variant relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-l-4 border-l-outline-variant"></div>
+<div class="absolute top-[-20px] left-1/2 -translate-x-1/2 text-code-xs font-code-xs text-on-surface-variant bg-surface px-2">POST /v1/withdraw</div>
+</div>
+<!-- DECISION: Sufficient Balance -->
+<div class="w-64 bg-surface-container p-[1px] border border-outline">
+<div class="bg-surface-variant px-3 py-1 flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant">02: DECISION</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div class="p-3">
+<h3 class="text-code-sm font-code-sm text-on-surface mb-1">SUFFICIENT_BALANCE?</h3>
+<div class="mt-2 flex gap-2">
+<div class="px-2 py-0.5 border border-primary/20 text-code-xs text-primary font-bold">YES</div>
+<div class="px-2 py-0.5 border border-error/20 text-code-xs text-error font-bold">NO</div>
+</div>
+</div>
+<!-- Audit stub -->
+<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-2 bg-primary"></div>
+</div>
+</div>
+</div>
+<!-- Swimlane: LOGIC & AI -->
+<div class="relative mb-24">
+<div class="absolute -left-12 top-0 bottom-0 w-8 border-r border-outline-variant flex items-center justify-center">
+<span class="rotate-90 text-label-caps font-label-caps text-on-surface-variant whitespace-nowrap">ACTOR: CORE_AI</span>
+</div>
+<div class="flex items-center gap-24 ml-[352px]">
+<!-- AI ACTION: Fraud Screening -->
+<div class="w-64 bg-surface-container p-[1px] border border-secondary shadow-lg shadow-secondary/5">
+<div class="bg-secondary/10 px-3 py-1 flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-secondary">03: AI_PROCESS</span>
+<span class="material-symbols-outlined text-[14px] text-secondary" data-icon="psychology">psychology</span>
+</div>
+<div class="p-3">
+<h3 class="text-code-sm font-code-sm text-secondary mb-1">FRAUD_SCREENING</h3>
+<div class="space-y-1 mt-2">
+<div class="flex justify-between text-code-xs text-on-surface-variant font-code-xs">
+<span>VELOCITY:</span>
+<span class="text-primary">NORMAL</span>
+</div>
+<div class="flex justify-between text-code-xs text-on-surface-variant font-code-xs">
+<span>PATTERN:</span>
+<span class="text-primary">TYPICAL</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Connector: Vertical Split -->
+<div class="flex-1 h-px bg-outline-variant relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-l-4 border-l-outline-variant"></div>
+</div>
+<!-- DECISION: Compliance Review -->
+<div class="w-64 bg-surface-container p-[1px] border border-outline relative">
+<div class="bg-surface-variant px-3 py-1 flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant">04: ROUTE</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="gavel">gavel</span>
+</div>
+<div class="p-3">
+<h3 class="text-code-sm font-code-sm text-on-surface mb-1 uppercase">COMPLIANCE_REVIEW?</h3>
+<p class="text-code-xs text-on-surface-variant font-code-xs opacity-60">THRESHOLD: &gt;$10k</p>
+</div>
+<!-- Path to Admin Approval -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 -mt-12 h-12 w-px border-l border-dashed border-error">
+<div class="absolute top-[-10px] left-2 text-code-xs text-error font-bold">YES</div>
+</div>
+<!-- Path to Auto-Settlement -->
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 -mb-12 h-12 w-px border-l border-primary">
+<div class="absolute bottom-[-10px] left-2 text-code-xs text-primary font-bold">NO</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: SETTLEMENT LAYER -->
+<div class="relative mb-24">
+<div class="absolute -left-12 top-0 bottom-0 w-8 border-r border-outline-variant flex items-center justify-center">
+<span class="rotate-90 text-label-caps font-label-caps text-on-surface-variant whitespace-nowrap">ACTOR: EXTERNAL_NET</span>
+</div>
+<div class="flex items-center gap-24 ml-[704px]">
+<!-- EXTERNAL: Bank Transfer API -->
+<div class="w-64 bg-surface-container p-[1px] border border-primary shadow-lg shadow-primary/10">
+<div class="bg-primary/20 px-3 py-1 flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-primary">05: EXTERNAL</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="account_balance">account_balance</span>
+</div>
+<div class="p-3">
+<h3 class="text-code-sm font-code-sm text-primary mb-1">BANK_TRANSFER_API</h3>
+<div class="flex justify-between items-center text-code-xs font-code-xs text-on-surface-variant">
+<span>ENDPOINT: ACH-v2</span>
+<span class="text-primary glow-pulse">ACTIVE</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: PERSISTENCE & NOTIF -->
+<div class="relative">
+<div class="absolute -left-12 top-0 bottom-0 w-8 border-r border-outline-variant flex items-center justify-center">
+<span class="rotate-90 text-label-caps font-label-caps text-on-surface-variant whitespace-nowrap">ACTOR: SYSTEM</span>
+</div>
+<div class="flex items-center gap-24 ml-[704px]">
+<!-- UPDATE: Ledger & Wallet -->
+<div class="w-64 bg-surface-container p-[1px] border border-outline-variant">
+<div class="bg-surface-variant px-3 py-1 flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant">06: PERSIST</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="database">database</span>
+</div>
+<div class="p-3">
+<h3 class="text-code-sm font-code-sm text-on-surface mb-1">LEDGER_COMMIT</h3>
+<div class="text-code-xs text-on-surface-variant font-code-xs">
+<code>UPDATE wallets SET bal = bal - val</code>
+</div>
+</div>
+</div>
+<div class="w-px h-px bg-outline-variant relative flex-1">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-l-4 border-l-outline-variant"></div>
+</div>
+<!-- NOTIFICATION: Transfer Status -->
+<div class="w-64 bg-surface-container p-[1px] border border-primary">
+<div class="bg-primary/10 px-3 py-1 flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-primary">07: NOTIFY</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="mail">mail</span>
+</div>
+<div class="p-3">
+<h3 class="text-code-sm font-code-sm text-on-surface mb-1 uppercase">DISPATCH_RECEIPT</h3>
+<p class="text-code-xs text-on-surface-variant font-code-xs">CHANNELS: PUSH, EMAIL</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Dashboard Background Decor (Shader or Atmospheric) -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-20">
+
+</div>
+</main>
+<!-- Right Side Panel: Telemetry & Logs -->
+<aside class="w-80 bg-surface-container-low border-l border-outline-variant p-6 flex flex-col gap-6">
+<section>
+<h4 class="text-label-caps font-label-caps text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="analytics">analytics</span>
+                    REAL_TIME_TELEMETRY
+                </h4>
+<div class="space-y-3">
+<div class="bg-surface p-3 border border-outline-variant">
+<div class="text-code-xs text-on-surface-variant">NODE_LATENCY</div>
+<div class="text-headline-md font-code-sm text-primary">12ms <span class="text-code-xs text-on-surface-variant font-normal">AVG</span></div>
+</div>
+<div class="bg-surface p-3 border border-outline-variant">
+<div class="text-code-xs text-on-surface-variant">SUCCESS_RATE</div>
+<div class="text-headline-md font-code-sm text-primary">99.98%</div>
+</div>
+<div class="bg-surface p-3 border border-outline-variant">
+<div class="text-code-xs text-on-surface-variant">FAILURE_HANDLING</div>
+<div class="flex items-center gap-2 mt-1">
+<div class="h-2 flex-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-error w-1/12"></div>
+</div>
+<span class="text-code-xs text-error">RETRIED: 4</span>
+</div>
+</div>
+</div>
+</section>
+<section class="flex-1 flex flex-col min-h-0">
+<h4 class="text-label-caps font-label-caps text-on-surface-variant mb-4">AUDIT_TRAIL: ACTIVE</h4>
+<div class="flex-1 overflow-y-auto terminal-scroll space-y-2 pr-2">
+<div class="text-code-xs font-code-xs text-on-surface-variant/80 border-l-2 border-primary pl-2 py-1">
+<div class="text-primary opacity-100">[10:45:02]</div>
+<div>TX-900_INIT: SUCCESS</div>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant/80 border-l-2 border-outline pl-2 py-1">
+<div class="text-on-surface opacity-100">[10:45:03]</div>
+<div>BAL_CHK: SUFFICIENT ($45.2k)</div>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant/80 border-l-2 border-secondary pl-2 py-1">
+<div class="text-secondary opacity-100">[10:45:05]</div>
+<div>FRAUD_AI: NO_MATCH</div>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant/80 border-l-2 border-outline-variant pl-2 py-1">
+<div class="text-on-surface-variant opacity-100">[10:45:08]</div>
+<div>SETTLE_QUEUED: PRIMARY_ACH</div>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant/80 border-l-2 border-error pl-2 py-1">
+<div class="text-error opacity-100">[10:44:50]</div>
+<div>ERR_TX-899: TIMEOUT_RETRY_3</div>
+</div>
+</div>
+</section>
+</aside>
+</div>
+<!-- Footer Telemetry Bar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<span class="h-3 w-px bg-outline-variant"></span>
+<div class="flex gap-4 text-label-caps font-label-caps text-on-surface-variant">
+<span class="hover:text-primary transition-colors cursor-pointer">AUDIT_TRAIL: ACTIVE</span>
+<span class="hover:text-primary transition-colors cursor-pointer">N8N_SYNC: OK</span>
+<span class="text-primary font-bold">LATENCY: 12ms</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-container glow-pulse"></div>
+<span class="text-code-xs font-code-xs text-on-surface-variant uppercase">Ecosystem Health: Nominal</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Node hover effects
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'transform 0.2s ease-out';
+                node.classList.add('border-primary');
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0)';
+                if (!node.classList.contains('border-secondary') && !node.classList.contains('border-primary')) {
+                    node.classList.remove('border-primary');
+                }
+            });
+        });
+    </script>
+</body></html>

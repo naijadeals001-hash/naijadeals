@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-006 Business Rules Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, rgba(114, 255, 112, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .logic-gate-connector {
+            position: relative;
+        }
+        .logic-gate-connector::after {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            width: 12px;
+            height: 1px;
+            background: #3b4b37;
+        }
+        .terminal-glow {
+            text-shadow: 0 0 8px rgba(114, 255, 112, 0.4);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #010f1f; }
+        ::-webkit-scrollbar-thumb { background: #273647; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b4b37; }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#72ff70",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary": "#490080",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#0d1c2d",
+                    "outline-variant": "#3b4b37",
+                    "on-surface": "#d4e4fa",
+                    "on-primary-container": "#007117",
+                    "surface-container-lowest": "#010f1f",
+                    "tertiary-container": "#ecd3ff",
+                    "on-secondary": "#002388",
+                    "inverse-primary": "#006e16",
+                    "surface": "#051424",
+                    "surface-dim": "#051424",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-tint": "#00e639",
+                    "on-error": "#690005",
+                    "error-container": "#93000a",
+                    "outline": "#84967e",
+                    "on-tertiary-container": "#862ed4",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-highest": "#273647",
+                    "surface-container": "#122131",
+                    "on-secondary-fixed": "#001356",
+                    "secondary-container": "#0043eb",
+                    "on-primary-fixed-variant": "#00530e",
+                    "surface-variant": "#273647",
+                    "surface-bright": "#2c3a4c",
+                    "primary": "#ebffe2",
+                    "primary-container": "#00ff41",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-container-high": "#1c2b3c",
+                    "on-primary-fixed": "#002203",
+                    "inverse-on-surface": "#233143",
+                    "secondary": "#b8c3ff",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "tertiary": "#fff6ff",
+                    "on-surface-variant": "#b9ccb2",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "background": "#051424",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "inverse-surface": "#d4e4fa",
+                    "on-secondary-container": "#c6ceff",
+                    "on-background": "#d4e4fa",
+                    "on-primary": "#003907"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-node-gutter h-12 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed" style="font-variation-settings: 'FILL' 0;">terminal</span>
+<span class="font-headline-md text-headline-md font-bold text-primary-fixed tracking-tight">ENGINE: ESCROW_LIFECYCLE_WF-006</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-code-sm text-code-sm text-primary-fixed opacity-80 bg-surface-container px-2 py-0.5 border border-outline-variant">V.4.2.1-STABLE</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse shadow-[0_0_8px_#72ff70]"></div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<nav class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container-low border-r border-outline-variant flex flex-col py-4">
+<div class="px-6 mb-6">
+<span class="font-label-caps text-label-caps text-primary-fixed opacity-60">SYSTEM_INDEX</span>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed group" href="#">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow Index</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out bg-surface-container-highest text-primary-fixed border-l-4 border-primary-container group" href="#">
+<span class="material-symbols-outlined text-[18px]">settings_input_component</span>
+<span class="font-label-caps text-label-caps">State Machine</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed group" href="#">
+<span class="material-symbols-outlined text-[18px]">database</span>
+<span class="font-label-caps text-label-caps">Data Models</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed group" href="#">
+<span class="material-symbols-outlined text-[18px]">schema</span>
+<span class="font-label-caps text-label-caps">Logic Connectors</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed group" href="#">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</a>
+</div>
+<div class="mt-auto px-6 pt-4 border-t border-outline-variant/30">
+<div class="bg-surface-container-lowest p-3 border border-outline-variant rounded">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-on-surface-variant uppercase">Local Latency</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">14ms</span>
+</div>
+<div class="w-full bg-surface-container h-1 overflow-hidden">
+<div class="bg-primary-fixed h-full w-[85%]"></div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 p-8 min-h-screen">
+<div class="max-w-[1400px] mx-auto">
+<!-- Page Header / Stats Row -->
+<div class="flex flex-wrap items-end justify-between gap-6 mb-8">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary-fixed terminal-glow mb-1">Business Rules Engine</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant uppercase tracking-widest">Target Configuration: WF-006_LIVE_PRODUCTION</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container p-4 border border-outline-variant min-w-[160px]">
+<span class="block font-label-caps text-[10px] text-on-surface-variant mb-1">ACTIVE RULES</span>
+<span class="font-headline-md text-headline-md text-primary-fixed">24/24</span>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant min-w-[160px]">
+<span class="block font-label-caps text-[10px] text-on-surface-variant mb-1">LAST COMPILED</span>
+<span class="font-headline-md text-headline-md text-secondary">0.4s AGO</span>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant min-w-[160px]">
+<span class="block font-label-caps text-[10px] text-on-surface-variant mb-1">SYNC STATUS</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed text-sm">check_circle</span>
+<span class="font-headline-md text-headline-md text-on-surface">NOMINAL</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Rules Grid -->
+<div class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full border-collapse text-left">
+<thead>
+<tr class="bg-surface-container-high border-b border-outline-variant">
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant/30">RULE ID</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant/30">LOGIC / CONDITION</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant/30">DECISION</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant/30">RESPONSIBLE SERVICE</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant/30">FAILURE RESULT</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">RECOVERY PATH</th>
+</tr>
+</thead>
+<tbody class="font-code-sm text-code-sm divide-y divide-outline-variant/30">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="px-6 py-5 border-r border-outline-variant/30 font-bold text-primary-fixed">R-001</td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-on-surface-variant">Escrow_Fully_Funded</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-primary-fixed-dim">IF</span>
+<code class="text-secondary">Amount == Expected</code>
+</div>
+</td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span class="font-bold">HOLD_FUNDS</span>
+</div>
+</td>
+<td class="px-6 py-5 border-r border-outline-variant/30 text-on-surface-variant">
+                                    Escrow_Service
+                                </td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<span class="text-error border border-error/30 px-2 py-0.5 bg-error-container/10">Transaction_Abort</span>
+</td>
+<td class="px-6 py-5 text-on-tertiary-container flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+                                    Retry_Auth
+                                </td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="px-6 py-5 border-r border-outline-variant/30 font-bold text-primary-fixed">R-002</td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-on-surface-variant">Identity_Verified</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-primary-fixed-dim">IF</span>
+<code class="text-secondary">KYC_Level &gt;= 2</code>
+</div>
+</td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="font-bold">ALLOW_CREATE</span>
+</div>
+</td>
+<td class="px-6 py-5 border-r border-outline-variant/30 text-on-surface-variant">
+                                    Trust_Engine
+                                </td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<span class="text-error border border-error/30 px-2 py-0.5 bg-error-container/10">Account_Block</span>
+</td>
+<td class="px-6 py-5 text-on-tertiary-container flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">person_search</span>
+                                    Manual_Verification
+                                </td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="px-6 py-5 border-r border-outline-variant/30 font-bold text-primary-fixed">R-003</td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-on-surface-variant">Milestone_Approved</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-primary-fixed-dim">IF</span>
+<code class="text-secondary">Evidence_Confidence &gt; 0.9</code>
+</div>
+</td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="font-bold">RELEASE_FUNDS</span>
+</div>
+</td>
+<td class="px-6 py-5 border-r border-outline-variant/30 text-on-surface-variant">
+                                    Aura_AI
+                                </td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<span class="text-error border border-error/30 px-2 py-0.5 bg-error-container/10">Payment_Hold</span>
+</td>
+<td class="px-6 py-5 text-on-tertiary-container flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                                    Manual_Review
+                                </td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="px-6 py-5 border-r border-outline-variant/30 font-bold text-primary-fixed">R-004</td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-on-surface-variant">Dispute_Status</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-primary-fixed-dim">IF</span>
+<code class="text-secondary">Open == TRUE</code>
+</div>
+</td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="font-bold">LOCK_SETTLEMENT</span>
+</div>
+</td>
+<td class="px-6 py-5 border-r border-outline-variant/30 text-on-surface-variant">
+                                    Compliance_Service
+                                </td>
+<td class="px-6 py-5 border-r border-outline-variant/30">
+<span class="text-error border border-error/30 px-2 py-0.5 bg-error-container/10">Funds_Frozen</span>
+</td>
+<td class="px-6 py-5 text-on-tertiary-container flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">folder_shared</span>
+                                    Evidence_Collection
+                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Footer Meta Info -->
+<div class="mt-8 flex flex-col md:flex-row gap-6">
+<div class="flex-1 bg-surface-container p-6 border border-outline-variant">
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-4">LOGIC CONNECTORS: TOPOLOGY</h3>
+<div class="flex items-center gap-6 h-32 relative overflow-hidden">
+<div class="flex flex-col gap-4">
+<div class="bg-surface-container-highest border border-outline text-[10px] px-2 py-1 font-code-xs">INPUT_BUFFER</div>
+<div class="bg-surface-container-highest border border-outline text-[10px] px-2 py-1 font-code-xs">AUTH_STREAM</div>
+</div>
+<div class="flex-1 flex flex-col items-center justify-center relative">
+<div class="w-12 h-12 border-2 border-primary-fixed flex items-center justify-center font-bold text-primary-fixed text-xs rotate-45">
+<span class="-rotate-45">AND</span>
+</div>
+<div class="absolute w-full h-px bg-outline-variant -z-10"></div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="bg-surface-container-highest border border-outline text-[10px] px-2 py-1 font-code-xs">EXEC_GATE</div>
+<div class="bg-surface-container-highest border border-outline text-[10px] px-2 py-1 font-code-xs">ERR_STUB</div>
+</div>
+</div>
+</div>
+<div class="w-full md:w-80 bg-surface-container-lowest p-6 border border-outline-variant">
+<h3 class="font-label-caps text-label-caps text-secondary mb-4">MICRO-TELEMETRY</h3>
+<ul class="space-y-4">
+<li class="flex justify-between items-end border-b border-outline-variant/30 pb-2">
+<div>
+<span class="block font-label-caps text-[9px] text-on-surface-variant">THROUGHPUT</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">1,204 ops/s</span>
+</div>
+<div class="w-16 h-8 bg-surface-container flex items-end gap-1 px-1">
+<div class="w-2 bg-primary-fixed h-[40%]"></div>
+<div class="w-2 bg-primary-fixed h-[70%]"></div>
+<div class="w-2 bg-primary-fixed h-[50%]"></div>
+<div class="w-2 bg-primary-fixed h-[90%]"></div>
+</div>
+</li>
+<li class="flex justify-between items-end border-b border-outline-variant/30 pb-2">
+<div>
+<span class="block font-label-caps text-[9px] text-on-surface-variant">ERROR RATE</span>
+<span class="font-code-sm text-code-sm text-error">0.02%</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-50">NOMINAL</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB for Global Action -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary-container text-on-primary-container rounded-none flex items-center justify-center shadow-[0_0_20px_rgba(0,255,65,0.3)] hover:scale-105 transition-transform border border-primary-fixed group">
+<span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">settings</span>
+</button>
+<script>
+        // Micro-interactions and subtle telemetry animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+
+            // Randomize telemetry bars occasionally
+            setInterval(() => {
+                const bars = document.querySelectorAll('.w-2.bg-primary-fixed');
+                bars.forEach(bar => {
+                    const h = Math.floor(Math.random() * 80) + 10;
+                    bar.style.height = h + '%';
+                    bar.style.transition = 'height 0.4s ease';
+                });
+            }, 1200);
+        });
+    </script>
+</body></html>

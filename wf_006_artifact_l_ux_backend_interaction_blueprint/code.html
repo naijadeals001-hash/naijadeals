@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-006 ESCROW_LIFECYCLE_BLUEPRINT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#72ff70",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary": "#490080",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#0d1c2d",
+                        "outline-variant": "#3b4b37",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-container": "#007117",
+                        "surface-container-lowest": "#010f1f",
+                        "tertiary-container": "#ecd3ff",
+                        "on-secondary": "#002388",
+                        "inverse-primary": "#006e16",
+                        "surface": "#051424",
+                        "surface-dim": "#051424",
+                        "secondary-fixed": "#dde1ff",
+                        "surface-tint": "#00e639",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "outline": "#84967e",
+                        "on-tertiary-container": "#862ed4",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-highest": "#273647",
+                        "surface-container": "#122131",
+                        "on-secondary-fixed": "#001356",
+                        "secondary-container": "#0043eb",
+                        "on-primary-fixed-variant": "#00530e",
+                        "surface-variant": "#273647",
+                        "surface-bright": "#2c3a4c",
+                        "primary": "#ebffe2",
+                        "primary-container": "#00ff41",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container-high": "#1c2b3c",
+                        "on-primary-fixed": "#002203",
+                        "inverse-on-surface": "#233143",
+                        "secondary": "#b8c3ff",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "primary-fixed-dim": "#00e639",
+                        "tertiary": "#fff6ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "background": "#051424",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "inverse-surface": "#d4e4fa",
+                        "on-secondary-container": "#c6ceff",
+                        "on-background": "#d4e4fa",
+                        "on-primary": "#003907"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector-line {
+            background: repeating-linear-gradient(to bottom, #72ff70 0, #72ff70 8px, transparent 8px, transparent 16px);
+        }
+        .lane-border { border-color: rgba(114, 255, 112, 0.1); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface antialiased overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-node-gutter h-12 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="terminal">terminal</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary-fixed tracking-tight">ENGINE: ESCROW_LIFECYCLE_WF-006</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-code-sm text-code-sm text-primary-fixed bg-surface-container-highest px-2 py-1 rounded">V.4.2.1-STABLE</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed transition-colors" data-icon="notifications">notifications</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 flex flex-col py-4 bg-surface-container-low border-r border-outline-variant z-40">
+<div class="px-6 mb-8">
+<span class="font-label-caps text-label-caps text-primary-fixed opacity-60">SYSTEM_INDEX</span>
+</div>
+<nav class="flex flex-col gap-1 px-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow Index</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded bg-surface-container-highest text-primary-fixed border-l-4 border-primary-container transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps">State Machine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data Models</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">Logic Connectors</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</a>
+</nav>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 mt-12 p-node-gutter min-h-screen relative">
+<!-- Background Grid Label -->
+<div class="absolute top-4 right-4 pointer-events-none opacity-20">
+<span class="font-code-xs text-code-xs text-primary-fixed uppercase tracking-widest">Grid_Resolution: 24px / 8px_Sub</span>
+</div>
+<div class="max-w-6xl mx-auto">
+<!-- Header Section -->
+<div class="mb-12 border-l-2 border-primary-fixed pl-6 py-2">
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-2">END-TO-END REQUEST LIFECYCLE</h2>
+<p class="text-on-surface-variant max-w-2xl font-body-md opacity-80">
+                    High-fidelity trace of the [FUND_ESCROW] event across the distributed system architecture. Logic flow maps the sequential transition from Client interaction to Immutable Ledger commit.
+                </p>
+</div>
+<!-- Workflow Container -->
+<div class="relative grid grid-cols-1 gap-0">
+<!-- Vertical Flow Line -->
+<div class="absolute left-1/2 top-0 bottom-0 w-px node-connector-line -translate-x-1/2 opacity-20 z-0"></div>
+<!-- STEP 1: USER ACTION -->
+<div class="relative z-10 flex flex-col items-center mb-16">
+<div class="bg-surface-container-high border border-outline px-4 py-1 rounded-full mb-4">
+<span class="font-label-caps text-label-caps text-primary-fixed uppercase">User Interaction</span>
+</div>
+<div class="bg-surface-container-lowest border-2 border-primary-fixed w-full max-w-sm p-6 shadow-2xl transition-transform hover:scale-[1.02] cursor-pointer group">
+<div class="flex items-start justify-between mb-4">
+<span class="material-symbols-outlined text-primary-fixed text-4xl" data-icon="touch_app">touch_app</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-50">TRACE_ID: 0x9f2...</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Clicks 'Pay/Fund Escrow'</h3>
+<p class="text-on-surface-variant font-code-sm text-code-sm">Manual trigger originating from Client_Node_01</p>
+<div class="mt-4 flex gap-2">
+<div class="h-1 flex-1 bg-primary-fixed animate-pulse"></div>
+<div class="h-1 flex-1 bg-primary-fixed/20"></div>
+<div class="h-1 flex-1 bg-primary-fixed/20"></div>
+</div>
+</div>
+</div>
+<!-- STEP 2: FRONTEND COMPONENT -->
+<div class="relative z-10 flex flex-col items-center mb-16">
+<div class="bg-surface-container-high border border-outline px-4 py-1 rounded-full mb-4">
+<span class="font-label-caps text-label-caps text-secondary-fixed uppercase">UI Module</span>
+</div>
+<div class="bg-surface-container-lowest border border-secondary-fixed w-full max-w-md p-6 group">
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-secondary-fixed" data-icon="smartphone">smartphone</span>
+<h4 class="font-code-sm text-code-sm text-secondary-fixed">Escrow_Payment_Component</h4>
+</div>
+<div class="bg-black/40 p-3 rounded font-code-xs text-code-xs text-on-surface-variant">
+                            const trigger = useEscrowHook();<br/>
+                            trigger.dispatch({ amount: 50000, currency: 'USD' });
+                        </div>
+</div>
+</div>
+<!-- STEP 3: API GATEWAY -->
+<div class="relative z-10 flex flex-col items-center mb-16">
+<div class="bg-surface-container-high border border-outline px-4 py-1 rounded-full mb-4">
+<span class="font-label-caps text-label-caps text-tertiary-fixed uppercase">Transport Layer</span>
+</div>
+<div class="bg-surface-container-lowest border border-tertiary-fixed w-full max-w-sm p-6 flex items-center justify-between">
+<div>
+<span class="font-label-caps text-label-caps text-tertiary-fixed block mb-1">API ENDPOINT</span>
+<span class="font-headline-md text-headline-md text-on-surface">POST /escrow/fund</span>
+</div>
+<span class="material-symbols-outlined text-tertiary-fixed text-4xl" data-icon="settings_ethernet">settings_ethernet</span>
+</div>
+</div>
+<!-- STEP 4: SERVICE LOGIC (BENTO GRID STYLE INTERNALS) -->
+<div class="relative z-10 flex flex-col items-center mb-16 w-full">
+<div class="bg-surface-container-high border border-outline px-4 py-1 rounded-full mb-4">
+<span class="font-label-caps text-label-caps text-primary-fixed uppercase">Core Logic</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+<div class="bg-surface-container border border-outline-variant p-6 rounded-lg">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="dns">dns</span>
+<h4 class="font-headline-md text-headline-md text-on-surface">Escrow_Service</h4>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">Auth_Check</span>
+<span class="material-symbols-outlined text-primary-fixed" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">Logic: Validation</span>
+<span class="material-symbols-outlined text-primary-fixed" data-icon="verified">verified</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface-variant">KYC_Check</span>
+<span class="material-symbols-outlined text-primary-fixed" data-icon="account_balance">account_balance</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-6 rounded-lg relative overflow-hidden">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="database">database</span>
+<h4 class="font-headline-md text-headline-md text-on-surface">Ledger_Update</h4>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface-variant">Balance Update:</span>
+<span class="text-error font-bold">-50,000.00 USD</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full mt-4">
+<div class="bg-error w-3/4 h-full rounded-full shadow-[0_0_10px_#ffb4ab]"></div>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant mt-4 block">TRANS_HASH: 0x821_f92...</span>
+</div>
+</div>
+</div>
+</div>
+<!-- STEP 5: EVENT BUS -->
+<div class="relative z-10 flex flex-col items-center mb-16">
+<div class="bg-surface-container-high border border-outline px-4 py-1 rounded-full mb-4">
+<span class="font-label-caps text-label-caps text-secondary-fixed uppercase">Message Broker</span>
+</div>
+<div class="bg-surface-container-lowest border-2 border-dashed border-secondary-fixed w-full max-w-sm p-6 relative">
+<div class="absolute -top-3 left-6 px-2 bg-surface-container-lowest font-code-xs text-code-xs text-secondary-fixed">EVENT_EMIT</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary-fixed text-3xl" data-icon="hub">hub</span>
+<span class="font-headline-md text-headline-md text-secondary-fixed">Fund_Verified_Event</span>
+</div>
+</div>
+</div>
+<!-- STEP 6: N8N NOTIFICATION -->
+<div class="relative z-10 flex flex-col items-center mb-16">
+<div class="bg-surface-container-high border border-outline px-4 py-1 rounded-full mb-4">
+<span class="font-label-caps text-label-caps text-tertiary-fixed uppercase">External Integrations</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant w-full max-w-md p-6 flex gap-6">
+<div class="flex-none w-16 h-16 bg-surface-container-highest flex items-center justify-center rounded-lg border border-tertiary-fixed">
+<span class="material-symbols-outlined text-tertiary-fixed text-3xl" data-icon="account_tree">account_tree</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">n8n: Notification_Workflow</h4>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container px-2 py-1 flex items-center gap-2 border border-outline-variant">
+<span class="material-symbols-outlined text-[12px]" data-icon="mail">mail</span>
+<span class="font-code-xs text-code-xs opacity-70">Email_Worker</span>
+</div>
+<div class="bg-surface-container px-2 py-1 flex items-center gap-2 border border-outline-variant">
+<span class="material-symbols-outlined text-[12px]" data-icon="chat">chat</span>
+<span class="font-code-xs text-code-xs opacity-70">Slack_Bot</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- STEP 7: FINAL UI -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="bg-surface-container-high border border-outline px-4 py-1 rounded-full mb-4">
+<span class="font-label-caps text-label-caps text-primary-fixed uppercase">State Resolution</span>
+</div>
+<div class="bg-surface-container-lowest border-2 border-primary-fixed w-full max-w-lg p-8 shadow-[0_0_40px_rgba(114,255,112,0.1)]">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary-container/20 rounded-full flex items-center justify-center border border-primary-container">
+<span class="material-symbols-outlined text-primary-fixed text-3xl" data-icon="verified_user">verified_user</span>
+</div>
+<div>
+<h3 class="font-headline-lg text-headline-lg text-primary-fixed">SUCCESS</h3>
+<p class="font-code-sm text-code-sm text-on-surface-variant">LIFECYCLE_FINAL_STATE</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps block text-on-surface-variant">STATUS</span>
+<span class="font-headline-md text-headline-md text-on-surface">Funds Held in Escrow</span>
+</div>
+</div>
+<div class="bg-surface-container-highest/30 p-4 border border-outline-variant rounded">
+<div class="flex justify-between items-center text-on-surface-variant font-code-sm text-code-sm mb-2">
+<span>Completion Time:</span>
+<span>142ms</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant font-code-sm text-code-sm">
+<span>Gas Consumption:</span>
+<span>0.00042 ETH</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Float Info Panel (Right) -->
+<div class="fixed top-24 right-8 w-64 space-y-4 hidden xl:block">
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-primary-fixed block mb-2">METRICS_STREAM</span>
+<div class="space-y-2">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="opacity-60">Throughput:</span>
+<span class="text-primary-fixed">2.4k TPS</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="opacity-60">Avg_Latency:</span>
+<span class="text-primary-fixed">45ms</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="opacity-60">Error_Rate:</span>
+<span class="text-primary-fixed">0.002%</span>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant">
+<div class="w-full h-24 rounded" data-alt="A sleek minimalist technological dashboard showing real-time abstract data graphs and pulsing connection points in a professional dark-mode terminal style. The visual uses a strict palette of deep navy backgrounds and neon green accents with high information density." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBmeRZK9HmvPt93XTlKnzykSo9ZojhLE9BQFgAyQ6qAVErvena1xxfYH-T0OV-aRKqN_EEECnWeBObs7ZxHgn9AQ13EKY8Yk2RUa_ZhCGHYprDTabA4uFq3sWa7RTEkhMnpZhvoq85IbTJ2HJ5eZoR1va-cqAxKnopOSZ3pW9a6edem4QcX3nluLSEex1GnY8oQNN3yAnsTr9y4Frr5R3NhPucuK1mazALPxFC2s8JnRK0otfbaCNYda50m2dTeP2waALTGmz0QF7M')"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-tertiary-fixed block mb-2">SYSTEM_LOG_FEED</span>
+<div class="space-y-1 overflow-hidden">
+<div class="font-code-xs text-code-xs text-on-surface-variant truncate opacity-50">[12:04:11] Received Escrow_Fund</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant truncate opacity-50">[12:04:11] Validating Auth_Token</div>
+<div class="font-code-xs text-code-xs text-primary-fixed truncate">[12:04:11] Ledger Write Success</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant truncate opacity-50">[12:04:12] Event Propagated to Bus</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="ml-64 bg-surface-container-lowest p-6 border-t border-outline-variant mt-12">
+<div class="max-w-6xl mx-auto flex items-center justify-between opacity-50">
+<span class="font-code-xs text-code-xs">© 2024 ESCROW_GEN_INTERNAL_SYSTEMS</span>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs hover:text-primary-fixed cursor-pointer transition-colors">PRIVACY_POLICY</span>
+<span class="font-code-xs text-code-xs hover:text-primary-fixed cursor-pointer transition-colors">SECURITY_AUDIT</span>
+<span class="font-code-xs text-code-xs hover:text-primary-fixed cursor-pointer transition-colors">STABLE_BUILD_4.2.1</span>
+</div>
+</div>
+</footer>
+<script>
+        // Simple micro-interaction for hover effects on flow nodes
+        document.querySelectorAll('.group').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.boxShadow = '0 0 20px rgba(114, 255, 112, 0.2)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body></html>

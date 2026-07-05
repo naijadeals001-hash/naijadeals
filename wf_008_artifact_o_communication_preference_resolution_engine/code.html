@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UCE_CORE_ENGINE_V2.4 | Communication Preference Resolution</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .connector-line {
+            position: absolute;
+            z-index: 0;
+            border-color: #3b4b37;
+        }
+        .node-active-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.15);
+        }
+        @keyframes pulse-dot {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+        .animate-pulse-dot {
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "secondary-container": "#0043eb",
+                      "on-surface": "#d4e4fa",
+                      "on-primary-fixed-variant": "#00530e",
+                      "surface-dim": "#051424",
+                      "inverse-primary": "#006e16",
+                      "surface": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "surface-tint": "#00e639",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-tertiary": "#490080",
+                      "primary-container": "#00ff41",
+                      "surface-container-lowest": "#010f1f",
+                      "surface-bright": "#2c3a4c",
+                      "on-secondary-container": "#c6ceff",
+                      "surface-container-high": "#1c2b3c",
+                      "on-secondary": "#002388",
+                      "surface-container": "#122131",
+                      "inverse-on-surface": "#233143",
+                      "secondary-fixed": "#dde1ff",
+                      "on-primary": "#003907",
+                      "error": "#ffb4ab",
+                      "on-secondary-fixed": "#001356",
+                      "on-error-container": "#ffdad6",
+                      "on-error": "#690005",
+                      "secondary": "#b8c3ff",
+                      "primary-fixed": "#72ff70",
+                      "on-primary-container": "#007117",
+                      "error-container": "#93000a",
+                      "tertiary-container": "#ecd3ff",
+                      "primary": "#ebffe2",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "tertiary": "#fff6ff",
+                      "surface-variant": "#273647",
+                      "on-background": "#d4e4fa",
+                      "surface-container-low": "#0d1c2d",
+                      "on-primary-fixed": "#002203",
+                      "inverse-surface": "#d4e4fa",
+                      "primary-fixed-dim": "#00e639",
+                      "surface-container-highest": "#273647",
+                      "outline": "#84967e",
+                      "on-tertiary-fixed": "#2c0051",
+                      "on-tertiary-container": "#862ed4",
+                      "tertiary-fixed": "#f0dbff",
+                      "background": "#051424",
+                      "on-surface-variant": "#b9ccb2",
+                      "outline-variant": "#3b4b37"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "body-md": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen text-on-surface font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant z-50 flex justify-between items-center px-node-gutter h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<h1 class="font-label-caps text-headline-md tracking-tighter text-primary-fixed-dim dark:text-primary-fixed-dim uppercase">UCE_CORE_ENGINE_V2.4</h1>
+</div>
+<div class="hidden md:flex gap-8 items-center h-full">
+<a class="h-full flex items-center px-4 text-primary dark:text-primary border-b-2 border-primary font-label-caps text-label-caps hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors cursor-pointer active:opacity-80" href="#">System_Architecture</a>
+<a class="h-full flex items-center px-4 text-on-surface-variant dark:text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors cursor-pointer active:opacity-80" href="#">Flow_Matrix</a>
+<a class="h-full flex items-center px-4 text-on-surface-variant dark:text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors cursor-pointer active:opacity-80" href="#">AI_Logic_Engine</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer active:opacity-80" data-icon="terminal">terminal</span>
+</div>
+</header>
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col h-full py-lane-margin bg-surface-container dark:bg-surface-container w-64 left-0 border-r border-outline-variant">
+<div class="px-6 mb-8">
+<h2 class="font-label-caps text-primary-fixed-dim dark:text-primary-fixed-dim text-label-caps uppercase tracking-widest opacity-60">SYSTEM_EXPLORER</h2>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="group flex items-center px-6 py-3 bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container border-l-4 border-primary-fixed-dim transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined mr-3" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps uppercase">System_Architecture</span>
+</div>
+<div class="group flex items-center px-6 py-3 text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined mr-3" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps uppercase">Flow_Matrix</span>
+</div>
+<div class="group flex items-center px-6 py-3 text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined mr-3" data-icon="psychology">psychology</span>
+<span class="font-label-caps text-label-caps uppercase">AI_Logic_Engine</span>
+</div>
+<div class="group flex items-center px-6 py-3 text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined mr-3" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-label-caps uppercase">Compliance_Logs</span>
+</div>
+</nav>
+<div class="mt-auto px-6 py-4 border-t border-outline-variant/30">
+<div class="flex items-center gap-2 text-primary-fixed-dim font-code-xs">
+<span class="animate-pulse-dot w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+<span>ENGINE_ONLINE :: v2.4.12</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-auto relative p-lane-margin">
+<!-- Flow Matrix Canvas -->
+<div class="relative min-w-[1200px] min-h-[800px]">
+<!-- Swimlanes -->
+<div class="absolute inset-0 flex flex-col pointer-events-none">
+<div class="h-1/3 border-b border-outline-variant/20 flex items-start px-4 py-2">
+<span class="font-label-caps text-label-caps uppercase text-outline opacity-40">LANE_01 :: EVENT_INGESTION</span>
+</div>
+<div class="h-1/3 border-b border-outline-variant/20 flex items-start px-4 py-2 bg-surface-container-lowest/10">
+<span class="font-label-caps text-label-caps uppercase text-outline opacity-40">LANE_02 :: PREFERENCE_EVALUATION</span>
+</div>
+<div class="h-1/3 flex items-start px-4 py-2">
+<span class="font-label-caps text-label-caps uppercase text-outline opacity-40">LANE_03 :: DELIVERY_RESOLUTION</span>
+</div>
+</div>
+<!-- Workflow Nodes Grid -->
+<div class="relative z-10 grid grid-cols-6 gap-x-20 gap-y-16 items-center">
+<!-- Column 1: Ingestion -->
+<div class="col-start-1 space-y-16">
+<div class="bg-surface-container border border-outline-variant p-3 w-56 rounded-sm node-active-glow">
+<div class="flex items-center gap-2 mb-2 border-b border-outline-variant pb-1">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim" data-icon="bolt">bolt</span>
+<span class="font-label-caps text-[9px] uppercase tracking-tighter text-outline">Trigger</span>
+</div>
+<h3 class="font-code-sm text-on-surface">Business Event</h3>
+<div class="mt-2 flex justify-between font-code-xs text-outline">
+<span>TYPE: WEBHOOK</span>
+<span class="text-primary-fixed-dim">OK</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-3 w-56 rounded-sm">
+<div class="flex items-center gap-2 mb-2 border-b border-outline-variant pb-1">
+<span class="material-symbols-outlined text-[14px] text-secondary" data-icon="forward_to_inbox">forward_to_inbox</span>
+<span class="font-label-caps text-[9px] uppercase tracking-tighter text-outline">Module</span>
+</div>
+<h3 class="font-code-sm text-on-surface">Notification Engine</h3>
+<div class="mt-2 flex justify-between font-code-xs text-outline">
+<span>QUEUE: HIGH</span>
+<span>12ms</span>
+</div>
+</div>
+</div>
+<!-- Column 2: Data Loading -->
+<div class="col-start-2">
+<div class="bg-surface-container border border-outline-variant p-3 w-64 rounded-sm border-l-4 border-l-secondary-fixed-dim">
+<div class="flex items-center gap-2 mb-2 border-b border-outline-variant pb-1">
+<span class="material-symbols-outlined text-[14px] text-secondary-fixed-dim" data-icon="database">database</span>
+<span class="font-label-caps text-[9px] uppercase tracking-tighter text-outline">Data_Fetch</span>
+</div>
+<h3 class="font-code-sm text-on-surface">Load User Comms Preferences</h3>
+<div class="mt-2 space-y-1">
+<div class="h-1 bg-surface-variant w-full overflow-hidden">
+<div class="h-full bg-secondary-fixed-dim w-3/4"></div>
+</div>
+<div class="flex justify-between font-code-xs text-outline">
+<span>CACHE_HIT</span>
+<span class="text-secondary-fixed-dim">98.2%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 3: Evaluation Decision Matrix (The Diamond) -->
+<div class="col-start-3 relative flex justify-center py-20">
+<div class="relative w-48 h-48 rotate-45 border-2 border-primary-fixed-dim bg-surface-container flex items-center justify-center">
+<div class="-rotate-45 text-center p-4">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim uppercase block mb-1">Logic_Gate</span>
+<h3 class="font-headline-md text-primary tracking-tighter">EVALUATE</h3>
+<span class="material-symbols-outlined text-primary-fixed-dim mt-2" data-icon="psychology">psychology</span>
+</div>
+</div>
+<!-- Mini Checklist Floating around Decision -->
+<div class="absolute -top-10 -right-20 space-y-2">
+<div class="flex items-center gap-2 bg-surface-container-high px-2 py-1 border border-outline-variant rounded-full">
+<span class="material-symbols-outlined text-[12px] text-primary-fixed-dim" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-code-xs text-on-surface">Email_Enabled?</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high px-2 py-1 border border-outline-variant rounded-full">
+<span class="material-symbols-outlined text-[12px] text-primary-fixed-dim" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-code-xs text-on-surface">SMS_Enabled?</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high px-2 py-1 border border-outline-variant rounded-full">
+<span class="material-symbols-outlined text-[12px] text-error" data-icon="cancel">cancel</span>
+<span class="font-code-xs text-on-surface">Marketing_Consent?</span>
+</div>
+</div>
+</div>
+<!-- Column 4: Priority & Resolution -->
+<div class="col-start-4 space-y-12">
+<div class="bg-surface-container border border-outline-variant p-3 w-56 rounded-sm">
+<div class="flex items-center gap-2 mb-2 border-b border-outline-variant pb-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim" data-icon="low_priority">low_priority</span>
+<span class="font-label-caps text-[9px] uppercase tracking-tighter text-outline">Policy</span>
+</div>
+<h3 class="font-code-sm text-on-surface">Priority Resolution</h3>
+<div class="mt-2 flex justify-between font-code-xs text-on-surface-variant italic">
+<span>CRITICAL &gt; INAPP</span>
+</div>
+</div>
+<div class="bg-surface-container border border-primary-fixed-dim p-4 w-56 rounded-sm relative overflow-hidden shadow-lg shadow-primary/5">
+<div class="absolute top-0 right-0 p-1">
+<span class="material-symbols-outlined text-[12px] text-primary-fixed-dim animate-pulse" data-icon="star">star</span>
+</div>
+<div class="flex items-center gap-2 mb-2 border-b border-outline-variant pb-1">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim" data-icon="route">route</span>
+<span class="font-label-caps text-[9px] uppercase tracking-tighter text-primary-fixed-dim">Execution</span>
+</div>
+<h3 class="font-code-sm text-on-surface">Select Best Delivery Channel</h3>
+</div>
+</div>
+<!-- Column 5: Delivery & Success Check -->
+<div class="col-start-5 space-y-24">
+<div class="bg-surface-container border border-outline-variant p-3 w-64 rounded-sm border-l-4 border-l-primary-fixed-dim">
+<div class="flex items-center gap-2 mb-2 border-b border-outline-variant pb-1">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim" data-icon="send">send</span>
+<span class="font-label-caps text-[9px] uppercase tracking-tighter text-outline">Action</span>
+</div>
+<h3 class="font-code-sm text-on-surface">Primary Delivery: [PUSH]</h3>
+<div class="mt-2 flex items-center justify-between font-code-xs">
+<span class="text-on-surface-variant">Lat: 0.45ms</span>
+<span class="px-1 bg-primary-container/20 text-primary-fixed-dim rounded">ATTEMPTING</span>
+</div>
+</div>
+<!-- Success Branch Diamond -->
+<div class="relative w-32 h-32 rotate-45 border-2 border-outline-variant bg-surface-container flex items-center justify-center mx-auto">
+<div class="-rotate-45 text-center">
+<h4 class="font-label-caps text-[10px] uppercase text-outline">Success?</h4>
+</div>
+<!-- Branch Labels -->
+<span class="absolute -bottom-8 -left-8 -rotate-45 font-code-xs text-primary-fixed-dim">YES</span>
+<span class="absolute -top-8 -right-8 -rotate-45 font-code-xs text-error">NO</span>
+</div>
+</div>
+<!-- Column 6: Terminal States -->
+<div class="col-start-6 space-y-32">
+<!-- Success Path -->
+<div class="space-y-4">
+<div class="bg-surface-container-high border border-outline-variant p-3 w-56 rounded-sm">
+<div class="flex items-center gap-2 mb-2 border-b border-outline-variant pb-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="assignment_turned_in">assignment_turned_in</span>
+<span class="font-label-caps text-[9px] uppercase tracking-tighter text-outline">Audit</span>
+</div>
+<h3 class="font-code-sm text-on-surface">Delivery Receipt</h3>
+</div>
+<div class="flex items-center justify-center p-2 border border-primary-fixed-dim bg-primary-container/10 rounded-full w-fit mx-auto px-6">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim uppercase">COMPLETED</span>
+</div>
+</div>
+<!-- Failure/Retry Path -->
+<div class="space-y-4">
+<div class="bg-surface-container border border-error p-3 w-56 rounded-sm opacity-60">
+<div class="flex items-center gap-2 mb-2 border-b border-outline-variant pb-1">
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="replay">replay</span>
+<span class="font-label-caps text-[9px] uppercase tracking-tighter text-outline">Recovery</span>
+</div>
+<h3 class="font-code-sm text-on-surface">Retry Policy</h3>
+</div>
+<div class="bg-surface-container border border-outline-variant p-3 w-56 rounded-sm opacity-60">
+<h3 class="font-code-sm text-on-surface text-center">Escalation -&gt; Support</h3>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG Layer for Polylines/Connectors -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 5;">
+<!-- Line from Trigger to Engine -->
+<path d="M 248 100 L 248 200" fill="none" stroke="#3b4b37" stroke-dasharray="4" stroke-width="2"></path>
+<!-- Line from Engine to Load -->
+<path d="M 248 245 L 340 245 L 340 380 L 380 380" fill="none" stroke="#3b4b37" stroke-width="2"></path>
+<!-- Line from Load to Evaluate -->
+<path d="M 640 380 L 720 380" fill="none" stroke="#3b4b37" stroke-width="2"></path>
+<!-- Evaluated Paths (multiple to priority) -->
+<path d="M 865 380 L 910 380 L 910 300 L 980 300" fill="none" stroke="#00e639" stroke-width="2"></path>
+<path d="M 1210 380 L 1260 380" fill="none" stroke="#00e639" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Contextual FAB (Suppressed on focused detail logic screens, but here used for 'Manual Trigger') -->
+<!-- Not rendered per rules: "Suppress the FAB on Settings, Profile, Details, and Transactional screens." -->
+</main>
+<!-- Right Side: Micro-Telemetry Panel -->
+<aside class="hidden xl:flex flex-col w-80 bg-surface-container-low border-l border-outline-variant p-6 gap-6">
+<div>
+<h4 class="font-label-caps text-label-caps text-outline uppercase mb-4 tracking-widest">LIVE_TELEMETRY</h4>
+<div class="space-y-3">
+<div class="bg-surface p-3 border border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-code-xs text-outline">ENGINE_THROUGHPUT</span>
+<span class="font-code-xs text-primary-fixed-dim">ACTIVE</span>
+</div>
+<div class="h-12 w-full flex items-end gap-1">
+<div class="w-2 bg-primary-fixed-dim h-4"></div>
+<div class="w-2 bg-primary-fixed-dim h-8"></div>
+<div class="w-2 bg-primary-fixed-dim h-6"></div>
+<div class="w-2 bg-primary-fixed-dim h-10"></div>
+<div class="w-2 bg-primary-fixed-dim h-5"></div>
+<div class="w-2 bg-primary-fixed-dim h-7"></div>
+<div class="w-2 bg-primary-fixed-dim h-9"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface p-2 border border-outline-variant">
+<span class="block font-code-xs text-outline mb-1">LATENCY</span>
+<span class="block font-headline-md text-primary-fixed-dim">45ms</span>
+</div>
+<div class="bg-surface p-2 border border-outline-variant">
+<span class="block font-code-xs text-outline mb-1">ERR_RATE</span>
+<span class="block font-headline-md text-error">0.04%</span>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h4 class="font-label-caps text-label-caps text-outline uppercase mb-4 tracking-widest">AUDIT_LOG_STUBS</h4>
+<div class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+<div class="font-code-xs p-2 border-l-2 border-primary-fixed-dim bg-surface-container-high">
+<span class="text-outline">14:22:01.04</span><br/>
+<span class="text-on-surface">LOGIC_GATE: Preference check passed for UID_882.</span>
+</div>
+<div class="font-code-xs p-2 border-l-2 border-secondary-fixed-dim bg-surface-container-high">
+<span class="text-outline">14:21:58.82</span><br/>
+<span class="text-on-surface">DB_FETCH: Preference vector [1,0,1,1] loaded.</span>
+</div>
+<div class="font-code-xs p-2 border-l-2 border-outline bg-surface-container-high">
+<span class="text-outline">14:21:58.45</span><br/>
+<span class="text-on-surface">INGEST: Event [ORDER_CONFIRM] detected.</span>
+</div>
+<div class="font-code-xs p-2 border-l-2 border-error bg-surface-container-high opacity-80">
+<span class="text-outline">14:21:55.12</span><br/>
+<span class="text-error">FAILURE: SMS Gateway timeout. Retrying alternative.</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-grid-unit bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline-variant">
+<div class="flex flex-col items-center justify-center bg-primary-container/10 text-primary-fixed-dim dark:text-primary-fixed-dim py-1 scale-95 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+<span class="font-code-xs text-code-xs">Live_Telemetry</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 scale-95 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="dns">dns</span>
+<span class="font-code-xs text-code-xs">Node_Status</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 scale-95 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="sync_alt">sync_alt</span>
+<span class="font-code-xs text-code-xs">Sync_Engine</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 scale-95 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="health_metrics">health_metrics</span>
+<span class="font-code-xs text-code-xs">System_Health</span>
+</div>
+</nav>
+<script>
+        // Micro-interaction: Update latency numbers randomly
+        setInterval(() => {
+            const latencyElements = document.querySelectorAll('.font-headline-md.text-primary-fixed-dim');
+            latencyElements.forEach(el => {
+                if (el.innerText.includes('ms')) {
+                    const newVal = Math.floor(Math.random() * (50 - 40) + 40);
+                    el.innerText = newVal + 'ms';
+                }
+            });
+        }, 3000);
+
+        // Simple log simulator
+        const logContainer = document.querySelector('.custom-scrollbar');
+        setInterval(() => {
+            const logs = [
+                "EVAL: High priority override detected.",
+                "RESOLVE: WhatsApp fallback enabled.",
+                "AUDIT: Log committed to segment 4A.",
+                "INGEST: Signal strength 0.98."
+            ];
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const newLog = document.createElement('div');
+            newLog.className = "font-code-xs p-2 border-l-2 border-outline-variant bg-surface-container-high animate-pulse";
+            newLog.innerHTML = `<span class="text-outline">${time}</span><br/><span class="text-on-surface">${logs[Math.floor(Math.random()*logs.length)]}</span>`;
+            logContainer.prepend(newLog);
+            if (logContainer.children.length > 8) logContainer.lastElementChild.remove();
+        }, 5000);
+    </script>
+</body></html>

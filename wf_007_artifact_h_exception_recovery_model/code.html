@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-007 Exception &amp; Recovery Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary-container": "#00ff41",
+                "inverse-primary": "#006e16",
+                "surface-dim": "#051424",
+                "on-tertiary-fixed-variant": "#6900b3",
+                "on-primary-fixed-variant": "#00530e",
+                "on-tertiary": "#490080",
+                "outline-variant": "#3b4b37",
+                "on-error-container": "#ffdad6",
+                "secondary": "#b8c3ff",
+                "tertiary-container": "#ecd3ff",
+                "secondary-fixed-dim": "#b8c3ff",
+                "surface-container-high": "#1c2b3c",
+                "surface-container-highest": "#273647",
+                "background": "#051424",
+                "tertiary-fixed": "#f0dbff",
+                "surface": "#051424",
+                "on-primary-container": "#007117",
+                "secondary-fixed": "#dde1ff",
+                "on-surface-variant": "#b9ccb2",
+                "tertiary": "#fff6ff",
+                "surface-container-lowest": "#010f1f",
+                "on-surface": "#d4e4fa",
+                "on-secondary-container": "#c6ceff",
+                "on-primary": "#003907",
+                "on-tertiary-container": "#862ed4",
+                "on-secondary-fixed": "#001356",
+                "inverse-on-surface": "#233143",
+                "on-primary-fixed": "#002203",
+                "inverse-surface": "#d4e4fa",
+                "surface-tint": "#00e639",
+                "surface-container": "#122131",
+                "primary-fixed-dim": "#00e639",
+                "on-secondary": "#002388",
+                "surface-bright": "#2c3a4c",
+                "outline": "#84967e",
+                "tertiary-fixed-dim": "#ddb7ff",
+                "secondary-container": "#0043eb",
+                "primary": "#ebffe2",
+                "on-secondary-fixed-variant": "#0035be",
+                "surface-container-low": "#0d1c2d",
+                "on-error": "#690005",
+                "primary-fixed": "#72ff70",
+                "on-background": "#d4e4fa",
+                "surface-variant": "#273647",
+                "on-tertiary-fixed": "#2c0051",
+                "error-container": "#93000a",
+                "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "node-gutter": "24px",
+                "lane-margin": "32px",
+                "stack-gap": "4px",
+                "grid-unit": "8px"
+            },
+            "fontFamily": {
+                "headline-lg": ["Plus Jakarta Sans"],
+                "label-caps": ["JetBrains Mono"],
+                "headline-md": ["Plus Jakarta Sans"],
+                "body-md": ["Plus Jakarta Sans"],
+                "code-sm": ["JetBrains Mono"],
+                "code-xs": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-port {
+            width: 8px;
+            height: 8px;
+            background: #00ff41;
+            position: absolute;
+            border-radius: 50%;
+        }
+        .connector-line {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(15, 15, 15, 0.8);
+        }
+        @keyframes pulse-error {
+            0%, 100% { border-color: #93000a; box-shadow: 0 0 0px #93000a; }
+            50% { border-color: #ffb4ab; box-shadow: 0 0 8px #93000a; }
+        }
+        .animate-error {
+            animation: pulse-error 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full h-12 flex justify-between items-center px-8 border-b border-outline-variant bg-surface-container-lowest z-[100]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<span class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<a class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed px-1" href="#">Logic_Matrices</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-primary-fixed transition-colors px-1" href="#">Telemetry_Streams</a>
+</nav>
+<span class="font-label-caps text-label-caps text-primary">STATUS: OK</span>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 border-r border-outline-variant bg-surface-container z-[90] flex flex-col">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed opacity-70">MODULE_INDEX</span>
+</div>
+<nav class="flex-1 overflow-y-auto py-2">
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps">System_Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps">Workflow_Engine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span class="font-code-sm text-code-sm font-label-caps">Logic_Matrices</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">insights</span>
+<span class="font-code-sm text-code-sm font-label-caps">Telemetry_Streams</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+<span class="font-code-sm text-code-sm font-label-caps">Node_Registry</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 mb-8 p-8 min-h-screen relative overflow-hidden">
+<!-- Background Decorative Element -->
+<div class="absolute top-0 right-0 w-full h-full pointer-events-none opacity-20">
+
+</div>
+<!-- Page Header -->
+<div class="relative z-10 mb-12 flex justify-between items-end border-b border-outline-variant pb-6">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-error-container text-on-error-container px-2 py-0.5 font-label-caps text-[10px] rounded">EXCEPTION MODEL</span>
+<span class="text-outline font-code-xs text-code-xs">REF: WF-007-REV-REC</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Unhappy Path: Exception &amp; Recovery Mapping</h1>
+</div>
+<div class="text-right">
+<p class="font-code-xs text-code-xs text-outline mb-1 uppercase">Process Criticality</p>
+<div class="flex gap-1">
+<div class="w-8 h-1 bg-primary-container"></div>
+<div class="w-8 h-1 bg-primary-container"></div>
+<div class="w-8 h-1 bg-primary-container"></div>
+<div class="w-8 h-1 bg-secondary-container"></div>
+<div class="w-8 h-1 bg-outline-variant"></div>
+</div>
+</div>
+</div>
+<!-- Workflow Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-node-gutter relative z-10">
+<!-- Lane 1: Triggering Events -->
+<div class="space-y-6">
+<h3 class="font-label-caps text-label-caps text-outline-variant border-l-2 border-outline-variant pl-3 mb-8">01_TRIGGER_FAILURES</h3>
+<!-- Node: False Review -->
+<div class="bg-surface-container border border-error-container p-4 relative group animate-error">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-[9px] text-error">E_CODE: 403.11</span>
+<span class="material-symbols-outlined text-error text-[16px]">report</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">False Review Detected</h4>
+<p class="font-code-xs text-code-xs text-outline leading-tight">AI flagging indicates synthetic sentiment pattern detected in submission node.</p>
+<div class="mt-4 flex gap-2">
+<div class="bg-surface-container-high px-2 py-1 font-code-xs text-code-xs border border-outline-variant">P_VAL: 0.94</div>
+</div>
+</div>
+<!-- Node: Fraud Event -->
+<div class="bg-surface-container border border-error-container p-4 relative group">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-[9px] text-error">E_CODE: 500.FR</span>
+<span class="material-symbols-outlined text-error text-[16px]">security</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Fraudulent Activity Signal</h4>
+<p class="font-code-xs text-code-xs text-outline leading-tight">Velocity check triggered. Multiple concurrent session IDs from unauthorized IP range.</p>
+</div>
+<!-- Node: Compliance Failure -->
+<div class="bg-surface-container border border-error-container p-4 relative group">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-[9px] text-error">E_CODE: 902.REG</span>
+<span class="material-symbols-outlined text-error text-[16px]">gavel</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Compliance Violation</h4>
+<p class="font-code-xs text-code-xs text-outline leading-tight">Regulatory breach detected in data residency validation check.</p>
+</div>
+<!-- Node: Account Suspension -->
+<div class="bg-surface-container border border-error-container p-4 relative group">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-[9px] text-error">E_CODE: 101.LOCK</span>
+<span class="material-symbols-outlined text-error text-[16px]">lock_reset</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Automated Suspension</h4>
+<p class="font-code-xs text-code-xs text-outline leading-tight">System-wide account lock initiated due to repeated policy violations.</p>
+</div>
+</div>
+<!-- Lane 2: Intermediate Action -->
+<div class="space-y-6">
+<h3 class="font-label-caps text-label-caps text-outline-variant border-l-2 border-outline-variant pl-3 mb-8">02_MITIGATION_VAL</h3>
+<!-- Action: User Appeal -->
+<div class="bg-surface-container border border-primary p-4 relative group h-24 flex flex-col justify-center">
+<h4 class="font-code-sm text-code-sm text-primary mb-1">User Appeal Initiation</h4>
+<p class="font-code-xs text-code-xs text-outline">External entity rebuttal queue.</p>
+</div>
+<!-- Action: Investigation -->
+<div class="bg-surface-container border border-primary p-4 relative group h-24 flex flex-col justify-center">
+<h4 class="font-code-sm text-code-sm text-primary mb-1">Deep Forensic Investigation</h4>
+<p class="font-code-xs text-code-xs text-outline">Trace analysis on data packet origin.</p>
+</div>
+<!-- Action: Manual Review -->
+<div class="bg-surface-container border border-primary p-4 relative group h-24 flex flex-col justify-center">
+<h4 class="font-code-sm text-code-sm text-primary mb-1">Human-in-the-loop (HITL)</h4>
+<p class="font-code-xs text-code-xs text-outline">Compliance Officer manual verification.</p>
+</div>
+<!-- Action: Evidence Submission -->
+<div class="bg-surface-container border border-primary p-4 relative group h-24 flex flex-col justify-center">
+<h4 class="font-code-sm text-code-sm text-primary mb-1">ID Verification Path</h4>
+<p class="font-code-xs text-code-xs text-outline">Biometric/Document sync required.</p>
+</div>
+</div>
+<!-- Lane 3: Recovery Path -->
+<div class="space-y-6">
+<h3 class="font-label-caps text-label-caps text-outline-variant border-l-2 border-outline-variant pl-3 mb-8">03_RECOVERY_EXEC</h3>
+<!-- Path: Score Restoration -->
+<div class="bg-surface-container border border-secondary-fixed p-4 relative group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-secondary">REC_OPS</span>
+<span class="material-symbols-outlined text-secondary text-[16px]">history_edu</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Restore Trust Score</h4>
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 bg-secondary"></div>
+<span class="font-code-xs text-code-xs text-outline">Rollback penalization</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 bg-secondary"></div>
+<span class="font-code-xs text-code-xs text-outline">Re-index reviews</span>
+</div>
+</div>
+</div>
+<!-- Path: Correction -->
+<div class="bg-surface-container border border-secondary-fixed p-4 relative group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-secondary">REC_OPS</span>
+<span class="material-symbols-outlined text-secondary text-[16px]">edit_note</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Systemic Correction</h4>
+<p class="font-code-xs text-code-xs text-outline">Metadata override and regional policy patching.</p>
+</div>
+<!-- Path: Reinstatement -->
+<div class="bg-surface-container border border-secondary-fixed p-4 relative group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-secondary">REC_OPS</span>
+<span class="material-symbols-outlined text-secondary text-[16px]">key</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Full Reinstatement</h4>
+<p class="font-code-xs text-code-xs text-outline">Unlocking all endpoint access and API keys.</p>
+</div>
+</div>
+<!-- Lane 4: Compensation & Closure -->
+<div class="space-y-6">
+<h3 class="font-label-caps text-label-caps text-outline-variant border-l-2 border-outline-variant pl-3 mb-8">04_COMPENSATION_LOGIC</h3>
+<div class="bg-surface-container-high border-2 border-primary-container p-6 relative">
+<div class="absolute -top-3 left-4 bg-primary-container text-on-primary px-2 py-0.5 font-label-caps text-[9px] font-bold">COMPENSATION_NODE</div>
+<div class="space-y-4">
+<div>
+<span class="font-label-caps text-[10px] text-outline">LOGIC_TYPE: AUTOMATED_CREDIT</span>
+<div class="mt-2 p-3 bg-surface-container-lowest border border-outline-variant font-code-sm text-primary">
+                                IF (RecoveryTime &gt; 24h) { <br/>
+                                  InjectCredits(50.00); <br/>
+                                  SendApologyEmail(); <br/>
+                                }
+                            </div>
+</div>
+<div class="pt-4 border-t border-outline-variant">
+<span class="font-label-caps text-[10px] text-outline">TELEMETRY_DATA</span>
+<div class="mt-2 grid grid-cols-2 gap-4">
+<div>
+<p class="font-code-xs text-code-xs text-outline">Total Recoveries</p>
+<p class="font-headline-md text-headline-md text-on-surface">1,242</p>
+</div>
+<div>
+<p class="font-code-xs text-code-xs text-outline">Avg. Downtime</p>
+<p class="font-headline-md text-headline-md text-on-surface">14m</p>
+</div>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary py-2 font-label-caps text-label-caps hover:bg-primary transition-all active:opacity-80">
+                            MANUAL_OVERRIDE_AUTH
+                        </button>
+</div>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-low">
+<h5 class="font-label-caps text-[10px] text-primary mb-3">AUDIT_LOG_STUB</h5>
+<ul class="space-y-2">
+<li class="flex items-start gap-2">
+<span class="text-secondary font-code-xs text-code-xs">09:14:22</span>
+<span class="text-outline font-code-xs text-code-xs">Recov_WF-007_ID_992 started</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="text-secondary font-code-xs text-code-xs">09:14:45</span>
+<span class="text-outline font-code-xs text-code-xs">Score_Delta matched target</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Flow Connectors Simulation (Static representation of logic) -->
+<div class="mt-12 p-8 glass-panel border border-outline-variant">
+<h3 class="font-label-caps text-label-caps text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">account_tree</span>
+                EXCEPTION_RECOVERY_PROTOCOL_OVERVIEW
+            </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Recovery Path 1 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-error"></div>
+<div class="w-0.5 h-16 bg-outline-variant"></div>
+<div class="w-4 h-4 rounded-full bg-primary"></div>
+</div>
+<div>
+<h6 class="font-label-caps text-[11px] text-on-surface mb-1">FALSE_REVIEW -&gt; APPEAL -&gt; RESTORE_SCORE</h6>
+<p class="font-code-xs text-code-xs text-outline">Logic: Verifies IP consistency and linguistic style markers against verified historical submissions.</p>
+</div>
+</div>
+<!-- Recovery Path 2 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-error"></div>
+<div class="w-0.5 h-16 bg-outline-variant"></div>
+<div class="w-4 h-4 rounded-full bg-primary"></div>
+</div>
+<div>
+<h6 class="font-label-caps text-[11px] text-on-surface mb-1">FRAUD_EVENT -&gt; INVESTIGATION -&gt; RESTORE_SCORE</h6>
+<p class="font-code-xs text-code-xs text-outline">Logic: Automated packet forensic trace. Matches device fingerprint with known authorized profile.</p>
+</div>
+</div>
+<!-- Recovery Path 3 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-error"></div>
+<div class="w-0.5 h-16 bg-outline-variant"></div>
+<div class="w-4 h-4 rounded-full bg-primary"></div>
+</div>
+<div>
+<h6 class="font-label-caps text-[11px] text-on-surface mb-1">COMPLIANCE_FAIL -&gt; MANUAL -&gt; CORRECTION</h6>
+<p class="font-code-xs text-code-xs text-outline">Logic: Regional override for specific regulatory edge-cases (e.g., GDPR Article 17 exemptions).</p>
+</div>
+</div>
+<!-- Recovery Path 4 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-error"></div>
+<div class="w-0.5 h-16 bg-outline-variant"></div>
+<div class="w-4 h-4 rounded-full bg-primary"></div>
+</div>
+<div>
+<h6 class="font-label-caps text-[11px] text-on-surface mb-1">ACC_SUSPENSION -&gt; APPEAL -&gt; REINSTATEMENT</h6>
+<p class="font-code-xs text-code-xs text-outline">Logic: High-priority manual queue. 2-factor verification bypass with biometric fallback.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Status Bar -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-8 bg-surface-container-lowest border-t border-outline-variant z-50">
+<div class="flex items-center gap-6">
+<span class="font-code-xs text-code-xs text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+<span class="font-code-xs text-code-xs text-primary-fixed animate-pulse">● LIVE_STREAM_ACTIVE</span>
+</div>
+<div class="flex gap-4">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">LOGS</a>
+</div>
+</footer>
+<!-- Node Editor Overlay (Hidden by Default) -->
+<div class="fixed right-0 top-12 h-[calc(100vh-80px)] w-96 bg-surface-container border-l border-outline-variant translate-x-full transition-transform duration-300 z-50 flex flex-col p-6 shadow-2xl glass-panel" id="node-overlay">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline-md text-headline-md">Node Configuration</h2>
+<button class="material-symbols-outlined text-outline hover:text-primary" onclick="toggleOverlay()">close</button>
+</div>
+<div class="space-y-6 flex-1 overflow-y-auto">
+<div>
+<label class="font-label-caps text-[10px] text-outline mb-2 block">NODE_IDENTIFIER</label>
+<input class="w-full bg-transparent border border-outline-variant p-2 font-code-sm text-primary focus:border-primary focus:ring-0" type="text" value="E_CODE: 403.11"/>
+</div>
+<div>
+<label class="font-label-caps text-[10px] text-outline mb-2 block">RECOVERY_PRIORITY</label>
+<select class="w-full bg-transparent border border-outline-variant p-2 font-code-sm text-primary focus:border-primary focus:ring-0">
+<option>P0 - CRITICAL</option>
+<option selected="">P1 - HIGH</option>
+<option>P2 - STANDARD</option>
+</select>
+</div>
+<div>
+<label class="font-label-caps text-[10px] text-outline mb-2 block">LOGIC_FLOW_DESCRIPTION</label>
+<textarea class="w-full bg-transparent border border-outline-variant p-2 font-code-sm text-outline focus:border-primary focus:ring-0" rows="4">Detection of synthetic patterns using transformer-based sentiment analysis model. Triggers automatic appeal window of 48 hours for user rebuttal.</textarea>
+</div>
+</div>
+<div class="pt-6 border-t border-outline-variant">
+<button class="w-full bg-primary-container text-on-primary py-3 font-label-caps font-bold">COMMIT_TO_STABLE</button>
+</div>
+</div>
+<script>
+        function toggleOverlay() {
+            const overlay = document.getElementById('node-overlay');
+            overlay.classList.toggle('translate-x-full');
+        }
+
+        // Add micro-interaction to nodes
+        document.querySelectorAll('.bg-surface-container.border').forEach(node => {
+            node.style.cursor = 'pointer';
+            node.addEventListener('click', () => {
+                toggleOverlay();
+            });
+        });
+
+        // Simple animation for the shader or dynamic elements
+        let lastTime = 0;
+        function updateMetrics(time) {
+            if (time - lastTime > 3000) {
+                const latency = Math.floor(Math.random() * 10) + 10;
+                document.querySelector('footer div span').innerText = `SYS_HEALTH: NOMINAL [LATENCY: ${latency}ms] [REGION: US-EAST-1]`;
+                lastTime = time;
+            }
+            requestAnimationFrame(updateMetrics);
+        }
+        requestAnimationFrame(updateMetrics);
+    </script>
+</body></html>

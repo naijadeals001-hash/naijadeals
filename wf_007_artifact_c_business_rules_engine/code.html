@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CORE_OS_v2.4.1-STABLE | Business Rules Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-border-green { border: 1px solid #00ff41; }
+        .node-border-red { border: 1px solid #ffb4ab; }
+        .node-border-blue { border: 1px solid #b8c3ff; }
+        .logic-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .orthogonal-connector {
+            position: absolute;
+            width: 2px;
+            background: #3b4b37;
+            z-index: -1;
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(18, 33, 49, 0.8);
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline-effect::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 255, 65, 0.05) 50%, transparent 100%);
+            animation: scanline 4s linear infinite;
+            pointer-events: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#00ff41",
+                      "inverse-primary": "#006e16",
+                      "surface-dim": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-tertiary": "#490080",
+                      "outline-variant": "#3b4b37",
+                      "on-error-container": "#ffdad6",
+                      "secondary": "#b8c3ff",
+                      "tertiary-container": "#ecd3ff",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "surface-container-high": "#1c2b3c",
+                      "surface-container-highest": "#273647",
+                      "background": "#051424",
+                      "tertiary-fixed": "#f0dbff",
+                      "surface": "#051424",
+                      "on-primary-container": "#007117",
+                      "secondary-fixed": "#dde1ff",
+                      "on-surface-variant": "#b9ccb2",
+                      "tertiary": "#fff6ff",
+                      "surface-container-lowest": "#010f1f",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary-container": "#c6ceff",
+                      "on-primary": "#003907",
+                      "on-tertiary-container": "#862ed4",
+                      "on-secondary-fixed": "#001356",
+                      "inverse-on-surface": "#233143",
+                      "on-primary-fixed": "#002203",
+                      "inverse-surface": "#d4e4fa",
+                      "surface-tint": "#00e639",
+                      "surface-container": "#122131",
+                      "primary-fixed-dim": "#00e639",
+                      "on-secondary": "#002388",
+                      "surface-bright": "#2c3a4c",
+                      "outline": "#84967e",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "secondary-container": "#0043eb",
+                      "primary": "#ebffe2",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "surface-container-low": "#0d1c2d",
+                      "on-error": "#690005",
+                      "primary-fixed": "#72ff70",
+                      "on-background": "#d4e4fa",
+                      "surface-variant": "#273647",
+                      "on-tertiary-fixed": "#2c0051",
+                      "error-container": "#93000a",
+                      "error": "#ffb4ab"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "stack-gap": "4px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-12">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 h-12 w-full bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed uppercase">CORE_OS_v2.4.1-STABLE</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<span class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed cursor-pointer transition-colors uppercase">Logic_Matrices</span>
+<span class="font-label-caps text-label-caps text-outline hover:text-primary-fixed cursor-pointer transition-colors uppercase">Workflow_Engine</span>
+</div>
+<div class="text-primary-fixed font-code-xs border border-primary-fixed px-2 py-0.5 rounded-sm">STATUS: OK</div>
+</div>
+</header>
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container border-r border-outline-variant flex flex-col z-40 hidden md:flex">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary-fixed uppercase">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1 py-2">
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps uppercase">System_Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps uppercase">Workflow_Engine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="grid_view">grid_view</span>
+<span class="font-label-caps text-label-caps uppercase">Logic_Matrices</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="insights">insights</span>
+<span class="font-label-caps text-label-caps uppercase">Telemetry_Streams</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps uppercase">Node_Registry</span>
+</a>
+</nav>
+<div class="p-4 bg-surface-container-low mt-auto">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-xs text-outline">CPU_LOAD</span>
+<span class="font-code-xs text-primary-fixed">24%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 overflow-hidden">
+<div class="bg-primary-container h-full w-[24%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:pl-64 pt-12 min-h-screen">
+<div class="p-8">
+<!-- Breadcrumbs & Header -->
+<div class="mb-8 flex justify-between items-end">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="font-code-xs text-outline uppercase">PROJ_ROOT</span>
+<span class="text-outline">/</span>
+<span class="font-code-xs text-primary-fixed uppercase">WF-007_LOGIC</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Business Rules Engine</h2>
+<p class="font-body-md text-on-surface-variant max-w-2xl mt-1">Operational constraints and score calibration for WF-007 Workflow. Modifications affect live scoring latency by ~14ms.</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-surface-container-highest text-primary-fixed px-4 py-2 border border-outline-variant font-label-caps text-label-caps flex items-center gap-2 hover:bg-primary-container hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                        NEW_RULE
+                    </button>
+<button class="bg-surface-container-low text-outline px-4 py-2 border border-outline-variant font-label-caps text-label-caps flex items-center gap-2 hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="export_notes">export_notes</span>
+                        DEPLOY_V2.4.2
+                    </button>
+</div>
+</div>
+<!-- Dashboard Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-label-caps text-label-caps text-outline mb-1 uppercase">Active_Rules</div>
+<div class="font-headline-lg text-headline-lg text-on-surface">10</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-label-caps text-label-caps text-outline mb-1 uppercase">Avg_Score_Impact</div>
+<div class="font-headline-lg text-headline-lg text-primary-fixed">+14.2</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-label-caps text-label-caps text-outline mb-1 uppercase">Compliance_Breach</div>
+<div class="font-headline-lg text-headline-lg text-error">0.03%</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-label-caps text-label-caps text-outline mb-1 uppercase">Engine_Latency</div>
+<div class="font-headline-lg text-headline-lg text-secondary">0.08ms</div>
+</div>
+</div>
+<!-- Rules Grid -->
+<div class="logic-grid-container relative">
+<!-- Rule 1: Verified Identity -->
+<div class="bg-surface-container-low border border-primary-container p-4 flex flex-col scanline-effect relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-primary-container text-on-primary px-1.5 py-0.5 rounded-sm">TRUST_TIER_A</span>
+<span class="material-symbols-outlined text-primary-fixed" data-icon="verified_user">verified_user</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 text-primary">Verified Identity</h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Impact</span>
+<span class="font-code-xs text-primary-fixed">+50.00 pts</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Service</span>
+<span class="font-code-xs text-on-surface">AUTH_CORE_V3</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Recovery</span>
+<span class="font-code-xs text-on-surface">Manual Review</span>
+</div>
+<div class="pt-2 border-t border-outline-variant">
+<div class="flex justify-between font-code-xs text-[9px]">
+<span class="text-outline">MIN: +10</span>
+<span class="text-outline">MAX: +100</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 mt-1">
+<div class="bg-primary-container h-full w-[50%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rule 2: Fraud Detected -->
+<div class="bg-surface-container-low border border-error p-4 flex flex-col relative overflow-hidden">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-error text-on-error px-1.5 py-0.5 rounded-sm uppercase">Critical_Block</span>
+<span class="material-symbols-outlined text-error" data-icon="gpp_bad" style="font-variation-settings: 'FILL' 1;">gpp_bad</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 text-error">Fraud Detected</h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Impact</span>
+<span class="font-code-xs text-error">-500.00 pts</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Service</span>
+<span class="font-code-xs text-on-surface">SENTINEL_AI</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Recovery</span>
+<span class="font-code-xs text-on-surface">Account Freeze</span>
+</div>
+<div class="pt-2 border-t border-outline-variant">
+<div class="flex justify-between font-code-xs text-[9px]">
+<span class="text-outline">MIN: -1000</span>
+<span class="text-outline">MAX: -250</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 mt-1">
+<div class="bg-error h-full w-[75%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rule 3: Late Delivery -->
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-surface-container-highest text-outline px-1.5 py-0.5 rounded-sm uppercase">SLA_Warning</span>
+<span class="material-symbols-outlined text-secondary" data-icon="schedule">schedule</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 text-on-surface">Late Delivery</h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Impact</span>
+<span class="font-code-xs text-error">-15.00 pts</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Service</span>
+<span class="font-code-xs text-on-surface">LOGISTICS_MW</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Recovery</span>
+<span class="font-code-xs text-on-surface">Auto-Credit</span>
+</div>
+<div class="pt-2 border-t border-outline-variant">
+<div class="flex justify-between font-code-xs text-[9px]">
+<span class="text-outline">MIN: -50</span>
+<span class="text-outline">MAX: -5</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 mt-1">
+<div class="bg-secondary h-full w-[30%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rule 4: Certification Earned -->
+<div class="bg-surface-container-low border border-secondary p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-secondary text-on-secondary px-1.5 py-0.5 rounded-sm uppercase">Talent_Boost</span>
+<span class="material-symbols-outlined text-secondary" data-icon="workspace_premium">workspace_premium</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 text-secondary">Certification Earned</h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Impact</span>
+<span class="font-code-xs text-primary-fixed">+85.00 pts</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Service</span>
+<span class="font-code-xs text-on-surface">ED_GATEWAY</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Recovery</span>
+<span class="font-code-xs text-on-surface">N/A</span>
+</div>
+<div class="pt-2 border-t border-outline-variant">
+<div class="flex justify-between font-code-xs text-[9px]">
+<span class="text-outline">MIN: +20</span>
+<span class="text-outline">MAX: +100</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 mt-1">
+<div class="bg-secondary h-full w-[85%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rule 5: Compliance Violation -->
+<div class="bg-surface-container-low border border-error-container p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-error-container text-on-error-container px-1.5 py-0.5 rounded-sm uppercase">Legal_Audit</span>
+<span class="material-symbols-outlined text-error" data-icon="policy">policy</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 text-on-surface">Compliance Violation</h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Impact</span>
+<span class="font-code-xs text-error">-120.00 pts</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Service</span>
+<span class="font-code-xs text-on-surface">GOV_REGULATOR</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Recovery</span>
+<span class="font-code-xs text-on-surface">Rectification Flow</span>
+</div>
+<div class="pt-2 border-t border-outline-variant">
+<div class="flex justify-between font-code-xs text-[9px]">
+<span class="text-outline">MIN: -500</span>
+<span class="text-outline">MAX: -100</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 mt-1">
+<div class="bg-error-container h-full w-[45%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rule 6: Completed Transaction -->
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-surface-container-highest text-outline px-1.5 py-0.5 rounded-sm uppercase">Economy_Flow</span>
+<span class="material-symbols-outlined text-primary-fixed" data-icon="receipt_long">receipt_long</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 text-on-surface">Completed Transaction</h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Impact</span>
+<span class="font-code-xs text-primary-fixed">+12.50 pts</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Service</span>
+<span class="font-code-xs text-on-surface">FIN_ENGINE_V1</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Recovery</span>
+<span class="font-code-xs text-on-surface">Auto-Reconcile</span>
+</div>
+<div class="pt-2 border-t border-outline-variant">
+<div class="flex justify-between font-code-xs text-[9px]">
+<span class="text-outline">MIN: +1</span>
+<span class="text-outline">MAX: +50</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 mt-1">
+<div class="bg-primary-container h-full w-[25%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rule 7: Positive Review -->
+<div class="bg-surface-container-low border border-primary-container p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-primary-container text-on-primary px-1.5 py-0.5 rounded-sm uppercase">Social_Value</span>
+<span class="material-symbols-outlined text-primary-fixed" data-icon="thumb_up" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 text-on-surface">Positive Review</h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Impact</span>
+<span class="font-code-xs text-primary-fixed">+25.00 pts</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Service</span>
+<span class="font-code-xs text-on-surface">COMMS_HUB</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Recovery</span>
+<span class="font-code-xs text-on-surface">Verification Audit</span>
+</div>
+<div class="pt-2 border-t border-outline-variant">
+<div class="flex justify-between font-code-xs text-[9px]">
+<span class="text-outline">MIN: +5</span>
+<span class="text-outline">MAX: +50</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 mt-1">
+<div class="bg-primary-container h-full w-[50%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rule 8: Dispute Lost/Won -->
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-surface-container-highest text-outline px-1.5 py-0.5 rounded-sm uppercase">Conflict_Resolution</span>
+<span class="material-symbols-outlined text-on-surface" data-icon="gavel">gavel</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 text-on-surface">Dispute Lost/Won</h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Impact</span>
+<span class="font-code-xs text-error">±100.00 pts</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Service</span>
+<span class="font-code-xs text-on-surface">RESOLUTION_SVC</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-outline uppercase">Recovery</span>
+<span class="font-code-xs text-on-surface">Appeals Panel</span>
+</div>
+<div class="pt-2 border-t border-outline-variant">
+<div class="flex justify-between font-code-xs text-[9px]">
+<span class="text-outline">MIN: -200</span>
+<span class="text-outline">MAX: +100</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 mt-1 flex">
+<div class="bg-error h-full w-[60%] border-r border-background"></div>
+<div class="bg-primary-container h-full w-[40%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Background Visuals -->
+<div class="absolute inset-0 z-[-1] opacity-20 pointer-events-none">
+
+</div>
+</div>
+<!-- Audit Log Stub Section (Bottom Overlay Style) -->
+<div class="mt-12 border-t border-outline-variant pt-8">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed uppercase tracking-widest flex items-center gap-2">
+<span class="w-2 h-2 bg-primary-container rounded-full animate-pulse"></span>
+                        Live_Engine_Telemetery
+                    </h3>
+<span class="font-code-xs text-outline">v2.4.1.88-PROD</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-2">
+<div class="flex gap-4 items-center bg-surface-container-low p-2 border-l-2 border-primary-container">
+<span class="font-code-xs text-outline">12:44:02.01</span>
+<span class="font-code-xs text-on-surface">RULE_EXEC: "Verified Identity" -&gt; UID: 9942 -&gt; Score +50.00</span>
+</div>
+<div class="flex gap-4 items-center bg-surface-container-low p-2 border-l-2 border-error">
+<span class="font-code-xs text-outline">12:44:02.14</span>
+<span class="font-code-xs text-error">RULE_ALERT: "Fraud Detected" TRIGGERED -&gt; UID: 8821 -&gt; Freeze Initiated</span>
+</div>
+<div class="flex gap-4 items-center bg-surface-container-low p-2 border-l-2 border-outline-variant">
+<span class="font-code-xs text-outline">12:44:03.55</span>
+<span class="font-code-xs text-on-surface">RULE_EXEC: "Course Completed" -&gt; UID: 1209 -&gt; Achievement Syncing...</span>
+</div>
+</div>
+<div class="bg-surface-container p-6 border border-outline-variant flex items-center justify-center min-h-[200px]">
+<div class="text-center">
+<div class="font-code-sm text-outline mb-4">NODE_HEALTH_VISUALIZATION</div>
+<div class="flex gap-2 justify-center">
+<div class="w-1 h-8 bg-primary-container animate-[bounce_1s_infinite]"></div>
+<div class="w-1 h-12 bg-primary-container animate-[bounce_1.2s_infinite]"></div>
+<div class="w-1 h-6 bg-primary-container animate-[bounce_0.8s_infinite]"></div>
+<div class="w-1 h-10 bg-primary-container animate-[bounce_1.5s_infinite]"></div>
+<div class="w-1 h-7 bg-primary-container animate-[bounce_1.1s_infinite]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-8 z-50 bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-outline uppercase">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<div class="flex gap-6">
+<a class="font-code-xs text-outline hover:text-primary-fixed transition-colors uppercase" href="#">DOCS</a>
+<a class="font-code-xs text-outline hover:text-primary-fixed transition-colors uppercase" href="#">API</a>
+<a class="font-code-xs text-outline hover:text-primary-fixed transition-colors uppercase" href="#">LOGS</a>
+</div>
+</footer>
+<!-- FAB Tooltip Logic -->
+<script>
+        // Micro-interactions for grid nodes
+        document.querySelectorAll('.logic-grid-container > div').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px)';
+                node.style.boxShadow = '0 10px 30px -10px rgba(0, 255, 65, 0.1)';
+                node.classList.add('transition-all', 'duration-200');
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0)';
+                node.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body></html>

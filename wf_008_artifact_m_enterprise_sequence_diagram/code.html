@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-008: ECOSYSTEM_ORCHESTRATOR - Sequence Analysis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, #122131 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sequence-line {
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 4px, #3b4b37 4px, #3b4b37 8px);
+        }
+        .node-active {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.15);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#b8c3ff",
+                        "primary-fixed": "#72ff70",
+                        "surface-container-high": "#1c2b3c",
+                        "on-tertiary-container": "#862ed4",
+                        "outline-variant": "#3b4b37",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container": "#122131",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-highest": "#273647",
+                        "on-primary-fixed-variant": "#00530e",
+                        "error": "#ffb4ab",
+                        "on-secondary": "#002388",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-dim": "#051424",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "background": "#051424",
+                        "surface-container-low": "#0d1c2d",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-container": "#007117",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "primary": "#ebffe2",
+                        "on-primary-fixed": "#002203",
+                        "on-background": "#d4e4fa",
+                        "on-secondary-container": "#c6ceff",
+                        "primary-fixed-dim": "#00e639",
+                        "on-error": "#690005",
+                        "tertiary": "#fff6ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-tertiary": "#490080",
+                        "outline": "#84967e",
+                        "inverse-on-surface": "#233143",
+                        "secondary-container": "#0043eb",
+                        "inverse-primary": "#006e16",
+                        "secondary-fixed": "#dde1ff",
+                        "inverse-surface": "#d4e4fa",
+                        "on-secondary-fixed": "#001356",
+                        "primary-container": "#00ff41",
+                        "surface-tint": "#00e639",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "error-container": "#93000a",
+                        "surface-container-lowest": "#010f1f",
+                        "on-primary": "#003907",
+                        "surface-variant": "#273647",
+                        "surface": "#051424"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-lane-margin">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-4">
+<a class="text-on-surface-variant hover:bg-surface-container-high px-3 py-1 transition-colors text-label-caps font-label-caps" href="#">MONITOR</a>
+<a class="text-primary border-b-2 border-primary px-3 py-1 text-label-caps font-label-caps" href="#">SEQUENCE_MAP</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high px-3 py-1 transition-colors text-label-caps font-label-caps" href="#">LOGS</a>
+</nav>
+<span class="text-label-caps font-label-caps text-primary border border-primary px-2 py-1">v4.2.0 LIVE</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-surface-container border-r border-outline-variant pt-20 flex flex-col hidden lg:flex">
+<div class="px-4 py-2 mb-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</span>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</div>
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="payments">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</div>
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="security">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</div>
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="mail">mail</span>
+<span class="text-code-sm font-code-sm">WF-004: NOTIF</span>
+</div>
+<!-- WF-008 Active -->
+<div class="bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 flex items-center gap-3 translate-x-1 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="psychology">psychology</span>
+<span class="text-code-sm font-code-sm">WF-008: AI_INF</span>
+</div>
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="text-code-sm font-code-sm">WF-010: CORE</span>
+</div>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant bg-surface-container-low">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<span class="text-code-xs font-code-xs text-primary">NODE_HEALTH: OPTIMAL</span>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">
+                MEMORY_USAGE: 42.1%
+            </div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-16 pb-12 px-6 lg:px-lane-margin min-h-screen">
+<!-- Header & Control Bar -->
+<section class="py-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-outline-variant mb-12">
+<div>
+<span class="text-label-caps font-label-caps text-primary mb-2 block">TECHNICAL ARTIFACT M</span>
+<h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">WF-008: ASYNC_NOTIFICATION_SEQUENCE</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-2 max-w-2xl">
+                    Detailed chronological trace of the automated notification delivery pipeline, including state persistence, 
+                    n8n orchestration hooks, and multi-provider failover logic.
+                </p>
+</div>
+<div class="flex items-center gap-2">
+<button class="bg-surface-container-highest text-primary border border-outline-variant px-4 py-2 text-code-sm font-code-sm hover:bg-surface-bright transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="download">download</span> EXPORT_PDF
+                </button>
+<button class="bg-primary text-on-primary px-4 py-2 text-code-sm font-code-sm font-bold hover:opacity-90 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="play_arrow">play_arrow</span> SIMULATE_FLOW
+                </button>
+</div>
+</section>
+<!-- Sequence Diagram Container -->
+<div class="relative w-full overflow-x-auto pb-12">
+<div class="min-w-[1200px] flex flex-col gap-0">
+<!-- Actors / Lifelines Headers -->
+<div class="flex items-start justify-between sticky top-0 z-10 bg-background/80 backdrop-blur py-4">
+<div class="w-40 flex flex-col items-center gap-3">
+<div class="w-12 h-12 rounded bg-surface-container-high border border-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="business_center">business_center</span>
+</div>
+<span class="text-label-caps font-label-caps text-on-surface text-center">BUSINESS<br/>SERVICE</span>
+</div>
+<div class="w-40 flex flex-col items-center gap-3">
+<div class="w-12 h-12 rounded bg-surface-container-high border border-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="hub">hub</span>
+</div>
+<span class="text-label-caps font-label-caps text-on-surface text-center">API<br/>GATEWAY</span>
+</div>
+<div class="w-40 flex flex-col items-center gap-3">
+<div class="w-12 h-12 rounded bg-surface-container-high border border-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary" data-icon="notifications">notifications</span>
+</div>
+<span class="text-label-caps font-label-caps text-on-surface text-center">NOTIFICATION<br/>SERVICE</span>
+</div>
+<div class="w-40 flex flex-col items-center gap-3">
+<div class="w-12 h-12 rounded bg-surface-container-high border border-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="database">database</span>
+</div>
+<span class="text-label-caps font-label-caps text-on-surface text-center">DATABASE<br/>(STATE)</span>
+</div>
+<div class="w-40 flex flex-col items-center gap-3">
+<div class="w-12 h-12 rounded bg-surface-container-high border border-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+</div>
+<span class="text-label-caps font-label-caps text-on-surface text-center">n8n<br/>WORKFLOW</span>
+</div>
+<div class="w-40 flex flex-col items-center gap-3">
+<div class="w-12 h-12 rounded bg-surface-container-high border border-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-error" data-icon="cloud_queue">cloud_queue</span>
+</div>
+<span class="text-label-caps font-label-caps text-on-surface text-center">EXTERNAL<br/>PROVIDER</span>
+</div>
+<div class="w-40 flex flex-col items-center gap-3">
+<div class="w-12 h-12 rounded bg-surface-container-high border border-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="history">history</span>
+</div>
+<span class="text-label-caps font-label-caps text-on-surface text-center">AUDIT<br/>TRAIL</span>
+</div>
+</div>
+<!-- Vertical Lifelines (Visual Guide) -->
+<div class="absolute inset-0 pointer-events-none flex justify-between pt-32 px-20">
+<div class="w-px h-full border-l border-outline-variant/30 dashed"></div>
+<div class="w-px h-full border-l border-outline-variant/30 dashed"></div>
+<div class="w-px h-full border-l border-outline-variant/30 dashed"></div>
+<div class="w-px h-full border-l border-outline-variant/30 dashed"></div>
+<div class="w-px h-full border-l border-outline-variant/30 dashed"></div>
+<div class="w-px h-full border-l border-outline-variant/30 dashed"></div>
+<div class="w-px h-full border-l border-outline-variant/30 dashed"></div>
+</div>
+<!-- Sequence Rows -->
+<div class="relative z-20 flex flex-col gap-12 mt-12 px-20">
+<!-- Row 1: Initial Request -->
+<div class="relative flex items-center h-12">
+<div class="absolute left-[0%] w-[16.6%] h-0.5 bg-primary-fixed-dim flex items-center justify-end">
+<div class="w-2 h-2 border-t-2 border-r-2 border-primary-fixed-dim rotate-45 mb-0.5"></div>
+</div>
+<div class="absolute left-[8%] -top-5 text-code-xs font-code-xs text-primary-fixed-dim bg-background px-2">POST /v1/dispatch (Event_Payload)</div>
+</div>
+<!-- Row 2: Gateway to Notif -->
+<div class="relative flex items-center h-12">
+<div class="absolute left-[16.6%] w-[16.6%] h-0.5 bg-primary-fixed-dim flex items-center justify-end">
+<div class="w-2 h-2 border-t-2 border-r-2 border-primary-fixed-dim rotate-45 mb-0.5"></div>
+</div>
+<div class="absolute left-[24%] -top-5 text-code-xs font-code-xs text-primary-fixed-dim bg-background px-2">Validate &amp; Forward Token</div>
+</div>
+<!-- Row 3: Async ACK -->
+<div class="relative flex items-center h-12 opacity-60">
+<div class="absolute left-[0%] w-[33.2%] h-0.5 border-t border-dashed border-on-surface-variant flex items-center justify-start">
+<div class="w-2 h-2 border-b-2 border-l-2 border-on-surface-variant rotate-45 mb-0.5"></div>
+</div>
+<div class="absolute left-[16%] -top-5 text-code-xs font-code-xs text-on-surface-variant bg-background px-2">202 ACCEPTED (Request_ID: 0x8F2)</div>
+</div>
+<!-- Row 4: Persist State -->
+<div class="relative flex items-center h-12">
+<div class="absolute left-[33.2%] w-[16.6%] h-0.5 bg-secondary flex items-center justify-end">
+<div class="w-2 h-2 border-t-2 border-r-2 border-secondary rotate-45 mb-0.5"></div>
+</div>
+<div class="absolute left-[40%] -top-5 text-code-xs font-code-xs text-secondary bg-background px-2">UPSERT State='PENDING'</div>
+</div>
+<!-- Row 5: Trigger n8n -->
+<div class="relative flex items-center h-12">
+<div class="absolute left-[33.2%] w-[33.2%] h-0.5 bg-primary-fixed-dim flex items-center justify-end">
+<div class="w-2 h-2 border-t-2 border-r-2 border-primary-fixed-dim rotate-45 mb-0.5"></div>
+</div>
+<div class="absolute left-[45%] -top-5 text-code-xs font-code-xs text-primary-fixed-dim bg-background px-2">Webhook_Execute (Map_Context)</div>
+</div>
+<!-- RECURSIVE / RETRY BLOCK -->
+<div class="relative border-2 border-outline-variant bg-surface-container-low/50 p-6 -mx-4 rounded">
+<div class="absolute -top-3 left-4 bg-outline-variant text-label-caps font-label-caps text-on-surface px-2">LOOP [Retry Max: 3]</div>
+<!-- Row 6: Call Provider -->
+<div class="relative flex items-center h-12">
+<div class="absolute left-[66.4%] w-[16.6%] h-0.5 bg-primary flex items-center justify-end">
+<div class="w-2 h-2 border-t-2 border-r-2 border-primary rotate-45 mb-0.5"></div>
+</div>
+<div class="absolute left-[70%] -top-5 text-code-xs font-code-xs text-primary bg-background px-2">SEND (Twilio/Firebase)</div>
+</div>
+<!-- Row 7: Failure Case -->
+<div class="relative flex items-center h-12">
+<div class="absolute left-[66.4%] w-[16.6%] h-0.5 border-t border-dashed border-error flex items-center justify-start">
+<div class="w-2 h-2 border-b-2 border-l-2 border-error rotate-45 mb-0.5"></div>
+</div>
+<div class="absolute left-[70%] -top-5 text-code-xs font-code-xs text-error bg-background px-2">429 RATE_LIMIT_EXCEEDED</div>
+</div>
+<!-- Row 8: Backoff Logic -->
+<div class="relative flex items-center h-12">
+<div class="absolute right-[33.2%] w-12 h-12 border-2 border-l-0 border-outline-variant rounded-r-lg"></div>
+<div class="absolute right-[33.2%] -top-2 text-code-xs font-code-xs text-on-surface-variant translate-x-16">Exp_Backoff(T+2^n)</div>
+</div>
+</div>
+<!-- Row 9: Callback Success -->
+<div class="relative flex items-center h-12">
+<div class="absolute left-[66.4%] w-[16.6%] h-0.5 border-t border-dashed border-primary-fixed-dim flex items-center justify-start">
+<div class="w-2 h-2 border-b-2 border-l-2 border-primary-fixed-dim rotate-45 mb-0.5"></div>
+</div>
+<div class="absolute left-[70%] -top-5 text-code-xs font-code-xs text-primary-fixed-dim bg-background px-2">Websocket_Callback (DELIVERED)</div>
+</div>
+<!-- Row 10: Final Audit -->
+<div class="relative flex items-center h-12">
+<div class="absolute left-[66.4%] w-[33.2%] h-0.5 bg-on-surface-variant flex items-center justify-end">
+<div class="w-2 h-2 border-t-2 border-r-2 border-on-surface-variant rotate-45 mb-0.5"></div>
+</div>
+<div class="absolute left-[80%] -top-5 text-code-xs font-code-xs text-on-surface-variant bg-background px-2">Commit_Log (Trace_ID: x77)</div>
+</div>
+</div>
+</div>
+</div>
+<!-- System Telemetry & Bento Grid -->
+<section class="mt-20 grid grid-cols-1 md:grid-cols-4 gap-6">
+<!-- Telemetry Card -->
+<div class="md:col-span-1 bg-surface-container border border-outline-variant p-4 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<span class="text-label-caps font-label-caps text-on-surface-variant">LATENCY_P99</span>
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="speed">speed</span>
+</div>
+<div class="text-headline-lg font-code-sm text-primary">12ms</div>
+<div class="mt-auto">
+<div class="h-1 w-full bg-surface-variant">
+<div class="h-full bg-primary w-[12%]"></div>
+</div>
+<span class="text-code-xs font-code-xs text-on-surface-variant mt-1 block">BUFFER_HEADROOM: 88%</span>
+</div>
+</div>
+<!-- n8n Instance Status -->
+<div class="md:col-span-1 bg-surface-container border border-outline-variant p-4 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_RUNS</span>
+<span class="material-symbols-outlined text-secondary text-[18px]" data-icon="account_tree">account_tree</span>
+</div>
+<div class="text-headline-lg font-code-sm text-on-surface">1,429<span class="text-code-sm text-on-surface-variant">/hr</span></div>
+<div class="mt-auto flex items-center gap-2">
+<span class="text-primary-fixed-dim text-code-xs font-code-xs">SYNC_OK</span>
+<span class="text-on-surface-variant text-code-xs font-code-xs">• v1.42.0-PROD</span>
+</div>
+</div>
+<!-- Provider Health -->
+<div class="md:col-span-2 bg-surface-container border border-outline-variant p-4">
+<div class="flex items-center justify-between mb-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant">EXTERNAL_PROVIDER_HEALTH</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-code-xs font-code-xs">
+<span class="text-on-surface">TWILIO_SMS</span>
+<span class="text-primary-fixed-dim">99.9%</span>
+</div>
+<div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[99.9%]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-code-xs font-code-xs">
+<span class="text-on-surface">FIREBASE_FCM</span>
+<span class="text-primary-fixed-dim">98.4%</span>
+</div>
+<div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[98.4%]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-code-xs font-code-xs">
+<span class="text-on-surface">SENDGRID_SMTP</span>
+<span class="text-error">82.1%</span>
+</div>
+<div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-error w-[82.1%]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-code-xs font-code-xs">
+<span class="text-on-surface">SLACK_WEBHOOK</span>
+<span class="text-primary-fixed-dim">100%</span>
+</div>
+<div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Audit Trail Log Stub -->
+<section class="mt-12 bg-surface-container-lowest border border-outline-variant overflow-hidden">
+<div class="bg-surface-container px-4 py-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-on-surface">LIVE_SYSTEM_TRACE</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">FILTER: WF-008_ONLY</span>
+</div>
+<div class="p-4 font-code-xs text-code-xs leading-relaxed max-h-48 overflow-y-auto">
+<div class="flex gap-4 py-1 text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="text-primary shrink-0">[14:22:01.002]</span>
+<span class="text-on-surface">[TRACE] 0x8F2: Received payload from Business_Svc_01</span>
+</div>
+<div class="flex gap-4 py-1 text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="text-primary shrink-0">[14:22:01.015]</span>
+<span class="text-secondary">[STATE] 0x8F2: Persisted as PENDING in PostgreSQL.node_02</span>
+</div>
+<div class="flex gap-4 py-1 text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="text-primary shrink-0">[14:22:01.042]</span>
+<span class="text-primary-fixed-dim">[n8n] Executing Workflow 'Email_Failover_Router'</span>
+</div>
+<div class="flex gap-4 py-1 text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="text-primary shrink-0">[14:22:03.119]</span>
+<span class="text-error">[WARN] Twilio call failed (Timeout). Triggering Retry_01</span>
+</div>
+<div class="flex gap-4 py-1 text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="text-primary shrink-0">[14:22:05.500]</span>
+<span class="text-primary-fixed-dim">[SUCCESS] Message delivered via Firebase_FCM_Backup</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-low border-t border-outline-variant flex justify-between items-center px-lane-margin py-2">
+<div class="flex items-center gap-6">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-4">
+<span class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer">AUDIT_TRAIL: ACTIVE</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer">N8N_SYNC: OK</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer">LATENCY: 12ms</span>
+</div>
+</div>
+<div class="text-label-caps font-label-caps text-on-surface-variant">
+            © 2024 ECOSYSTEM_ORCHESTRATOR • CLASSIFIED
+        </div>
+</footer>
+<script>
+        // Simple micro-interaction for simulation
+        document.querySelector('button:last-of-type').addEventListener('click', function() {
+            const lines = document.querySelectorAll('.h-0.5, .border-t-2');
+            lines.forEach((line, index) => {
+                line.style.transition = 'opacity 0.3s ease-in-out';
+                line.style.opacity = '0.2';
+                setTimeout(() => {
+                    line.style.opacity = '1';
+                }, index * 200);
+            });
+        });
+
+        // Tonal layer hover effect for actors
+        const actors = document.querySelectorAll('.w-40');
+        actors.forEach(actor => {
+            actor.addEventListener('mouseenter', () => {
+                actor.querySelector('.w-12').classList.add('node-active', 'border-primary');
+            });
+            actor.addEventListener('mouseleave', () => {
+                actor.querySelector('.w-12').classList.remove('node-active', 'border-primary');
+            });
+        });
+    </script>
+</body></html>

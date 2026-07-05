@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CORE_OS_v2.4.1-STABLE | DATA PERSISTENCE MODEL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#00ff41",
+                    "inverse-primary": "#006e16",
+                    "surface-dim": "#051424",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-tertiary": "#490080",
+                    "outline-variant": "#3b4b37",
+                    "on-error-container": "#ffdad6",
+                    "secondary": "#b8c3ff",
+                    "tertiary-container": "#ecd3ff",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-container-highest": "#273647",
+                    "background": "#051424",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface": "#051424",
+                    "on-primary-container": "#007117",
+                    "secondary-fixed": "#dde1ff",
+                    "on-surface-variant": "#b9ccb2",
+                    "tertiary": "#fff6ff",
+                    "surface-container-lowest": "#010f1f",
+                    "on-surface": "#d4e4fa",
+                    "on-secondary-container": "#c6ceff",
+                    "on-primary": "#003907",
+                    "on-tertiary-container": "#862ed4",
+                    "on-secondary-fixed": "#001356",
+                    "inverse-on-surface": "#233143",
+                    "on-primary-fixed": "#002203",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-tint": "#00e639",
+                    "surface-container": "#122131",
+                    "primary-fixed-dim": "#00e639",
+                    "on-secondary": "#002388",
+                    "surface-bright": "#2c3a4c",
+                    "outline": "#84967e",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "secondary-container": "#0043eb",
+                    "primary": "#ebffe2",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "surface-container-low": "#0d1c2d",
+                    "on-error": "#690005",
+                    "primary-fixed": "#72ff70",
+                    "on-background": "#d4e4fa",
+                    "surface-variant": "#273647",
+                    "on-tertiary-fixed": "#2c0051",
+                    "error-container": "#93000a",
+                    "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "stack-gap": "4px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-port {
+            width: 8px;
+            height: 8px;
+            background: #84967e;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .connector-line {
+            position: absolute;
+            background: #3b4b37;
+            pointer-events: none;
+        }
+        .active-transaction {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0% { border-color: #3b4b37; }
+            50% { border-color: #00ff41; }
+            100% { border-color: #3b4b37; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-container-lowest text-primary dark:text-primary-fixed w-full top-0 border-b border-outline-variant flex justify-between items-center px-grid-unit h-12 w-full z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<h1 class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-4">
+<span class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed cursor-pointer h-12 flex items-center px-2">SCHEMA_VIEW</span>
+<span class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors cursor-pointer h-12 flex items-center px-2">QUERY_PLANNER</span>
+<span class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors cursor-pointer h-12 flex items-center px-2">TX_LOGS</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary cursor-pointer active:opacity-80">STATUS: OK</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<nav class="bg-surface-container dark:bg-surface-container h-screen w-64 border-r border-outline-variant fixed left-0 top-12 h-[calc(100vh-48px)] flex flex-col z-40">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed">MODULE_INDEX</span>
+</div>
+<div class="flex flex-col flex-1 overflow-y-auto">
+<div class="px-4 py-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed flex items-center gap-3 transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm">account_tree</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</div>
+<div class="px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow_Engine</span>
+</div>
+<div class="px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm">grid_view</span>
+<span class="font-label-caps text-label-caps">Logic_Matrices</span>
+</div>
+<div class="px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm">insights</span>
+<span class="font-label-caps text-label-caps">Telemetry_Streams</span>
+</div>
+<div class="px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm">settings_input_component</span>
+<span class="font-label-caps text-label-caps">Node_Registry</span>
+</div>
+</div>
+</nav>
+<!-- Main Content Area (Canvas) -->
+<main class="ml-64 flex-1 relative overflow-auto pb-8">
+<div class="p-lane-margin min-w-[1200px]">
+<!-- Swimlane Header -->
+<div class="flex items-center gap-4 mb-8">
+<div class="p-2 bg-primary-container/10 border border-primary-container/30 rounded">
+<span class="material-symbols-outlined text-primary-container">database</span>
+</div>
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">WF-007: PERSISTENCE_LAYER</h2>
+<p class="font-code-sm text-code-sm text-outline">SCHEMA_VERSION: 1.0.4 // SHARD_CLUSTER: US-EAST-1A</p>
+</div>
+</div>
+<!-- Entity Grid -->
+<div class="grid grid-cols-4 gap-node-gutter relative">
+<!-- Entity: TrustProfile -->
+<div class="bg-[#0F0F0F] border border-primary-container p-3 rounded shadow-sm relative active-transaction">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-primary-container">TrustProfile</span>
+<span class="material-symbols-outlined text-xs text-primary-container">lock</span>
+</div>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">id:</span> UUID</li>
+<li class="text-on-surface"><span class="text-outline">entity_id:</span> VARCHAR(64)</li>
+<li class="text-on-surface"><span class="text-outline">score_v:</span> INT <span class="text-primary-container">[VERSIONED]</span></li>
+<li class="text-on-surface"><span class="text-outline">status:</span> ENUM('ACTIVE', 'SUSPENDED')</li>
+</ul>
+<div class="mt-3 flex gap-2">
+<span class="bg-primary-container/20 text-primary-container px-1 py-0.5 rounded text-[8px] font-bold">LOCKED_BY_TX_982</span>
+</div>
+</div>
+<!-- Entity: TrustScore -->
+<div class="bg-[#0F0F0F] border border-outline p-3 rounded relative">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-on-surface">TrustScore</span>
+<span class="material-symbols-outlined text-xs text-outline">history</span>
+</div>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">profile_id:</span> FK_PROFILE</li>
+<li class="text-on-surface"><span class="text-outline">current_val:</span> DECIMAL(5,2)</li>
+<li class="text-on-surface"><span class="text-outline">last_calc:</span> TIMESTAMP</li>
+<li class="text-on-surface"><span class="text-outline">delta:</span> FLOAT</li>
+</ul>
+</div>
+<!-- Entity: TrustEvent -->
+<div class="bg-[#0F0F0F] border border-outline-variant p-3 rounded relative">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-on-surface">TrustEvent</span>
+<span class="material-symbols-outlined text-xs text-outline">bolt</span>
+</div>
+<div class="font-code-xs text-code-xs opacity-50 mb-2 italic">INSERT_ONLY_STREAM</div>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">event_id:</span> UUID</li>
+<li class="text-on-surface"><span class="text-outline">type:</span> ENUM</li>
+<li class="text-on-surface"><span class="text-outline">weight:</span> FLOAT</li>
+</ul>
+</div>
+<!-- Entity: TrustBadge -->
+<div class="bg-[#0F0F0F] border border-secondary p-3 rounded relative">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-secondary">TrustBadge</span>
+<span class="material-symbols-outlined text-xs text-secondary">verified</span>
+</div>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">badge_code:</span> VARCHAR</li>
+<li class="text-on-surface"><span class="text-outline">issued_at:</span> TIMESTAMP</li>
+<li class="text-on-surface"><span class="text-outline">metadata:</span> JSONB</li>
+</ul>
+</div>
+<!-- Row 2 -->
+<!-- Entity: ReputationHistory -->
+<div class="bg-[#0F0F0F] border border-outline-variant p-3 rounded relative">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-on-surface">ReputationHistory</span>
+<span class="material-symbols-outlined text-xs text-outline">timeline</span>
+</div>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">snap_id:</span> BIGINT</li>
+<li class="text-on-surface"><span class="text-outline">score_at:</span> DECIMAL</li>
+<li class="text-on-surface"><span class="text-outline">tx_hash:</span> VARCHAR</li>
+</ul>
+</div>
+<!-- Entity: AuditLog -->
+<div class="bg-[#0F0F0F] border border-outline-variant p-3 rounded relative col-span-2">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-on-surface">AuditLog</span>
+<span class="material-symbols-outlined text-xs text-outline">visibility</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">log_id:</span> PKEY</li>
+<li class="text-on-surface"><span class="text-outline">actor:</span> USER_ID</li>
+<li class="text-on-surface"><span class="text-outline">action:</span> ACTION_TYPE</li>
+</ul>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">old_val:</span> TEXT</li>
+<li class="text-on-surface"><span class="text-outline">new_val:</span> TEXT</li>
+<li class="text-on-surface"><span class="text-outline">ip_addr:</span> INET</li>
+</ul>
+</div>
+</div>
+<!-- Entity: FraudEvent -->
+<div class="bg-[#0F0F0F] border border-error p-3 rounded relative">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-error">FraudEvent</span>
+<span class="material-symbols-outlined text-xs text-error">warning</span>
+</div>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">risk_level:</span> INT</li>
+<li class="text-on-surface"><span class="text-outline">detector_id:</span> VARCHAR</li>
+<li class="text-on-surface"><span class="text-outline">is_rollback:</span> BOOL</li>
+</ul>
+</div>
+<!-- Row 3 -->
+<!-- Entity: TrustAppeal -->
+<div class="bg-[#0F0F0F] border border-outline-variant p-3 rounded relative">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-on-surface">TrustAppeal</span>
+<span class="material-symbols-outlined text-xs text-outline">gavel</span>
+</div>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">appeal_id:</span> UUID</li>
+<li class="text-on-surface"><span class="text-outline">evidence_ref:</span> URI</li>
+<li class="text-on-surface"><span class="text-outline">status:</span> ENUM</li>
+</ul>
+</div>
+<!-- Entity: ComplianceEvent -->
+<div class="bg-[#0F0F0F] border border-outline-variant p-3 rounded relative">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-on-surface">ComplianceEvent</span>
+<span class="material-symbols-outlined text-xs text-outline">policy</span>
+</div>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">reg_type:</span> VARCHAR</li>
+<li class="text-on-surface"><span class="text-outline">jurisdiction:</span> ISO2</li>
+</ul>
+</div>
+<!-- Entity: Notification -->
+<div class="bg-[#0F0F0F] border border-outline-variant p-3 rounded relative">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-label-caps text-on-surface">Notification</span>
+<span class="material-symbols-outlined text-xs text-outline">notifications</span>
+</div>
+<ul class="font-code-xs text-code-xs space-y-1">
+<li class="text-on-surface"><span class="text-outline">channel:</span> ENUM</li>
+<li class="text-on-surface"><span class="text-outline">read_at:</span> TIMESTAMP</li>
+</ul>
+</div>
+</div>
+<!-- Transaction Micro-Telemetry -->
+<div class="mt-lane-margin grid grid-cols-3 gap-8">
+<div class="border-l-2 border-primary-container pl-4">
+<span class="font-label-caps text-label-caps text-primary-container block mb-1">TX_LOG: UPDATE_SCORE</span>
+<div class="font-code-xs text-code-xs text-outline space-y-1">
+<p>&gt; START TRANSACTION ISOLATION SERIALIZABLE;</p>
+<p>&gt; SELECT * FROM TrustProfile WHERE id = '0xf83' FOR UPDATE;</p>
+<p class="text-primary-container">&gt; [LOCK_ACQUIRED] // Latency: 2.1ms</p>
+<p>&gt; UPDATE TrustScore SET current_val = 98.2 WHERE profile_id = '0xf83';</p>
+<p>&gt; INSERT INTO AuditLog (action, old, new) VALUES ('SCORE_UPD', 95.1, 98.2);</p>
+<p>&gt; COMMIT;</p>
+</div>
+</div>
+<div class="border-l-2 border-error pl-4">
+<span class="font-label-caps text-label-caps text-error block mb-1">TX_LOG: FRAUD_ROLLBACK</span>
+<div class="font-code-xs text-code-xs text-outline space-y-1">
+<p>&gt; START TRANSACTION;</p>
+<p>&gt; INSERT INTO FraudEvent (risk_level) VALUES (9);</p>
+<p class="text-error">&gt; [EXCEPTION] CONSTRAINTS_VIOLATED // Node: 04</p>
+<p>&gt; ROLLBACK TO SAVEPOINT SP_PRE_FRAUD;</p>
+<p class="text-on-surface-variant">&gt; RECOVERY_INITIATED [SEQ_442]</p>
+</div>
+</div>
+<div class="border-l-2 border-secondary pl-4">
+<span class="font-label-caps text-label-caps text-secondary block mb-1">VERSION_CONTROL</span>
+<div class="font-code-xs text-code-xs text-outline space-y-1">
+<p>Current Score Version: <span class="text-on-surface">v1.2.9</span></p>
+<p>Schema Migrations: <span class="text-on-surface">Applied [142/142]</span></p>
+<p>Snapshot Interval: <span class="text-on-surface">600s</span></p>
+<div class="mt-2 h-1 bg-surface-container w-full rounded">
+<div class="h-1 bg-secondary w-2/3 rounded"></div>
+</div>
+<p class="text-[8px]">LOG_BUFFER_SATURATION: 64%</p>
+</div>
+</div>
+</div>
+<!-- Bento Style Detail Cards -->
+<div class="mt-lane-margin grid grid-cols-4 gap-4">
+<div class="col-span-2 bg-surface-container p-4 rounded border border-outline-variant">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline-md text-headline-md">LIVE_QUERY_STREAM</h3>
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-xs">STREAMING</span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-code-xs border-b border-outline-variant/30 pb-2">
+<span class="text-primary-container">INSERT [TrustEvent]</span>
+<span class="text-outline">0.42ms</span>
+</div>
+<div class="flex justify-between items-center text-code-xs border-b border-outline-variant/30 pb-2">
+<span class="text-primary-container">UPDATE [TrustScore]</span>
+<span class="text-outline">1.12ms</span>
+</div>
+<div class="flex justify-between items-center text-code-xs border-b border-outline-variant/30 pb-2">
+<span class="text-on-surface">SELECT [ReputationHistory]</span>
+<span class="text-outline">0.08ms</span>
+</div>
+<div class="flex justify-between items-center text-code-xs border-b border-outline-variant/30 pb-2">
+<span class="text-error">ROLLBACK [TrustAppeal]</span>
+<span class="text-outline">4.50ms</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-high p-4 rounded border border-outline-variant">
+<h3 class="font-label-caps text-label-caps mb-4">HISTORY_TRACKING</h3>
+<div class="relative h-32 overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full h-full opacity-30">
+<!-- Minimal Sparkline Replacement -->
+<div class="flex items-end gap-1 h-full">
+<div class="bg-primary-fixed w-2 h-[20%]"></div>
+<div class="bg-primary-fixed w-2 h-[40%]"></div>
+<div class="bg-primary-fixed w-2 h-[35%]"></div>
+<div class="bg-primary-fixed w-2 h-[60%]"></div>
+<div class="bg-primary-fixed w-2 h-[80%]"></div>
+<div class="bg-primary-fixed w-2 h-[75%]"></div>
+<div class="bg-primary-fixed w-2 h-[90%]"></div>
+<div class="bg-primary-fixed w-2 h-[85%]"></div>
+</div>
+</div>
+<div class="absolute top-0 left-0 text-[10px] font-code-xs">TPS: 12.4k</div>
+</div>
+</div>
+<div class="bg-surface-container-high p-4 rounded border border-outline-variant flex flex-col justify-between">
+<h3 class="font-label-caps text-label-caps">STORAGE_QUOTA</h3>
+<div class="text-center">
+<div class="text-headline-lg font-headline-lg text-primary-fixed">1.4 TB</div>
+<div class="text-code-xs text-outline">USED OF 2.0 TB</div>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary-fixed h-full w-[70%]"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Right-side Slide-out Control Panel (Partial Visibility for context) -->
+<div class="fixed right-0 top-12 bottom-8 w-8 bg-surface-container border-l border-outline-variant flex flex-col items-center py-4 gap-6">
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary-fixed">settings</span>
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary-fixed">search</span>
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary-fixed">filter_list</span>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-surface-container-lowest text-primary-fixed w-full bottom-0 border-t border-outline-variant fixed bottom-0 left-0 h-8 flex items-center justify-between px-grid-unit z-50">
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<div class="flex gap-6">
+<span class="font-code-xs text-code-xs text-outline hover:text-primary-fixed cursor-pointer transition-colors opacity-90 hover:opacity-100">DOCS</span>
+<span class="font-code-xs text-code-xs text-outline hover:text-primary-fixed cursor-pointer transition-colors opacity-90 hover:opacity-100">API</span>
+<span class="font-code-xs text-code-xs text-outline hover:text-primary-fixed cursor-pointer transition-colors opacity-90 hover:opacity-100">LOGS</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction for entity highlights
+        document.querySelectorAll('div.bg-[#0F0F0F]').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'transform 0.15s ease-out';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>

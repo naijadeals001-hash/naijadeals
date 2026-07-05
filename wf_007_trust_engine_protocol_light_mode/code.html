@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-007: Trust Engine Protocol</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffe16d",
+                        "on-tertiary-fixed": "#221b00",
+                        "on-surface-variant": "#3c4a3c",
+                        "tertiary": "#705d00",
+                        "surface": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#213145",
+                        "inverse-primary": "#3ce36a",
+                        "surface-container-low": "#eff4ff",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed-variant": "#3a485a",
+                        "tertiary-fixed-dim": "#e9c400",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container": "#e5eeff",
+                        "on-secondary-container": "#556477",
+                        "on-tertiary-container": "#4d4000",
+                        "on-primary-fixed": "#002108",
+                        "on-secondary-fixed": "#0e1c2d",
+                        "secondary-container": "#d2e1f7",
+                        "primary-fixed": "#69ff87",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#6c7b6a",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "on-tertiary-fixed-variant": "#544600",
+                        "secondary": "#515f72",
+                        "outline-variant": "#bbcbb8",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-surface": "#0b1c30",
+                        "surface-container-high": "#dce9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "primary": "#006e2a",
+                        "on-primary-container": "#004c1b",
+                        "on-primary-fixed-variant": "#00531e",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#3ce36a",
+                        "tertiary-container": "#cbab00",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#00c853",
+                        "surface-tint": "#006e2a",
+                        "secondary-fixed": "#d5e4fa",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "background": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["IBM Plex Sans"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["IBM Plex Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "data-mono": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f8f9ff;
+            background-image: 
+                linear-gradient(to right, rgba(11, 28, 48, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(11, 28, 48, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        .node-navy {
+            background-color: #0b1c30;
+            border: 1px solid #d2e1f7;
+        }
+
+        .flow-line {
+            position: absolute;
+            background-color: #00c853;
+            z-index: 0;
+            transition: all 0.3s ease;
+        }
+
+        .flow-line::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #00c853;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00c853;
+            animation: flow-particle 3s infinite linear;
+        }
+
+        @keyframes flow-particle {
+            0% { left: 0%; top: 50%; transform: translate(-50%, -50%); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { left: 100%; top: 50%; transform: translate(-50%, -50%); opacity: 0; }
+        }
+
+        .diamond {
+            width: 48px;
+            height: 48px;
+            transform: rotate(45deg);
+            border: 2px solid #00c853;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .diamond-content {
+            transform: rotate(-45deg);
+            font-family: 'JetBrains Mono';
+            font-weight: 600;
+            font-size: 10px;
+            color: #006e2a;
+        }
+
+        .actor-lane {
+            border-left: 2px solid #bbcbb8;
+            padding-left: 24px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface min-h-screen pb-24">
+<!-- Top Navigation (Shell Implementation) -->
+<header class="fixed top-0 w-full z-50 bg-surface border-b border-outline-variant flex items-center justify-between px-margin-desktop h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+<span class="font-headline-md text-headline-md font-bold text-secondary">NaijaDeals</span>
+<div class="ml-8 hidden md:flex items-center gap-6">
+<span class="font-label-caps text-label-caps text-primary font-bold cursor-pointer transition-colors duration-200">Dashboard</span>
+<span class="font-label-caps text-label-caps text-secondary cursor-pointer hover:text-primary transition-colors duration-200">Infrastructure</span>
+<span class="font-label-caps text-label-caps text-secondary cursor-pointer hover:text-primary transition-colors duration-200">Governance</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-xs font-bold font-data-mono">NODE_01_ACTIVE</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional corporate headshot of a female tech administrator with a confident expression, set against a clean, architectural office background with soft blue lighting and modern furniture. The photography style is high-end corporate with sharp focus and professional color grading in a bright light-mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-QYtnGt127zG4QFf7bckzB2HYnKSddnJjMBo4ulAsR2s0F77WAHOBQpV4_OqzTEEiRFINiBevM3oouNbYK46rwevpmu0L86zZgd1aauG5JFRSCyROjGbqeS4lRWVdo_OWLB_A5UY8mYUSeVcn0fEvZxIftUo51cENlQtyL3mOFav3tanC6pScdV5wYHAvLgi5f78mE1sKOYTnesSTA_X2vifzsDy5OZ1YUMnwi-ExOWIunrI4oCXbKsFZqqwE4KYEFmIVmsk564A"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation (Drawer Implementation) -->
+<nav class="hidden md:flex flex-col h-full w-80 fixed left-0 top-16 z-40 bg-surface-container-low border-r border-outline-variant py-6">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 bg-primary-container flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-on-primary-container" data-icon="admin_panel_settings">admin_panel_settings</span>
+</div>
+<div>
+<h3 class="font-headline-md text-[18px] leading-tight text-on-surface font-bold">Admin Terminal</h3>
+<p class="font-body-md text-xs text-secondary">Infrastructure Node 01</p>
+</div>
+</div>
+<div class="bg-surface-container-highest rounded px-3 py-2 text-[10px] font-data-mono text-primary flex items-center justify-between">
+<span>VERIFIED AUTHORITY</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="verified">verified</span>
+</div>
+</div>
+<div class="flex-1 space-y-1">
+<a class="flex items-center gap-4 px-6 py-3 bg-primary-container text-on-primary-container border-l-4 border-primary transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-secondary hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-body-md">Infrastructure</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-secondary hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+<span class="font-body-md">Governance</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-secondary hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+<span class="font-body-md">Logistics</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-secondary hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="md:pl-80 pt-24 px-6 md:px-margin-desktop">
+<!-- Protocol Header Section -->
+<section class="mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
+<div class="max-w-2xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-primary font-data-mono text-xs font-bold tracking-widest uppercase">Protocol Workflow</span>
+<div class="h-px w-12 bg-primary"></div>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-4">WF-007: Trust Engine Protocol</h1>
+<p class="font-body-lg text-secondary">A multi-layered validation sequence ensuring zero-trust verification between Core Infrastructure and Distributed Actors. Optimized for high-frequency institutional throughput.</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-surface border border-outline-variant text-on-surface px-6 py-3 rounded flex items-center gap-2 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="download">download</span>
+<span class="font-label-caps">Export BPMN</span>
+</button>
+<button class="bg-primary text-white px-6 py-3 rounded flex items-center gap-2 hover:opacity-90 transition-opacity shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="play_arrow">play_arrow</span>
+<span class="font-label-caps">Simulate Flow</span>
+</button>
+</div>
+</section>
+<!-- The BPMN-style Canvas -->
+<section class="relative min-h-[800px] bg-white rounded-xl border border-outline-variant overflow-hidden p-12">
+<!-- Grid Watermark Overlay -->
+<div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#0b1c30 1px, transparent 0); background-size: 16px 16px;"></div>
+<!-- Flow Container -->
+<div class="relative grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
+<!-- LANE 1: AURA AI (ACTOR) -->
+<div class="actor-lane">
+<div class="mb-16">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-8 h-8 rounded bg-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="psychology">psychology</span>
+</div>
+<span class="font-label-caps text-secondary text-xs">Aura AI Agent</span>
+</div>
+<!-- Start Node -->
+<div class="node-navy rounded-lg p-6 w-full max-w-[240px] shadow-lg relative z-10">
+<h4 class="font-label-caps text-primary text-[10px] mb-2 uppercase">Input Trigger</h4>
+<p class="font-headline-md text-white text-[16px]">Intent Detection</p>
+<div class="mt-4 flex gap-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+</div>
+</div>
+</div>
+<!-- Process Node 2 -->
+<div class="mt-32 relative">
+<!-- Horizontal Flow Path to Core Trust -->
+<div class="flow-line w-24 h-0.5 top-1/2 left-full hidden md:block"></div>
+<div class="node-navy rounded-lg p-6 w-full max-w-[240px] shadow-lg relative z-10">
+<h4 class="font-label-caps text-primary text-[10px] mb-2 uppercase">Refinement</h4>
+<p class="font-headline-md text-white text-[16px]">Contextual Synthesis</p>
+<p class="text-[12px] text-secondary-fixed-dim mt-2 font-data-mono">Lat: 0.042ms</p>
+</div>
+</div>
+</div>
+<!-- LANE 2: CORE TRUST (DECISION) -->
+<div class="actor-lane border-primary/20">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="shield">shield</span>
+</div>
+<span class="font-label-caps text-primary text-xs">Core Trust Engine</span>
+</div>
+<!-- Vertical Flow -->
+<div class="absolute left-1/2 top-40 w-0.5 h-64 bg-primary/20 hidden md:block"></div>
+<!-- Decision Diamond -->
+<div class="flex justify-center my-12 relative">
+<div class="diamond shadow-md">
+<div class="diamond-content">VERIFY</div>
+</div>
+<!-- Connection labels -->
+<div class="absolute -right-8 top-1/2 -translate-y-1/2 text-[10px] font-data-mono text-primary font-bold">YES</div>
+<div class="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-data-mono text-error font-bold">NO</div>
+</div>
+<!-- Sub-Process Node -->
+<div class="mt-24">
+<div class="bg-surface-container border-2 border-primary rounded-lg p-6 w-full max-w-[240px] shadow-md relative z-10">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-primary text-[10px] uppercase">Validation Loop</span>
+<span class="material-symbols-outlined text-primary text-[16px]" data-icon="sync">sync</span>
+</div>
+<p class="font-headline-md text-on-surface text-[16px]">Auth Multi-Factor</p>
+<div class="h-1 w-full bg-outline-variant mt-4 overflow-hidden rounded-full">
+<div class="h-full bg-primary w-[75%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- LANE 3: EXECUTION LAYER -->
+<div class="actor-lane border-secondary/20">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-8 h-8 rounded bg-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="settings_ethernet">settings_ethernet</span>
+</div>
+<span class="font-label-caps text-secondary text-xs">Infrastructure Exec</span>
+</div>
+<div class="mt-4">
+<!-- Success Card -->
+<div class="bg-white border border-outline-variant rounded-xl p-0 overflow-hidden w-full max-w-[280px] shadow-sm">
+<div class="bg-primary px-4 py-2 flex justify-between items-center">
+<span class="text-white font-label-caps text-[10px]">EXECUTION_SUCCESS</span>
+<span class="material-symbols-outlined text-white text-[14px]" data-icon="check_circle">check_circle</span>
+</div>
+<div class="p-4">
+<div class="h-24 w-full rounded mb-4 bg-cover bg-center" data-alt="A macro shot of a server motherboard with glowing green circuit pathways. The image is clean, sharp, and uses a light-mode color palette with white surfaces and vibrant green LED indicators. The mood is high-tech, efficient, and precise." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAkn2zYg5alTxh8N3XDRdT4P6jebjSQQzUAoU_60tkzdvh8N0gvtN83UaCUiGIORxo76JWcNB23oqbHSTLsICuj3CZg-3QRloZynzFzRuj60rkgHmwcyTrS6xMQJ7FFeoN7-b5RuSr9WJENRqzehHr1rL6l9Je-E8rJRsV0asF1rOKdeUEeibDrqirHCnKm7Q4GyDo046OcPeUpLOQuEk5-UA_npdEcICEKfFcLEKprty20tLp-2DxbsY-2Wjd4Dliae5z6tnzhpVY')"></div>
+<h5 class="font-bold text-on-surface text-sm mb-1">TXN_ID: 99x-82-A</h5>
+<p class="text-xs text-secondary mb-4">Ledger settlement finalized at 14:02:11 UTC.</p>
+<div class="flex items-center gap-2 text-primary font-data-mono text-[10px] font-bold">
+<span class="material-symbols-outlined text-[12px]" data-icon="lan">lan</span>
+                                    NODE DISTRIBUTED
+                                </div>
+</div>
+</div>
+</div>
+<!-- Failure/Reject Case -->
+<div class="mt-8">
+<div class="bg-surface-container-low border border-outline-variant border-dashed rounded-lg p-4 w-full max-w-[280px] opacity-60">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-error text-[18px]" data-icon="cancel">cancel</span>
+<span class="font-label-caps text-error text-[10px]">REJECTION_LOG</span>
+</div>
+<p class="text-[11px] font-data-mono text-secondary">Anomaly detected in packet signature. Origin: Unauthorized Proxy. Block initiated.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Atmospheric Ambient Animation Overlay -->
+
+</section>
+<!-- Metrics Grid -->
+<section class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-white border border-outline-variant p-6 rounded-lg">
+<p class="font-label-caps text-secondary text-[10px] mb-2">NETWORK LATENCY</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-on-surface">14ms</span>
+<span class="text-primary text-xs font-bold font-data-mono">↓ 2.1%</span>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-6 rounded-lg">
+<p class="font-label-caps text-secondary text-[10px] mb-2">TRUST SCORE AVG</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-on-surface">99.8</span>
+<span class="text-primary text-xs font-bold font-data-mono">STABLE</span>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-6 rounded-lg">
+<p class="font-label-caps text-secondary text-[10px] mb-2">ACTIVE NODES</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-on-surface">1,024</span>
+<span class="text-primary text-xs font-bold font-data-mono">LIVE</span>
+</div>
+</div>
+<div class="bg-primary text-white p-6 rounded-lg flex flex-col justify-between">
+<p class="font-label-caps text-[10px] mb-2 opacity-80">THROUGHPUT</p>
+<div class="flex items-center justify-between">
+<span class="font-headline-md">1.2M/s</span>
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation (Mobile Shell Implementation) -->
+<nav class="md:hidden fixed bottom-0 w-full h-16 bg-surface border-t border-outline-variant flex justify-around items-center px-margin-mobile z-50">
+<div class="flex flex-col items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+<span class="text-[10px] font-label-caps">Deals</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="text-[10px] font-label-caps">Markets</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-label-caps">Orders</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-label-caps">Account</span>
+</div>
+</nav>
+<!-- Floating Action Button Contextual -->
+<button class="fixed bottom-24 right-8 w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform z-40 md:bottom-8">
+<span class="material-symbols-outlined text-[28px]" data-icon="add">add</span>
+</button>
+<script>
+        // Micro-interactions for flow simulation
+        document.addEventListener('DOMContentLoaded', () => {
+            const nodes = document.querySelectorAll('.node-navy');
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', () => {
+                    node.style.borderColor = '#00c853';
+                    node.style.transform = 'translateY(-2px)';
+                });
+                node.addEventListener('mouseleave', () => {
+                    node.style.borderColor = '#d2e1f7';
+                    node.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Initialize dynamic flow paths if needed
+            console.log('Trust Engine Protocol Initialized');
+        });
+    </script>
+</body></html>

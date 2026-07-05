@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-008: Enterprise BPMN Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration Injection -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#b8c3ff",
+                    "primary-fixed": "#72ff70",
+                    "surface-container-high": "#1c2b3c",
+                    "on-tertiary-container": "#862ed4",
+                    "outline-variant": "#3b4b37",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface-container": "#122131",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-highest": "#273647",
+                    "on-primary-fixed-variant": "#00530e",
+                    "error": "#ffb4ab",
+                    "on-secondary": "#002388",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "surface-dim": "#051424",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "background": "#051424",
+                    "surface-container-low": "#0d1c2d",
+                    "on-surface": "#d4e4fa",
+                    "on-primary-container": "#007117",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-surface-variant": "#b9ccb2",
+                    "primary": "#ebffe2",
+                    "on-primary-fixed": "#002203",
+                    "on-background": "#d4e4fa",
+                    "on-secondary-container": "#c6ceff",
+                    "primary-fixed-dim": "#00e639",
+                    "on-error": "#690005",
+                    "tertiary": "#fff6ff",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-tertiary": "#490080",
+                    "outline": "#84967e",
+                    "inverse-on-surface": "#233143",
+                    "secondary-container": "#0043eb",
+                    "inverse-primary": "#006e16",
+                    "secondary-fixed": "#dde1ff",
+                    "inverse-surface": "#d4e4fa",
+                    "on-secondary-fixed": "#001356",
+                    "primary-container": "#00ff41",
+                    "surface-tint": "#00e639",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "error-container": "#93000a",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary": "#003907",
+                    "surface-variant": "#273647",
+                    "surface": "#051424"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "node-gutter": "24px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .bpmn-connector {
+            position: absolute;
+            background-color: #72ff70;
+            pointer-events: none;
+        }
+        .bpmn-node {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bpmn-node:hover {
+            box-shadow: 0 0 15px rgba(114, 255, 112, 0.2);
+            filter: brightness(1.2);
+        }
+        .swimlane-border {
+            border-bottom: 1px solid #3b4b37;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-error {
+            border-color: #ffb4ab !important;
+            color: #ffb4ab !important;
+        }
+        .connector-error {
+            border-top: 1px dashed #ffb4ab !important;
+            background: transparent !important;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #010f1f; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; border-radius: 3px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface text-primary border-b border-outline-variant fixed top-0 full-width top-0 z-50 flex justify-between items-center w-full px-lane-margin h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-headline-md">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter">WF-008: AI_INF</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<span class="text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high px-2 py-1 transition-opacity">DIAGRAM_MODE: EDIT</span>
+<span class="text-primary border-b-2 border-primary font-label-caps text-label-caps hover:bg-surface-container-high px-2 py-1 transition-opacity">VALIDATION: PASS</span>
+</div>
+<div class="bg-primary-container text-on-primary-container px-3 py-1 rounded-sm text-label-caps font-bold">
+                v4.2.0 LIVE
+            </div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container border-r border-outline-variant w-64">
+<div class="px-6 py-4 border-b border-outline-variant">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</h2>
+</div>
+<nav class="flex-1 overflow-y-auto pt-4 pb-20">
+<div class="flex flex-col">
+<!-- WF-008 is Active -->
+<a class="bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 flex items-center gap-3 transition-transform translate-x-1" href="#">
+<span class="material-symbols-outlined text-sm">psychology</span>
+<span class="font-code-sm text-code-sm">WF-008: AI_INF</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">fingerprint</span>
+<span class="font-code-sm text-code-sm">WF-001: AUTH</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">payments</span>
+<span class="font-code-sm text-code-sm">WF-002: PAY</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">security</span>
+<span class="font-code-sm text-code-sm">WF-003: RISK</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">mail</span>
+<span class="font-code-sm text-code-sm">WF-004: NOTIF</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">database</span>
+<span class="font-code-sm text-code-sm">WF-005: DATA</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">sync</span>
+<span class="font-code-sm text-code-sm">WF-006: SYNC</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">history</span>
+<span class="font-code-sm text-code-sm">WF-007: LOGS</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">lan</span>
+<span class="font-code-sm text-code-sm">WF-009: EDGE</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">settings_ethernet</span>
+<span class="font-code-sm text-code-sm">WF-010: CORE</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 ml-64 mt-16 overflow-auto relative select-none">
+<!-- SVG Layer for arrows -->
+<svg class="absolute inset-0 w-[2000px] h-[1200px] pointer-events-none z-0">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#72ff70" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead-error" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#ffb4ab" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Primary Flow Path -->
+<path d="M 120 100 L 250 100 L 250 250 L 320 250" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="2"></path>
+<path d="M 520 250 L 600 250 L 600 400 L 680 400" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="2"></path>
+<path d="M 880 400 L 960 400 L 960 550 L 1040 550" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="2"></path>
+<!-- Decision Paths -->
+<path d="M 1120 550 L 1200 550 L 1200 700 L 1280 700" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="2"></path>
+<path d="M 1120 550 L 1200 550 L 1200 850 L 1280 850" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="2"></path>
+<!-- Retry Loops -->
+<path d="M 1480 700 L 1550 700 L 1550 950 L 1080 950 L 1080 590" fill="none" marker-end="url(#arrowhead-error)" stroke="#ffb4ab" stroke-dasharray="4" stroke-width="1.5"></path>
+<!-- Audit Sync -->
+<path d="M 320 250 L 280 250 L 280 1050 L 320 1050" fill="none" stroke="#84967e" stroke-dasharray="2" stroke-width="1"></path>
+</svg>
+<!-- Swimlanes Content -->
+<div class="min-w-[2000px] h-full flex flex-col relative z-10">
+<!-- Lane: Customer -->
+<section class="h-[180px] swimlane-border flex items-start group">
+<div class="w-16 h-full border-r border-outline-variant bg-surface-container-low flex flex-col items-center justify-center p-2 sticky left-0 z-20">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">person</span>
+<span class="[writing-mode:vertical-lr] rotate-180 text-label-caps font-label-caps text-on-surface-variant">CUSTOMER</span>
+</div>
+<div class="p-10 flex gap-12 items-center">
+<!-- Start Node -->
+<div class="bpmn-node w-40 bg-surface-container border border-primary p-3 rounded-sm flex flex-col gap-2 relative">
+<span class="text-label-caps font-label-caps text-primary opacity-60">EVENT: START</span>
+<h3 class="text-code-sm font-code-sm">USER_ACTION_TRIGGER</h3>
+<div class="flex justify-between items-center mt-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant">ID: E-0102</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Lane: n8n Workflow Orchestrator -->
+<section class="h-[180px] swimlane-border flex items-start group">
+<div class="w-16 h-full border-r border-outline-variant bg-surface-container-low flex flex-col items-center justify-center p-2 sticky left-0 z-20">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">hub</span>
+<span class="[writing-mode:vertical-lr] rotate-180 text-label-caps font-label-caps text-on-surface-variant">N8N_ENGINE</span>
+</div>
+<div class="p-10 flex gap-12 items-center ml-64">
+<div class="bpmn-node w-48 bg-surface-container border border-secondary p-3 rounded-sm flex flex-col gap-2 relative">
+<span class="text-label-caps font-label-caps text-secondary opacity-60">SERVICE: WEBHOOK</span>
+<h3 class="text-code-sm font-code-sm">RECEIVE_EVENT_PAYLOAD</h3>
+<div class="flex justify-between items-center mt-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant">LATENCY: 12ms</span>
+<span class="text-code-xs font-code-xs text-secondary-fixed-dim">AUTH: OK</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Lane: Notification Service -->
+<section class="h-[180px] swimlane-border flex items-start group">
+<div class="w-16 h-full border-r border-outline-variant bg-surface-container-low flex flex-col items-center justify-center p-2 sticky left-0 z-20">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">notifications</span>
+<span class="[writing-mode:vertical-lr] rotate-180 text-label-caps font-label-caps text-on-surface-variant">NOTIF_SVC</span>
+</div>
+<div class="p-10 flex gap-12 items-center ml-[520px]">
+<div class="bpmn-node w-52 bg-surface-container border border-outline p-3 rounded-sm flex flex-col gap-2 relative">
+<span class="text-label-caps font-label-caps text-outline opacity-60">PROCESS: LOGIC</span>
+<h3 class="text-code-sm font-code-sm">MAP_EVENT_TO_TEMPLATE</h3>
+<div class="flex flex-col gap-1 mt-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant">TMPL_ID: 0x8F22</span>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[85%]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Lane: Preference Service -->
+<section class="h-[180px] swimlane-border flex items-start group">
+<div class="w-16 h-full border-r border-outline-variant bg-surface-container-low flex flex-col items-center justify-center p-2 sticky left-0 z-20">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">tune</span>
+<span class="[writing-mode:vertical-lr] rotate-180 text-label-caps font-label-caps text-on-surface-variant">PREF_SVC</span>
+</div>
+<div class="p-10 flex gap-12 items-center ml-[880px]">
+<!-- Gateway Diamond -->
+<div class="relative w-20 h-20 rotate-45 border-2 border-primary bg-surface-container flex items-center justify-center -translate-y-2">
+<div class="-rotate-45 text-center">
+<span class="material-symbols-outlined text-primary scale-75">alt_route</span>
+<span class="block text-[8px] font-bold leading-tight">CHANNEL_SEL</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Lane: Providers (Email, SMS, Push) -->
+<section class="h-[320px] swimlane-border flex items-start group">
+<div class="w-16 h-full border-r border-outline-variant bg-surface-container-low flex flex-col items-center justify-center p-2 sticky left-0 z-20">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">cell_tower</span>
+<span class="[writing-mode:vertical-lr] rotate-180 text-label-caps font-label-caps text-on-surface-variant">PROVIDERS</span>
+</div>
+<div class="p-10 flex flex-col gap-10 ml-[1200px]">
+<div class="flex gap-12 items-center">
+<div class="bpmn-node w-44 bg-surface-container border border-primary p-3 rounded-sm flex flex-col gap-2 relative">
+<span class="text-label-caps font-label-caps text-primary opacity-60">ENDPOINT: SMTP</span>
+<h3 class="text-code-sm font-code-sm">SEND_EMAIL_RELAY</h3>
+<span class="text-code-xs font-code-xs text-on-surface-variant">PROVIDER: SENDGRID</span>
+</div>
+<div class="bpmn-node w-40 bg-surface-container-high border border-error border-dashed p-3 rounded-sm flex flex-col gap-2 relative">
+<span class="text-label-caps font-label-caps text-error opacity-60">RETRY_LOGIC</span>
+<h3 class="text-code-sm font-code-sm">BACKOFF_QUEUE</h3>
+<span class="text-code-xs font-code-xs text-on-surface-variant">ATTEMPT: 2/5</span>
+</div>
+</div>
+<div class="flex gap-12 items-center">
+<div class="bpmn-node w-44 bg-surface-container border border-secondary p-3 rounded-sm flex flex-col gap-2 relative">
+<span class="text-label-caps font-label-caps text-secondary opacity-60">ENDPOINT: TWILIO</span>
+<h3 class="text-code-sm font-code-sm">PUSH_SMS_PACKET</h3>
+<span class="text-code-xs font-code-xs text-on-surface-variant">STATUS: QUEUED</span>
+</div>
+<div class="bpmn-node w-40 bg-error-container/20 border border-error p-3 rounded-sm flex flex-col gap-2 relative">
+<span class="text-label-caps font-label-caps text-error">DEAD_LETTER</span>
+<h3 class="text-code-sm font-code-sm">DLQ_ESCALATION</h3>
+<span class="text-code-xs font-code-xs text-error">FAILURE_R_500</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Lane: Audit & Analytics -->
+<section class="h-[180px] flex items-start group">
+<div class="w-16 h-full border-r border-outline-variant bg-surface-container-low flex flex-col items-center justify-center p-2 sticky left-0 z-20">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">analytics</span>
+<span class="[writing-mode:vertical-lr] rotate-180 text-label-caps font-label-caps text-on-surface-variant">AUDIT_TRAIL</span>
+</div>
+<div class="p-10 flex gap-8 items-center ml-64">
+<div class="w-full max-w-2xl bg-surface-container-lowest border border-outline-variant p-4 rounded-sm">
+<div class="flex justify-between items-center mb-3">
+<span class="text-label-caps font-label-caps text-primary">REAL_TIME_TELEMETRY</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">NODES_ALIVE: 14</span>
+</div>
+<div class="grid grid-cols-4 gap-4">
+<div class="border-l border-primary pl-2">
+<div class="text-code-xs text-on-surface-variant">UPTIME</div>
+<div class="text-code-sm font-bold text-primary">99.98%</div>
+</div>
+<div class="border-l border-secondary pl-2">
+<div class="text-code-xs text-on-surface-variant">DROP_RATE</div>
+<div class="text-code-sm font-bold text-secondary">0.021%</div>
+</div>
+<div class="border-l border-outline pl-2">
+<div class="text-code-xs text-on-surface-variant">LATENCY</div>
+<div class="text-code-sm font-bold text-outline">45ms</div>
+</div>
+<div class="border-l border-error pl-2">
+<div class="text-code-xs text-on-surface-variant">RETRY_C</div>
+<div class="text-code-sm font-bold text-error">423</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Floating UI / MiniMap Context -->
+<div class="fixed bottom-16 right-8 w-48 h-32 bg-surface-container-high border border-outline-variant z-50 p-2 opacity-80 overflow-hidden hidden md:block">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-1 text-[8px]">VIEWPORT_MINIMAP</div>
+<div class="w-full h-full relative border border-outline-variant/30">
+<div class="absolute top-2 left-2 w-1/4 h-1/4 bg-primary/20 border border-primary"></div>
+<div class="w-full h-1 bg-primary/10 mt-4"></div>
+<div class="w-full h-1 bg-primary/10 mt-2"></div>
+<div class="w-full h-1 bg-primary/10 mt-2"></div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-4">
+<span class="text-on-surface-variant text-code-xs font-code-xs transition-colors duration-150 hover:text-primary">AUDIT_TRAIL: ACTIVE</span>
+<span class="text-on-surface-variant text-code-xs font-code-xs transition-colors duration-150 hover:text-primary">N8N_SYNC: OK</span>
+<span class="text-on-surface-variant text-code-xs font-code-xs transition-colors duration-150 hover:text-primary">LATENCY: 12ms</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">SYSTEM_READY</span>
+</div>
+</footer>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.querySelectorAll('.bpmn-node').forEach(node => {
+            node.addEventListener('mousedown', () => {
+                node.style.transform = 'scale(0.98)';
+                node.style.borderColor = 'var(--secondary)';
+            });
+            node.addEventListener('mouseup', () => {
+                node.style.transform = 'scale(1)';
+                node.style.borderColor = '';
+            });
+        });
+
+        // Simple parallax effect for grid background
+        const canvas = document.querySelector('main');
+        canvas.addEventListener('scroll', () => {
+            const x = canvas.scrollLeft;
+            const y = canvas.scrollTop;
+            canvas.style.backgroundPosition = `-${x % 24}px -${y % 24}px`;
+        });
+    </script>
+</body></html>

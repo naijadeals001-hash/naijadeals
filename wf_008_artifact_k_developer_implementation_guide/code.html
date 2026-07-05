@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-008: IMPLEMENTATION_GUIDE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#b8c3ff",
+                    "primary-fixed": "#72ff70",
+                    "surface-container-high": "#1c2b3c",
+                    "on-tertiary-container": "#862ed4",
+                    "outline-variant": "#3b4b37",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface-container": "#122131",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-highest": "#273647",
+                    "on-primary-fixed-variant": "#00530e",
+                    "error": "#ffb4ab",
+                    "on-secondary": "#002388",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "surface-dim": "#051424",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "background": "#051424",
+                    "surface-container-low": "#0d1c2d",
+                    "on-surface": "#d4e4fa",
+                    "on-primary-container": "#007117",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-surface-variant": "#b9ccb2",
+                    "primary": "#ebffe2",
+                    "on-primary-fixed": "#002203",
+                    "on-background": "#d4e4fa",
+                    "on-secondary-container": "#c6ceff",
+                    "primary-fixed-dim": "#00e639",
+                    "on-error": "#690005",
+                    "tertiary": "#fff6ff",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-tertiary": "#490080",
+                    "outline": "#84967e",
+                    "inverse-on-surface": "#233143",
+                    "secondary-container": "#0043eb",
+                    "inverse-primary": "#006e16",
+                    "secondary-fixed": "#dde1ff",
+                    "inverse-surface": "#d4e4fa",
+                    "on-secondary-fixed": "#001356",
+                    "primary-container": "#00ff41",
+                    "surface-tint": "#00e639",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "error-container": "#93000a",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary": "#003907",
+                    "surface-variant": "#273647",
+                    "surface": "#051424"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "node-gutter": "24px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(13, 28, 45, 0.7);
+            backdrop-filter: blur(12px);
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+            z-index: -1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 flex justify-between items-center w-full px-lane-margin h-16 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary dark:text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<a class="text-primary dark:text-primary border-b-2 border-primary px-1 transition-opacity opacity-80 font-label-caps text-label-caps" href="#">IMPLEMENTATION</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high px-1 font-label-caps text-label-caps transition-colors" href="#">SCHEMA</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high px-1 font-label-caps text-label-caps transition-colors" href="#">METRICS</a>
+</nav>
+<span class="text-label-caps font-label-caps text-primary px-3 py-1 border border-primary/30 rounded">v4.2.0 LIVE</span>
+</div>
+</header>
+<!-- NavigationDrawer (Left) -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 w-64 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant">
+<div class="px-4 mb-6">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</span>
+</div>
+<nav class="flex flex-col gap-1 overflow-y-auto pb-20">
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors group" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="fingerprint">fingerprint</span>
+<span class="font-code-sm text-code-sm">WF-001: AUTH</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors group" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="payments">payments</span>
+<span class="font-code-sm text-code-sm">WF-002: PAY</span>
+</a>
+<a class="bg-surface-variant dark:bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 flex items-center gap-3 translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="psychology">psychology</span>
+<span class="font-code-sm text-code-sm">WF-008: AI_INF</span>
+</a>
+<!-- Sub-item for current focus -->
+<div class="ml-8 mt-2 flex flex-col gap-1 border-l border-outline-variant">
+<a class="text-primary px-4 py-1 text-code-xs font-code-xs" href="#">NOTIF_CORE</a>
+<a class="text-on-surface-variant px-4 py-1 text-code-xs font-code-xs hover:text-primary" href="#">SHARDING_LOGIC</a>
+<a class="text-on-surface-variant px-4 py-1 text-code-xs font-code-xs hover:text-primary" href="#">API_KEYS</a>
+</div>
+<!-- More items -->
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors group" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="lan">lan</span>
+<span class="font-code-sm text-code-sm">WF-009: EDGE</span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 flex items-center gap-3 hover:bg-surface-container-highest transition-colors group" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-code-sm text-code-sm">WF-010: CORE</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 pb-20 px-lane-margin min-h-screen">
+<!-- Header Section -->
+<div class="mb-12 border-l-4 border-primary pl-6">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-label-caps font-label-caps text-primary bg-primary/10 px-2 py-0.5 rounded">SERVICE: NOTIFICATION_CORE</span>
+<span class="text-label-caps font-label-caps text-secondary bg-secondary/10 px-2 py-0.5 rounded">STATUS: READY_FOR_HANDOFF</span>
+</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">WF-008 Implementation Protocol</h2>
+<p class="text-on-surface-variant max-w-2xl mt-4 font-body-md">Architectural breakdown and integration guide for the high-throughput Notification_Core microservice. Includes multi-channel routing logic and high-availability sharding strategies.</p>
+</div>
+<!-- Bento Grid for Tech Specs -->
+<div class="grid grid-cols-12 gap-6">
+<!-- API Key Vault -->
+<div class="col-span-12 lg:col-span-4 glass-panel border border-outline-variant p-6 rounded-lg relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="key">key</span>
+</div>
+<h3 class="text-label-caps font-label-caps text-primary mb-6">REQUIRED_API_VAULT</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center p-3 bg-surface-container-highest border-l-2 border-secondary">
+<div>
+<p class="text-code-xs font-code-xs text-on-surface-variant">SMS_GATEWAY</p>
+<p class="text-code-sm font-code-sm text-on-surface">TWILIO_AUTH_TOKEN</p>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="verified">verified</span>
+</div>
+<div class="flex justify-between items-center p-3 bg-surface-container-highest border-l-2 border-primary">
+<div>
+<p class="text-code-xs font-code-xs text-on-surface-variant">EMAIL_RELAY</p>
+<p class="text-code-sm font-code-sm text-on-surface">SENDGRID_API_KEY</p>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="verified">verified</span>
+</div>
+<div class="flex justify-between items-center p-3 bg-surface-container-highest border-l-2 border-error">
+<div>
+<p class="text-code-xs font-code-xs text-on-surface-variant">PUSH_SERVICE</p>
+<p class="text-code-sm font-code-sm text-on-surface">FCM_SERVER_KEY</p>
+</div>
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+</div>
+</div>
+<div class="mt-6 flex justify-end">
+<button class="text-label-caps font-label-caps text-primary hover:underline flex items-center gap-1">
+                        ROTATE_KEYS <span class="material-symbols-outlined text-xs" data-icon="refresh">refresh</span>
+</button>
+</div>
+</div>
+<!-- Sharding Logic Visualization -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-low border border-outline-variant p-6 rounded-lg">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-label-caps font-label-caps text-primary">SHARDING_LOGIC: MESSAGE_QUEUES</h3>
+<div class="flex gap-2">
+<span class="w-3 h-3 rounded-full bg-primary-fixed animate-pulse"></span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">REAL-TIME LOAD BALANCING</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 h-48 relative">
+<!-- Shard 1 -->
+<div class="border border-outline-variant bg-surface-container flex flex-col items-center justify-center p-4 group hover:border-primary transition-colors">
+<span class="text-code-xs font-code-xs text-on-surface-variant mb-2">SHARD_001 [USA]</span>
+<div class="w-full bg-surface-container-highest h-2 rounded overflow-hidden">
+<div class="bg-primary h-full w-[45%]"></div>
+</div>
+<span class="text-code-sm font-code-sm mt-2 text-primary">45% LOAD</span>
+</div>
+<!-- Shard 2 -->
+<div class="border border-outline-variant bg-surface-container flex flex-col items-center justify-center p-4 group hover:border-primary transition-colors">
+<span class="text-code-xs font-code-xs text-on-surface-variant mb-2">SHARD_002 [EUW]</span>
+<div class="w-full bg-surface-container-highest h-2 rounded overflow-hidden">
+<div class="bg-secondary h-full w-[88%]"></div>
+</div>
+<span class="text-code-sm font-code-sm mt-2 text-secondary">88% LOAD</span>
+</div>
+<!-- Shard 3 -->
+<div class="border border-outline-variant bg-surface-container flex flex-col items-center justify-center p-4 group hover:border-primary transition-colors">
+<span class="text-code-xs font-code-xs text-on-surface-variant mb-2">SHARD_003 [APAC]</span>
+<div class="w-full bg-surface-container-highest h-2 rounded overflow-hidden">
+<div class="bg-primary h-full w-[12%]"></div>
+</div>
+<span class="text-code-sm font-code-sm mt-2 text-primary">12% LOAD</span>
+</div>
+<!-- Decorative Connection Lines -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-20" xmlns="http://www.w3.org/2000/svg">
+<path class="text-outline" d="M 0 50 L 100 50" fill="none" stroke="currentColor"></path>
+</svg>
+</div>
+<div class="mt-6 pt-6 border-t border-outline-variant grid grid-cols-2 gap-8">
+<div>
+<p class="text-label-caps font-label-caps text-on-surface-variant mb-2">PARTITION_STRATEGY</p>
+<code class="text-code-sm font-code-sm block p-2 bg-surface-dim text-secondary">
+                            shard_key = user_id % total_shards
+                        </code>
+</div>
+<div>
+<p class="text-label-caps font-label-caps text-on-surface-variant mb-2">FAILOVER_POLICY</p>
+<p class="text-code-sm font-code-sm text-on-surface">Auto-redirection to adjacent regional shard on 3 consecutive 5xx errors.</p>
+</div>
+</div>
+</div>
+<!-- Shared Components Registry -->
+<div class="col-span-12 lg:col-span-7 border border-outline-variant p-6 rounded-lg">
+<h3 class="text-label-caps font-label-caps text-primary mb-6">SHARED_COMPONENTS_REGISTRY</h3>
+<div class="grid grid-cols-2 gap-6">
+<!-- Component 1 -->
+<div class="flex gap-4 items-start p-4 bg-surface-container-low rounded border border-transparent hover:border-outline-variant transition-all cursor-crosshair">
+<div class="p-3 bg-primary/10 rounded">
+<span class="material-symbols-outlined text-primary" data-icon="notifications_active">notifications_active</span>
+</div>
+<div>
+<h4 class="text-code-sm font-code-sm font-bold text-on-surface">notification-bell</h4>
+<p class="text-code-xs font-code-xs text-on-surface-variant mt-1">Reactive WebSocket listener. Tracks unread counts per user_id segment.</p>
+<div class="mt-3 flex gap-2">
+<span class="px-2 py-0.5 bg-surface-container-highest text-code-xs font-code-xs rounded">Vue 3.2</span>
+<span class="px-2 py-0.5 bg-surface-container-highest text-code-xs font-code-xs rounded">Pinia</span>
+</div>
+</div>
+</div>
+<!-- Component 2 -->
+<div class="flex gap-4 items-start p-4 bg-surface-container-low rounded border border-transparent hover:border-outline-variant transition-all cursor-crosshair">
+<div class="p-3 bg-secondary/10 rounded">
+<span class="material-symbols-outlined text-secondary" data-icon="toggle_on">toggle_on</span>
+</div>
+<div>
+<h4 class="text-code-sm font-code-sm font-bold text-on-surface">preference-toggle</h4>
+<p class="text-code-xs font-code-xs text-on-surface-variant mt-1">Atomic state persistence. Updates database via partial patching.</p>
+<div class="mt-3 flex gap-2">
+<span class="px-2 py-0.5 bg-surface-container-highest text-code-xs font-code-xs rounded">Tailwind</span>
+<span class="px-2 py-0.5 bg-surface-container-highest text-code-xs font-code-xs rounded">Axios</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Testing & Deployment Card -->
+<div class="col-span-12 lg:col-span-5 bg-secondary-container/10 border border-secondary/30 p-6 rounded-lg flex flex-col justify-between">
+<div>
+<h3 class="text-label-caps font-label-caps text-secondary mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="rocket_launch">rocket_launch</span>
+                        DEPLOYMENT_REQUIREMENTS
+                    </h3>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-sm mt-0.5" data-icon="check_circle">check_circle</span>
+<span class="text-code-sm font-code-sm">Unit Testing: Min 85% coverage on routing logic.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-sm mt-0.5" data-icon="check_circle">check_circle</span>
+<span class="text-code-sm font-code-sm">Stress Test: 50k req/sec burst throughput benchmark.</span>
+</li>
+<li class="flex items-start gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm mt-0.5" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="text-code-sm font-code-sm">Canary Deploy: 5% traffic routing for 4 hours.</span>
+</li>
+</ul>
+</div>
+<div class="mt-8 pt-6 border-t border-secondary/20">
+<button class="w-full py-3 bg-secondary text-on-secondary font-label-caps text-label-caps rounded flex justify-center items-center gap-2 hover:opacity-90 transition-opacity">
+                        INITIATE_PROD_PUSH <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Deep Handoff Technical Terminal -->
+<div class="mt-12 bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden">
+<div class="bg-surface-container px-4 py-2 border-b border-outline-variant flex justify-between items-center">
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-error/40"></div>
+<div class="w-3 h-3 rounded-full bg-secondary/40"></div>
+<div class="w-3 h-3 rounded-full bg-primary/40"></div>
+</div>
+<span class="text-code-xs font-code-xs text-on-surface-variant">HANDOFF_GUIDE.MD</span>
+</div>
+<div class="p-6 font-code-sm text-on-surface leading-relaxed max-h-[400px] overflow-y-auto">
+<p class="text-primary mb-4"># WF-008: Deep Technical Integration Guide</p>
+<p class="mb-2">## 1. Microservice Orchestration</p>
+<p class="text-on-surface-variant mb-4 pl-4 border-l border-outline-variant">
+                    `Notification_Core` operates as a downstream consumer of `Workflow_Engine`. All events emitted from the engine are serialized into JSON and pushed to a RabbitMQ exchange. This service pulls from the `pending_notifications` queue and resolves channel mapping based on user preferences.
+                </p>
+<p class="mb-2">## 2. Queue Architecture</p>
+<div class="bg-surface-dim p-4 rounded mb-4">
+<pre class="text-secondary text-code-xs">{
+  "queue_name": "notification.priority.high",
+  "routing_key": "notif.high.#",
+  "durable": true,
+  "dead_letter_exchange": "notif.dlx"
+}
+                    </pre>
+</div>
+<p class="mb-2">## 3. Latency Mitigation</p>
+<p class="text-on-surface-variant mb-4 pl-4 border-l border-outline-variant">
+                    To maintain &lt; 12ms latency, the service uses an in-memory Redis cache for frequently accessed user preferences. Cache invalidation occurs via TTL (300s) or explicit `preference_update` events.
+                </p>
+<p class="text-primary mt-8">--- END OF HANDOFF DOCUMENT ---</p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2 bg-surface-container-low dark:bg-surface-container-low border-t border-outline-variant dark:border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div class="flex gap-4">
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors duration-150" href="#">AUDIT_TRAIL: ACTIVE</a>
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors duration-150" href="#">N8N_SYNC: OK</a>
+<a class="text-code-xs font-code-xs text-primary font-bold transition-colors duration-150" href="#">LATENCY: 12ms</a>
+</div>
+</div>
+<div class="text-label-caps font-label-caps text-on-surface-variant">
+            © 2024 ECOSYSTEM_ORCHESTRATOR
+        </div>
+</footer>
+<!-- FAB (Floating Action Button) - Suppressed on this detail/docs screen as per guidance -->
+<!-- Micro-Telemetry Interactions -->
+<script>
+        document.addEventListener('mousemove', (e) => {
+            const gridEffect = document.querySelector('.grid-effect');
+            if (gridEffect) {
+                const x = (e.clientX / window.innerWidth) * 100;
+                const y = (e.clientY / window.innerHeight) * 100;
+                gridEffect.style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(114, 255, 112, 0.05) 0%, transparent 40%)`;
+            }
+        });
+
+        // Simple typing effect for the terminal
+        const terminalText = document.querySelectorAll('.font-code-sm');
+        terminalText.forEach((el, index) => {
+            el.style.opacity = '0';
+            setTimeout(() => {
+                el.style.transition = 'opacity 0.5s ease-out';
+                el.style.opacity = '1';
+            }, index * 50);
+        });
+    </script>
+</body></html>

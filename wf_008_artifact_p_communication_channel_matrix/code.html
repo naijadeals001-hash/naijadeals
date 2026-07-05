@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UCE_CORE_ENGINE_V2.4 | Channel Matrix</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .matrix-cell {
+            border-right: 1px solid #3b4b37;
+            border-bottom: 1px solid #3b4b37;
+            padding: 8px 12px;
+        }
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 20;
+            background-color: #122131;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "secondary-container": "#0043eb",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-fixed-variant": "#00530e",
+                        "surface-dim": "#051424",
+                        "inverse-primary": "#006e16",
+                        "surface": "#051424",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-tint": "#00e639",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "primary-container": "#00ff41",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-bright": "#2c3a4c",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-container-high": "#1c2b3c",
+                        "on-secondary": "#002388",
+                        "surface-container": "#122131",
+                        "inverse-on-surface": "#233143",
+                        "secondary-fixed": "#dde1ff",
+                        "on-primary": "#003907",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#001356",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "secondary": "#b8c3ff",
+                        "primary-fixed": "#72ff70",
+                        "on-primary-container": "#007117",
+                        "error-container": "#93000a",
+                        "tertiary-container": "#ecd3ff",
+                        "primary": "#ebffe2",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "tertiary": "#fff6ff",
+                        "surface-variant": "#273647",
+                        "on-background": "#d4e4fa",
+                        "surface-container-low": "#0d1c2d",
+                        "on-primary-fixed": "#002203",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "outline": "#84967e",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-tertiary-container": "#862ed4",
+                        "tertiary-fixed": "#f0dbff",
+                        "background": "#051424",
+                        "on-surface-variant": "#b9ccb2",
+                        "outline-variant": "#3b4b37"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface custom-scrollbar overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-node-gutter h-16">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-headline-md tracking-tighter text-primary-fixed-dim">UCE_CORE_ENGINE_V2.4</span>
+</div>
+<nav class="hidden md:flex gap-6">
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary hover:bg-surface-variant transition-colors py-5" href="#">Communication_Matrix</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors py-5" href="#">System_Architecture</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors py-5" href="#">Flow_Matrix</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex flex-col items-end">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SYSTEM_UPTIME: 99.98%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">NODE_01: ACTIVE</span>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer active:opacity-80" data-icon="terminal">terminal</span>
+</div>
+</header>
+<div class="flex min-h-screen">
+<!-- NavigationDrawer (Desktop Only) -->
+<aside class="hidden md:flex flex-col h-full w-64 left-0 border-r border-outline-variant bg-surface-container py-lane-margin sticky top-16">
+<div class="px-6 mb-8">
+<span class="font-label-caps text-headline-md text-primary-fixed-dim">SYSTEM_EXPLORER</span>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out text-on-surface-variant hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Flow_Matrix</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out text-on-surface-variant hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="psychology">psychology</span>
+<span class="font-label-caps text-label-caps">AI_Logic_Engine</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out text-on-surface-variant hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-label-caps">Compliance_Logs</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out text-on-surface-variant hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="developer_board">developer_board</span>
+<span class="font-label-caps text-label-caps">Terminal_Console</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-node-gutter pb-32">
+<!-- Header Section -->
+<div class="mb-10 max-w-5xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 bg-primary-fixed-dim rounded-full animate-pulse"></span>
+<h2 class="font-label-caps text-label-caps text-primary-fixed-dim">DATASET_REF: ARTIFACT_P</h2>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-4">Communication Channel Matrix</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+                    Comprehensive cross-reference of protocol capabilities and reliability metrics for the unified communication engine. Developers should refer to fallback options for critical notification sequencing.
+                </p>
+</div>
+<!-- Matrix Control Bar -->
+<div class="mb-6 flex flex-wrap gap-4 items-center bg-surface-container-low p-4 border border-outline-variant rounded-lg">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container border border-outline-variant rounded">
+<span class="material-symbols-outlined text-sm" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 font-code-xs text-code-xs text-on-surface w-40" placeholder="FILTER_CHANNELS..." type="text"/>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 bg-primary-fixed-dim rounded-sm"></span>
+<span class="font-label-caps text-[10px]">SUPPORTED</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 bg-secondary-container rounded-sm"></span>
+<span class="font-label-caps text-[10px]">PARTIAL</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 bg-error-container rounded-sm"></span>
+<span class="font-label-caps text-[10px]">UNSUPPORTED</span>
+</div>
+</div>
+</div>
+<!-- The Matrix -->
+<div class="relative border border-outline-variant rounded-lg overflow-hidden bg-surface-container-lowest">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full border-collapse">
+<thead>
+<tr class="bg-surface-container-high border-b border-outline-variant">
+<th class="matrix-cell sticky-col text-left min-w-[180px] font-label-caps text-label-caps text-primary-fixed-dim">CHANNEL_IDENTIFIER</th>
+<th class="matrix-cell text-left min-w-[220px] font-label-caps text-label-caps">USE_CASES</th>
+<th class="matrix-cell text-center min-w-[120px] font-label-caps text-label-caps">PRIORITY</th>
+<th class="matrix-cell text-center min-w-[120px] font-label-caps text-label-caps">DELIVERY_SPEED</th>
+<th class="matrix-cell text-left min-w-[180px] font-label-caps text-label-caps">FALLBACK</th>
+<th class="matrix-cell text-center min-w-[100px] font-label-caps text-label-caps">COST</th>
+<th class="matrix-cell text-center min-w-[100px] font-label-caps text-label-caps">RELIABILITY</th>
+<th class="matrix-cell text-center font-label-caps text-[9px] uppercase">ATTACH?</th>
+<th class="matrix-cell text-center font-label-caps text-[9px] uppercase">IMAGE?</th>
+<th class="matrix-cell text-center font-label-caps text-[9px] uppercase">VOICE?</th>
+<th class="matrix-cell text-center font-label-caps text-[9px] uppercase">VIDEO?</th>
+<th class="matrix-cell text-center font-label-caps text-[9px] uppercase">READ_REC</th>
+<th class="matrix-cell text-center font-label-caps text-[9px] uppercase">DELIV_REC</th>
+<th class="matrix-cell text-center font-label-caps text-[9px] uppercase">TYPING</th>
+<th class="matrix-cell text-center font-label-caps text-[9px] uppercase">TRANS</th>
+<th class="matrix-cell text-center font-label-caps text-[9px] uppercase">AI_ASSIST</th>
+</tr>
+</thead>
+<tbody class="font-code-sm text-code-sm text-on-surface">
+<!-- Row Generator Script Placeholder or Static for Prototype -->
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">Email</td>
+<td class="matrix-cell text-on-surface-variant">Marketing, Reports, Invoices, Reset Password</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-surface-variant rounded text-[10px]">LOW/MED</span></td>
+<td class="matrix-cell text-center">1-5 MIN</td>
+<td class="matrix-cell text-on-surface-variant">Push, SMS</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">$</td>
+<td class="matrix-cell text-center">98.2%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-secondary-container" data-icon="change_history">change_history</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">SMS</td>
+<td class="matrix-cell text-on-surface-variant">OTP, Critical Alerts, Booking Confirm</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-primary-container text-on-primary-container rounded text-[10px]">CRITICAL</span></td>
+<td class="matrix-cell text-center">&lt; 15 SEC</td>
+<td class="matrix-cell text-on-surface-variant">Voice Call, Email</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">$$</td>
+<td class="matrix-cell text-center">99.9%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-secondary-container" data-icon="change_history">change_history</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">WhatsApp</td>
+<td class="matrix-cell text-on-surface-variant">Customer Support, Media Sharing</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded text-[10px]">HIGH</span></td>
+<td class="matrix-cell text-center">&lt; 5 SEC</td>
+<td class="matrix-cell text-on-surface-variant">SMS, In-App</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">$$</td>
+<td class="matrix-cell text-center">95.4%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">Push Notification</td>
+<td class="matrix-cell text-on-surface-variant">Status Updates, App Engagement</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-surface-variant rounded text-[10px]">MED</span></td>
+<td class="matrix-cell text-center">INSTANT</td>
+<td class="matrix-cell text-on-surface-variant">In-App, SMS</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">FREE</td>
+<td class="matrix-cell text-center">88.2%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">In-App</td>
+<td class="matrix-cell text-on-surface-variant">Activity Feed, Contextual Prompts</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-surface-variant rounded text-[10px]">LOW</span></td>
+<td class="matrix-cell text-center">SESSION</td>
+<td class="matrix-cell text-on-surface-variant">None</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">FREE</td>
+<td class="matrix-cell text-center">100%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">Voice Call</td>
+<td class="matrix-cell text-on-surface-variant">High-stakes Logistics, Driver Connect</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-primary-container text-on-primary-container rounded text-[10px]">CRITICAL</span></td>
+<td class="matrix-cell text-center">INSTANT</td>
+<td class="matrix-cell text-on-surface-variant">SMS, Push</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">$$$</td>
+<td class="matrix-cell text-center">92.1%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-secondary-container" data-icon="change_history">change_history</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">Admin Broadcast</td>
+<td class="matrix-cell text-on-surface-variant">Global System Maintenance, Policy Update</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded text-[10px]">HIGH</span></td>
+<td class="matrix-cell text-center">&lt; 1 MIN</td>
+<td class="matrix-cell text-on-surface-variant">Email, Banner</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">FREE</td>
+<td class="matrix-cell text-center">99.9%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-secondary-container" data-icon="change_history">change_history</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">Merchant Broadcast</td>
+<td class="matrix-cell text-on-surface-variant">Promo Flash, Opening Hours Change</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-surface-variant rounded text-[10px]">MED</span></td>
+<td class="matrix-cell text-center">&lt; 2 MIN</td>
+<td class="matrix-cell text-on-surface-variant">Email</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">$</td>
+<td class="matrix-cell text-center">97.5%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">Driver Broadcast</td>
+<td class="matrix-cell text-on-surface-variant">Peak Demand Alert, Safety Warning</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-primary-container text-on-primary-container rounded text-[10px]">CRITICAL</span></td>
+<td class="matrix-cell text-center">&lt; 10 SEC</td>
+<td class="matrix-cell text-on-surface-variant">Push, SMS</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">FREE</td>
+<td class="matrix-cell text-center">99.1%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="matrix-cell sticky-col font-bold border-r-2 border-r-primary-fixed-dim/30">Corporate Broadcast</td>
+<td class="matrix-cell text-on-surface-variant">Internal News, Stakeholder Briefings</td>
+<td class="matrix-cell text-center"><span class="px-2 py-0.5 bg-surface-variant rounded text-[10px]">LOW</span></td>
+<td class="matrix-cell text-center">BATCH</td>
+<td class="matrix-cell text-on-surface-variant">Email</td>
+<td class="matrix-cell text-center text-primary-fixed-dim">$</td>
+<td class="matrix-cell text-center">94.8%</td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+<td class="matrix-cell text-center"><span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Footer Telemetry -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="p-4 border border-outline-variant bg-surface-container-low rounded-lg">
+<span class="font-label-caps text-[10px] text-on-surface-variant">AVG_LATENCY_GLOBAL</span>
+<div class="flex items-end gap-2 mt-2">
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">45.2ms</span>
+<span class="text-xs text-primary-fixed-dim pb-1">▼ 1.2%</span>
+</div>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-low rounded-lg">
+<span class="font-label-caps text-[10px] text-on-surface-variant">TOTAL_TX_24H</span>
+<div class="flex items-end gap-2 mt-2">
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">1.42M</span>
+<span class="text-xs text-primary-fixed-dim pb-1">▲ 0.4%</span>
+</div>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-low rounded-lg">
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTIVE_PROTOCOL_STREAMS</span>
+<div class="flex items-end gap-2 mt-2">
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">10/10</span>
+<span class="text-xs text-primary-fixed-dim pb-1">OPTIMIZED</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-grid-unit bg-surface-container-lowest border-t border-outline-variant">
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+<span class="font-code-xs text-code-xs">Live_Telemetry</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/10 text-primary-fixed-dim py-1 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dns">dns</span>
+<span class="font-code-xs text-code-xs">Node_Status</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="sync_alt">sync_alt</span>
+<span class="font-code-xs text-code-xs">Sync_Engine</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="health_metrics">health_metrics</span>
+<span class="font-code-xs text-code-xs">System_Health</span>
+</a>
+</nav>
+<!-- Micro-Interaction JavaScript -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    row.style.boxShadow = 'inset 4px 0 0 #00e639';
+                });
+                row.addEventListener('mouseleave', () => {
+                    row.style.boxShadow = 'none';
+                });
+            });
+            
+            // Console log simulation
+            console.log("UCE_CORE_ENGINE :: Matrix initialized.");
+            console.log("CHANNELS_LOADED :: 10");
+            console.log("ENCRYPTION_STATUS :: AES-256-GCM ACTIVE");
+        });
+    </script>
+</body></html>

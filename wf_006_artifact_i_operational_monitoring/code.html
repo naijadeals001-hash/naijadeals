@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OPERATIONAL MONITORING - WF-006</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .node-glow-primary {
+            box-shadow: 0 0 15px -5px #72ff70;
+        }
+        @keyframes pulse-dot {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-pulse-dot {
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#72ff70",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary": "#490080",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#0d1c2d",
+                    "outline-variant": "#3b4b37",
+                    "on-surface": "#d4e4fa",
+                    "on-primary-container": "#007117",
+                    "surface-container-lowest": "#010f1f",
+                    "tertiary-container": "#ecd3ff",
+                    "on-secondary": "#002388",
+                    "inverse-primary": "#006e16",
+                    "surface": "#051424",
+                    "surface-dim": "#051424",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-tint": "#00e639",
+                    "on-error": "#690005",
+                    "error-container": "#93000a",
+                    "outline": "#84967e",
+                    "on-tertiary-container": "#862ed4",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-highest": "#273647",
+                    "surface-container": "#122131",
+                    "on-secondary-fixed": "#001356",
+                    "secondary-container": "#0043eb",
+                    "on-primary-fixed-variant": "#00530e",
+                    "surface-variant": "#273647",
+                    "surface-bright": "#2c3a4c",
+                    "primary": "#ebffe2",
+                    "primary-container": "#00ff41",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-container-high": "#1c2b3c",
+                    "on-primary-fixed": "#002203",
+                    "inverse-on-surface": "#233143",
+                    "secondary": "#b8c3ff",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "tertiary": "#fff6ff",
+                    "on-surface-variant": "#b9ccb2",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "background": "#051424",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "inverse-surface": "#d4e4fa",
+                    "on-secondary-container": "#c6ceff",
+                    "on-background": "#d4e4fa",
+                    "on-primary": "#003907"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-node-gutter h-12 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<span class="font-headline-md text-headline-md font-bold text-primary-fixed tracking-tight">ENGINE: ESCROW_LIFECYCLE_WF-006</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-highest/30 border border-outline-variant rounded">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse-dot"></span>
+<span class="font-code-sm text-code-sm text-primary-fixed">SYSTEM_ONLINE</span>
+</div>
+<span class="font-code-sm text-code-sm text-primary-fixed opacity-80 cursor-pointer hover:bg-surface-container-highest transition-colors px-2 py-1 rounded">V.4.2.1-STABLE</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<nav class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 flex flex-col py-4 bg-surface-container-low border-r border-outline-variant z-40">
+<div class="px-6 mb-8">
+<span class="font-label-caps text-label-caps text-primary-fixed">SYSTEM_INDEX</span>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-4 px-6 py-3 bg-surface-container-highest text-primary-fixed border-l-4 border-primary-container transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow Index</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-label-caps text-label-caps">State Machine</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data Models</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-label-caps text-label-caps">Logic Connectors</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</a>
+</div>
+<div class="mt-auto px-6 pt-4 border-t border-outline-variant/30">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">CPU_LOAD</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">12%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="bg-primary-fixed h-full w-[12%]"></div>
+</div>
+<div class="flex justify-between items-center mt-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">MEM_USAGE</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">4.2GB</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="bg-primary-fixed h-full w-[45%]"></div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 p-node-gutter min-h-[calc(100vh-48px)]">
+<!-- KPI Row -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-4xl">inventory_2</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">TOTAL OPEN ESCROWS</span>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-primary-fixed">12,842</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">+4.2% ↑</span>
+</div>
+<div class="w-full h-0.5 bg-outline-variant mt-2 relative">
+<div class="absolute inset-0 bg-primary-fixed w-2/3 shadow-[0_0_8px_#72ff70]"></div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-4xl">payments</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">PENDING FUNDING</span>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-primary-fixed">₦42.8M</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">AVG: 1.2M</span>
+</div>
+<div class="w-full h-0.5 bg-outline-variant mt-2">
+<div class="bg-primary-fixed h-full w-1/3"></div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-4xl">verified_user</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">SUCCESS RATE</span>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-primary-fixed">99.82%</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">NOMINAL</span>
+</div>
+<div class="w-full h-0.5 bg-outline-variant mt-2">
+<div class="bg-primary-fixed h-full w-[99.82%]"></div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-4xl">avg_time</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">AVG SETTLEMENT</span>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-primary-fixed">412ms</span>
+<span class="font-code-sm text-code-sm text-on-error">↑ 12ms</span>
+</div>
+<div class="w-full h-0.5 bg-outline-variant mt-2">
+<div class="bg-primary-fixed h-full w-[40%]"></div>
+</div>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Main Monitoring Canvas -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-6">
+<!-- High-Density Telemetry (Chart Placeholder Area) -->
+<div class="bg-surface-container border border-outline-variant rounded p-6 min-h-[400px] flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-primary-fixed">THROUGHPUT_VISUALIZER</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">REAL-TIME PACKET FLOW [LAST 60 MIN]</span>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-surface-container-highest border border-outline-variant font-code-xs text-code-xs hover:bg-primary-fixed hover:text-on-primary transition-colors">60M</button>
+<button class="px-3 py-1 bg-surface-container border border-outline-variant font-code-xs text-code-xs opacity-50">24H</button>
+<button class="px-3 py-1 bg-surface-container border border-outline-variant font-code-xs text-code-xs opacity-50">7D</button>
+</div>
+</div>
+<div class="flex-grow flex items-center justify-center relative border border-outline-variant/20 bg-surface-container-lowest/50 rounded overflow-hidden">
+<!-- Simulated Grid and Graph -->
+<div class="absolute inset-0 grid grid-cols-12 grid-rows-6 opacity-10 pointer-events-none">
+<div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-b border-outline-variant"></div>
+<div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-r border-b border-outline-variant"></div><div class="border-b border-outline-variant"></div>
+</div>
+
+<!-- Telemetry Overlays -->
+<div class="absolute bottom-4 left-4 p-2 bg-surface-container-lowest/80 backdrop-blur border border-outline-variant rounded flex flex-col gap-1 z-10">
+<span class="font-code-xs text-code-xs text-on-surface-variant">MAX_BURST: 2.4k ops/s</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">CURRENT: 1.8k ops/s</span>
+</div>
+</div>
+</div>
+<!-- Status Monitors Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Node Health & API -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant pb-2 mb-2">INFRASTRUCTURE_HEALTH</span>
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+<span class="font-code-sm text-code-sm text-on-surface group-hover:text-primary-fixed transition-colors">CLUSTER_NODE_01 (PRIMARY)</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">UP_TIME: 144D</span>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+<span class="font-code-sm text-code-sm text-on-surface group-hover:text-primary-fixed transition-colors">CLUSTER_NODE_02 (FOLLOWER)</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">UP_TIME: 122D</span>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-yellow-400"></span>
+<span class="font-code-sm text-code-sm text-on-surface group-hover:text-primary-fixed transition-colors">PROV_BANK_API_GATEWAY</span>
+</div>
+<span class="font-code-xs text-code-xs text-yellow-400">LATENCY: 850MS</span>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+<span class="font-code-sm text-code-sm text-on-surface group-hover:text-primary-fixed transition-colors">STRIPE_SETTLEMENT_RAIL</span>
+</div>
+<span class="font-code-xs text-code-xs text-primary-fixed">STABLE</span>
+</div>
+</div>
+</div>
+<!-- Queue & Alerts -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant pb-2 mb-2">CRITICAL_VECTORS</span>
+<div class="space-y-4">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center">
+<span class="font-code-sm text-code-sm">DLQ_DEPTH (DEAD LETTER)</span>
+<span class="font-code-sm text-code-sm text-error">42</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest">
+<div class="bg-error h-full w-[15%]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center">
+<span class="font-code-sm text-code-sm">SLA_BREACH_THRESHOLD</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">0.05%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest">
+<div class="bg-primary-fixed h-full w-[2%]"></div>
+</div>
+</div>
+<div class="p-2 bg-error/10 border border-error/20 flex gap-3 items-center">
+<span class="material-symbols-outlined text-error text-sm">warning</span>
+<span class="font-code-xs text-code-xs text-error">ALERT: UNUSUAL BURST IN NGN_LEDGER RECONCILIATION [OFFSET: +14]</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Feed Panel -->
+<div class="col-span-12 lg:col-span-4 flex flex-col h-full bg-surface-container border border-outline-variant overflow-hidden">
+<div class="p-4 border-b border-outline-variant bg-surface-container-high flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-primary-fixed">LIVE_EVENT_STREAM</span>
+<span class="flex items-center gap-2 font-code-xs text-code-xs text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed animate-ping"></span>
+                        LISTENING...
+                    </span>
+</div>
+<div class="flex-grow overflow-y-auto custom-scrollbar p-4 space-y-4 max-h-[700px]">
+<!-- Event Log Item -->
+<div class="flex gap-4 group cursor-crosshair">
+<div class="flex flex-col items-center gap-1">
+<div class="w-0.5 h-full bg-outline-variant group-hover:bg-primary-fixed transition-colors"></div>
+</div>
+<div class="flex flex-col gap-1 pb-4">
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:22:01.442</span>
+<span class="px-1.5 py-0.5 bg-primary-container text-on-primary-container font-code-xs text-[9px] uppercase tracking-wider rounded">ESCROW_FUNDED</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface">ID_TX: 8820-AAX29-001 fund success</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant italic">Payload: { "val": 250000, "curr": "NGN", "src": "bank_api_v2" }</span>
+</div>
+</div>
+<div class="flex gap-4 group cursor-crosshair">
+<div class="flex flex-col items-center gap-1">
+<div class="w-0.5 h-full bg-outline-variant group-hover:bg-primary-fixed transition-colors"></div>
+</div>
+<div class="flex flex-col gap-1 pb-4">
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:21:58.910</span>
+<span class="px-1.5 py-0.5 bg-tertiary-container text-on-tertiary-container font-code-xs text-[9px] uppercase tracking-wider rounded">FUND_RELEASED</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface">ID_TX: 7119-BBZ84-442 release executed</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant italic">Trigger: Buyer_Confirmed | Recipient: Seller_Wallet_99</span>
+</div>
+</div>
+<div class="flex gap-4 group cursor-crosshair">
+<div class="flex flex-col items-center gap-1">
+<div class="w-0.5 h-full bg-outline-variant group-hover:bg-primary-fixed transition-colors"></div>
+</div>
+<div class="flex flex-col gap-1 pb-4">
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:21:55.221</span>
+<span class="px-1.5 py-0.5 bg-surface-container-highest text-on-surface-variant font-code-xs text-[9px] uppercase tracking-wider rounded">STATE_TRANSITION</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface">TX_3310 PENDING -&gt; DISPUTED</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant italic">Automated Rule: Time_Out_Limit_Exceeded</span>
+</div>
+</div>
+<div class="flex gap-4 group cursor-crosshair">
+<div class="flex flex-col items-center gap-1">
+<div class="w-0.5 h-full bg-outline-variant group-hover:bg-primary-fixed transition-colors"></div>
+</div>
+<div class="flex flex-col gap-1 pb-4">
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:21:50.001</span>
+<span class="px-1.5 py-0.5 bg-primary-container text-on-primary-container font-code-xs text-[9px] uppercase tracking-wider rounded">ESCROW_FUNDED</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface">ID_TX: 8820-CCX00-119 fund success</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant italic">Payload: { "val": 12000, "curr": "USD", "src": "stripe_v3" }</span>
+</div>
+</div>
+<!-- Repeat items for scroll depth -->
+<div class="flex gap-4 group cursor-crosshair opacity-60">
+<div class="flex flex-col items-center gap-1">
+<div class="w-0.5 h-full bg-outline-variant group-hover:bg-primary-fixed transition-colors"></div>
+</div>
+<div class="flex flex-col gap-1 pb-4">
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:20:44.201</span>
+<span class="px-1.5 py-0.5 bg-error-container text-on-error-container font-code-xs text-[9px] uppercase tracking-wider rounded">ERROR_LOGGED</span>
+</div>
+<span class="font-code-sm text-code-sm text-error">Bank API 500: HANDSHAKE_FAILED</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant italic">Retrying in 2000ms... (Attempt 1/3)</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex items-center gap-2">
+<input class="w-full bg-surface-container border border-outline-variant font-code-sm text-code-sm text-on-surface placeholder:opacity-30 focus:border-primary-fixed focus:ring-0" placeholder="FILTER BY ID/EVENT..." type="text"/>
+<button class="material-symbols-outlined text-primary-fixed bg-surface-container-high p-2 border border-outline-variant hover:bg-primary-fixed hover:text-on-primary transition-colors">search</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Micro-Telemetry -->
+<footer class="mt-12 pt-6 border-t border-outline-variant flex flex-wrap gap-x-12 gap-y-4">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">DB_SYNC_STATUS</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">SYNCHRONIZED (OFFSET: 0.00ms)</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">GATEWAY_LOAD_BALANCER</span>
+<span class="font-code-sm text-code-sm text-on-surface">WEIGHT: [2, 5, 2] | ALGO: RR_WEIGHTED</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SECURITY_LAYER</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">TLS 1.3 | AES-256-GCM | ACTIVE</span>
+</div>
+<div class="flex flex-col ml-auto">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SESSION_TOKEN_EXP</span>
+<span class="font-code-sm text-code-sm text-yellow-400">02:44:12</span>
+</div>
+</footer>
+</main>
+<script>
+        // Micro-interactions and UI simulation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simulated live updates for counters
+            const counters = document.querySelectorAll('.font-headline-lg');
+            setInterval(() => {
+                const randomCounter = counters[Math.floor(Math.random() * counters.length)];
+                // No actual logic needed for a UI mockup, just subtle changes if desired
+            }, 5000);
+
+            // Hover effects on nodes
+            const nodes = document.querySelectorAll('.bg-surface-container');
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', () => {
+                    node.classList.add('node-glow-primary');
+                    node.style.transition = 'all 0.3s ease';
+                });
+                node.addEventListener('mouseleave', () => {
+                    node.classList.remove('node-glow-primary');
+                });
+            });
+        });
+    </script>
+</body></html>

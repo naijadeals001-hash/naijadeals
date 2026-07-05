@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ARTIFACT R: Conversation Intelligence Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .node-connector {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .glow-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 5s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #00e639, transparent);
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: scan 4s linear infinite;
+            opacity: 0.2;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(15, 15, 15, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "secondary-container": "#0043eb",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-fixed-variant": "#00530e",
+                        "surface-dim": "#051424",
+                        "inverse-primary": "#006e16",
+                        "surface": "#051424",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-tint": "#00e639",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "primary-container": "#00ff41",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-bright": "#2c3a4c",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-container-high": "#1c2b3c",
+                        "on-secondary": "#002388",
+                        "surface-container": "#122131",
+                        "inverse-on-surface": "#233143",
+                        "secondary-fixed": "#dde1ff",
+                        "on-primary": "#003907",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#001356",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "secondary": "#b8c3ff",
+                        "primary-fixed": "#72ff70",
+                        "on-primary-container": "#007117",
+                        "error-container": "#93000a",
+                        "tertiary-container": "#ecd3ff",
+                        "primary": "#ebffe2",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "tertiary": "#fff6ff",
+                        "surface-variant": "#273647",
+                        "on-background": "#d4e4fa",
+                        "surface-container-low": "#0d1c2d",
+                        "on-primary-fixed": "#002203",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "outline": "#84967e",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-tertiary-container": "#862ed4",
+                        "tertiary-fixed": "#f0dbff",
+                        "background": "#051424",
+                        "on-surface-variant": "#b9ccb2",
+                        "outline-variant": "#3b4b37"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-[100] flex justify-between items-center px-node-gutter h-16 w-full bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<h1 class="font-label-caps text-headline-md tracking-tighter text-primary-fixed-dim">UCE_CORE_ENGINE_V2.4</h1>
+</div>
+<nav class="hidden md:flex gap-6 h-full items-center">
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary h-full flex items-center px-2" href="#">ARCHITECTURE</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors h-full flex items-center px-2" href="#">LOGS</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors h-full flex items-center px-2" href="#">TELEMETRY</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SYSTEM_STATUS: OK</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">LATENCY: 12ms</span>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="terminal">terminal</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Explorer -->
+<aside class="hidden md:flex flex-col h-full py-lane-margin bg-surface-container w-64 border-r border-outline-variant">
+<div class="px-6 mb-8">
+<h2 class="font-label-caps text-headline-md text-primary-fixed-dim">SYSTEM_EXPLORER</h2>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim transition-all">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Flow_Matrix</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-label-caps text-label-caps">AI_Logic_Engine</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-label-caps">Compliance_Logs</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="developer_board">developer_board</span>
+<span class="font-label-caps text-label-caps">Terminal_Console</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 relative overflow-auto p-node-gutter">
+<!-- Background Visualization -->
+<div class="absolute inset-0 pointer-events-none opacity-40">
+
+</div>
+<!-- Workflow Container -->
+<div class="relative z-10 flex flex-col items-center py-12">
+<!-- Entry Point -->
+<div class="flex flex-col items-center mb-12" id="start-node">
+<div class="bg-surface-container-highest border border-primary-fixed-dim px-6 py-4 rounded-lg shadow-xl flex flex-col items-center min-w-[200px]">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim mb-2 uppercase">Input_Stream</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Conversation</h3>
+<div class="mt-3 flex gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="chat">chat</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: RX-9042</span>
+</div>
+</div>
+</div>
+<!-- Neural Connection Vector (Animated Line) -->
+<div class="h-24 w-px bg-gradient-to-b from-primary-fixed-dim to-secondary-container"></div>
+<!-- Central Analysis Engine -->
+<div class="flex flex-col items-center mb-16 relative">
+<div class="scanline"></div>
+<div class="bg-secondary-container/20 border border-secondary-container backdrop-blur-xl px-10 py-6 rounded-xl shadow-[0_0_50px_rgba(0,67,235,0.3)] flex flex-col items-center">
+<div class="w-16 h-16 bg-secondary-container rounded-full flex items-center justify-center mb-4 animate-pulse">
+<span class="material-symbols-outlined text-on-secondary-container text-4xl" data-icon="psychology">psychology</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-secondary-fixed">Aura AI Analysis</h2>
+<span class="font-code-xs text-code-xs text-secondary-fixed-dim mt-1">CORE_ENGINE_STATE: PROCESSING</span>
+</div>
+</div>
+<!-- Analysis Grid (Branching Nodes) -->
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 w-full max-w-7xl mb-16">
+<!-- Logic Node 1 -->
+<div class="flex flex-col items-center">
+<div class="bg-surface-container border border-outline-variant p-4 rounded w-full">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">L_DETECTOR</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-xs" data-icon="language">language</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-3">Language Detection</h4>
+<div class="bg-surface-container-lowest p-2 rounded">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-on-surface-variant">CONFIDENCE</span>
+<span class="text-primary-fixed-dim">0.99</span>
+</div>
+<div class="h-1 bg-surface-variant w-full mt-1">
+<div class="h-full bg-primary-fixed-dim w-[99%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Logic Node 2 -->
+<div class="flex flex-col items-center">
+<div class="bg-surface-container border border-outline-variant p-4 rounded w-full">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">T_MATRIX</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-xs" data-icon="translate">translate</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-3">Translation</h4>
+<div class="bg-surface-container-lowest p-2 rounded">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-on-surface-variant">EN-US</span>
+<span class="text-primary-fixed-dim">SYNCED</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Logic Node 3 -->
+<div class="flex flex-col items-center">
+<div class="bg-surface-container border border-outline-variant p-4 rounded w-full">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">S_INDEX</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-xs" data-icon="sentiment_satisfied">sentiment_satisfied</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-3">Sentiment Analysis</h4>
+<div class="bg-surface-container-lowest p-2 rounded">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-on-surface-variant">SCORE</span>
+<span class="text-primary-fixed-dim">0.89</span>
+</div>
+<div class="h-1 bg-surface-variant w-full mt-1">
+<div class="h-full bg-primary-fixed-dim w-[89%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Logic Node 4 -->
+<div class="flex flex-col items-center">
+<div class="bg-surface-container border border-outline-variant p-4 rounded w-full">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">P_CLASS</span>
+<span class="material-symbols-outlined text-secondary-fixed text-xs" data-icon="priority_high">priority_high</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-3">Priority Classification</h4>
+<div class="bg-surface-container-lowest p-2 rounded">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-on-surface-variant">LEVEL</span>
+<span class="text-secondary-fixed">HIGH</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Logic Node 5 -->
+<div class="flex flex-col items-center">
+<div class="bg-surface-container border border-outline-variant p-4 rounded w-full">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">F_DETECT</span>
+<span class="material-symbols-outlined text-error text-xs" data-icon="security">security</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-3">Fraud Detection</h4>
+<div class="bg-surface-container-lowest p-2 rounded">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-on-surface-variant">RISK</span>
+<span class="text-error">0.02</span>
+</div>
+<div class="h-1 bg-surface-variant w-full mt-1">
+<div class="h-full bg-error w-[2%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Logic Node 6 -->
+<div class="flex flex-col items-center">
+<div class="bg-surface-container border border-outline-variant p-4 rounded w-full">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">A_DETECT</span>
+<span class="material-symbols-outlined text-error text-xs" data-icon="gavel">gavel</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-3">Abuse Detection</h4>
+<div class="bg-surface-container-lowest p-2 rounded">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-on-surface-variant">DETECTION</span>
+<span class="text-primary-fixed-dim">NONE</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Downstream Sequence -->
+<div class="w-full flex flex-col lg:flex-row justify-center items-center gap-12 max-w-6xl">
+<!-- Escalation -->
+<div class="flex flex-col items-center flex-1">
+<div class="w-px h-12 bg-outline-variant lg:hidden"></div>
+<div class="bg-surface-container-high border-l-4 border-error p-4 w-full">
+<span class="font-label-caps text-[10px] text-error">ESCALATION_ENGINE</span>
+<h5 class="font-headline-md text-headline-md mt-1">Escalation Recommendation</h5>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">Route to Level 2 Technical Support</p>
+</div>
+</div>
+<!-- Suggestions -->
+<div class="flex flex-col items-center flex-1">
+<div class="w-px h-12 bg-outline-variant lg:hidden"></div>
+<div class="bg-surface-container-high border-l-4 border-tertiary-fixed-dim p-4 w-full">
+<span class="font-label-caps text-[10px] text-tertiary-fixed-dim">KB_FETCHER</span>
+<h5 class="font-headline-md text-headline-md mt-1">Knowledge Base Suggestions</h5>
+<ul class="mt-2 space-y-1">
+<li class="font-code-xs text-code-xs text-on-surface">• KB-729: Engine Initialization</li>
+<li class="font-code-xs text-code-xs text-on-surface">• KB-114: Node Sync Protocol</li>
+</ul>
+</div>
+</div>
+<!-- Reply Assistance -->
+<div class="flex flex-col items-center flex-1">
+<div class="w-px h-12 bg-outline-variant lg:hidden"></div>
+<div class="bg-surface-container-high border-l-4 border-primary-fixed-dim p-4 w-full">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim">REPLY_GEN_V4</span>
+<h5 class="font-headline-md text-headline-md mt-1">Reply Assistance</h5>
+<div class="mt-2 bg-surface p-2 rounded italic text-on-surface-variant font-body-md">
+                                "I have initialized the diagnostic sequence for your core engine..."
+                            </div>
+</div>
+</div>
+</div>
+<!-- Conclusion -->
+<div class="mt-20 flex flex-col items-center">
+<div class="h-16 w-px bg-gradient-to-b from-outline-variant to-primary-fixed-dim"></div>
+<div class="flex items-center gap-4 bg-primary-container/10 border border-primary-container px-8 py-4 rounded-full">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_circle">check_circle</span>
+<h3 class="font-label-caps text-headline-md text-primary-fixed-dim">CONVERSATION COMPLETED</h3>
+</div>
+</div>
+</div>
+</main>
+<!-- Right Side Audit Log -->
+<aside class="hidden xl:flex flex-col w-80 bg-surface-container-low border-l border-outline-variant p-lane-margin">
+<h3 class="font-label-caps text-label-caps text-on-surface mb-6 border-b border-outline-variant pb-2">AUDIT_LOGS</h3>
+<div class="space-y-4 overflow-y-auto pr-2">
+<div class="flex flex-col gap-1 border-b border-outline-variant/30 pb-3">
+<span class="font-code-xs text-code-xs text-on-surface-variant">T-12:44:01.032</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">AURA_AI_INIT_SUCCESS</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-outline-variant/30 pb-3">
+<span class="font-code-xs text-code-xs text-on-surface-variant">T-12:44:01.045</span>
+<span class="font-code-sm text-code-sm">INGESTION: RX-9042 Stream active</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-outline-variant/30 pb-3">
+<span class="font-code-xs text-code-xs text-on-surface-variant">T-12:44:01.156</span>
+<span class="font-code-sm text-code-sm">LANG_DET: detected EN-US (0.99)</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-outline-variant/30 pb-3">
+<span class="font-code-xs text-code-xs text-on-surface-variant">T-12:44:01.210</span>
+<span class="font-code-sm text-code-sm text-secondary-fixed">THREAT_SCAN: Negative</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-outline-variant/30 pb-3">
+<span class="font-code-xs text-code-xs text-on-surface-variant">T-12:44:01.442</span>
+<span class="font-code-sm text-code-sm">SENTIMENT: 0.89 Positive</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-outline-variant/30 pb-3">
+<span class="font-code-xs text-code-xs text-on-surface-variant">T-12:44:01.503</span>
+<span class="font-code-sm text-code-sm">ESC_ROUTING: Vector assigned to Tier 2</span>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-outline-variant">
+<div class="bg-surface p-4 rounded-lg flex flex-col gap-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">LIVE_TELEMETRY</span>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs">CPU_LOAD</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">12.4%</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim" style="width: 12.4%"></div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Bottom Telemetry Bar -->
+<footer class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-grid-unit bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex flex-col items-center justify-center bg-primary-container/10 text-primary-fixed-dim py-1">
+<span class="material-symbols-outlined text-lg" data-icon="analytics">analytics</span>
+<span class="font-code-xs text-code-xs">Telemetry</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-1">
+<span class="material-symbols-outlined text-lg" data-icon="dns">dns</span>
+<span class="font-code-xs text-code-xs">Nodes</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-1">
+<span class="material-symbols-outlined text-lg" data-icon="sync_alt">sync_alt</span>
+<span class="font-code-xs text-code-xs">Sync</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-1">
+<span class="material-symbols-outlined text-lg" data-icon="health_metrics">health_metrics</span>
+<span class="font-code-xs text-code-xs">Health</span>
+</div>
+</footer>
+<script>
+        // Simple Micro-interactions for Node Selection
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.borderColor = '#00e639';
+                node.style.boxShadow = '0 0 15px rgba(0, 230, 57, 0.2)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.borderColor = 'rgba(59, 75, 55, 1)';
+                node.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body></html>
