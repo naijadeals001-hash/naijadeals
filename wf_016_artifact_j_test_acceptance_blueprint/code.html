@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ARTIFACT J: Test &amp; Acceptance Blueprint | WF-016</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 255, 65, 0.1);
+            position: absolute;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 24px;
+            background: #3b4b37;
+            left: 50%;
+            bottom: -24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#00ff41",
+                      "inverse-on-surface": "#233143",
+                      "surface-container-low": "#0d1c2d",
+                      "on-tertiary-container": "#862ed4",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "error-container": "#93000a",
+                      "outline": "#84967e",
+                      "surface-container-high": "#1c2b3c",
+                      "on-surface": "#d4e4fa",
+                      "surface-tint": "#00e639",
+                      "primary-fixed-dim": "#00e639",
+                      "on-tertiary-fixed": "#2c0051",
+                      "on-error": "#690005",
+                      "surface-dim": "#051424",
+                      "secondary-container": "#0043eb",
+                      "on-secondary": "#002388",
+                      "on-primary-container": "#007117",
+                      "secondary-fixed": "#dde1ff",
+                      "primary": "#ebffe2",
+                      "on-background": "#d4e4fa",
+                      "secondary": "#b8c3ff",
+                      "on-tertiary": "#490080",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-variant": "#273647",
+                      "surface": "#051424",
+                      "on-error-container": "#ffdad6",
+                      "inverse-primary": "#006e16",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-secondary-fixed": "#001356",
+                      "surface-container": "#122131",
+                      "on-primary": "#003907",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "surface-container-highest": "#273647",
+                      "tertiary": "#fff6ff",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "error": "#ffb4ab",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "tertiary-fixed": "#f0dbff",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary-container": "#c6ceff",
+                      "background": "#051424",
+                      "surface-bright": "#2c3a4c",
+                      "surface-container-lowest": "#010f1f",
+                      "on-primary-fixed": "#002203",
+                      "on-primary-fixed-variant": "#00530e",
+                      "inverse-surface": "#d4e4fa",
+                      "primary-fixed": "#72ff70"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              }
+            }
+          }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation -->
+<nav class="flex justify-between items-center h-12 px-lane-margin w-full fixed top-0 z-50 border-b border-outline-variant bg-background">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">CORE_ENGINE_V2</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors px-2 py-1">SYS_STATUS: ACTIVE</span>
+<span class="font-label-caps text-label-caps text-primary-fixed font-bold px-2 py-1">ARTIFACT_J</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</nav>
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 flex flex-col pt-stack-gap border-r border-outline-variant bg-surface-container-low hidden md:flex">
+<div class="px-4 py-6 border-b border-outline-variant mb-4">
+<span class="font-label-caps text-label-caps text-on-surface block mb-1">MODULE_REGISTRY</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">WF-016 EXECUTOR</span>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span class="font-label-caps text-label-caps">Inventory_Flow</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default">
+<span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+<span class="font-label-caps text-label-caps">Order_Lifecycle</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+<span class="font-label-caps text-label-caps">Payment_Gateway</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed cursor-default">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit_Logs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+<span class="font-label-caps text-label-caps">n8n_Connectors</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 mt-12 p-lane-margin min-h-screen">
+<!-- Header Section -->
+<header class="mb-12 border-l-4 border-primary-fixed-dim pl-6 py-2 relative overflow-hidden">
+<div class="scanline"></div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2 tracking-tight">WF-016: TEST &amp; ACCEPTANCE BLUEPRINT</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant flex items-center gap-4">
+<span>OBJECT_ID: ARTIFACT_J</span>
+<span>STATUS: STAGE_04_VALIDATION</span>
+<span>VERSION: 2.0.4-STABLE</span>
+</p>
+</header>
+<!-- QA Validation Matrix Grid -->
+<section class="matrix-grid mb-12">
+<!-- Cart Tests -->
+<div class="bg-[#0F0F0F] border border-primary-fixed-dim/30 p-4 relative group">
+<div class="flex justify-between items-start mb-4">
+<div class="px-2 py-0.5 bg-primary-fixed-dim/10 border border-primary-fixed-dim/40 rounded text-primary-fixed-dim font-label-caps text-[10px]">UNIT_01</div>
+<span class="material-symbols-outlined text-primary-fixed-dim text-[18px]">shopping_cart</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-on-surface mb-3">Cart Tests</h3>
+<ul class="space-y-2">
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Sync Consistency</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Concurrency Race</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm">
+<span class="text-on-surface-variant">Voucher Logic</span>
+<span class="text-on-tertiary-fixed-variant font-bold">PENDING</span>
+</li>
+</ul>
+</div>
+<!-- Checkout Tests -->
+<div class="bg-[#0F0F0F] border border-secondary/30 p-4 relative group">
+<div class="flex justify-between items-start mb-4">
+<div class="px-2 py-0.5 bg-secondary/10 border border-secondary/40 rounded text-secondary font-label-caps text-[10px]">UNIT_02</div>
+<span class="material-symbols-outlined text-secondary text-[18px]">verified_user</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-on-surface mb-3">Checkout Tests</h3>
+<ul class="space-y-2">
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Address Validation</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Inventory Lock</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm">
+<span class="text-on-surface-variant">Failure Recovery</span>
+<span class="text-error font-bold">RETRYING</span>
+</li>
+</ul>
+</div>
+<!-- Wallet Tests -->
+<div class="bg-[#0F0F0F] border border-tertiary-fixed-dim/30 p-4 relative group">
+<div class="flex justify-between items-start mb-4">
+<div class="px-2 py-0.5 bg-tertiary-fixed-dim/10 border border-tertiary-fixed-dim/40 rounded text-tertiary-fixed-dim font-label-caps text-[10px]">UNIT_03</div>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[18px]">account_balance_wallet</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-on-surface mb-3">Wallet Tests</h3>
+<ul class="space-y-2">
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Auth Handshake</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Balance Precision</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm">
+<span class="text-on-surface-variant">Timeout Handling</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+</ul>
+</div>
+<!-- Escrow Tests -->
+<div class="bg-[#0F0F0F] border border-outline/30 p-4 relative group">
+<div class="flex justify-between items-start mb-4">
+<div class="px-2 py-0.5 bg-outline/10 border border-outline/40 rounded text-outline font-label-caps text-[10px]">UNIT_04</div>
+<span class="material-symbols-outlined text-outline text-[18px]">lock</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-on-surface mb-3">Escrow Tests</h3>
+<ul class="space-y-2">
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Contract Sign-off</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Release Trigger</span>
+<span class="text-on-tertiary-fixed-variant font-bold">PENDING</span>
+</li>
+<li class="flex items-center justify-between text-code-sm">
+<span class="text-on-surface-variant">Dispute Flow</span>
+<span class="text-on-tertiary-fixed-variant font-bold">PENDING</span>
+</li>
+</ul>
+</div>
+<!-- API Tests -->
+<div class="bg-[#0F0F0F] border border-primary-container/30 p-4 relative group">
+<div class="flex justify-between items-start mb-4">
+<div class="px-2 py-0.5 bg-primary-container/10 border border-primary-container/40 rounded text-primary-container font-label-caps text-[10px]">UNIT_05</div>
+<span class="material-symbols-outlined text-primary-container text-[18px]">api</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-on-surface mb-3">API Tests</h3>
+<ul class="space-y-2">
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Latency (Avg 45ms)</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Schema Compliance</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm">
+<span class="text-on-surface-variant">Rate Limit Check</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+</ul>
+</div>
+<!-- DB Validation -->
+<div class="bg-[#0F0F0F] border border-on-secondary/30 p-4 relative group">
+<div class="flex justify-between items-start mb-4">
+<div class="px-2 py-0.5 bg-on-secondary/10 border border-on-secondary/40 rounded text-on-secondary font-label-caps text-[10px]">UNIT_06</div>
+<span class="material-symbols-outlined text-on-secondary text-[18px]">database</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-on-surface mb-3">DB Validation</h3>
+<ul class="space-y-2">
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">ACID Transactions</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface-variant">Index Efficiency</span>
+<span class="text-primary-fixed font-bold">PASSED</span>
+</li>
+<li class="flex items-center justify-between text-code-sm">
+<span class="text-on-surface-variant">Purge Policies</span>
+<span class="text-on-tertiary-fixed-variant font-bold">PENDING</span>
+</li>
+</ul>
+</div>
+</section>
+<!-- Checklists Section: Split Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
+<!-- Developer Checklist -->
+<div class="border border-outline-variant bg-surface-container-lowest p-6">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary-fixed text-[24px]">developer_mode</span>
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">DEVELOPER_CHECKLIST</h2>
+</div>
+<div class="space-y-4">
+<label class="flex items-start gap-4 p-3 border border-outline-variant/50 hover:border-primary-fixed-dim transition-colors group cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-outline-variant text-primary-fixed focus:ring-0" type="checkbox"/>
+<div>
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">ENV_SYNC</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant">Validate production-mirror environment variables for all microservices in the stack.</div>
+</div>
+</label>
+<label class="flex items-start gap-4 p-3 border border-outline-variant/50 hover:border-primary-fixed-dim transition-colors group cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-outline-variant text-primary-fixed focus:ring-0" type="checkbox"/>
+<div>
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">UNIT_COVERAGE</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant">Ensure &gt;92% test coverage on Core Checkout and Wallet modules.</div>
+</div>
+</label>
+<label class="flex items-start gap-4 p-3 border border-outline-variant/50 hover:border-primary-fixed-dim transition-colors group cursor-pointer">
+<input class="mt-1 bg-transparent border-outline-variant text-primary-fixed focus:ring-0" type="checkbox"/>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">LOG_ASSERTION</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant">Confirm that audit log stubs correctly populate ELK stack on failure events.</div>
+</div>
+</label>
+</div>
+</div>
+<!-- QA Checklist -->
+<div class="border border-outline-variant bg-surface-container-lowest p-6">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-secondary text-[24px]">fact_check</span>
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">QA_VALIDATION_STUB</h2>
+</div>
+<div class="space-y-4">
+<label class="flex items-start gap-4 p-3 border border-outline-variant/50 hover:border-secondary transition-colors group cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-outline-variant text-secondary focus:ring-0" type="checkbox"/>
+<div>
+<div class="font-label-caps text-label-caps text-secondary mb-1">UAT_SCENARIO_04</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant">End-to-end guest checkout flow with crypto-wallet integration.</div>
+</div>
+</label>
+<label class="flex items-start gap-4 p-3 border border-outline-variant/50 hover:border-secondary transition-colors group cursor-pointer">
+<input class="mt-1 bg-transparent border-outline-variant text-secondary focus:ring-0" type="checkbox"/>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">LOAD_SPIKE_TOLERANCE</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant">Simulate 5,000 concurrent cart updates over a 60-second window.</div>
+</div>
+</label>
+<label class="flex items-start gap-4 p-3 border border-outline-variant/50 hover:border-secondary transition-colors group cursor-pointer">
+<input class="mt-1 bg-transparent border-outline-variant text-secondary focus:ring-0" type="checkbox"/>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">CROSS_DOMAIN_CORS</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant">Verify handshake protocols for third-party escrow API endpoints.</div>
+</div>
+</label>
+</div>
+</div>
+</div>
+<!-- Telemetry Visualization -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<div class="border border-outline-variant bg-surface-container p-4">
+<span class="font-label-caps text-[10px] text-on-surface-variant block mb-2 uppercase">Mean_Latency</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary-fixed">42.8</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ms</span>
+</div>
+<div class="h-1 w-full bg-surface-container-highest mt-4 overflow-hidden">
+<div class="h-full bg-primary-fixed-dim" style="width: 85%;"></div>
+</div>
+</div>
+<div class="border border-outline-variant bg-surface-container p-4">
+<span class="font-label-caps text-[10px] text-on-surface-variant block mb-2 uppercase">Pass_Rate</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary-fixed">94.2</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">%</span>
+</div>
+<div class="h-1 w-full bg-surface-container-highest mt-4 overflow-hidden">
+<div class="h-full bg-secondary" style="width: 94%;"></div>
+</div>
+</div>
+<div class="border border-outline-variant bg-surface-container p-4">
+<span class="font-label-caps text-[10px] text-on-surface-variant block mb-2 uppercase">Coverage_Stub</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-tertiary-fixed-variant">88.1</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">%</span>
+</div>
+<div class="h-1 w-full bg-surface-container-highest mt-4 overflow-hidden">
+<div class="h-full bg-tertiary-fixed-dim" style="width: 88%;"></div>
+</div>
+</div>
+</section>
+<!-- Dynamic Visual Asset -->
+<section class="relative w-full h-48 border border-outline-variant overflow-hidden mb-12 bg-surface-container-lowest">
+
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="text-center px-6 py-3 bg-background/80 backdrop-blur border border-primary-fixed/20">
+<span class="font-label-caps text-label-caps text-primary tracking-widest block mb-1">SYSTEM_VISUALIZER</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">MAPPING_TOPOLOGICAL_FLOW_V2</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<footer class="fixed bottom-0 left-0 w-full flex justify-center pb-4 z-50">
+<div class="w-fit rounded-full bg-surface-container-highest border border-outline-variant shadow-lg flex items-center px-4 py-1 gap-2">
+<div class="text-on-surface-variant p-2 hover:text-primary transition-colors cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined">zoom_in</span>
+</div>
+<div class="text-on-surface-variant p-2 hover:text-primary transition-colors cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined">zoom_out</span>
+</div>
+<div class="text-primary-fixed bg-surface-container-high rounded-full p-2 scale-95 active:scale-90">
+<span class="material-symbols-outlined">grid_4x4</span>
+</div>
+<div class="text-on-surface-variant p-2 hover:text-primary transition-colors cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined">file_download</span>
+</div>
+</div>
+</footer>
+<script>
+        // Simple micro-interaction for the checklist completion feel
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const parent = this.closest('label');
+                if (this.checked) {
+                    parent.classList.add('opacity-80');
+                } else {
+                    parent.classList.remove('opacity-80');
+                }
+            });
+        });
+
+        // Auto-scroll simulation for "active processing" feel
+        const matrixItems = document.querySelectorAll('.matrix-grid > div');
+        setInterval(() => {
+            const randomItem = matrixItems[Math.floor(Math.random() * matrixItems.length)];
+            randomItem.classList.add('ring-1', 'ring-primary-fixed-dim/50');
+            setTimeout(() => {
+                randomItem.classList.remove('ring-1', 'ring-primary-fixed-dim/50');
+            }, 1500);
+        }, 3000);
+    </script>
+</body></html>

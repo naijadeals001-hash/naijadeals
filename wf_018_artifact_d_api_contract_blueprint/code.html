@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-018: Artifact D — API Contract Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0052FF",
+                        "primary-fixed": "#0052FF",
+                        "primary-fixed-dim": "#003EB3",
+                        "on-primary-container": "#001A40",
+                        "primary-container": "#D6E2FF",
+                        surface: "#F8FAFC",
+                        "surface-container-low": "#F1F5F9",
+                        "surface-container": "#E2E8F0",
+                        "surface-container-highest": "#CBD5E1",
+                        "on-surface": "#0F172A",
+                        "on-surface-variant": "#475569",
+                        "outline-variant": "#E2E8F0",
+                        success: "#10B981",
+                        warning: "#F59E0B",
+                        error: "#EF4444",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "sm": "0.0625rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Public Sans", "sans-serif"],
+                        display: ["Public Sans", "sans-serif"],
+                        body: ["Public Sans", "sans-serif"],
+                        label: ["Public Sans", "sans-serif"],
+                        code: ["JetBrains Mono", "monospace"]
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .font-code-sm { font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; }
+        .font-code-xs { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+        .font-label-caps { font-family: 'Public Sans', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .api-card:hover .endpoint-copy { opacity: 1; }
+        .endpoint-copy { opacity: 0; transition: opacity 0.2s; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface text-primary dark:text-primary w-full top-0 border-b border-outline-variant flex justify-between items-center px-6 h-16 w-full z-50 sticky top-0">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed">REVERSE_LOGISTICS_v4.2</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="text-primary-fixed-dim font-code-sm hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">Runtime</a>
+<a class="text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">Schema</a>
+<a class="text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">Gateway</a>
+<a class="text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">Metrics</a>
+</nav>
+<span class="material-symbols-outlined cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-64px)]">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col h-auto py-8 bg-surface-container-low dark:bg-surface-container-low h-screen w-64 border-r border-outline-variant sticky top-16">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary font-bold">CORE_ENGINE</h2>
+</div>
+<nav class="flex flex-col flex-1">
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out font-label-caps text-xs" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+                    System Map
+                </a>
+<a class="flex items-center gap-3 px-6 py-3 text-primary-fixed bg-surface-container-highest border-l-4 border-primary-fixed transition-all duration-150 ease-in-out font-label-caps text-xs" href="#">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+                    API Contracts
+                </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out font-label-caps text-xs" href="#">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+                    Logic Gates
+                </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out font-label-caps text-xs" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+                    Audit Logs
+                </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out font-label-caps text-xs" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+                    Telemetry
+                </a>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+<!-- Header Section -->
+<div class="mb-12">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold tracking-tighter">ARTIFACT D</span>
+<span class="text-on-surface-variant font-code-xs">BLUEPRINT_SEC_256</span>
+</div>
+<h1 class="text-4xl md:text-5xl font-black tracking-tighter text-on-surface mb-4">API Contract Blueprint</h1>
+<p class="text-on-surface-variant max-w-2xl leading-relaxed">
+                    Technical specification for high-throughput return and recovery endpoints. All endpoints require OAuth2 Bearer Tokens with specific service-level scopes.
+                </p>
+</div>
+<!-- Bento Grid - Global Specs -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+<div class="col-span-1 md:col-span-2 glass-panel p-6 border border-outline-variant rounded-lg">
+<h3 class="font-label-caps text-xs text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="security">security</span> Auth Requirements
+                    </h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="text-sm font-code-sm">Type</span>
+<span class="text-sm font-bold">OAuth 2.0 / MTLS</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="text-sm font-code-sm">Authorization</span>
+<span class="text-sm font-bold">Bearer &lt;JWT&gt;</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm font-code-sm">Scopes</span>
+<div class="flex gap-2">
+<span class="bg-surface-container-highest text-[10px] px-2 py-0.5 font-bold">returns:write</span>
+<span class="bg-surface-container-highest text-[10px] px-2 py-0.5 font-bold">wallet:refund</span>
+</div>
+</div>
+</div>
+</div>
+<div class="glass-panel p-6 border border-outline-variant rounded-lg">
+<h3 class="font-label-caps text-xs text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="timer">timer</span> SLA Config
+                    </h3>
+<div class="space-y-3">
+<div>
+<span class="block text-[10px] font-bold text-on-surface-variant uppercase">Timeouts</span>
+<span class="text-lg font-code-sm">1500ms</span>
+</div>
+<div>
+<span class="block text-[10px] font-bold text-on-surface-variant uppercase">Retries</span>
+<span class="text-lg font-code-sm">3 (Exponential)</span>
+</div>
+</div>
+</div>
+<div class="glass-panel p-6 border border-outline-variant rounded-lg">
+<h3 class="font-label-caps text-xs text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="hub">hub</span> Webhook Hooks
+                    </h3>
+<ul class="text-[10px] font-bold space-y-2">
+<li class="flex items-center gap-2 text-success"><span class="w-1.5 h-1.5 rounded-full bg-success"></span> RETURN_STATE_CHANGED</li>
+<li class="flex items-center gap-2 text-success"><span class="w-1.5 h-1.5 rounded-full bg-success"></span> FUNDS_DISBURSED</li>
+<li class="flex items-center gap-2 text-warning"><span class="w-1.5 h-1.5 rounded-full bg-warning"></span> INSPECTION_FAILED</li>
+</ul>
+</div>
+</div>
+<!-- API Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Return Flow -->
+<div class="space-y-6">
+<h2 class="text-xl font-bold flex items-center gap-2">
+<span class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">01</span>
+                        Initiation &amp; Approval
+                    </h2>
+<!-- POST /return/request -->
+<div class="api-card group bg-white border border-outline-variant p-5 rounded hover:border-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="bg-success text-white text-[10px] px-2 py-0.5 font-bold">POST</span>
+<code class="text-sm font-bold text-on-surface">/return/request</code>
+</div>
+<button class="endpoint-copy p-1 hover:bg-surface-container rounded transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+<div class="bg-on-surface text-white p-4 font-code-sm text-xs rounded mb-4 overflow-x-auto">
+<pre class="whitespace-pre">{
+  "order_id": "ORD-7729-LX",
+  "reason": "DEFECTIVE_UNIT",
+  "media_proof": ["s3://assets/img_01.jpg"]
+}</pre>
+</div>
+<div class="flex justify-between items-center text-[10px] font-bold text-on-surface-variant uppercase">
+<span>Status: 202 Accepted</span>
+<span class="text-primary">Scope: returns:write</span>
+</div>
+</div>
+<!-- POST /return/approve -->
+<div class="api-card group bg-white border border-outline-variant p-5 rounded hover:border-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="bg-success text-white text-[10px] px-2 py-0.5 font-bold">POST</span>
+<code class="text-sm font-bold text-on-surface">/return/approve</code>
+</div>
+<button class="endpoint-copy p-1 hover:bg-surface-container rounded transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+<div class="bg-on-surface text-white p-4 font-code-sm text-xs rounded mb-4">
+<pre class="whitespace-pre">{
+  "request_id": "REQ-009",
+  "approver_id": "SYS_AUTO_BOT_01",
+  "policy_applied": "STD_30_DAY"
+}</pre>
+</div>
+</div>
+<!-- POST /pickup/create -->
+<div class="api-card group bg-white border border-outline-variant p-5 rounded hover:border-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="bg-success text-white text-[10px] px-2 py-0.5 font-bold">POST</span>
+<code class="text-sm font-bold text-on-surface">/pickup/create</code>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">Orchestrates courier dispatch and generates return labels.</p>
+<div class="flex gap-2">
+<span class="border border-outline-variant px-2 py-1 text-[9px] font-bold">CARRIER_FEDEX</span>
+<span class="border border-outline-variant px-2 py-1 text-[9px] font-bold">PRIORITY_EXPEDITED</span>
+</div>
+</div>
+</div>
+<!-- Financial & Logic Flow -->
+<div class="space-y-6">
+<h2 class="text-xl font-bold flex items-center gap-2">
+<span class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">02</span>
+                        Disbursement &amp; Ledger
+                    </h2>
+<!-- POST /wallet/refund -->
+<div class="api-card group bg-white border border-outline-variant p-5 rounded hover:border-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="bg-success text-white text-[10px] px-2 py-0.5 font-bold">POST</span>
+<code class="text-sm font-bold text-on-surface">/wallet/refund</code>
+</div>
+</div>
+<div class="bg-on-surface text-white p-4 font-code-sm text-xs rounded mb-4">
+<pre class="whitespace-pre">{
+  "customer_id": "USR_9921",
+  "amount": 149.50,
+  "currency": "USD",
+  "method": "ORIGINAL_PAYMENT"
+}</pre>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-sm" data-icon="report_problem">report_problem</span>
+<span class="text-[9px] text-error font-bold uppercase tracking-tight">Requires IDEMPOTENCY_KEY header</span>
+</div>
+</div>
+<!-- POST /escrow/release -->
+<div class="api-card group bg-white border border-outline-variant p-5 rounded hover:border-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="bg-success text-white text-[10px] px-2 py-0.5 font-bold">POST</span>
+<code class="text-sm font-bold text-on-surface">/escrow/release</code>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant">Releases withheld funds to secondary marketplace vendors after inspection pass.</p>
+</div>
+<!-- POST /audit/write -->
+<div class="api-card group bg-white border border-outline-variant p-5 rounded hover:border-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="bg-success text-white text-[10px] px-2 py-0.5 font-bold">POST</span>
+<code class="text-sm font-bold text-on-surface">/audit/write</code>
+</div>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant mb-3">
+<span class="material-symbols-outlined text-sm" data-icon="info">info</span>
+<span class="text-[10px] font-bold uppercase">Immutable Log Storage</span>
+</div>
+<div class="bg-surface-container-low border-l-2 border-primary p-2 text-[10px] font-code-sm">
+                            system.audit.push({ event: "LEDGER_BALANCE_UPDATE", timestamp: "ISO_8601" })
+                        </div>
+</div>
+</div>
+</div>
+<!-- Error Codes Table -->
+<div class="mt-16">
+<h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-error" data-icon="bug_report">bug_report</span>
+                    Failure Codes &amp; Exception Handling
+                </h3>
+<div class="overflow-hidden border border-outline-variant rounded-lg">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low text-[10px] font-bold uppercase text-on-surface-variant">
+<tr>
+<th class="px-6 py-3 border-b border-outline-variant">Code</th>
+<th class="px-6 py-3 border-b border-outline-variant">Description</th>
+<th class="px-6 py-3 border-b border-outline-variant">Retry Strategy</th>
+</tr>
+</thead>
+<tbody class="text-xs font-code-sm">
+<tr class="hover:bg-surface-container/50 transition-colors">
+<td class="px-6 py-4 border-b border-outline-variant font-bold text-error">ERR_001_AUTH</td>
+<td class="px-6 py-4 border-b border-outline-variant text-on-surface-variant">Invalid or expired JWT token.</td>
+<td class="px-6 py-4 border-b border-outline-variant"><span class="bg-surface-container px-2 py-0.5 rounded">NO_RETRY</span></td>
+</tr>
+<tr class="hover:bg-surface-container/50 transition-colors">
+<td class="px-6 py-4 border-b border-outline-variant font-bold text-error">ERR_005_CONCURRENCY</td>
+<td class="px-6 py-4 border-b border-outline-variant text-on-surface-variant">Optimistic locking failure on resource.</td>
+<td class="px-6 py-4 border-b border-outline-variant text-primary">IMMEDIATE_RETRY</td>
+</tr>
+<tr class="hover:bg-surface-container/50 transition-colors">
+<td class="px-6 py-4 border-b border-outline-variant font-bold text-error">ERR_012_RATE_LIMIT</td>
+<td class="px-6 py-4 border-b border-outline-variant text-on-surface-variant">Exceeded 10,000 req/sec quota.</td>
+<td class="px-6 py-4 border-b border-outline-variant text-warning">EXP_BACKOFF</td>
+</tr>
+<tr class="hover:bg-surface-container/50 transition-colors">
+<td class="px-6 py-4 font-bold text-error">ERR_044_UPSTREAM</td>
+<td class="px-6 py-4 text-on-surface-variant">Third-party logistics carrier timeout.</td>
+<td class="px-6 py-4 text-warning">CIRCUIT_BREAKER</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Visual Decorative Section -->
+<div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="relative h-48 rounded-lg overflow-hidden border border-outline-variant">
+<div class="w-full h-full bg-cover bg-center" data-alt="A macro photograph of high-tech circuit boards with glowing data paths and blue neon light trails, representing a high-throughput API gateway. The style is ultra-modern, clean, and professional, using a cool blue and crisp white palette to convey precision and reliability in a corporate technology setting." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDdf1-rRGui-0s2hO0HSxk95Q3dq5LuESptjiAYN3c4lvqfc0b_ltj3z4egD6A9ieeqeDxRo5wPOR5Qibh8ORK1PQ3KieAAhUtGowswOhE95GHAbjPqe6H_vc7LA6sd0mBCKw0Lnb2UHF4zYdHkqs_d68abGacbu5qB1T0YmxtmP1B4Qml69w4qU7Q3U7uxYfrMUBxwqIm8TrJodMh6BIsJr_33Au8pTHabZrQq5VwicufPwc0ccvwYLCaW02EU-8ZW3ERO_egX88Q')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+<span class="text-white text-[10px] font-bold uppercase tracking-widest">Gateway Node A-12</span>
+</div>
+</div>
+<div class="relative h-48 rounded-lg overflow-hidden border border-outline-variant">
+<div class="w-full h-full bg-cover bg-center" data-alt="A clean, minimalist 3D rendering of an abstract data visualization showing interconnected nodes and floating glass cubes in a bright white studio space. Soft global illumination and sharp shadows emphasize a high-contrast light mode aesthetic. The composition is balanced and technical, symbolizing a complex API system architecture." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDVyZ3WA9fMNElEWRTDP0WdK_wryezob5TEuaQwnJOpy-hQSn1VxmERYw3KDWI8u-CwEV1b-A3b79aAYEfiKQi5asDqZHlh4jKO767SJ9QFlXZnik7GdTm7IHY67zakk3AGd8CRhjwxbSZGvKTMQ-Ylr3Jkrebgfxoyo7oiriQdafxnsKCu4YzG2xmFeJla-ZOAnzC6uLWicp9PXpCaO34I7hyOsTj-v8d5dZqzjMDuah9tPrC31IsAb1sp0-FRPM4Ap9vJNGfkTS8')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+<span class="text-white text-[10px] font-bold uppercase tracking-widest">Cluster Schema Map</span>
+</div>
+</div>
+<div class="relative h-48 rounded-lg overflow-hidden border border-outline-variant">
+<div class="w-full h-full bg-cover bg-center" data-alt="A high-contrast architectural shot of a modern server room aisle with glass doors and polished white floors. Rows of server racks with blue status indicator lights fade into a bright bokeh background. The lighting is high-key and corporate, suggesting a high-performance and secure computing environment for logistics processing." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDshhYWhXNNA_ZMdBCzKVM6Kd4Hx6Ix-r061oD76HNf5PunP7xbEidopzrD4kv0f1fzfwDwfivNLWS3KHEkwbzHNiqpaEthoyDcFtGg1Ddh_c7GuHpJwKli408VvmJoaKUXSSZ8Lm6fetYGJGz4iB4regseWs8tC8Bgr0BZiPNsh73G65RHzu0gRIqRELL6J5q5DssOubtXlGpnMhSzYqwkYlC1L9FiuEQ1RbNcAAJC-JOc-7GUw9yHeaf558hn6Nnf2vJqSvM0g9o')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+<span class="text-white text-[10px] font-bold uppercase tracking-widest">Telemetry Hub</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar -->
+<footer class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-4 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-sm p-1 scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="memory">memory</span>
+<span class="font-code-xs text-[8px] font-label-caps">Runtime</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="schema">schema</span>
+<span class="font-code-xs text-[8px] font-label-caps">Schema</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="dns">dns</span>
+<span class="font-code-xs text-[8px] font-label-caps">Gateway</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="analytics">analytics</span>
+<span class="font-code-xs text-[8px] font-label-caps">Metrics</span>
+</div>
+</footer>
+<script>
+        // Simple Micro-interaction for Copy Buttons
+        document.querySelectorAll('.endpoint-copy').forEach(button => {
+            button.addEventListener('click', () => {
+                const icon = button.querySelector('.material-symbols-outlined');
+                const original = icon.innerText;
+                icon.innerText = 'check';
+                button.classList.add('text-success');
+                setTimeout(() => {
+                    icon.innerText = original;
+                    button.classList.remove('text-success');
+                }, 2000);
+            });
+        });
+
+        // Sticky Header Shadow on Scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 0) {
+                header.classList.add('shadow-sm');
+            } else {
+                header.classList.remove('shadow-sm');
+            }
+        });
+    </script>
+</body></html>

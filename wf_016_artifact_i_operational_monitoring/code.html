@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-016 | CORE_ENGINE_V2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector-horizontal {
+            height: 2px;
+            background: #3b4b37;
+            position: relative;
+        }
+        .node-connector-horizontal::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: -4px;
+            border-left: 6px solid #3b4b37;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(0, 255, 65, 0) 0%, rgba(0, 255, 65, 0.05) 50%, rgba(0, 255, 65, 0) 100%);
+            opacity: 0.1;
+            position: fixed;
+            bottom: 100%;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+        }
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100px; }
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "primary-container": "#00ff41",
+                "inverse-on-surface": "#233143",
+                "surface-container-low": "#0d1c2d",
+                "on-tertiary-container": "#862ed4",
+                "secondary-fixed-dim": "#b8c3ff",
+                "error-container": "#93000a",
+                "outline": "#84967e",
+                "surface-container-high": "#1c2b3c",
+                "on-surface": "#d4e4fa",
+                "surface-tint": "#00e639",
+                "primary-fixed-dim": "#00e639",
+                "on-tertiary-fixed": "#2c0051",
+                "on-error": "#690005",
+                "surface-dim": "#051424",
+                "secondary-container": "#0043eb",
+                "on-secondary": "#002388",
+                "on-primary-container": "#007117",
+                "secondary-fixed": "#dde1ff",
+                "primary": "#ebffe2",
+                "on-background": "#d4e4fa",
+                "secondary": "#b8c3ff",
+                "on-tertiary": "#490080",
+                "tertiary-container": "#ecd3ff",
+                "surface-variant": "#273647",
+                "surface": "#051424",
+                "on-error-container": "#ffdad6",
+                "inverse-primary": "#006e16",
+                "on-surface-variant": "#b9ccb2",
+                "on-secondary-fixed": "#001356",
+                "surface-container": "#122131",
+                "on-primary": "#003907",
+                "on-secondary-fixed-variant": "#0035be",
+                "surface-container-highest": "#273647",
+                "tertiary": "#fff6ff",
+                "on-tertiary-fixed-variant": "#6900b3",
+                "error": "#ffb4ab",
+                "tertiary-fixed-dim": "#ddb7ff",
+                "tertiary-fixed": "#f0dbff",
+                "outline-variant": "#3b4b37",
+                "on-secondary-container": "#c6ceff",
+                "background": "#051424",
+                "surface-bright": "#2c3a4c",
+                "surface-container-lowest": "#010f1f",
+                "on-primary-fixed": "#002203",
+                "on-primary-fixed-variant": "#00530e",
+                "inverse-surface": "#d4e4fa",
+                "primary-fixed": "#72ff70"
+              },
+              "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+              },
+              "spacing": {
+                "node-gutter": "24px",
+                "stack-gap": "4px",
+                "lane-margin": "32px",
+                "grid-unit": "8px"
+              },
+              "fontFamily": {
+                "headline-lg": ["Plus Jakarta Sans"],
+                "label-caps": ["JetBrains Mono"],
+                "code-sm": ["JetBrains Mono"],
+                "code-xs": ["JetBrains Mono"],
+                "headline-md": ["Plus Jakarta Sans"],
+                "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<div class="scanline"></div>
+<!-- TopAppBar -->
+<header class="w-full border-b border-outline-variant bg-background flex justify-between items-center h-12 px-lane-margin fixed top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">CORE_ENGINE_V2</span>
+<div class="ml-4 px-2 py-0.5 border border-primary-container/30 rounded text-[10px] font-label-caps text-primary-container">SYSTEM_OK: WF-016</div>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<span class="font-label-caps text-label-caps text-primary-fixed font-bold cursor-pointer">MONITORING</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer px-2 py-1 rounded">DEPLOYMENTS</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer px-2 py-1 rounded">VULNERABILITIES</span>
+</nav>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container-low border-r border-outline-variant flex flex-col pt-stack-gap hidden lg:flex">
+<div class="px-6 py-4">
+<h2 class="font-label-caps text-label-caps text-on-surface opacity-50">MODULE_REGISTRY</h2>
+</div>
+<nav class="flex flex-col">
+<div class="flex items-center px-6 py-3 gap-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed cursor-default select-none">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-caps text-label-caps font-code-sm">Inventory_Flow</span>
+</div>
+<div class="flex items-center px-6 py-3 gap-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-label-caps text-label-caps font-code-sm">Order_Lifecycle</span>
+</div>
+<div class="flex items-center px-6 py-3 gap-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-label-caps text-label-caps font-code-sm">Payment_Gateway</span>
+</div>
+<div class="flex items-center px-6 py-3 gap-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps font-code-sm">Audit_Logs</span>
+</div>
+<div class="flex items-center px-6 py-3 gap-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="font-label-caps text-label-caps font-code-sm">n8n_Connectors</span>
+</div>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant/30">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">UPSTREAM_STABLE</span>
+</div>
+<div class="p-3 bg-surface-container-lowest rounded border border-outline-variant/20">
+<div class="text-[9px] font-label-caps text-on-surface-variant mb-1">NODE_UPTIME</div>
+<div class="font-code-sm text-code-sm text-primary">1,240:12:44:09</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="lg:ml-64 pt-12 pb-24 min-h-screen px-lane-margin">
+<!-- Dashboard Header -->
+<div class="py-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<div class="font-label-caps text-[10px] text-primary mb-1">ARTIFACT_TYPE: OPERATIONAL_MONITORING</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">WF-016_CORE_TELEMETRY</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-2 max-w-2xl">Real-time throughput analysis for checkout orchestration and inventory locking mechanisms. Current focus: Order_Lifecycle [Subsystem 04].</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-[10px] text-on-surface-variant">LATEST_SYNC</span>
+<span class="font-code-sm text-code-sm text-primary">2023-10-27 14:02:44.211</span>
+</div>
+<div class="h-10 w-[1px] bg-outline-variant"></div>
+<button class="bg-primary text-on-primary px-4 py-2 font-label-caps text-label-caps flex items-center gap-2 hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="refresh">refresh</span>
+                    REBOOT_DAEMON
+                </button>
+</div>
+</div>
+<!-- KPI Grid (Bento Style) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+<!-- Active Carts -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTIVE_CARTS</span>
+<span class="material-symbols-outlined text-primary text-[16px]" data-icon="shopping_basket">shopping_basket</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-primary">12,482</div>
+<div class="mt-auto flex items-center gap-1 text-primary-fixed text-[10px] font-code-xs">
+<span class="material-symbols-outlined text-[12px]" data-icon="trending_up">trending_up</span>
+                    +12.4% vs T-1H
+                </div>
+</div>
+<!-- Abandonment Rate -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-[10px] text-on-surface-variant">ABANDON_RATE</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="logout">logout</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-surface">24.5<span class="text-sm opacity-50">%</span></div>
+<div class="mt-auto flex items-center gap-1 text-error text-[10px] font-code-xs">
+<span class="material-symbols-outlined text-[12px]" data-icon="trending_down">trending_down</span>
+                    +1.2% Drift
+                </div>
+</div>
+<!-- Checkout Success -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-[10px] text-on-surface-variant">CHECKOUT_SUCCESS</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-[16px]" data-icon="verified">verified</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-primary-fixed">98.2<span class="text-sm opacity-50">%</span></div>
+<div class="mt-auto h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[98%]"></div>
+</div>
+</div>
+<!-- Payment Success -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-[10px] text-on-surface-variant">PAYMENT_STABILITY</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" data-icon="credit_card">credit_card</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-secondary">99.9<span class="text-sm opacity-50">%</span></div>
+<div class="mt-auto flex items-center gap-1 text-on-surface-variant text-[10px] font-code-xs">
+                    GATEWAY: STRIPE_01 [LIVE]
+                </div>
+</div>
+<!-- Inventory Conflicts -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-[10px] text-on-surface-variant">LOCK_CONFLICTS</span>
+<span class="material-symbols-outlined text-error text-[16px]" data-icon="lock_reset">lock_reset</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-error">14</div>
+<div class="mt-auto flex items-center gap-1 text-on-error-container bg-error-container px-1 py-0.5 rounded text-[9px] font-code-xs">
+                    CRITICAL_OVERSELL_RISK
+                </div>
+</div>
+<!-- Avg Checkout Time -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-[10px] text-on-surface-variant">AVG_LATENCY_CK</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="timer">timer</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-surface">1.2<span class="text-sm opacity-50">s</span></div>
+<div class="mt-auto flex items-center gap-1 text-primary-fixed text-[10px] font-code-xs">
+                    OPTIMIZED: P99
+                </div>
+</div>
+</section>
+<!-- Main Workflow Visualization -->
+<section class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+<!-- Real-time Flow Map (Center Left) -->
+<div class="lg:col-span-3 bg-surface-container-lowest border border-outline-variant relative overflow-hidden min-h-[400px]">
+<div class="absolute inset-0 opacity-10">
+
+</div>
+<div class="relative z-10 p-6 flex flex-col h-full">
+<div class="flex justify-between items-center mb-8">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+<span class="font-label-caps text-label-caps text-primary tracking-widest">LIVE_PROCESS_NODE_MAP</span>
+</div>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-surface-container-highest text-[10px] font-code-xs text-on-surface-variant rounded">RELAY_CLUSTER_ALPHA</span>
+<span class="px-2 py-1 bg-primary-container text-[10px] font-code-xs text-on-primary-container rounded">HEALTHY</span>
+</div>
+</div>
+<!-- Visual Process Nodes -->
+<div class="flex-grow flex items-center justify-center gap-8 py-12 relative">
+<!-- Node 1 -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-32 bg-surface-dim border border-primary p-3 rounded shadow-lg shadow-primary-container/10">
+<div class="text-[9px] font-label-caps text-primary/50 mb-1">AUTH_GATE</div>
+<div class="text-[12px] font-code-sm text-primary font-bold">SESSION_INIT</div>
+<div class="mt-2 text-[10px] font-code-xs text-on-surface-variant">REQ: 4.2k/s</div>
+</div>
+</div>
+<div class="w-16 node-connector-horizontal"></div>
+<!-- Node 2 -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-32 bg-surface-dim border border-outline p-3 rounded">
+<div class="text-[9px] font-label-caps text-outline mb-1">LOCK_MGR</div>
+<div class="text-[12px] font-code-sm text-on-surface font-bold">INV_RESERVE</div>
+<div class="mt-2 text-[10px] font-code-xs text-on-surface-variant">LOCK: 14ms</div>
+</div>
+</div>
+<div class="w-16 node-connector-horizontal"></div>
+<!-- Node 3 -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-40 bg-surface-dim border-2 border-secondary-container p-3 rounded relative">
+<div class="absolute -top-3 -right-2 bg-secondary-container text-[9px] px-2 py-0.5 rounded font-bold text-white animate-pulse">ACTIVE</div>
+<div class="text-[9px] font-label-caps text-secondary-fixed-dim mb-1">PAY_ORCH</div>
+<div class="text-[12px] font-code-sm text-secondary font-bold uppercase tracking-tight">Stripe_3D_Verify</div>
+<div class="mt-2 text-[10px] font-code-xs text-secondary-fixed">ACK: WAITING...</div>
+</div>
+</div>
+<div class="w-16 node-connector-horizontal opacity-30 border-dashed"></div>
+<!-- Node 4 -->
+<div class="flex flex-col items-center gap-2 opacity-50">
+<div class="w-32 bg-surface-dim border border-outline-variant p-3 rounded">
+<div class="text-[9px] font-label-caps text-on-surface-variant mb-1">FULFILL</div>
+<div class="text-[12px] font-code-sm text-on-surface-variant font-bold">ORDER_GEN</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Data Overlay -->
+<div class="mt-auto grid grid-cols-4 gap-4 pt-4 border-t border-outline-variant/30">
+<div>
+<div class="text-[9px] font-label-caps text-on-surface-variant">INBOUND_FLOW</div>
+<div class="text-sm font-code-sm text-primary">842.1 MB/S</div>
+</div>
+<div>
+<div class="text-[9px] font-label-caps text-on-surface-variant">ERROR_RATE_SYS</div>
+<div class="text-sm font-code-sm text-error">0.002%</div>
+</div>
+<div>
+<div class="text-[9px] font-label-caps text-on-surface-variant">DB_IO_LATENCY</div>
+<div class="text-sm font-code-sm text-on-surface">3.4 MS</div>
+</div>
+<div>
+<div class="text-[9px] font-label-caps text-on-surface-variant">THREADS_ACTIVE</div>
+<div class="text-sm font-code-sm text-on-surface">1,024</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Audit Log Side Panel -->
+<div class="lg:col-span-1 bg-surface-container border border-outline-variant flex flex-col h-full min-h-[400px]">
+<div class="p-4 border-b border-outline-variant bg-surface-container-high flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">EVENT_LOG_STREAM</span>
+<span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>
+</div>
+<div class="flex-grow overflow-y-auto p-3 flex flex-col gap-3 font-code-xs text-[10px]">
+<div class="flex gap-2">
+<span class="text-on-surface-variant shrink-0">14:02:44</span>
+<span class="text-primary-fixed shrink-0 font-bold">[INFO]</span>
+<span class="text-on-surface">Cart_8291 lock verified.</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant shrink-0">14:02:44</span>
+<span class="text-primary-fixed shrink-0 font-bold">[INFO]</span>
+<span class="text-on-surface">Payment_Stripe_Session_004 created.</span>
+</div>
+<div class="flex gap-2 border-l border-error pl-2 bg-error-container/10">
+<span class="text-on-surface-variant shrink-0">14:02:43</span>
+<span class="text-error shrink-0 font-bold">[WARN]</span>
+<span class="text-error">SKU_4492 inventory lock collision detected. Retrying...</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant shrink-0">14:02:43</span>
+<span class="text-primary-fixed shrink-0 font-bold">[INFO]</span>
+<span class="text-on-surface">Order_Gen worker #14 spawned.</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant shrink-0">14:02:42</span>
+<span class="text-primary-fixed shrink-0 font-bold">[INFO]</span>
+<span class="text-on-surface">Auth_Sync completed (44ms).</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant shrink-0">14:02:42</span>
+<span class="text-primary-fixed shrink-0 font-bold">[INFO]</span>
+<span class="text-on-surface">Cart_8290 transaction finalized.</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant shrink-0">14:02:41</span>
+<span class="text-on-surface-variant shrink-0 font-bold">[DEBUG]</span>
+<span class="text-on-surface-variant opacity-70">Tracing: wf-016-ctx-991...</span>
+</div>
+<div class="flex gap-2 border-l border-error pl-2 bg-error-container/10">
+<span class="text-on-surface-variant shrink-0">14:02:40</span>
+<span class="text-error shrink-0 font-bold">[ERR]</span>
+<span class="text-error">Gateway connection timeout. Failover triggered.</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant shrink-0">14:02:40</span>
+<span class="text-primary-fixed shrink-0 font-bold">[INFO]</span>
+<span class="text-on-surface">Node_Relay_B status changed: STANDBY.</span>
+</div>
+</div>
+<div class="p-3 border-t border-outline-variant bg-surface-container-lowest">
+<div class="relative">
+<input class="w-full bg-transparent border border-outline-variant text-[10px] font-code-xs px-2 py-1.5 focus:border-primary-fixed outline-none" placeholder="QUERY_EVENT_ID..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-[14px] text-on-surface-variant" data-icon="search">search</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Detail Section -->
+<section class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container border border-outline-variant rounded p-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="analytics">analytics</span>
+<h3 class="font-label-caps text-label-caps text-on-surface">SUBSYSTEM_ANALYSIS</h3>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end border-b border-outline-variant/30 pb-2">
+<div class="font-code-sm text-on-surface-variant">Worker Saturation</div>
+<div class="text-right">
+<div class="font-code-sm text-primary">82%</div>
+<div class="w-32 h-1 bg-surface-container-highest rounded-full mt-1">
+<div class="h-full bg-primary w-[82%]"></div>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-end border-b border-outline-variant/30 pb-2">
+<div class="font-code-sm text-on-surface-variant">Redis Cache Hit</div>
+<div class="text-right">
+<div class="font-code-sm text-primary">99.1%</div>
+<div class="w-32 h-1 bg-surface-container-highest rounded-full mt-1">
+<div class="h-full bg-primary w-[99%]"></div>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-end border-b border-outline-variant/30 pb-2">
+<div class="font-code-sm text-on-surface-variant">SQL Connection Pool</div>
+<div class="text-right">
+<div class="font-code-sm text-secondary">42/100</div>
+<div class="w-32 h-1 bg-surface-container-highest rounded-full mt-1">
+<div class="h-full bg-secondary w-[42%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant rounded p-0 overflow-hidden flex flex-col">
+<div class="p-4 bg-surface-container-high flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+<h3 class="font-label-caps text-label-caps text-on-surface">ANOMALY_TRACKER</h3>
+</div>
+<span class="text-[10px] font-code-xs text-on-surface-variant">3 DETECTED</span>
+</div>
+<div class="p-6 space-y-4 flex-grow">
+<div class="flex gap-4 p-3 border border-error-container bg-error-container/5 rounded">
+<div class="material-symbols-outlined text-error" data-icon="dns">dns</div>
+<div>
+<div class="font-label-caps text-[10px] text-error">CRITICAL_LATENCY_SPIKE</div>
+<div class="font-code-sm text-on-surface">Node EU-WEST-1 reporting 450ms drift in inventory lock sync.</div>
+</div>
+</div>
+<div class="flex gap-4 p-3 border border-outline-variant rounded">
+<div class="material-symbols-outlined text-on-surface-variant" data-icon="bolt">bolt</div>
+<div>
+<div class="font-label-caps text-[10px] text-on-surface-variant">THROUGHPUT_LIMIT_REACHED</div>
+<div class="font-code-sm text-on-surface">Checkout queue #04 reaching max concurrency. Scaling up...</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<div class="fixed bottom-0 left-0 w-full flex justify-center pb-4 z-50">
+<div class="w-fit rounded-full bg-surface-container-highest border border-outline-variant shadow-lg flex items-center p-1.5 gap-2 scale-100 transition-transform active:scale-95">
+<div class="text-primary-fixed bg-surface-container-high rounded-full p-2 cursor-pointer transition-colors hover:text-primary">
+<span class="material-symbols-outlined block" data-icon="zoom_in">zoom_in</span>
+</div>
+<div class="text-on-surface-variant p-2 cursor-pointer transition-colors hover:text-primary">
+<span class="material-symbols-outlined block" data-icon="zoom_out">zoom_out</span>
+</div>
+<div class="text-on-surface-variant p-2 cursor-pointer transition-colors hover:text-primary">
+<span class="material-symbols-outlined block" data-icon="grid_4x4">grid_4x4</span>
+</div>
+<div class="text-on-surface-variant p-2 cursor-pointer transition-colors hover:text-primary">
+<span class="material-symbols-outlined block" data-icon="file_download">file_download</span>
+</div>
+</div>
+</div>
+<script>
+        // Micro-interactions and real-time feel
+        document.addEventListener('DOMContentLoaded', () => {
+            const logs = document.querySelector('.overflow-y-auto');
+            
+            // Randomly add some log entries to simulate activity
+            setInterval(() => {
+                const now = new Date();
+                const time = now.toTimeString().split(' ')[0];
+                const messages = [
+                    "Worker heartbeat received.",
+                    "Cache invalidated for key: STOCK_04.",
+                    "Session_X sync handshake success.",
+                    "Metrics pushed to global registry.",
+                    "Auth validator relay: OK"
+                ];
+                const msg = messages[Math.floor(Math.random() * messages.length)];
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = "flex gap-2 animate-pulse";
+                logEntry.innerHTML = `
+                    <span class="text-on-surface-variant shrink-0">${time}</span>
+                    <span class="text-primary-fixed shrink-0 font-bold">[INFO]</span>
+                    <span class="text-on-surface">${msg}</span>
+                `;
+                
+                logs.prepend(logEntry);
+                if (logs.children.length > 20) {
+                    logs.removeChild(logs.lastChild);
+                }
+                
+                setTimeout(() => logEntry.classList.remove('animate-pulse'), 1000);
+            }, 3000);
+
+            // Simple cursor interaction for the node map
+            const nodes = document.querySelectorAll('.bg-surface-dim');
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', () => {
+                    node.classList.add('border-primary-container');
+                    node.style.transform = "translateY(-2px)";
+                });
+                node.addEventListener('mouseleave', () => {
+                    node.classList.remove('border-primary-container');
+                    node.style.transform = "translateY(0px)";
+                });
+            });
+        });
+    </script>
+</body></html>

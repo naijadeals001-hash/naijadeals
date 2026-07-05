@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CORE_ENGINE_V2 | Business Rules Engine WF-016</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, rgba(132, 150, 126, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 48px 1fr 1fr 1.5fr 1fr 1fr;
+            gap: 1px;
+            background-color: #3b4b37;
+        }
+        .matrix-cell {
+            background-color: #0d1c2d;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+        }
+        .matrix-header {
+            background-color: #122131;
+            padding: 8px 12px;
+            color: #b9ccb2;
+            text-transform: uppercase;
+        }
+        .glow-line {
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#00ff41",
+                        "inverse-on-surface": "#233143",
+                        "surface-container-low": "#0d1c2d",
+                        "on-tertiary-container": "#862ed4",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "error-container": "#93000a",
+                        "outline": "#84967e",
+                        "surface-container-high": "#1c2b3c",
+                        "on-surface": "#d4e4fa",
+                        "surface-tint": "#00e639",
+                        "primary-fixed-dim": "#00e639",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-error": "#690005",
+                        "surface-dim": "#051424",
+                        "secondary-container": "#0043eb",
+                        "on-secondary": "#002388",
+                        "on-primary-container": "#007117",
+                        "secondary-fixed": "#dde1ff",
+                        "primary": "#ebffe2",
+                        "on-background": "#d4e4fa",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-variant": "#273647",
+                        "surface": "#051424",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006e16",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-secondary-fixed": "#001356",
+                        "surface-container": "#122131",
+                        "on-primary": "#003907",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "surface-container-highest": "#273647",
+                        "tertiary": "#fff6ff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "tertiary-fixed": "#f0dbff",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-container": "#c6ceff",
+                        "background": "#051424",
+                        "surface-bright": "#2c3a4c",
+                        "surface-container-lowest": "#010f1f",
+                        "on-primary-fixed": "#002203",
+                        "on-primary-fixed-variant": "#00530e",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-fixed": "#72ff70"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-background min-h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-12 px-lane-margin w-full fixed top-0 z-50 border-b border-outline-variant bg-background">
+<div class="flex items-center gap-2 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">CORE_ENGINE_V2</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors px-2 py-1 cursor-pointer">SYS_MONITOR</span>
+<span class="font-label-caps text-label-caps text-primary-fixed font-bold hover:bg-surface-container-high transition-colors px-2 py-1 cursor-pointer">RULES_ENGINE</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors px-2 py-1 cursor-pointer">LOG_STREAM</span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 border-r border-outline-variant bg-surface-container-low flex flex-col pt-stack-gap hidden md:flex">
+<div class="px-4 py-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface font-bold">MODULE_REGISTRY</span>
+</div>
+<nav class="flex-1 overflow-y-auto">
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-caps text-label-caps">Inventory_Flow</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed cursor-default select-none">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-label-caps text-label-caps">Order_Lifecycle</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-caps text-label-caps">Payment_Gateway</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit_Logs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-label-caps text-label-caps">n8n_Connectors</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-20 px-lane-margin pb-24">
+<!-- Logic Matrix Header -->
+<div class="mb-8">
+<div class="flex items-baseline gap-3 mb-2">
+<h1 class="font-headline-lg text-headline-lg text-primary">BUSINESS RULES ENGINE</h1>
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container-highest px-2 py-0.5 rounded">NODE: WF-016</span>
+</div>
+<p class="font-body-md text-on-surface-variant max-w-2xl">High-density logic evaluation matrix for the WF-016 Transaction Lifecycle. Real-time auditing of state transitions and recovery paths.</p>
+</div>
+<!-- Matrix Control Panel -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col gap-1">
+<span class="font-label-caps text-[10px] text-on-surface-variant">ENGINE_STATE</span>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-sm text-code-sm text-primary">OPERATIONAL_STABLE</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col gap-1">
+<span class="font-label-caps text-[10px] text-on-surface-variant">LATENCY_P99</span>
+<span class="font-code-sm text-code-sm text-on-surface">14.2ms</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col gap-1">
+<span class="font-label-caps text-[10px] text-on-surface-variant">EXEC_COUNT_24H</span>
+<span class="font-code-sm text-code-sm text-on-surface">842,109</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col gap-1">
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTIVE_SESSIONS</span>
+<span class="font-code-sm text-code-sm text-on-surface">1,024</span>
+</div>
+</div>
+<!-- Logic Matrix Table -->
+<div class="w-full overflow-x-auto border border-outline-variant rounded-sm">
+<div class="matrix-grid min-w-[1000px]">
+<!-- Header -->
+<div class="matrix-header font-label-caps text-[10px]">ID</div>
+<div class="matrix-header font-label-caps text-[10px]">Rule Definition</div>
+<div class="matrix-header font-label-caps text-[10px]">Responsible Service</div>
+<div class="matrix-header font-label-caps text-[10px]">Decision Logic</div>
+<div class="matrix-header font-label-caps text-[10px]">Failure Result</div>
+<div class="matrix-header font-label-caps text-[10px]">Recovery Path</div>
+<!-- Row 1: Cart Empty -->
+<div class="matrix-cell font-code-sm text-on-surface-variant">01</div>
+<div class="matrix-cell">
+<div class="flex flex-col">
+<span class="font-code-sm text-on-surface font-bold">Cart Empty?</span>
+<span class="font-code-xs text-[9px] text-on-surface-variant">BR-CART-001</span>
+</div>
+</div>
+<div class="matrix-cell font-code-sm text-secondary">service.commerce.v2</div>
+<div class="matrix-cell">
+<div class="bg-surface-container p-2 rounded border border-outline-variant w-full">
+<code class="font-code-xs text-[10px] text-primary-fixed">IF cart.items.count() &gt; 0 THEN PASS ELSE FAIL</code>
+</div>
+</div>
+<div class="matrix-cell text-error-container">
+<span class="font-label-caps text-[10px] px-1 bg-error-container text-on-error-container rounded">ERR_EMPTY_CART</span>
+</div>
+<div class="matrix-cell font-code-xs text-on-surface-variant italic">Redirect to /shop-catalog</div>
+<!-- Row 2: Inventory Available -->
+<div class="matrix-cell font-code-sm text-on-surface-variant">02</div>
+<div class="matrix-cell">
+<div class="flex flex-col">
+<span class="font-code-sm text-on-surface font-bold">Inventory Available?</span>
+<span class="font-code-xs text-[9px] text-on-surface-variant">BR-INV-042</span>
+</div>
+</div>
+<div class="matrix-cell font-code-sm text-secondary">service.warehouse.io</div>
+<div class="matrix-cell">
+<div class="bg-surface-container p-2 rounded border border-outline-variant w-full">
+<code class="font-code-xs text-[10px] text-primary-fixed">FOR ALL item IN cart: stock(item) &gt;= quantity</code>
+</div>
+</div>
+<div class="matrix-cell text-error-container">
+<span class="font-label-caps text-[10px] px-1 bg-error-container text-on-error-container rounded">ERR_STOCK_OUT</span>
+</div>
+<div class="matrix-cell font-code-xs text-on-surface-variant italic">Triggers Backorder_UI flow</div>
+<!-- Row 3: Price Changed -->
+<div class="matrix-cell font-code-sm text-on-surface-variant">03</div>
+<div class="matrix-cell">
+<div class="flex flex-col">
+<span class="font-code-sm text-on-surface font-bold">Price Changed?</span>
+<span class="font-code-xs text-[9px] text-on-surface-variant">BR-PRC-009</span>
+</div>
+</div>
+<div class="matrix-cell font-code-sm text-secondary">service.pricing.edge</div>
+<div class="matrix-cell">
+<div class="bg-surface-container p-2 rounded border border-outline-variant w-full">
+<code class="font-code-xs text-[10px] text-primary-fixed">abs(cart.total - fetch_current(total)) &lt; 0.01</code>
+</div>
+</div>
+<div class="matrix-cell text-error-container">
+<span class="font-label-caps text-[10px] px-1 bg-error-container text-on-error-container rounded">WARN_PRC_MISM</span>
+</div>
+<div class="matrix-cell font-code-xs text-on-surface-variant italic">Auto-update cart + Toast Notify</div>
+<!-- Row 4: Coupon Valid -->
+<div class="matrix-cell font-code-sm text-on-surface-variant">04</div>
+<div class="matrix-cell">
+<div class="flex flex-col">
+<span class="font-code-sm text-on-surface font-bold">Coupon Valid?</span>
+<span class="font-code-xs text-[9px] text-on-surface-variant">BR-MKT-077</span>
+</div>
+</div>
+<div class="matrix-cell font-code-sm text-secondary">service.promo.node</div>
+<div class="matrix-cell">
+<div class="bg-surface-container p-2 rounded border border-outline-variant w-full">
+<code class="font-code-xs text-[10px] text-primary-fixed">coupon.expiry &gt; NOW &amp;&amp; user.eligibility == TRUE</code>
+</div>
+</div>
+<div class="matrix-cell text-error-container">
+<span class="font-label-caps text-[10px] px-1 bg-error-container text-on-error-container rounded">ERR_CPN_EXPIRED</span>
+</div>
+<div class="matrix-cell font-code-xs text-on-surface-variant italic">Strip discount; Proceed at base price</div>
+<!-- Row 5: Wallet Balance -->
+<div class="matrix-cell font-code-sm text-on-surface-variant">05</div>
+<div class="matrix-cell">
+<div class="flex flex-col">
+<span class="font-code-sm text-on-surface font-bold">Wallet Balance?</span>
+<span class="font-code-xs text-[9px] text-on-surface-variant">BR-PAY-101</span>
+</div>
+</div>
+<div class="matrix-cell font-code-sm text-secondary">service.ledger.auth</div>
+<div class="matrix-cell">
+<div class="bg-surface-container p-2 rounded border border-outline-variant w-full">
+<code class="font-code-xs text-[10px] text-primary-fixed">wallet.available &gt;= cart.total_inc_tax</code>
+</div>
+</div>
+<div class="matrix-cell text-error-container">
+<span class="font-label-caps text-[10px] px-1 bg-error-container text-on-error-container rounded">ERR_INSUF_FUNDS</span>
+</div>
+<div class="matrix-cell font-code-xs text-on-surface-variant italic">Invoke TOP_UP_MODAL</div>
+<!-- Row 6: Escrow Created -->
+<div class="matrix-cell font-code-sm text-on-surface-variant">06</div>
+<div class="matrix-cell">
+<div class="flex flex-col">
+<span class="font-code-sm text-on-surface font-bold">Escrow Created?</span>
+<span class="font-code-xs text-[9px] text-on-surface-variant">BR-FIN-300</span>
+</div>
+</div>
+<div class="matrix-cell font-code-sm text-secondary">service.escrow.v3</div>
+<div class="matrix-cell">
+<div class="bg-surface-container p-2 rounded border border-outline-variant w-full">
+<code class="font-code-xs text-[10px] text-primary-fixed">POST /create_escrow -&gt; HTTP 201 Created</code>
+</div>
+</div>
+<div class="matrix-cell text-error-container">
+<span class="font-label-caps text-[10px] px-1 bg-error-container text-on-error-container rounded">ERR_ESCROW_FAIL</span>
+</div>
+<div class="matrix-cell font-code-xs text-on-surface-variant italic">Retry 3x with Exponential Backoff</div>
+<!-- Row 7: Payment Authorized -->
+<div class="matrix-cell font-code-sm text-on-surface-variant">07</div>
+<div class="matrix-cell">
+<div class="flex flex-col">
+<span class="font-code-sm text-on-surface font-bold">Payment Authorized?</span>
+<span class="font-code-xs text-[9px] text-on-surface-variant">BR-PAY-202</span>
+</div>
+</div>
+<div class="matrix-cell font-code-sm text-secondary">service.stripe.gw</div>
+<div class="matrix-cell">
+<div class="bg-surface-container p-2 rounded border border-outline-variant w-full">
+<code class="font-code-xs text-[10px] text-primary-fixed">gateway.authorize(tx_id) == SUCCESS</code>
+</div>
+</div>
+<div class="matrix-cell text-error-container">
+<span class="font-label-caps text-[10px] px-1 bg-error-container text-on-error-container rounded">ERR_AUTH_DECLINED</span>
+</div>
+<div class="matrix-cell font-code-xs text-on-surface-variant italic">Redirect to PAYMENT_METHOD_SELECT</div>
+</div>
+</div>
+<!-- Telemetry & Visuals Section -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="relative h-64 bg-surface-container-lowest border border-outline-variant overflow-hidden">
+<div class="absolute top-4 left-4 z-10">
+<span class="font-label-caps text-label-caps text-on-surface bg-surface-container px-2 py-1 border border-outline-variant">LIVE_FLOW_TRAJECTORY</span>
+</div>
+
+<div class="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-1">
+<span class="font-code-xs text-code-xs text-primary-fixed">S: AUTH_OK [12.4ms]</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">S: ESCROW_ACTIVE [5.1ms]</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-6 relative">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">RECOVERY_TELEMETRY</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">AUTOMATED MITIGATION SUCCESS RATE</p>
+</div>
+<span class="font-headline-lg text-headline-lg text-primary">99.8%</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 99.8%"></div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="border-l border-primary-fixed pl-3">
+<span class="block font-code-xs text-[10px] text-on-surface-variant">AUTO_FIXED</span>
+<span class="font-headline-md text-headline-md text-on-surface">1,240</span>
+</div>
+<div class="border-l border-error pl-3">
+<span class="block font-code-xs text-[10px] text-on-surface-variant">MANUAL_ESCALATE</span>
+<span class="font-headline-md text-headline-md text-on-surface">3</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-center pb-4 z-50">
+<div class="w-fit rounded-full bg-surface-container-highest border border-outline-variant shadow-lg px-4 py-2 flex gap-4">
+<div class="text-on-surface-variant p-2 hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">zoom_in</span>
+</div>
+<div class="text-on-surface-variant p-2 hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">zoom_out</span>
+</div>
+<div class="text-primary-fixed bg-surface-container-high rounded-full p-2">
+<span class="material-symbols-outlined">grid_4x4</span>
+</div>
+<div class="text-on-surface-variant p-2 hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">file_download</span>
+</div>
+</div>
+</nav>
+<!-- Audit Log Stub (Slide-out panel hint) -->
+<div class="fixed right-0 top-12 bottom-0 w-12 bg-surface-container border-l border-outline-variant flex flex-col items-center py-6 gap-8 hidden lg:flex">
+<div class="rotate-90 origin-center whitespace-nowrap">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-50 tracking-[0.2em]">ENGINE_HEALTH: 100.00%</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container opacity-20"></div>
+</div>
+</div>
+<script>
+        // Micro-interaction for table rows
+        document.querySelectorAll('.matrix-grid > div:not(.matrix-header)').forEach(cell => {
+            cell.addEventListener('mouseenter', () => {
+                // Find all cells in the same row
+                // This is a simplified logic assuming fixed column count of 6
+                const index = Array.from(cell.parentNode.children).indexOf(cell);
+                const rowStart = Math.floor(index / 6) * 6;
+                for (let i = rowStart; i < rowStart + 6; i++) {
+                    cell.parentNode.children[i].classList.add('bg-surface-container-high');
+                }
+            });
+            cell.addEventListener('mouseleave', () => {
+                const index = Array.from(cell.parentNode.children).indexOf(cell);
+                const rowStart = Math.floor(index / 6) * 6;
+                for (let i = rowStart; i < rowStart + 6; i++) {
+                    cell.parentNode.children[i].classList.remove('bg-surface-container-high');
+                }
+            });
+        });
+    </script>
+</body></html>

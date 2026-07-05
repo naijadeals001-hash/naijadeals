@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-016 | Event Bus &amp; n8n Automation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(132, 150, 126, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-active {
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.15);
+        }
+        .connector-line {
+            background: repeating-linear-gradient(90deg, #3b4b37, #3b4b37 10px, transparent 10px, transparent 20px);
+            height: 2px;
+            width: 100%;
+        }
+        .event-stream-item::before {
+            content: '';
+            position: absolute;
+            left: -13px;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            background: #00ff41;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pulse-dot {
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#00ff41",
+                    "inverse-on-surface": "#233143",
+                    "surface-container-low": "#0d1c2d",
+                    "on-tertiary-container": "#862ed4",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "error-container": "#93000a",
+                    "outline": "#84967e",
+                    "surface-container-high": "#1c2b3c",
+                    "on-surface": "#d4e4fa",
+                    "surface-tint": "#00e639",
+                    "primary-fixed-dim": "#00e639",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-error": "#690005",
+                    "surface-dim": "#051424",
+                    "secondary-container": "#0043eb",
+                    "on-secondary": "#002388",
+                    "on-primary-container": "#007117",
+                    "secondary-fixed": "#dde1ff",
+                    "primary": "#ebffe2",
+                    "on-background": "#d4e4fa",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary": "#490080",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-variant": "#273647",
+                    "surface": "#051424",
+                    "on-error-container": "#ffdad6",
+                    "inverse-primary": "#006e16",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-secondary-fixed": "#001356",
+                    "surface-container": "#122131",
+                    "on-primary": "#003907",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "surface-container-highest": "#273647",
+                    "tertiary": "#fff6ff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "error": "#ffb4ab",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "tertiary-fixed": "#f0dbff",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary-container": "#c6ceff",
+                    "background": "#051424",
+                    "surface-bright": "#2c3a4c",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary-fixed": "#002203",
+                    "on-primary-fixed-variant": "#00530e",
+                    "inverse-surface": "#d4e4fa",
+                    "primary-fixed": "#72ff70"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-12 px-lane-margin w-full fixed top-0 z-50 border-b border-outline-variant bg-background">
+<div class="flex items-center gap-3 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">CORE_ENGINE_V2</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4">
+<span class="font-label-caps text-label-caps text-primary-fixed font-bold">WF-016_ACTIVE</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors px-2 py-1 rounded">SYS_HEALTH: OK</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high p-1 rounded transition-colors">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 flex flex-col pt-stack-gap border-r border-outline-variant bg-surface-container-low z-40">
+<div class="px-4 py-3">
+<span class="font-label-caps text-label-caps text-on-surface opacity-60">MODULE_REGISTRY</span>
+</div>
+<nav class="flex-1 space-y-1 px-2">
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none rounded">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Inventory_Flow</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed transition-all cursor-default select-none rounded">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Order_Lifecycle</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none rounded">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Payment_Gateway</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none rounded">
+<span class="material-symbols-outlined text-[20px]">history_edu</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Audit_Logs</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none rounded">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">n8n_Connectors</span>
+</div>
+</nav>
+<div class="p-4 border-t border-outline-variant">
+<div class="bg-surface-container p-3 rounded-lg border border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] uppercase opacity-50 tracking-widest">Worker Load</span>
+<span class="text-primary-fixed-dim font-code-xs text-code-xs">42%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[42%]"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 mt-12 p-8 h-[calc(100vh-48px)] overflow-y-auto bg-background">
+<!-- Dashboard Header -->
+<div class="flex justify-between items-end mb-8 border-b border-outline-variant pb-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface flex items-center gap-3">
+                    ARTIFACT F: Event Bus
+                    <span class="px-2 py-0.5 bg-primary-container/10 border border-primary-container/30 text-primary-container text-[10px] font-bold rounded">REAL-TIME</span>
+</h2>
+<p class="text-on-surface-variant font-code-sm text-code-sm mt-1 uppercase tracking-wider">WF-016 Automation &amp; Lifecycle Telemetry</p>
+</div>
+<div class="flex gap-2">
+<div class="flex flex-col items-end">
+<span class="text-on-surface-variant font-code-xs text-code-xs uppercase">Queue Depth</span>
+<span class="text-primary-fixed font-code-sm text-headline-md">1,248 ops/s</span>
+</div>
+</div>
+</div>
+<!-- Workflow Visualizer Grid -->
+<div class="grid grid-cols-12 gap-6 h-[500px]">
+<!-- Swimlane 1: Source Events (The Bus) -->
+<div class="col-span-3 flex flex-col gap-4">
+<div class="flex items-center gap-2 mb-2 px-2">
+<span class="material-symbols-outlined text-primary-fixed text-sm">sensors</span>
+<span class="font-label-caps text-label-caps text-on-surface opacity-80 uppercase">Ingress Stream</span>
+</div>
+<!-- Event Nodes -->
+<div class="space-y-3">
+<!-- CartCreated -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded hover:border-primary-container/50 transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[9px] font-label-caps text-primary uppercase">Event</span>
+<span class="text-[9px] font-code-xs text-on-surface-variant">0ms</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface group-hover:text-primary">CartCreated</h4>
+<div class="flex gap-2 mt-2">
+<div class="h-1 flex-1 bg-primary-container/20 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-full"></div>
+</div>
+</div>
+</div>
+<!-- CheckoutStarted -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[9px] font-label-caps text-primary uppercase">Event</span>
+<span class="text-[9px] font-code-xs text-on-surface-variant">124ms</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">CheckoutStarted</h4>
+</div>
+<!-- InventoryReserved -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded border-l-2 border-l-primary-fixed group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[9px] font-label-caps text-primary uppercase">Event</span>
+<span class="text-[9px] font-code-xs text-on-surface-variant">45ms</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">InventoryReserved</h4>
+</div>
+<!-- PaymentAuthorized -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[9px] font-label-caps text-primary uppercase">Event</span>
+<span class="text-[9px] font-code-xs text-on-surface-variant">1.2s</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">PaymentAuthorized</h4>
+</div>
+<!-- OrderCreated -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[9px] font-label-caps text-primary uppercase">Event</span>
+<span class="text-[9px] font-code-xs text-on-surface-variant">80ms</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">OrderCreated</h4>
+</div>
+</div>
+</div>
+<!-- Connectors (Visual Only) -->
+<div class="col-span-1 flex flex-col justify-around py-12">
+<div class="connector-line"></div>
+<div class="connector-line opacity-50"></div>
+<div class="connector-line"></div>
+<div class="connector-line opacity-20"></div>
+<div class="connector-line"></div>
+</div>
+<!-- Swimlane 2: n8n Processing Logic -->
+<div class="col-span-5 bg-surface-container-lowest/50 border border-outline-variant rounded-xl p-6 relative overflow-hidden">
+<!-- Background Grid decorative -->
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: linear-gradient(#84967e 1px, transparent 1px), linear-gradient(90deg, #84967e 1px, transparent 1px); background-size: 20px 20px;"></div>
+<div class="relative z-10 h-full flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary-fixed">hub</span>
+<span class="font-label-caps text-label-caps text-on-surface uppercase">Workflow Processor (n8n)</span>
+</div>
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse-dot"></div>
+<span class="text-[10px] font-code-sm text-primary-container">ENGINE_ONLINE</span>
+</div>
+</div>
+<!-- Simplified Workflow Graph UI -->
+<div class="flex-1 flex flex-col justify-center gap-8 px-4">
+<div class="flex justify-between">
+<!-- n8n Node 1 -->
+<div class="w-32 bg-[#0F0F0F] border border-primary-container/40 p-2 rounded shadow-xl">
+<div class="bg-primary-container/10 px-1 mb-2">
+<span class="text-[8px] font-label-caps text-primary tracking-tighter">WEBHOOK_IN</span>
+</div>
+<div class="text-[10px] font-code-sm mb-1">WF-ID: 16a-01</div>
+<div class="text-[9px] text-on-surface-variant font-code-xs uppercase">Trigger: HTTP</div>
+</div>
+<!-- n8n Node 2 -->
+<div class="w-32 bg-[#0F0F0F] border border-outline-variant p-2 rounded">
+<div class="bg-surface-variant px-1 mb-2">
+<span class="text-[8px] font-label-caps text-on-surface-variant tracking-tighter">TRANSFORM</span>
+</div>
+<div class="text-[10px] font-code-sm mb-1">Mapping V2</div>
+<div class="text-[9px] text-on-surface-variant font-code-xs uppercase">Status: Success</div>
+</div>
+</div>
+<div class="flex justify-center">
+<!-- Main Router Node -->
+<div class="w-48 bg-[#0F0F0F] border-2 border-secondary-container p-3 rounded relative">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-secondary-container px-2 rounded-full">
+<span class="text-[9px] font-label-caps text-on-secondary-container">ROUTER</span>
+</div>
+<div class="text-center font-code-sm mt-1">Logic Controller</div>
+<div class="mt-2 grid grid-cols-2 gap-1">
+<div class="bg-surface-container-highest h-1 rounded"></div>
+<div class="bg-primary-container h-1 rounded"></div>
+</div>
+</div>
+</div>
+<div class="flex justify-between">
+<!-- Exit 1 -->
+<div class="w-32 bg-[#0F0F0F] border border-outline-variant p-2 rounded">
+<div class="bg-primary-container/20 px-1 mb-2">
+<span class="text-[8px] font-label-caps text-primary tracking-tighter">DB_COMMIT</span>
+</div>
+<div class="text-[10px] font-code-sm">SQL-Cluster-A</div>
+</div>
+<!-- Exit 2 (Error State) -->
+<div class="w-32 bg-[#0F0F0F] border border-error-container/50 p-2 rounded">
+<div class="bg-error-container/20 px-1 mb-2">
+<span class="text-[8px] font-label-caps text-error tracking-tighter">DLQ_REDIRECT</span>
+</div>
+<div class="text-[10px] font-code-sm text-error">Critical Failure</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane 3: Queue & Dead Letter Management -->
+<div class="col-span-3 flex flex-col gap-6">
+<!-- Retries & Active Queues -->
+<div class="flex-1 bg-surface-container p-4 rounded border border-outline-variant flex flex-col">
+<div class="flex items-center gap-2 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">rebase_edit</span>
+<span class="font-label-caps text-label-caps uppercase">Queues &amp; Retries</span>
+</div>
+<div class="space-y-4 flex-1">
+<div class="bg-surface-container-low p-2 rounded border border-outline-variant">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-code-sm">Retry-Primary-Q</span>
+<span class="text-primary-fixed-dim font-code-sm">24 msg</span>
+</div>
+<div class="text-[9px] text-on-surface-variant uppercase font-code-xs">Avg Backoff: 4.2s</div>
+</div>
+<div class="bg-surface-container-low p-2 rounded border border-outline-variant opacity-60">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-code-sm">Batch-Processor</span>
+<span class="text-on-surface-variant font-code-sm">0 msg</span>
+</div>
+</div>
+</div>
+<!-- Metrics -->
+<div class="mt-4 pt-4 border-t border-outline-variant grid grid-cols-2 gap-2">
+<div class="text-center">
+<div class="text-[18px] font-code-sm text-primary">99.8%</div>
+<div class="text-[8px] font-label-caps text-on-surface-variant uppercase">Success Rate</div>
+</div>
+<div class="text-center">
+<div class="text-[18px] font-code-sm text-error">12</div>
+<div class="text-[8px] font-label-caps text-on-surface-variant uppercase">Total Errors</div>
+</div>
+</div>
+</div>
+<!-- Dead Letter Queue (DLQ) -->
+<div class="h-48 bg-error-container/5 border border-error-container/30 p-4 rounded flex flex-col">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-sm">skull</span>
+<span class="font-label-caps text-label-caps text-error uppercase">Dead Letter Q</span>
+</div>
+<span class="text-[10px] bg-error-container text-white px-1.5 rounded font-bold">CRITICAL</span>
+</div>
+<div class="flex-1 space-y-2 overflow-y-auto pr-1">
+<div class="bg-background/40 p-2 rounded text-[9px] border border-error-container/20 font-code-xs">
+<div class="flex justify-between text-error mb-1">
+<span>ERR_AUTH_EXPIRED</span>
+<span>14:22:01</span>
+</div>
+<div class="text-on-surface-variant truncate">PAYMENT_GATEWAY: [TIMEOUT] at 0x882...</div>
+</div>
+<div class="bg-background/40 p-2 rounded text-[9px] border border-error-container/20 font-code-xs">
+<div class="flex justify-between text-error mb-1">
+<span>ERR_INV_LOCK_FAIL</span>
+<span>14:20:55</span>
+</div>
+<div class="text-on-surface-variant truncate">REDIS_SHARD_3: [CONNECTION_LOST]</div>
+</div>
+</div>
+<button class="mt-3 w-full py-1.5 bg-error-container/20 border border-error-container/40 text-[9px] font-label-caps text-error hover:bg-error-container/40 transition-colors uppercase">Clear All &amp; Notify</button>
+</div>
+</div>
+</div>
+<!-- Real-time Event Stream Visualization (Bottom Panel) -->
+<section class="mt-8 border border-outline-variant bg-surface-container-low/30 rounded-lg overflow-hidden">
+<div class="bg-surface-container p-3 border-b border-outline-variant flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-sm">dynamic_feed</span>
+<span class="font-label-caps text-label-caps uppercase text-on-surface tracking-widest">Live Telemetry Feed</span>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="text-[10px] font-code-sm text-on-surface-variant uppercase">Events</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+<span class="text-[10px] font-code-sm text-on-surface-variant uppercase">Flows</span>
+</div>
+</div>
+</div>
+<div class="h-48 overflow-y-auto p-4 space-y-2 bg-[#020a14] font-code-sm text-[11px]">
+<div class="flex gap-4 items-center border-l-2 border-primary-container pl-3 py-1 bg-primary-container/5 relative event-stream-item">
+<span class="text-on-surface-variant opacity-40 shrink-0">14:30:45.002</span>
+<span class="text-primary-container shrink-0 uppercase">[BUS]</span>
+<span class="text-on-surface">Event received: <strong class="text-primary">CartCreated</strong> { user_id: 8821, session: "xyz" }</span>
+<span class="ml-auto text-on-surface-variant italic">Processed in 12ms</span>
+</div>
+<div class="flex gap-4 items-center pl-3 py-1 border-l-2 border-secondary-container/50">
+<span class="text-on-surface-variant opacity-40 shrink-0">14:30:45.150</span>
+<span class="text-secondary-fixed shrink-0 uppercase">[FLOW]</span>
+<span class="text-on-surface">Workflow <strong class="text-secondary-fixed">WF-16a-01</strong> started for event ID: evt_772</span>
+</div>
+<div class="flex gap-4 items-center border-l-2 border-primary-container pl-3 py-1 event-stream-item">
+<span class="text-on-surface-variant opacity-40 shrink-0">14:30:46.012</span>
+<span class="text-primary-container shrink-0 uppercase">[BUS]</span>
+<span class="text-on-surface">Event received: <strong class="text-primary">InventoryReserved</strong> { sku: "NIKE-AF1-001", qty: 1 }</span>
+</div>
+<div class="flex gap-4 items-center pl-3 py-1 border-l-2 border-error/50 bg-error-container/5">
+<span class="text-on-surface-variant opacity-40 shrink-0">14:30:47.882</span>
+<span class="text-error shrink-0 uppercase">[WARN]</span>
+<span class="text-on-surface">Execution <strong class="text-error">EX-9921</strong> retry attempt #1 initialized...</span>
+</div>
+<div class="flex gap-4 items-center border-l-2 border-primary-container pl-3 py-1 event-stream-item opacity-60">
+<span class="text-on-surface-variant opacity-40 shrink-0">14:30:48.201</span>
+<span class="text-primary-container shrink-0 uppercase">[BUS]</span>
+<span class="text-on-surface">Event received: <strong class="text-primary">CheckoutStarted</strong> { checkout_id: "CH-00122" }</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only Utility) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-center pb-4 z-50">
+<div class="w-fit rounded-full mb-4 mx-auto bg-surface-container-highest border border-outline-variant shadow-lg flex items-center p-1 px-3 gap-4">
+<div class="text-primary-fixed bg-surface-container-high rounded-full p-2 scale-95 active:scale-90 transition-all cursor-pointer">
+<span class="material-symbols-outlined">zoom_in</span>
+</div>
+<div class="text-on-surface-variant p-2 scale-95 active:scale-90 transition-all cursor-pointer hover:text-primary">
+<span class="material-symbols-outlined">zoom_out</span>
+</div>
+<div class="text-on-surface-variant p-2 scale-95 active:scale-90 transition-all cursor-pointer hover:text-primary">
+<span class="material-symbols-outlined">grid_4x4</span>
+</div>
+<div class="text-on-surface-variant p-2 scale-95 active:scale-90 transition-all cursor-pointer hover:text-primary">
+<span class="material-symbols-outlined">file_download</span>
+</div>
+</div>
+</nav>
+<!-- FAB Integration -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+<!-- Micro-Telemetry tooltips / floating stats -->
+<div class="fixed bottom-4 right-24 bg-surface-container-highest border border-outline-variant px-3 py-1 rounded text-[9px] font-code-xs text-on-surface-variant z-50 pointer-events-none flex items-center gap-2">
+<div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+        latency: 45ms / node_id: bus_cluster_01
+    </div>
+<script>
+        // Simple micro-interaction for the event stream
+        const eventItems = document.querySelectorAll('.event-stream-item');
+        setInterval(() => {
+            const randomIndex = Math.floor(Math.random() * eventItems.length);
+            const item = eventItems[randomIndex];
+            item.classList.add('bg-primary-container/20');
+            setTimeout(() => {
+                item.classList.remove('bg-primary-container/20');
+            }, 800);
+        }, 3000);
+    </script>
+</body></html>

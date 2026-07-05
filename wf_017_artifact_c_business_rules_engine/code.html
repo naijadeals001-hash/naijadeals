@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SYSTEM_ORCHESTRATOR_v2.1 | WF-017 Business Rules Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#2c0051",
+                    "outline": "#84967e",
+                    "on-secondary-fixed": "#001356",
+                    "on-surface": "#d4e4fa",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-background": "#d4e4fa",
+                    "surface-variant": "#273647",
+                    "on-primary-fixed": "#002203",
+                    "surface": "#051424",
+                    "secondary-container": "#0043eb",
+                    "primary-fixed": "#72ff70",
+                    "primary-container": "#00ff41",
+                    "on-tertiary-container": "#862ed4",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "inverse-primary": "#006e16",
+                    "on-primary-container": "#007117",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-secondary": "#002388",
+                    "primary": "#ebffe2",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-container-high": "#1c2b3c",
+                    "on-tertiary": "#490080",
+                    "tertiary": "#fff6ff",
+                    "surface-container": "#122131",
+                    "error": "#ffb4ab",
+                    "on-primary": "#003907",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-error": "#690005",
+                    "outline-variant": "#3b4b37",
+                    "background": "#051424",
+                    "surface-dim": "#051424",
+                    "surface-tint": "#00e639",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-container-highest": "#273647",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-secondary-container": "#c6ceff",
+                    "inverse-on-surface": "#233143",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#00530e",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary-fixed-variant": "#6900b3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .matrix-cell {
+            border-right: 1px solid #3b4b37;
+            border-bottom: 1px solid #3b4b37;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex h-screen overflow-hidden text-on-surface select-none">
+<!-- Navigation Drawer (Shared Component) -->
+<aside class="flex flex-col h-full py-lane-margin gap-stack-gap bg-surface-container-lowest dark:bg-surface-container-lowest border-r border-outline-variant w-64 docked left-0">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary-fixed-dim">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-6 py-3 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3">account_tree</span>NODE_MAP
+            </a>
+<a class="flex items-center px-6 py-3 font-label-caps text-label-caps bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3">receipt_long</span>SEQUENCE_LOGS
+            </a>
+<a class="flex items-center px-6 py-3 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3">reorder</span>LOAD_BALANCER
+            </a>
+<a class="flex items-center px-6 py-3 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3">database</span>DB_SHARDS
+            </a>
+<a class="flex items-center px-6 py-3 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3">security</span>AUTH_GATEWAY
+            </a>
+<a class="flex items-center px-6 py-3 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined mr-3">analytics</span>METRICS_EXPORT
+            </a>
+</nav>
+<div class="px-6 mt-auto">
+<div class="p-4 bg-surface-container-high rounded border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant uppercase tracking-tighter">System Health</p>
+<div class="mt-2 h-1 bg-surface-variant w-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-3/4 animate-pulse"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0">
+<!-- TopAppBar (Shared Component) -->
+<header class="flex justify-between items-center w-full px-node-gutter h-16 bg-surface dark:bg-surface border-b border-outline-variant docked full-width top-0">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">SYSTEM_ORCHESTRATOR_v2.1</h1>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">UPTIME: 99.98% | LATENCY: 24ms</span>
+<button class="bg-surface-variant text-on-surface-variant hover:bg-primary-fixed-dim hover:text-on-primary-fixed px-3 py-1 font-label-caps text-label-caps transition-colors duration-150 rounded">
+                    REFRESH_NODES
+                </button>
+</div>
+</header>
+<!-- Logic Matrix Canvas -->
+<div class="flex-1 overflow-auto terminal-scroll p-node-gutter relative">
+<!-- Breadcrumbs / Context -->
+<div class="flex items-center gap-2 mb-6 font-code-sm text-code-sm text-on-surface-variant opacity-70">
+<span>ROOT</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span>WORKFLOW_ENGINES</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-primary-fixed-dim">WF-017_LOGIC_MATRIX</span>
+</div>
+<!-- Header Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Active Rules</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">32 <span class="text-primary-fixed-dim text-sm">LIVE</span></p>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Pass Rate</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">94.2%</p>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Failure Exceptions</p>
+<p class="font-headline-lg text-headline-lg text-error">128 <span class="text-xs">/ 24h</span></p>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Orchestration Load</p>
+<p class="font-headline-lg text-headline-lg text-secondary-fixed-dim">1.2k <span class="text-xs">RPS</span></p>
+</div>
+</div>
+<!-- High Density Logic Table -->
+<div class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant">
+<th class="px-4 py-3 matrix-cell w-32">RULE_ID</th>
+<th class="px-4 py-3 matrix-cell">DECISION_LOGIC</th>
+<th class="px-4 py-3 matrix-cell w-48">SERVICE_NODE</th>
+<th class="px-4 py-3 matrix-cell w-48">FAILURE_RESULT</th>
+<th class="px-4 py-3 matrix-cell w-48">RECOVERY_PATH</th>
+<th class="px-4 py-3 border-b border-outline-variant w-16">STATUS</th>
+</tr>
+</thead>
+<tbody class="font-code-sm text-code-sm">
+<!-- Rule 01 -->
+<tr class="hover:bg-surface-variant/30 group">
+<td class="px-4 py-4 matrix-cell font-bold text-primary-fixed-dim">INV-RES-01</td>
+<td class="px-4 py-4 matrix-cell">
+<span class="text-tertiary-fixed-dim">IF</span> <code class="bg-surface-container p-1 rounded">inventory_reserved == TRUE</code><br/>
+<span class="text-tertiary-fixed-dim">AND</span> <code class="bg-surface-container p-1 rounded">lock_timestamp &lt; 5m</code>
+</td>
+<td class="px-4 py-4 matrix-cell text-on-surface-variant">WAREHOUSE_MGMT_SVC</td>
+<td class="px-4 py-4 matrix-cell text-error">ORDER_BLOCKAGE</td>
+<td class="px-4 py-4 matrix-cell text-primary-fixed-dim underline decoration-dotted">RE_POLL_AVAILABILITY</td>
+<td class="px-4 py-4 text-center">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</td>
+</tr>
+<!-- Rule 02 -->
+<tr class="hover:bg-surface-variant/30 group">
+<td class="px-4 py-4 matrix-cell font-bold text-primary-fixed-dim">WHS-ASN-03</td>
+<td class="px-4 py-4 matrix-cell">
+<span class="text-tertiary-fixed-dim">MAP</span> <code class="bg-surface-container p-1 rounded">geo_coord</code> <span class="text-tertiary-fixed-dim">TO</span> <code class="bg-surface-container p-1 rounded">nearest_node(capacity &gt; 0)</code>
+</td>
+<td class="px-4 py-4 matrix-cell text-on-surface-variant">LOGISTICS_CORE_V2</td>
+<td class="px-4 py-4 matrix-cell text-error">CROSS_REGION_FAILOVER</td>
+<td class="px-4 py-4 matrix-cell text-primary-fixed-dim underline decoration-dotted">ASSIGN_BACKUP_ZONE</td>
+<td class="px-4 py-4 text-center">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</td>
+</tr>
+<!-- Rule 03 -->
+<tr class="hover:bg-surface-variant/30 group">
+<td class="px-4 py-4 matrix-cell font-bold text-primary-fixed-dim">DRV-AVL-09</td>
+<td class="px-4 py-4 matrix-cell">
+<span class="text-tertiary-fixed-dim">IF</span> <code class="bg-surface-container p-1 rounded">driver_status == "ONLINE"</code><br/>
+<span class="text-tertiary-fixed-dim">AND</span> <code class="bg-surface-container p-1 rounded">current_load &lt;= 3</code>
+</td>
+<td class="px-4 py-4 matrix-cell text-on-surface-variant">FLEET_DISPATCHER</td>
+<td class="px-4 py-4 matrix-cell text-error">DISPATCH_DELAY</td>
+<td class="px-4 py-4 matrix-cell text-primary-fixed-dim underline decoration-dotted">TRIGGER_3PL_API</td>
+<td class="px-4 py-4 text-center text-primary-fixed-dim">
+<span class="material-symbols-outlined text-sm">sync</span>
+</td>
+</tr>
+<!-- Rule 04 -->
+<tr class="hover:bg-surface-variant/30 group">
+<td class="px-4 py-4 matrix-cell font-bold text-primary-fixed-dim">QRV-VER-22</td>
+<td class="px-4 py-4 matrix-cell">
+<span class="text-tertiary-fixed-dim">MATCH</span> <code class="bg-surface-container p-1 rounded">qr_hash</code> <span class="text-tertiary-fixed-dim">WITH</span> <code class="bg-surface-container p-1 rounded">ledger_entry(tx_id)</code>
+</td>
+<td class="px-4 py-4 matrix-cell text-on-surface-variant">SECURE_AUTH_GATEWAY</td>
+<td class="px-4 py-4 matrix-cell text-error">AUTH_REJECTED</td>
+<td class="px-4 py-4 matrix-cell text-primary-fixed-dim underline decoration-dotted">MANUAL_OVERRIDE_AUTH</td>
+<td class="px-4 py-4 text-center">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</td>
+</tr>
+<!-- Rule 05 -->
+<tr class="hover:bg-surface-variant/30 group bg-error-container/10">
+<td class="px-4 py-4 matrix-cell font-bold text-error">DLV-SUC-45</td>
+<td class="px-4 py-4 matrix-cell">
+<span class="text-tertiary-fixed-dim">IF</span> <code class="bg-surface-container p-1 rounded">proof_of_delivery == ATTACHED</code><br/>
+<span class="text-tertiary-fixed-dim">AND</span> <code class="bg-surface-container p-1 rounded">receiver_sig == VALID</code>
+</td>
+<td class="px-4 py-4 matrix-cell text-on-surface-variant">TRANSACTION_ORCHESTRATOR</td>
+<td class="px-4 py-4 matrix-cell text-error">ESCROW_HOLD_CONTINUED</td>
+<td class="px-4 py-4 matrix-cell text-primary-fixed-dim underline decoration-dotted">INIT_FRAUD_CHECK</td>
+<td class="px-4 py-4 text-center">
+<span class="material-symbols-outlined text-error text-sm">warning</span>
+</td>
+</tr>
+<!-- Rule 06 -->
+<tr class="hover:bg-surface-variant/30 group">
+<td class="px-4 py-4 matrix-cell font-bold text-primary-fixed-dim">ESC-REL-99</td>
+<td class="px-4 py-4 matrix-cell">
+<span class="text-tertiary-fixed-dim">EXEC</span> <code class="bg-surface-container p-1 rounded">release_funds()</code> <span class="text-tertiary-fixed-dim">IF</span> <code class="bg-surface-container p-1 rounded">DLV-SUC-45 == TRUE</code>
+</td>
+<td class="px-4 py-4 matrix-cell text-on-surface-variant">FINANCE_LEDGER_SVC</td>
+<td class="px-4 py-4 matrix-cell text-error">SETTLEMENT_ERROR</td>
+<td class="px-4 py-4 matrix-cell text-primary-fixed-dim underline decoration-dotted">QUEUE_FOR_RETRIAL</td>
+<td class="px-4 py-4 text-center">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">schedule</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Terminal Audit Section -->
+<div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Log Stream -->
+<div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant flex flex-col h-64">
+<div class="px-4 py-2 border-b border-outline-variant bg-surface-container-high flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">LIVE_AUDIT_STUB_STREAM</span>
+<div class="flex gap-2">
+<div class="w-2 h-2 rounded-full bg-error animate-ping"></div>
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+</div>
+</div>
+<div class="flex-1 overflow-auto p-4 font-code-xs text-code-xs space-y-1 terminal-scroll">
+<p class="text-on-surface-variant">[14:22:01.034] <span class="text-primary-fixed-dim">TRACE:</span> Rule INV-RES-01 triggered for TX_8829</p>
+<p class="text-on-surface-variant">[14:22:01.056] <span class="text-secondary-fixed-dim">INFO:</span> Warehouse MQ-9 selected. Capacity remaining: 82%</p>
+<p class="text-on-surface-variant">[14:22:02.112] <span class="text-primary-fixed-dim">TRACE:</span> Rule DRV-AVL-09 evaluation: ONLINE_COUNT=14, LOAD_AVG=1.2</p>
+<p class="text-on-surface-variant">[14:22:03.442] <span class="text-error">WARN:</span> DLV-SUC-45 missing signature for PKG_912 - Moving to Recovery Path</p>
+<p class="text-on-surface-variant">[14:22:03.445] <span class="text-secondary-fixed-dim">INFO:</span> Triggering INIT_FRAUD_CHECK flow...</p>
+<p class="text-on-surface-variant">[14:22:04.001] <span class="text-primary-fixed-dim">TRACE:</span> Heartbeat from LOGISTICS_CORE_V2: 200 OK</p>
+<p class="text-on-surface-variant">[14:22:05.120] <span class="text-on-surface-variant">[SYS] Re-sharding DB partition 0x4f...</span></p>
+</div>
+</div>
+<!-- Active Sequence Visualizer -->
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-4 block">WF-017_ACTIVE_PATHWAY</span>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded border border-primary-fixed-dim flex items-center justify-center bg-primary-fixed-dim/10">
+<span class="material-symbols-outlined text-sm text-primary-fixed-dim">inventory_2</span>
+</div>
+<div class="flex-1 h-0.5 bg-primary-fixed-dim"></div>
+<div class="w-8 h-8 rounded border border-primary-fixed-dim flex items-center justify-center bg-primary-fixed-dim/10">
+<span class="material-symbols-outlined text-sm text-primary-fixed-dim">local_shipping</span>
+</div>
+<div class="flex-1 h-0.5 bg-outline-variant"></div>
+<div class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center opacity-50">
+<span class="material-symbols-outlined text-sm">payments</span>
+</div>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant space-y-2">
+<div class="flex justify-between">
+<span>RESERVATION</span>
+<span class="text-primary-fixed-dim">COMPLETE</span>
+</div>
+<div class="flex justify-between">
+<span>ASSIGNMENT</span>
+<span class="text-primary-fixed-dim">COMPLETE</span>
+</div>
+<div class="flex justify-between">
+<span>ESCROW</span>
+<span class="text-on-surface">PENDING_PROOF</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Rule Creator (Suppressed as per task focus, but kept for visual utility in Matrix) -->
+<div class="fixed bottom-8 right-8 flex flex-col items-end gap-4 pointer-events-none">
+<div class="bg-surface-container-high border border-outline-variant p-4 pointer-events-auto shadow-2xl">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+<span class="font-label-caps text-label-caps">RULE_DEPLOY_ENGINE</span>
+</div>
+<button class="w-full bg-primary-fixed-dim text-on-primary-fixed font-label-caps text-label-caps py-2 hover:brightness-110 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span> NEW_LOGIC_BLOCK
+                </button>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interaction for simulated real-time logs
+        const logContainer = document.querySelector('.terminal-scroll');
+        const logs = [
+            "Rule ESC-REL-99 validation initiated...",
+            "Service FLEET_DISPATCHER reporting latency surge: 124ms",
+            "Node DB_SHARD_04 healthy.",
+            "Handshake verified with AUTH_GATEWAY.",
+            "Processing failover for rule INV-RES-01..."
+        ];
+
+        setInterval(() => {
+            if (!logContainer) return;
+            const logPanel = logContainer.querySelector('.flex-1');
+            if (logPanel) {
+                const newLog = document.createElement('p');
+                newLog.className = 'text-on-surface-variant animate-pulse';
+                const time = new Date().toLocaleTimeString('en-GB', { hour12: false }) + '.' + Math.floor(Math.random()*1000);
+                newLog.innerHTML = `[${time}] <span class="text-primary-fixed-dim">TRACE:</span> ${logs[Math.floor(Math.random() * logs.length)]}`;
+                logPanel.appendChild(newLog);
+                logPanel.scrollTop = logPanel.scrollHeight;
+                if(logPanel.children.length > 20) logPanel.removeChild(logPanel.firstChild);
+            }
+        }, 3000);
+    </script>
+</body></html>

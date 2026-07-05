@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAIJADEALS ATLAS V2.0 | WF-019 Event Bus</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.1);
+        }
+        .connector-flow {
+            stroke-dasharray: 8;
+            animation: flow 20s linear infinite;
+        }
+        @keyframes flow {
+            from { stroke-dashoffset: 100; }
+            to { stroke-dashoffset: 0; }
+        }
+        .telemetry-pulse {
+            animation: pulse-opacity 2s ease-in-out infinite;
+        }
+        @keyframes pulse-opacity {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#c6ceff",
+                        "tertiary": "#fff6ff",
+                        "on-secondary": "#002388",
+                        "inverse-surface": "#d4e4fa",
+                        "on-surface": "#d4e4fa",
+                        "surface-tint": "#00e639",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "surface": "#051424",
+                        "outline-variant": "#3b4b37",
+                        "inverse-primary": "#006e16",
+                        "surface-variant": "#273647",
+                        "outline": "#84967e",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-primary-container": "#007117",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-container-high": "#1c2b3c",
+                        "on-primary-fixed": "#002203",
+                        "primary": "#ebffe2",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-secondary-fixed": "#001356",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary": "#003907",
+                        "tertiary-fixed": "#f0dbff",
+                        "background": "#051424",
+                        "on-tertiary-fixed": "#2c0051",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed-dim": "#00e639",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-container": "#862ed4",
+                        "on-background": "#d4e4fa",
+                        "inverse-on-surface": "#233143",
+                        "surface-dim": "#051424",
+                        "surface-container-low": "#0d1c2d",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-container-highest": "#273647",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#122131"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-grid-unit h-12 z-50 bg-surface border-b border-outline-variant fixed top-0 left-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0;">terminal</span>
+<span class="font-label-caps text-label-caps tracking-tighter text-primary-container">NAIJADEALS_ATLAS_V2.0</span>
+</div>
+<div class="hidden md:flex gap-6 items-center">
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-1">MONITOR</button>
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-1">DEPLOY</button>
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-1">LOGS</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps text-primary active:opacity-80">WF-019_LIVE</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0;">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 pb-4 z-40 bg-surface-container border-r border-outline-variant w-64 hidden md:flex">
+<div class="px-6 mb-6">
+<h2 class="font-label-caps text-label-caps text-on-primary-container">SYSTEM_MODULES</h2>
+</div>
+<nav class="flex-1">
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Architecture</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-6 py-3 bg-primary-container text-on-primary-container font-bold border-l-4 border-surface-tint scale-[0.99] transition-transform" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Logic</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">api</span>
+<span class="font-label-caps text-label-caps">API</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</a>
+</li>
+</ul>
+</nav>
+<div class="px-6 mt-auto">
+<div class="p-3 bg-surface-container-lowest border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-1">NODE_STATUS</p>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-primary">CLUSTER_ACTIVE</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 mt-12 p-8 relative overflow-hidden bg-surface-container-lowest">
+<!-- Header Info -->
+<div class="flex justify-between items-start mb-12 relative z-10">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">WF-019: Payment Settlement Topology</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Automated Payout &amp; Reconcilliation Pipeline [v.2.0.4]</p>
+</div>
+<div class="flex gap-4">
+<div class="text-right">
+<p class="font-label-caps text-label-caps text-on-surface-variant">UPTIME</p>
+<p class="font-code-sm text-code-sm text-primary">99.998%</p>
+</div>
+<div class="text-right">
+<p class="font-label-caps text-label-caps text-on-surface-variant">TPS</p>
+<p class="font-code-sm text-code-sm text-primary">1,420</p>
+</div>
+</div>
+</div>
+<!-- SVG Connection Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<filter id="glow">
+<fegaussianblur result="coloredBlur" stddeviation="2.5"></fegaussianblur>
+<femerge>
+<femergenode in="coloredBlur"></femergenode>
+<femergenode in="SourceGraphic"></femergenode>
+</femerge>
+</filter>
+</defs>
+<!-- Primary Paths -->
+<path class="connector-flow" d="M 120 200 L 280 200" fill="none" filter="url(#glow)" stroke="#00ff41" stroke-width="2"></path>
+<path class="connector-flow" d="M 480 200 L 600 200" fill="none" filter="url(#glow)" stroke="#00ff41" stroke-width="2"></path>
+<path class="connector-flow" d="M 800 200 L 920 200" fill="none" filter="url(#glow)" stroke="#00ff41" stroke-width="2"></path>
+<path class="connector-flow" d="M 600 200 L 600 350 L 280 350" fill="none" filter="url(#glow)" stroke="#00ff41" stroke-dasharray="4" stroke-width="2"></path>
+<!-- Error/Dead Letter Path -->
+<path d="M 480 230 L 480 500 L 600 500" fill="none" stroke="#ffb4ab" stroke-dasharray="4" stroke-width="1.5"></path>
+</svg>
+<!-- Automation Map -->
+<div class="grid grid-cols-12 gap-8 relative z-10">
+<!-- Trigger Zone -->
+<div class="col-span-3 space-y-6">
+<div class="p-4 bg-surface-container border border-primary-container node-glow relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-container">EVENT_BUS</span>
+<span class="material-symbols-outlined text-primary-container text-sm">bolt</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">EscrowReleased</h3>
+<div class="mt-4 pt-4 border-t border-outline-variant space-y-2">
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">QUEUE</span>
+<span class="font-code-xs text-code-xs text-primary">RabbitMQ_01</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container border border-outline-variant opacity-60">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">TRIGGER</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">schedule</span>
+</div>
+<h3 class="font-code-sm text-code-sm">Scheduled Payouts</h3>
+<p class="font-code-xs text-code-xs mt-1">Daily @ 00:00 UTC</p>
+</div>
+</div>
+<!-- Processing Zone -->
+<div class="col-span-4 space-y-6">
+<!-- Main Workflow Node -->
+<div class="p-4 bg-surface border border-primary-fixed-dim node-glow">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 bg-primary-container rounded-full"></div>
+<span class="font-label-caps text-label-caps text-primary">WF_PAY_901</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">n8n_CORE</span>
+</div>
+<div class="space-y-4">
+<div class="p-2 bg-surface-container-highest border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant">STEP 01</p>
+<p class="font-code-sm text-code-sm">SettlementCreated</p>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="p-2 bg-surface-container-highest border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant">STEP 02A</p>
+<p class="font-code-sm text-code-sm">FeesCalculated</p>
+</div>
+<div class="p-2 bg-surface-container-highest border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant">STEP 02B</p>
+<p class="font-code-sm text-code-sm">TaxesCalculated</p>
+</div>
+</div>
+<div class="p-2 bg-primary-container/10 border border-primary-container/30">
+<p class="font-code-xs text-code-xs text-primary">STEP 03</p>
+<p class="font-code-sm text-code-sm text-primary">WalletCredited</p>
+</div>
+</div>
+</div>
+<!-- Secondary Workflow -->
+<div class="p-4 bg-surface-container-low border border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">WF_RECON_01</span>
+<span class="font-code-xs text-code-xs">Background Job</span>
+</div>
+<h3 class="font-code-sm text-code-sm">LedgerUpdated</h3>
+<div class="mt-2 flex gap-4">
+<div class="flex items-center gap-1">
+<span class="w-1 h-1 rounded-full bg-primary-container"></span>
+<span class="font-code-xs text-code-xs">MATCH: 100%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Execution & Destination -->
+<div class="col-span-5 grid grid-cols-1 gap-6">
+<div class="grid grid-cols-2 gap-6">
+<!-- Bank Node -->
+<div class="p-4 bg-surface border border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">INTEGRATION</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">account_balance</span>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm">BankTransferStarted</span>
+<span class="material-symbols-outlined text-primary text-xs animate-spin" style="font-variation-settings: 'wght' 200;">refresh</span>
+</div>
+<div class="flex items-center justify-between opacity-40">
+<span class="font-code-sm text-code-sm">BankTransferCompleted</span>
+<span class="material-symbols-outlined text-xs">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Payout Node -->
+<div class="p-4 bg-surface border border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">EXTERNAL</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">payments</span>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm">PayoutCreated</span>
+<span class="text-[8px] bg-secondary-container px-1 py-0.5 rounded text-white">ID: PX_91</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm">MerchantPaid</span>
+<span class="font-code-xs text-code-xs text-primary">$1,240.00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Notification & Telemetry Panel -->
+<div class="p-6 bg-surface-container-high border border-outline-variant rounded-lg relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2">
+<span class="material-symbols-outlined text-outline-variant" style="font-variation-settings: 'opsz' 48;">notifications_active</span>
+</div>
+<div class="flex items-center gap-2 mb-4">
+<span class="font-label-caps text-label-caps text-primary">COMMUNICATION_HUB</span>
+<div class="h-px flex-1 bg-outline-variant"></div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<span class="font-code-xs text-code-xs text-on-surface-variant">[14:22:01]</span>
+<span class="font-code-sm text-code-sm">NotificationSent -&gt; MERCHANT_001</span>
+<span class="ml-auto font-code-xs text-code-xs text-primary-container bg-primary-container/10 px-2 py-0.5">SMS/EMAIL</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-code-xs text-code-xs text-on-surface-variant">[14:22:05]</span>
+<span class="font-code-sm text-code-sm">AuditLog: LedgerUpdated successfully</span>
+</div>
+</div>
+<!-- Telemetry Data -->
+<div class="mt-6 pt-6 border-t border-outline-variant grid grid-cols-3 gap-4">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">RETRIES</p>
+<p class="font-code-sm text-code-sm text-primary">02</p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">DLQ_STATUS</p>
+<p class="font-code-sm text-code-sm text-error">EMPTY</p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">LATENCY</p>
+<p class="font-code-sm text-code-sm text-primary">42ms</p>
+</div>
+</div>
+</div>
+<!-- Error/DLQ Visualization (Lower) -->
+<div class="p-4 bg-error-container/10 border border-error/30 mt-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">report</span>
+<div>
+<p class="font-label-caps text-label-caps text-error">DEAD_LETTER_QUEUE</p>
+<p class="font-code-xs text-code-xs text-on-error-container">0 Events waiting for intervention</p>
+</div>
+</div>
+<button class="font-label-caps text-label-caps border border-error/50 px-3 py-1 text-error hover:bg-error/10 transition-colors">FLUSH_DLQ</button>
+</div>
+</div>
+</div>
+<!-- System Telemetry Floating Bar -->
+<div class="fixed bottom-6 right-8 left-[calc(16rem+2rem)] flex gap-4 pointer-events-none">
+<div class="flex-1 bg-surface-container-high/80 backdrop-blur-md border border-outline-variant p-4 pointer-events-auto flex items-center justify-between">
+<div class="flex gap-8">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">MEM_USAGE</p>
+<div class="w-24 h-1 bg-surface-variant mt-1 overflow-hidden">
+<div class="h-full bg-primary-container w-[45%]"></div>
+</div>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">CPU_LOAD</p>
+<div class="w-24 h-1 bg-surface-variant mt-1 overflow-hidden">
+<div class="h-full bg-primary-container w-[12%]"></div>
+</div>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">WORKER_PODS</p>
+<p class="font-code-sm text-code-sm text-primary">08 / 12 ACTIVE</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="telemetry-pulse w-2 h-2 rounded-full bg-primary-container"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant tracking-widest">LIVE_STREAM_SYNCED_V2.0.4</span>
+</div>
+</div>
+</div>
+<!-- Atmospheric Micro-details -->
+<div class="absolute top-1/4 right-0 w-64 h-64 bg-primary-container/5 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="absolute bottom-1/4 left-0 w-96 h-96 bg-secondary-container/5 rounded-full blur-[120px] pointer-events-none"></div>
+</main>
+<!-- FAB for Interaction -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform z-50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+<script>
+        // Micro-interactions for node hovering
+        document.querySelectorAll('.p-4, .p-6').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Simulate real-time metric updates
+        setInterval(() => {
+            const latencies = ['42ms', '45ms', '39ms', '41ms'];
+            const latencyEl = document.querySelector('.col-span-5 .font-code-sm.text-primary:last-of-type');
+            if (latencyEl) latencyEl.textContent = latencies[Math.floor(Math.random() * latencies.length)];
+        }, 3000);
+    </script>
+</body></html>

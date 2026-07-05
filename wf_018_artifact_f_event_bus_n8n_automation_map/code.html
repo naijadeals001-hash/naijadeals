@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-018: Artifact F — Event Bus &amp; n8n Automation Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@100;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3B82F6",
+              "primary-fixed": "#3B82F6",
+              "primary-fixed-dim": "#2563EB",
+              "on-primary-container": "#DBEAFE",
+              "primary-container": "#1E3A8A",
+              surface: "#0F172A",
+              "surface-container-low": "#1E293B",
+              "surface-container": "#334155",
+              "surface-container-highest": "#475569",
+              "surface-container-lowest": "#020617",
+              "on-surface": "#F8FAFC",
+              "on-surface-variant": "#94A3B8",
+              outline: "#475569",
+              "outline-variant": "#1E293B",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px"
+            },
+            fontFamily: {
+              headline: ["Public Sans", "sans-serif"],
+              display: ["Public Sans", "sans-serif"],
+              body: ["Public Sans", "sans-serif"],
+              label: ["Public Sans", "sans-serif"],
+              code: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
+            },
+            fontSize: {
+              "headline-md": ["1.5rem", { lineHeight: "2rem", fontWeight: "700" }],
+              "label-caps": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.05em", fontWeight: "600" }],
+              "code-sm": ["0.875rem", { lineHeight: "1.25rem" }],
+              "code-xs": ["0.75rem", { lineHeight: "1rem" }]
+            },
+            spacing: {
+              "lane-margin": "2rem",
+              "node-gutter": "1.5rem",
+              "grid-unit": "1rem"
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .font-code-sm { font-family: ui-monospace, monospace; font-size: 0.875rem; }
+      .font-code-xs { font-family: ui-monospace, monospace; font-size: 0.75rem; }
+      .font-label-caps { font-family: 'Public Sans', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; }
+      
+      /* Pulse Animation for active nodes */
+      @keyframes pulse-ring {
+        0% { transform: scale(.33); opacity: 0; }
+        80%, 100% { opacity: 0; }
+      }
+      .node-pulse::before {
+        content: '';
+        position: absolute;
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        background-color: #3B82F6;
+        animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+      }
+
+      /* Animated SVG paths */
+      .flow-line {
+        stroke-dasharray: 10;
+        animation: flow 20s linear infinite;
+      }
+      @keyframes flow {
+        from { stroke-dashoffset: 200; }
+        to { stroke-dashoffset: 0; }
+      }
+
+      /* Glassmorphism utility */
+      .glass-card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar from Shared Components -->
+<header class="bg-surface dark:bg-surface text-primary dark:text-primary flex justify-between items-center px-lane-margin h-16 w-full top-0 border-b border-outline-variant z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed">REVERSE_LOGISTICS_v4.2</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<span class="text-primary-fixed-dim font-label-caps cursor-pointer">Live_Bus</span>
+<span class="text-on-surface-variant hover:text-on-surface transition-colors font-label-caps cursor-pointer">Pipelines</span>
+<span class="text-on-surface-variant hover:text-on-surface transition-colors font-label-caps cursor-pointer">Nodes</span>
+</nav>
+<div class="p-2 hover:bg-surface-container-highest transition-colors cursor-pointer active:opacity-80 rounded-full">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer from Shared Components -->
+<aside class="h-full w-64 border-r border-outline-variant bg-surface-container-low dark:bg-surface-container-low flex flex-col py-node-gutter">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary">CORE_ENGINE</h2>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- System Map - Active -->
+<div class="flex items-center gap-3 px-6 py-3 text-primary-fixed bg-surface-container-highest border-l-4 border-primary-fixed cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">System Map</span>
+</div>
+<!-- API Contracts -->
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">API Contracts</span>
+</div>
+<!-- Logic Gates -->
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Logic Gates</span>
+</div>
+<!-- Audit Logs -->
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Audit Logs</span>
+</div>
+<!-- Telemetry -->
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Telemetry</span>
+</div>
+</nav>
+<div class="px-6 py-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 text-primary-fixed font-code-xs">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    BUS_STATUS: NOMINAL
+                </div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 relative overflow-hidden bg-surface-container-lowest">
+<!-- Background Animation Layer -->
+
+<!-- Event Bus Visualization Grid -->
+<div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: radial-gradient(circle, #475569 1px, transparent 1px); background-size: 40px 40px;"></div>
+<!-- Header and Stats -->
+<div class="absolute top-8 left-8 right-8 z-10 flex justify-between items-start">
+<div>
+<h3 class="text-3xl font-bold tracking-tighter text-on-surface">Asynchronous Event Orchestration</h3>
+<p class="text-on-surface-variant font-code-sm mt-1">N8N_INSTANCE_NODE_01 // CLUSTER_REVERSE_LOGISTICS</p>
+</div>
+<div class="flex gap-4">
+<div class="glass-card px-4 py-2 rounded-lg border border-outline-variant">
+<span class="text-xs font-label-caps text-on-surface-variant block">Throughput</span>
+<span class="text-lg font-bold text-primary">1.2k ev/s</span>
+</div>
+<div class="glass-card px-4 py-2 rounded-lg border border-outline-variant">
+<span class="text-xs font-label-caps text-on-surface-variant block">DLQ Status</span>
+<span class="text-lg font-bold text-red-400">0 Items</span>
+</div>
+</div>
+</div>
+<!-- The Event Map (Bento Layout Overlay) -->
+<div class="relative w-full h-full p-lane-margin flex items-center justify-center">
+<div class="grid grid-cols-12 grid-rows-6 gap-4 w-full h-full max-w-7xl max-h-[800px]">
+<!-- Primary Workflow Trigger (n8n Node) -->
+<div class="col-span-3 row-span-2 glass-card rounded-xl p-6 relative border-l-4 border-l-primary flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-center mb-4">
+<span class="bg-primary-container text-on-primary-container px-2 py-1 text-[10px] rounded font-bold uppercase">Trigger</span>
+<span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+</div>
+<h4 class="font-bold text-lg mb-1">ReturnRequested</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Incoming webhook from Shopify storefront. Triggers the primary orchestration pipeline.</p>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant font-code-xs text-on-surface-variant">
+                            ID: WF_RR_0921<br/>
+                            Retries: 3 (Exponential)
+                        </div>
+</div>
+<!-- Flow Line Simulation (SVGs) -->
+<div class="absolute inset-0 pointer-events-none">
+<svg class="w-full h-full">
+<path class="flow-line" d="M 320 250 L 400 250" fill="none" stroke="#3B82F6" stroke-width="2"></path>
+<path class="flow-line" d="M 720 250 L 800 250" fill="none" stroke="#3B82F6" stroke-width="2"></path>
+<path class="flow-line" d="M 1120 250 L 1200 250" fill="none" stroke="#3B82F6" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Merchant Approved Node -->
+<div class="col-span-3 row-span-2 col-start-5 glass-card rounded-xl p-6 border-l-4 border-l-emerald-500">
+<div class="flex justify-between items-center mb-4">
+<span class="bg-emerald-900/30 text-emerald-400 px-2 py-1 text-[10px] rounded font-bold uppercase">Approval</span>
+<span class="material-symbols-outlined text-emerald-500" data-icon="verified_user">verified_user</span>
+</div>
+<h4 class="font-bold text-lg mb-1">MerchantApproved</h4>
+<div class="space-y-2 mt-4">
+<div class="flex justify-between items-center text-xs font-code-xs">
+<span class="text-on-surface-variant">Queue:</span>
+<span class="text-on-surface">merch_approval_main</span>
+</div>
+<div class="flex justify-between items-center text-xs font-code-xs">
+<span class="text-on-surface-variant">Latency:</span>
+<span class="text-emerald-400">45ms</span>
+</div>
+</div>
+</div>
+<!-- Pickup Scheduled -->
+<div class="col-span-3 row-span-2 col-start-9 glass-card rounded-xl p-6 border-l-4 border-l-blue-400">
+<div class="flex justify-between items-center mb-4">
+<span class="bg-blue-900/30 text-blue-300 px-2 py-1 text-[10px] rounded font-bold uppercase">Logistics</span>
+<span class="material-symbols-outlined text-blue-400" data-icon="local_shipping">local_shipping</span>
+</div>
+<h4 class="font-bold text-lg mb-1">PickupScheduled</h4>
+<div class="mt-4 p-3 bg-surface-container-low rounded font-code-xs">
+<span class="text-primary-fixed">SCHED_ID:</span> SHP-772-X
+                        </div>
+</div>
+<!-- Async Buffer / Queue Status -->
+<div class="col-span-4 row-span-3 row-start-3 glass-card rounded-xl p-6 border border-outline-variant flex flex-col">
+<h5 class="text-sm font-label-caps text-on-surface-variant mb-4">Active Queues &amp; Buffers</h5>
+<div class="space-y-4 flex-1">
+<div class="flex items-center gap-4">
+<div class="flex-1 bg-surface h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[65%]"></div>
+</div>
+<span class="font-code-xs w-12 text-right">65%</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex-1 bg-surface h-2 rounded-full overflow-hidden">
+<div class="bg-purple-500 h-full w-[22%]"></div>
+</div>
+<span class="font-code-xs w-12 text-right">22%</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex-1 bg-surface h-2 rounded-full overflow-hidden">
+<div class="bg-orange-400 h-full w-[45%]"></div>
+</div>
+<span class="font-code-xs w-12 text-right">45%</span>
+</div>
+</div>
+<div class="mt-6">
+<div class="text-[10px] font-label-caps text-on-surface-variant mb-2">Dead Letter Queue</div>
+<div class="bg-red-900/20 text-red-400 p-2 rounded border border-red-500/30 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span>
+<span class="font-code-xs">NO_EVENTS_IN_DLQ</span>
+</div>
+</div>
+</div>
+<!-- Inspection Hub -->
+<div class="col-span-5 row-span-3 row-start-3 col-start-5 glass-card rounded-xl p-0 overflow-hidden flex">
+<div class="w-1/2 p-6 border-r border-outline-variant flex flex-col justify-between">
+<div>
+<h4 class="font-bold text-lg mb-1">InspectionCompleted</h4>
+<p class="text-xs text-on-surface-variant">Quality Assurance event fired upon warehouse scanning.</p>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="font-code-xs">ItemReceived</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-code-xs">InventoryAdjusted</span>
+</div>
+</div>
+</div>
+<div class="w-1/2 bg-surface-container flex flex-col items-center justify-center p-6 text-center">
+<span class="material-symbols-outlined text-4xl mb-4 text-on-surface-variant" data-icon="qr_code_2">qr_code_2</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">Scanning Cluster</span>
+<span class="font-code-sm font-bold text-on-surface">LOC_WAREHOUSE_B</span>
+</div>
+</div>
+<!-- Financial Logic Gate -->
+<div class="col-span-3 row-span-3 row-start-3 col-start-10 glass-card rounded-xl p-6 border-l-4 border-l-yellow-500 flex flex-col">
+<div class="flex justify-between items-center mb-4">
+<span class="bg-yellow-900/30 text-yellow-500 px-2 py-1 text-[10px] rounded font-bold uppercase">Financials</span>
+<span class="material-symbols-outlined text-yellow-500" data-icon="payments">payments</span>
+</div>
+<h4 class="font-bold text-lg mb-1">RefundApproved</h4>
+<p class="text-xs text-on-surface-variant mb-4">Secondary gate logic for high-value items.</p>
+<div class="mt-auto space-y-3">
+<button class="w-full py-2 bg-surface hover:bg-surface-container-highest transition-colors rounded text-[10px] font-label-caps border border-outline-variant flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
+                                VIEW_WORKFLOW
+                            </button>
+<div class="p-2 bg-yellow-500/10 rounded flex justify-between items-center">
+<span class="font-code-xs text-yellow-500">RefundCompleted</span>
+<span class="material-symbols-outlined text-sm text-yellow-500" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Exchange Pipeline -->
+<div class="col-span-6 row-span-1 row-start-6 glass-card rounded-xl px-6 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="swap_horiz">swap_horiz</span>
+<span class="font-bold">ExchangeCreated</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="h-1 w-24 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[40%]"></div>
+</div>
+<span class="font-code-xs text-on-surface-variant">ReplacementShipped (Pending)</span>
+</div>
+<div class="flex gap-2">
+<span class="bg-surface-container text-on-surface px-2 py-1 rounded text-[10px] font-code-sm">ID: 88-EXT</span>
+<span class="bg-surface-container text-on-surface px-2 py-1 rounded text-[10px] font-code-sm">TTL: 14h</span>
+</div>
+</div>
+<!-- Telemetry Summary -->
+<div class="col-span-6 row-span-1 row-start-6 col-start-7 glass-card rounded-xl px-6 flex items-center gap-8 overflow-hidden">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-400" data-icon="shield_person">shield_person</span>
+<span class="font-code-sm">TrustUpdated: <span class="text-emerald-400">+1.2</span></span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="mail">mail</span>
+<span class="font-code-sm">NotificationSent: <span class="text-on-surface">1,204</span></span>
+</div>
+<div class="ml-auto">
+<div class="flex gap-1">
+<div class="w-1.5 h-4 bg-emerald-500"></div>
+<div class="w-1.5 h-6 bg-emerald-500"></div>
+<div class="w-1.5 h-3 bg-emerald-500"></div>
+<div class="w-1.5 h-8 bg-emerald-500"></div>
+<div class="w-1.5 h-5 bg-emerald-500"></div>
+<div class="w-1.5 h-7 bg-primary"></div>
+<div class="w-1.5 h-4 bg-primary"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Interaction Context -->
+<div class="absolute bottom-16 right-8 w-80 glass-card rounded-xl p-4 border border-primary/30 shadow-2xl pointer-events-auto">
+<div class="flex items-center justify-between mb-3">
+<h6 class="font-label-caps text-[10px] text-primary">Live_Event_Listener</h6>
+<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+</div>
+<div class="space-y-3">
+<div class="p-2 bg-surface rounded border border-outline-variant">
+<div class="flex justify-between text-[10px] mb-1">
+<span class="text-primary">ReturnRequested</span>
+<span class="text-on-surface-variant">2s ago</span>
+</div>
+<div class="font-code-xs text-on-surface truncate">RID_99320_AMZN_FBA</div>
+</div>
+<div class="p-2 bg-surface rounded border border-outline-variant opacity-60">
+<div class="flex justify-between text-[10px] mb-1">
+<span class="text-emerald-400">MerchantApproved</span>
+<span class="text-on-surface-variant">15s ago</span>
+</div>
+<div class="font-code-xs text-on-surface truncate">RID_99318_CUSTOM_B2B</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar from Shared Components -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-grid-unit bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-sm p-1 cursor-pointer scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined" data-icon="memory">memory</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Runtime</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary cursor-pointer scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Schema</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary cursor-pointer scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined" data-icon="dns">dns</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Gateway</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary cursor-pointer scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Metrics</span>
+</div>
+</nav>
+<script>
+        // Micro-interaction for nodes
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px) scale(1.01)';
+                card.style.transition = 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body></html>

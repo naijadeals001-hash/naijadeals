@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAIJADEALS_ATLAS_V2.0 | Data Persistence Model WF-019</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#c6ceff",
+                        "tertiary": "#fff6ff",
+                        "on-secondary": "#002388",
+                        "inverse-surface": "#d4e4fa",
+                        "on-surface": "#d4e4fa",
+                        "surface-tint": "#00e639",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "surface": "#051424",
+                        "outline-variant": "#3b4b37",
+                        "inverse-primary": "#006e16",
+                        "surface-variant": "#273647",
+                        "outline": "#84967e",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-primary-container": "#007117",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-container-high": "#1c2b3c",
+                        "on-primary-fixed": "#002203",
+                        "primary": "#ebffe2",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-secondary-fixed": "#001356",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary": "#003907",
+                        "tertiary-fixed": "#f0dbff",
+                        "background": "#051424",
+                        "on-tertiary-fixed": "#2c0051",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed-dim": "#00e639",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-container": "#862ed4",
+                        "on-background": "#d4e4fa",
+                        "inverse-on-surface": "#233143",
+                        "surface-dim": "#051424",
+                        "surface-container-low": "#0d1c2d",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-container-highest": "#273647",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#122131"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector-h {
+            height: 1px;
+            background: #84967e;
+            position: absolute;
+        }
+        .node-connector-v {
+            width: 1px;
+            background: #84967e;
+            position: absolute;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 100;
+            background: linear-gradient(0deg, rgba(0, 255, 65, 0) 0%, rgba(0, 255, 65, 0.05) 50%, rgba(0, 255, 65, 0) 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            animation: moveScanline 8s linear infinite;
+        }
+        @keyframes moveScanline {
+            0% { transform: translateY(-100px); }
+            100% { transform: translateY(100vh); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md overflow-hidden flex h-screen w-screen">
+<div class="scanline"></div>
+<!-- Navigation Drawer -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 pb-4 z-40 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant docked h-full w-64">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">SYSTEM_MODULES</h2>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-6 py-3 space-x-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="font-label-caps text-label-caps">Architecture</span>
+</a>
+<a class="flex items-center px-6 py-3 space-x-3 bg-primary-container text-on-primary-container font-bold border-l-4 border-surface-tint scale-[0.99] transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="font-label-caps text-label-caps">Logic</span>
+</a>
+<a class="flex items-center px-6 py-3 space-x-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">database</span>
+<span class="font-label-caps text-label-caps">Data</span>
+</a>
+<a class="flex items-center px-6 py-3 space-x-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">api</span>
+<span class="font-label-caps text-label-caps">API</span>
+</a>
+<a class="flex items-center px-6 py-3 space-x-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</a>
+</nav>
+<div class="px-6 pt-4 border-t border-outline-variant">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 bg-primary-container rounded-full animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">SYNC: ACTIVE [SERIALIZABLE]</span>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 ml-64 flex flex-col relative h-full">
+<!-- Top App Bar -->
+<header class="flex justify-between items-center w-full px-8 h-12 z-50 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant sticky top-0">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">terminal</span>
+<span class="font-label-caps text-label-caps tracking-tighter text-primary-container dark:text-primary-container">NAIJADEALS_ATLAS_V2.0</span>
+</div>
+<div class="flex items-center space-x-6 h-full">
+<div class="flex items-center space-x-4 h-full border-x border-outline-variant px-4">
+<span class="font-code-xs text-code-xs text-primary-container">WF-019_PERSISTENCE_MODEL</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ENV: PRODUCTION</span>
+</div>
+<button class="hover:bg-surface-variant transition-colors p-2 rounded opacity-80">
+<span class="material-symbols-outlined text-primary">settings_input_component</span>
+</button>
+</div>
+</header>
+<!-- ER Diagram Workspace -->
+<section class="flex-1 overflow-auto terminal-scroll p-12 relative bg-surface-container-lowest">
+<!-- Swimlane: Core Accounting -->
+<div class="absolute top-12 left-12">
+<div class="flex items-center mb-6 space-x-2">
+<span class="material-symbols-outlined text-secondary">account_balance</span>
+<h3 class="font-headline-md text-headline-md text-secondary">CORE_ACCOUNTING</h3>
+</div>
+<div class="grid grid-cols-2 gap-node-gutter">
+<!-- Entity: Settlement -->
+<div class="w-64 border border-outline bg-surface-dim p-0 shadow-lg">
+<div class="bg-outline-variant px-3 py-1 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary">Settlement</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">PK</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant pb-1">
+<span class="text-on-surface">id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">amount</span>
+<span class="text-outline">DECIMAL</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">status</span>
+<span class="text-outline">ENUM</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">merchant_id</span>
+<span class="text-outline">FK</span>
+</div>
+</div>
+<div class="bg-surface-container px-3 py-1 flex space-x-2">
+<span class="text-[8px] bg-primary-container text-on-primary-container px-1 font-bold">LOCKABLE</span>
+<span class="text-[8px] bg-secondary-container text-on-secondary-container px-1 font-bold">AUDITED</span>
+</div>
+</div>
+<!-- Entity: LedgerEntry -->
+<div class="w-64 border border-outline bg-surface-dim p-0 shadow-lg relative">
+<div class="bg-outline-variant px-3 py-1 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary">LedgerEntry</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">N:1</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant pb-1">
+<span class="text-on-surface">id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">settlement_id</span>
+<span class="text-outline">FK</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">entry_type</span>
+<span class="text-outline">D/C</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">val_date</span>
+<span class="text-outline">TS</span>
+</div>
+</div>
+<!-- Cardinality line to Settlement -->
+<div class="absolute -left-6 top-1/2 w-6 h-[1px] bg-outline"></div>
+</div>
+</div>
+</div>
+<!-- Swimlane: Transaction Flow -->
+<div class="absolute top-[400px] left-12">
+<div class="flex items-center mb-6 space-x-2">
+<span class="material-symbols-outlined text-surface-tint">payments</span>
+<h3 class="font-headline-md text-headline-md text-surface-tint">TRANSACTION_FLOW</h3>
+</div>
+<div class="flex space-x-node-gutter">
+<!-- Entity: WalletTransaction -->
+<div class="w-64 border border-surface-tint bg-surface-dim p-0 shadow-lg">
+<div class="bg-surface-tint/10 px-3 py-1 flex justify-between items-center border-b border-surface-tint">
+<span class="font-label-caps text-label-caps text-surface-tint">WalletTransaction</span>
+<span class="material-symbols-outlined text-[14px]">lock</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between"><span>tx_hash</span><span class="text-outline">STR</span></div>
+<div class="flex justify-between"><span>wallet_id</span><span class="text-outline">FK</span></div>
+<div class="flex justify-between"><span>nonce</span><span class="text-outline">INT</span></div>
+</div>
+</div>
+<!-- Entity: Payout -->
+<div class="w-64 border border-surface-tint bg-surface-dim p-0 shadow-lg">
+<div class="bg-surface-tint/10 px-3 py-1 flex justify-between items-center border-b border-surface-tint">
+<span class="font-label-caps text-label-caps text-surface-tint">Payout</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between"><span>id</span><span class="text-outline">UUID</span></div>
+<div class="flex justify-between"><span>batch_id</span><span class="text-outline">FK</span></div>
+</div>
+</div>
+<!-- Entity: BankTransfer -->
+<div class="w-64 border border-surface-tint bg-surface-dim p-0 shadow-lg">
+<div class="bg-surface-tint/10 px-3 py-1 flex justify-between items-center border-b border-surface-tint">
+<span class="font-label-caps text-label-caps text-surface-tint">BankTransfer</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between"><span>trace_id</span><span class="text-outline">STR</span></div>
+<div class="flex justify-between"><span>swift_code</span><span class="text-outline">STR</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: Governance & Balance -->
+<div class="absolute top-12 left-[700px]">
+<div class="flex items-center mb-6 space-x-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">verified_user</span>
+<h3 class="font-headline-md text-headline-md text-tertiary-fixed-dim">GOVERNANCE_BALANCE</h3>
+</div>
+<div class="grid grid-cols-2 gap-node-gutter">
+<!-- Entity: MerchantBalance -->
+<div class="w-64 border border-outline bg-surface-dim p-0 shadow-lg">
+<div class="bg-outline-variant px-3 py-1 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary">MerchantBalance</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between"><span>curr_bal</span><span class="text-surface-tint">DECIMAL</span></div>
+<div class="flex justify-between"><span>frozen_bal</span><span class="text-error">DECIMAL</span></div>
+</div>
+</div>
+<!-- Entity: TaxRecord -->
+<div class="w-64 border border-outline bg-surface-dim p-0 shadow-lg">
+<div class="bg-outline-variant px-3 py-1 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary">TaxRecord</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between"><span>tax_id</span><span class="text-outline">STR</span></div>
+<div class="flex justify-between"><span>rate</span><span class="text-outline">PCT</span></div>
+</div>
+</div>
+<!-- Entity: PlatformFee -->
+<div class="w-64 border border-outline bg-surface-dim p-0 shadow-lg">
+<div class="bg-outline-variant px-3 py-1 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary">PlatformFee</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between"><span>tier_id</span><span class="text-outline">INT</span></div>
+<div class="flex justify-between"><span>commission</span><span class="text-outline">DEC</span></div>
+</div>
+</div>
+<!-- Entity: Reconciliation -->
+<div class="w-64 border border-outline bg-surface-dim p-0 shadow-lg">
+<div class="bg-outline-variant px-3 py-1 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary">Reconciliation</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm text-on-error">
+<div class="flex justify-between"><span>diff_amt</span><span class="text-outline">DEC</span></div>
+<div class="flex justify-between"><span>match_flag</span><span class="text-outline">BOOL</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Atomic Ops Overlay -->
+<div class="fixed bottom-12 right-12 flex space-x-4">
+<div class="bg-surface-container-highest border border-outline-variant p-4 backdrop-blur-md">
+<h4 class="font-label-caps text-label-caps text-primary-container mb-4">ATOMIC_OPS_STUB</h4>
+<div class="flex flex-wrap gap-2">
+<div class="px-2 py-1 bg-surface border border-primary-container text-primary-container font-code-sm">INSERT</div>
+<div class="px-2 py-1 bg-surface border border-on-secondary text-secondary font-code-sm">UPDATE</div>
+<div class="px-2 py-1 bg-surface border border-error text-error font-code-sm">DELETE (ARCHIVE)</div>
+<div class="px-2 py-1 bg-surface border border-tertiary text-tertiary font-code-sm">LOCK (RECO)</div>
+<div class="px-2 py-1 bg-surface-tint text-on-primary font-code-sm font-bold">COMMIT</div>
+<div class="px-2 py-1 bg-error-container text-on-error font-code-sm">ROLLBACK</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Panel -->
+<div class="fixed bottom-12 left-72 w-80 bg-surface-container-high border border-outline-variant p-4 shadow-2xl">
+<div class="flex justify-between items-center mb-4 border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface">AUDIT_LOG_STREAM</span>
+<span class="font-code-xs text-code-xs text-primary-container">LIVE</span>
+</div>
+<div class="space-y-2 max-h-48 overflow-y-auto terminal-scroll font-code-xs">
+<div class="flex space-x-2 text-on-surface-variant">
+<span class="text-outline">12:04:11</span>
+<span class="text-primary-container">[COMMIT]</span>
+<span>TX_ID: 0x8a92... SETTLEMENT_UPDATED</span>
+</div>
+<div class="flex space-x-2 text-on-surface-variant">
+<span class="text-outline">12:04:10</span>
+<span class="text-secondary">[LOCK]</span>
+<span>TBL: MerchantBalance ROW_ID: 992</span>
+</div>
+<div class="flex space-x-2 text-on-surface-variant">
+<span class="text-outline">12:04:09</span>
+<span class="text-tertiary-fixed-dim">[NOTIF]</span>
+<span>SENT_TO: USER_882 TYPE: PAYOUT_SUCCESS</span>
+</div>
+<div class="flex space-x-2 text-on-surface-variant">
+<span class="text-outline">12:04:05</span>
+<span class="text-outline-variant">[ARCHIVE]</span>
+<span>TBL: AuditLog_2023_Q4 COLD_STORAGE</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Notification Center (Asymmetric overlay) -->
+<div class="absolute top-20 right-8 w-64 pointer-events-none">
+<div class="bg-surface-container-highest border-l-4 border-primary-container p-3 mb-2 shadow-xl opacity-90 animate-pulse">
+<p class="font-label-caps text-label-caps text-primary-container mb-1">NOTIFICATION_PUSH</p>
+<p class="font-code-sm text-code-sm">Isolation Level: SERIALIZABLE guaranteed for TX_ID: 8829</p>
+</div>
+<div class="bg-surface-container-high border-l-4 border-outline-variant p-3 opacity-80">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">SYSTEM_STATUS</p>
+<p class="font-code-sm text-code-sm">Reconciliation drift: 0.0000ms</p>
+</div>
+</div>
+</main>
+<!-- Micro-Telemetry Cluster Script -->
+<script>
+        // Atmospheric interaction for nodes
+        document.querySelectorAll('.border-outline, .border-surface-tint').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px) scale(1.01)';
+                node.style.transition = 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Simulating the 'Real-time Sync' status
+        setInterval(() => {
+            const statusDot = document.querySelector('.animate-pulse');
+            if (statusDot) {
+                statusDot.classList.toggle('bg-primary-container');
+                statusDot.classList.toggle('bg-surface-tint');
+            }
+        }, 1000);
+    </script>
+</body></html>

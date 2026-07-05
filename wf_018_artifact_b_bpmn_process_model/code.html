@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0052FF",
+                        "primary-fixed": "#0052FF",
+                        "primary-fixed-dim": "#6695FF",
+                        "on-primary-container": "#001A40",
+                        "primary-container": "#D6E2FF",
+                        surface: "#FCFCFF",
+                        "surface-container-low": "#F3F3F7",
+                        "surface-container": "#EEEEF2",
+                        "surface-container-highest": "#E2E2E6",
+                        "surface-container-lowest": "#FFFFFF",
+                        "on-surface": "#1A1C1E",
+                        "on-surface-variant": "#44474E",
+                        "outline-variant": "#C4C6D0",
+                        "primary-fixed": "#0052FF",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Public Sans", "sans-serif"],
+                        display: ["Public Sans", "sans-serif"],
+                        body: ["Public Sans", "sans-serif"],
+                        label: ["Public Sans", "sans-serif"],
+                        code: ["JetBrains Mono", "monospace"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .bpmn-grid {
+            background-image: radial-gradient(#C4C6D0 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .font-code-sm { font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; }
+        .font-code-xs { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+        .font-label-caps { font-family: 'Public Sans', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        /* Custom scrollbar for the massive BPMN canvas */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #F3F3F7; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #C4C6D0; border-radius: 4px; }
+        
+        .connector-line {
+            position: absolute;
+            background: #44474E;
+            z-index: 0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/20">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-8 h-16 w-full top-0 border-b border-outline-variant bg-surface text-primary z-50 sticky">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed">REVERSE_LOGISTICS_v4.2</span>
+</div>
+<nav class="hidden md:flex gap-8">
+<a class="text-primary-fixed-dim font-code-sm hover:bg-surface-container-highest transition-colors px-3 py-1 rounded" href="#">System Map</a>
+<a class="text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-colors px-3 py-1 rounded" href="#">Logic Gates</a>
+<a class="text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-colors px-3 py-1 rounded" href="#">Telemetry</a>
+</nav>
+<div class="cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden lg:flex flex-col h-full py-6 bg-surface-container-low text-primary-fixed w-64 border-r border-outline-variant shrink-0">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-2xl font-bold text-primary">CORE_ENGINE</h2>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-4 px-6 py-3 text-primary-fixed bg-surface-container-highest border-l-4 border-primary-fixed cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-xs">System Map</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+<span class="font-label-caps text-xs">API Contracts</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-label-caps text-xs">Logic Gates</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-xs">Audit Logs</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-label-caps text-xs">Telemetry</span>
+</div>
+</div>
+<div class="mt-auto px-6 py-4">
+<div class="p-4 bg-primary-container rounded-lg">
+<p class="font-code-xs text-on-primary-container">Instance: RL-NODE-01</p>
+<p class="font-code-xs text-on-primary-container opacity-70 mt-1">Status: Operational</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area: BPMN Canvas -->
+<main class="flex-1 overflow-auto bpmn-grid relative custom-scrollbar bg-surface p-12">
+<div class="min-w-[2400px] flex flex-col gap-0 border border-outline-variant rounded-sm overflow-hidden shadow-sm bg-white">
+<!-- BPMN Swimlanes -->
+<!-- 1. Customer -->
+<div class="flex border-b border-outline-variant min-h-[120px]">
+<div class="w-12 bg-surface-container-highest border-r border-outline-variant flex items-center justify-center">
+<span class="font-label-caps text-xs -rotate-90 whitespace-nowrap">Customer</span>
+</div>
+<div class="flex-1 relative flex items-center px-12">
+<!-- START NODE -->
+<div class="w-10 h-10 rounded-full border-2 border-green-600 bg-green-50 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-green-700 text-sm" data-icon="play_arrow">play_arrow</span>
+</div>
+<div class="h-px w-16 bg-outline-variant"></div>
+<!-- TASK: Initiate Return -->
+<div class="px-4 py-3 bg-white border border-outline-variant rounded-sm shadow-sm w-44">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-xs" data-icon="person">person</span>
+<span class="font-code-xs uppercase opacity-50">Manual</span>
+</div>
+<p class="font-code-sm font-medium">Initiate Return Request</p>
+</div>
+</div>
+</div>
+<!-- 2. Aura AI -->
+<div class="flex border-b border-outline-variant min-h-[140px] bg-slate-50/30">
+<div class="w-12 bg-primary-container border-r border-outline-variant flex items-center justify-center">
+<span class="font-label-caps text-xs -rotate-90 whitespace-nowrap text-on-primary-container">Aura AI</span>
+</div>
+<div class="flex-1 relative flex items-center px-[280px]">
+<!-- TASK: Image Validation -->
+<div class="px-4 py-3 bg-primary text-white rounded-sm shadow-md w-48 relative z-10">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-xs" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-code-xs uppercase opacity-80">AI Service</span>
+</div>
+<p class="font-code-sm font-medium">Visual Defect Analysis</p>
+</div>
+<div class="h-px w-12 bg-outline-variant"></div>
+<!-- DIAMOND: Valid? -->
+<div class="w-16 h-16 border border-outline-variant rotate-45 flex items-center justify-center bg-white shrink-0 relative z-10">
+<span class="material-symbols-outlined -rotate-45 text-on-surface-variant" data-icon="question_mark">question_mark</span>
+</div>
+</div>
+</div>
+<!-- 3. Fraud Engine -->
+<div class="flex border-b border-outline-variant min-h-[120px]">
+<div class="w-12 bg-surface-container-highest border-r border-outline-variant flex items-center justify-center">
+<span class="font-label-caps text-xs -rotate-90 whitespace-nowrap">Fraud Engine</span>
+</div>
+<div class="flex-1 relative flex items-center px-[540px]">
+<div class="px-4 py-3 bg-red-50 border border-red-200 rounded-sm shadow-sm w-44">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-xs text-red-600" data-icon="security">security</span>
+<span class="font-code-xs uppercase text-red-600 opacity-70">Automated</span>
+</div>
+<p class="font-code-sm font-medium">Risk Score Calc</p>
+</div>
+</div>
+</div>
+<!-- 4. Merchant -->
+<div class="flex border-b border-outline-variant min-h-[120px]">
+<div class="w-12 bg-surface-container-highest border-r border-outline-variant flex items-center justify-center">
+<span class="font-label-caps text-xs -rotate-90 whitespace-nowrap">Merchant</span>
+</div>
+<div class="flex-1 relative flex items-center px-[760px]">
+<div class="px-4 py-3 bg-white border border-outline-variant rounded-sm shadow-sm w-44">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-xs" data-icon="storefront">storefront</span>
+<span class="font-code-xs uppercase opacity-50">User Task</span>
+</div>
+<p class="font-code-sm font-medium">Approve Disposition</p>
+</div>
+</div>
+</div>
+<!-- 5. NaijaSend (Logistics) -->
+<div class="flex border-b border-outline-variant min-h-[120px] bg-blue-50/20">
+<div class="w-12 bg-blue-100 border-r border-outline-variant flex items-center justify-center">
+<span class="font-label-caps text-xs -rotate-90 whitespace-nowrap">NaijaSend</span>
+</div>
+<div class="flex-1 relative flex items-center px-[980px]">
+<div class="px-4 py-3 bg-white border border-blue-200 rounded-sm shadow-sm w-48">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-xs text-blue-600" data-icon="local_shipping">local_shipping</span>
+<span class="font-code-xs uppercase text-blue-600">Service Task</span>
+</div>
+<p class="font-code-sm font-medium">Generate Return Label</p>
+</div>
+<div class="h-px w-12 bg-outline-variant"></div>
+<div class="w-10 h-10 rounded-full border border-outline-variant bg-white flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="schedule">schedule</span>
+</div>
+</div>
+</div>
+<!-- 6. Warehouse & Inspection -->
+<div class="flex border-b border-outline-variant min-h-[140px]">
+<div class="w-12 bg-surface-container-highest border-r border-outline-variant flex items-center justify-center">
+<span class="font-label-caps text-xs -rotate-90 whitespace-nowrap">Inspection Team</span>
+</div>
+<div class="flex-1 relative flex items-center px-[1250px]">
+<div class="px-4 py-3 bg-white border-2 border-primary rounded-sm shadow-sm w-52">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-xs text-primary" data-icon="assignment_turned_in">assignment_turned_in</span>
+<span class="font-code-xs uppercase text-primary">Physical Audit</span>
+</div>
+<p class="font-code-sm font-medium">Item Reconciliation</p>
+</div>
+<div class="h-px w-12 bg-outline-variant"></div>
+<div class="w-16 h-16 border border-outline-variant rotate-45 flex items-center justify-center bg-white shrink-0 relative z-10">
+<span class="material-symbols-outlined -rotate-45 text-on-surface-variant" data-icon="published_with_changes">published_with_changes</span>
+</div>
+</div>
+</div>
+<!-- 7. Wallet & Escrow -->
+<div class="flex border-b border-outline-variant min-h-[120px]">
+<div class="w-12 bg-green-100 border-r border-outline-variant flex items-center justify-center">
+<span class="font-label-caps text-xs -rotate-90 whitespace-nowrap">Escrow</span>
+</div>
+<div class="flex-1 relative flex items-center px-[1580px]">
+<div class="px-4 py-3 bg-white border border-green-200 rounded-sm shadow-sm w-44">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-xs text-green-600" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-code-xs uppercase text-green-600">Financial</span>
+</div>
+<p class="font-code-sm font-medium">Release Refund</p>
+</div>
+<div class="h-px w-12 bg-outline-variant"></div>
+<div class="w-10 h-10 rounded-full border-4 border-on-surface bg-on-surface flex items-center justify-center shrink-0">
+<div class="w-4 h-4 bg-white rounded-sm"></div>
+</div>
+</div>
+</div>
+<!-- 8. Audit & Notification (Footer Track) -->
+<div class="flex min-h-[80px] bg-surface-container-highest/30">
+<div class="w-12 bg-on-surface border-r border-outline-variant flex items-center justify-center">
+<span class="font-label-caps text-xs -rotate-90 whitespace-nowrap text-surface">Audit</span>
+</div>
+<div class="flex-1 flex items-center px-12 gap-12">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm opacity-50" data-icon="notifications">notifications</span>
+<span class="font-code-xs opacity-50">Notification Engine: Passive Listener Active</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm opacity-50" data-icon="data_object">data_object</span>
+<span class="font-code-xs opacity-50">Trust Engine: Recalculating Merchant Integrity...</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Context Tooltip (Floating) -->
+<div class="absolute top-24 right-24 w-72 p-6 bg-surface-container-highest border border-outline-variant shadow-xl rounded-lg z-50">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-label-caps text-sm">Flow Analytics</h3>
+<span class="px-2 py-0.5 bg-green-500 text-white text-[10px] rounded-full uppercase">Live</span>
+</div>
+<div class="space-y-4">
+<div>
+<p class="font-code-xs opacity-70">AVG_LIFECYCLE_TIME</p>
+<p class="text-xl font-bold font-code-sm">18.4 Hours</p>
+</div>
+<div class="h-1 bg-outline-variant w-full rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[70%]"></div>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="p-2 bg-surface-container rounded">
+<p class="text-[10px] uppercase opacity-50">Success</p>
+<p class="font-bold font-code-sm">94.2%</p>
+</div>
+<div class="p-2 bg-surface-container rounded">
+<p class="text-[10px] uppercase opacity-50">Disputed</p>
+<p class="font-bold font-code-sm">5.8%</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Connector SVG Overlay (Conceptual simplified lines for visualization) -->
+<svg class="absolute inset-0 pointer-events-none w-[2400px] h-full overflow-visible opacity-30">
+<path d="M 230 140 L 320 140 L 320 230 L 280 230" fill="none" stroke="#44474E" stroke-dasharray="4" stroke-width="2"></path>
+<path d="M 500 230 L 580 230 L 580 340 L 540 340" fill="none" stroke="#44474E" stroke-width="2"></path>
+<path d="M 720 340 L 800 340 L 800 460 L 760 460" fill="none" stroke="#44474E" stroke-width="2"></path>
+<path d="M 940 460 L 1020 460 L 1020 580 L 980 580" fill="none" stroke="#44474E" stroke-width="2"></path>
+<path d="M 1210 580 L 1300 580 L 1300 700 L 1250 700" fill="none" stroke="#44474E" stroke-width="2"></path>
+<path d="M 1520 700 L 1630 700 L 1630 820 L 1580 820" fill="none" stroke="#44474E" stroke-width="2"></path>
+</svg>
+</main>
+</div>
+<!-- BottomNavBar -->
+<footer class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-4 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-sm p-1">
+<span class="material-symbols-outlined text-lg" data-icon="memory">memory</span>
+<span class="font-code-xs text-[10px]">RUNTIME</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="schema">schema</span>
+<span class="font-code-xs text-[10px]">SCHEMA</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="dns">dns</span>
+<span class="font-code-xs text-[10px]">GATEWAY</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="analytics">analytics</span>
+<span class="font-code-xs text-[10px]">METRICS</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Logic Gate Flicker
+        const gates = document.querySelectorAll('.rotate-45');
+        setInterval(() => {
+            const gate = gates[Math.floor(Math.random() * gates.length)];
+            gate.classList.add('bg-primary-container');
+            setTimeout(() => {
+                gate.classList.remove('bg-primary-container');
+            }, 150);
+        }, 3000);
+
+        // Pan handling simulation (for presentation)
+        const main = document.querySelector('main');
+        let isDown = false;
+        let startX;
+        let startY;
+        let scrollLeft;
+        let scrollTop;
+
+        main.addEventListener('mousedown', (e) => {
+            isDown = true;
+            main.classList.add('cursor-grabbing');
+            startX = e.pageX - main.offsetLeft;
+            startY = e.pageY - main.offsetTop;
+            scrollLeft = main.scrollLeft;
+            scrollTop = main.scrollTop;
+        });
+        main.addEventListener('mouseleave', () => {
+            isDown = false;
+            main.classList.remove('cursor-grabbing');
+        });
+        main.addEventListener('mouseup', () => {
+            isDown = false;
+            main.classList.remove('cursor-grabbing');
+        });
+        main.addEventListener('mousemove', (e) => {
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - main.offsetLeft;
+            const y = e.pageY - main.offsetTop;
+            const walkX = (x - startX) * 2;
+            const walkY = (y - startY) * 2;
+            main.scrollLeft = scrollLeft - walkX;
+            main.scrollTop = scrollTop - walkY;
+        });
+    </script>
+</body></html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>API Contract Blueprint | WF-017</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dot-grid {
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, transparent, rgba(0, 230, 57, 0.05), transparent);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#2c0051",
+                        "outline": "#84967e",
+                        "on-secondary-fixed": "#001356",
+                        "on-surface": "#d4e4fa",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-background": "#d4e4fa",
+                        "surface-variant": "#273647",
+                        "on-primary-fixed": "#002203",
+                        "surface": "#051424",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "on-tertiary-container": "#862ed4",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "inverse-primary": "#006e16",
+                        "on-primary-container": "#007117",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-secondary": "#002388",
+                        "primary": "#ebffe2",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#dde1ff",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-container-high": "#1c2b3c",
+                        "on-tertiary": "#490080",
+                        "tertiary": "#fff6ff",
+                        "surface-container": "#122131",
+                        "error": "#ffb4ab",
+                        "on-primary": "#003907",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-error": "#690005",
+                        "outline-variant": "#3b4b37",
+                        "background": "#051424",
+                        "surface-dim": "#051424",
+                        "surface-tint": "#00e639",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-secondary-container": "#c6ceff",
+                        "inverse-on-surface": "#233143",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#00530e",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary-fixed-variant": "#6900b3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-fixed-dim selection:text-on-primary-fixed overflow-hidden flex h-screen w-screen dot-grid">
+<!-- Navigation Drawer -->
+<aside class="flex flex-col h-full py-lane-margin gap-stack-gap bg-surface-container-lowest border-r border-outline-variant docked left-0 h-full w-64 z-50">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<h2 class="font-headline-md text-headline-md text-primary-fixed-dim">MODULE_INDEX</h2>
+</div>
+<p class="font-code-xs text-code-xs text-outline mt-2">v2.1.0-STABLE</p>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim duration-75 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">NODE_MAP</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-caps text-label-caps">SEQUENCE_LOGS</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined">reorder</span>
+<span class="font-label-caps text-label-caps">LOAD_BALANCER</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">DB_SHARDS</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined">security</span>
+<span class="font-label-caps text-label-caps">AUTH_GATEWAY</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">METRICS_EXPORT</span>
+</div>
+</nav>
+<div class="px-6 pt-4 border-t border-outline-variant">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-outline">CPU_LOAD</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">12%</span>
+</div>
+<div class="h-1 bg-surface-container-high w-full">
+<div class="h-1 bg-primary-fixed-dim w-[12%]"></div>
+</div>
+</div>
+</div>
+</aside>
+<div class="flex-1 flex flex-col min-w-0 relative">
+<!-- Top App Bar -->
+<header class="flex justify-between items-center w-full px-node-gutter h-16 bg-surface border-b border-outline-variant docked full-width top-0 z-40">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">terminal</span>
+<h1 class="font-headline-md text-headline-md font-code-sm text-code-sm text-primary-fixed-dim tracking-widest">SYSTEM_ORCHESTRATOR_v2.1</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">UPTIME: 99.98% | LATENCY: 24ms</span>
+</div>
+<button class="bg-surface-variant hover:bg-primary-fixed-dim hover:text-on-primary p-2 transition-colors">
+<span class="material-symbols-outlined text-sm">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-auto custom-scrollbar p-node-gutter relative scanline">
+<!-- Global Security Header -->
+<section class="mb-lane-margin grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="col-span-1 md:col-span-2 p-4 bg-surface-container-low border border-outline-variant flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">AUTHENTICATION_PROTOCOL</span>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-on-surface">mTLS</span>
+<span class="font-code-xs text-code-xs text-outline">X.509 Client Cert Required</span>
+</div>
+<div class="h-8 w-px bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-on-surface">JWT</span>
+<span class="font-code-xs text-code-xs text-outline">RS256 Bearer Token</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low border border-outline-variant flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">AUTHORIZATION</span>
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-on-surface">RBAC / Scopes</span>
+<span class="font-code-xs text-code-xs text-outline">wf:read | wf:write | fulfill:admin</span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low border border-outline-variant flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-error">CONSTRAINTS</span>
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-on-surface">Timeout: 250ms</span>
+<span class="font-code-xs text-code-xs text-outline">Rate Limit: 5000 req/sec</span>
+</div>
+</div>
+</section>
+<!-- API Contract Flow -->
+<div class="grid grid-cols-1 gap-12 relative">
+<!-- Swimlane: Order Entry -->
+<div class="relative border-l-2 border-primary-fixed-dim pl-8">
+<div class="absolute -left-[11px] top-0 w-5 h-5 bg-primary-fixed-dim rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-fixed text-[12px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+<div class="mb-4">
+<span class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">shopping_cart</span>
+                            Fulfillment Initiation
+                        </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-node-gutter">
+<!-- Node 1 -->
+<div class="bg-surface-container border border-outline-variant overflow-hidden">
+<div class="bg-surface-container-highest px-3 py-1 flex justify-between items-center border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">POST /fulfillment/create</span>
+<span class="font-code-xs text-code-xs text-outline">v1.2</span>
+</div>
+<div class="p-4">
+<pre class="font-code-sm text-code-sm text-on-surface-variant overflow-x-auto">{
+  "order_id": "UUID",
+  "priority": "EXPRESS",
+  "items": [
+    { "sku": "WF-017-X", "qty": 1 }
+  ]
+}</pre>
+<div class="mt-4 pt-4 border-t border-outline-variant flex gap-2">
+<span class="px-2 py-1 bg-surface-container-highest text-primary-fixed-dim font-code-xs text-code-xs">202 ACCEPTED</span>
+<span class="px-2 py-1 bg-surface-container-highest text-outline font-code-xs text-code-xs">Latency: 45ms</span>
+</div>
+</div>
+</div>
+<!-- Node 2 -->
+<div class="bg-surface-container border border-outline-variant overflow-hidden">
+<div class="bg-surface-container-highest px-3 py-1 flex justify-between items-center border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">POST /warehouse/assign</span>
+<span class="font-code-xs text-code-xs text-outline">v1.0</span>
+</div>
+<div class="p-4">
+<pre class="font-code-sm text-code-sm text-on-surface-variant overflow-x-auto">{
+  "fulfillment_id": "UUID",
+  "geo_fence": "EU-WEST-1",
+  "strategy": "NEAREST_STOCK"
+}</pre>
+<div class="mt-4 pt-4 border-t border-outline-variant flex gap-2">
+<span class="px-2 py-1 bg-surface-container-highest text-primary-fixed-dim font-code-xs text-code-xs">200 OK</span>
+<span class="px-2 py-1 bg-surface-container-highest text-outline font-code-xs text-code-xs">Latency: 112ms</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: Inventory Ops -->
+<div class="relative border-l-2 border-secondary pl-8">
+<div class="absolute -left-[11px] top-0 w-5 h-5 bg-secondary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary text-[12px]" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+</div>
+<div class="mb-4">
+<span class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">conveyor_belt</span>
+                            Warehouse Execution
+                        </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Inventory Nodes -->
+<div class="bg-surface-container border border-outline-variant">
+<div class="bg-surface-container-highest px-3 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-label-caps text-secondary">POST /inventory/pick</span>
+</div>
+<div class="p-3">
+<p class="font-code-xs text-code-xs text-outline mb-2">Reserved items are retrieved from bins.</p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+<span class="font-code-xs text-code-xs">Webhook: picking.completed</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant">
+<div class="bg-surface-container-highest px-3 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-label-caps text-secondary">POST /inventory/pack</span>
+</div>
+<div class="p-3">
+<p class="font-code-xs text-code-xs text-outline mb-2">Items scanned and sealed in package.</p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+<span class="font-code-xs text-code-xs">Webhook: packing.ready</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant">
+<div class="bg-surface-container-highest px-3 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-label-caps text-secondary">POST /shipment/create</span>
+</div>
+<div class="p-3">
+<p class="font-code-xs text-code-xs text-outline mb-2">Generating manifest and labels.</p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+<span class="font-code-xs text-code-xs">Webhook: label.printed</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: Logistics -->
+<div class="relative border-l-2 border-tertiary-fixed-dim pl-8">
+<div class="absolute -left-[11px] top-0 w-5 h-5 bg-tertiary-fixed-dim rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-fixed text-[12px]" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+<div class="mb-4">
+<span class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">route</span>
+                            Logistics & Route Optimization
+                        </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-node-gutter">
+<div class="bg-surface-container border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">POST /driver/assign</span>
+<div class="mt-3 flex flex-col gap-2">
+<div class="flex justify-between items-center bg-surface-container-highest p-2 border border-outline-variant">
+<span class="font-code-sm text-code-sm">AUTO_MATCH</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">ENABLED</span>
+</div>
+<div class="flex justify-between items-center bg-surface-container-highest p-2 border border-outline-variant">
+<span class="font-code-sm text-code-sm">MAX_RADIUS</span>
+<span class="font-code-xs text-code-xs text-outline">15KM</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">POST /route/optimize</span>
+<div class="mt-3">
+<div class="h-16 w-full bg-surface-container-highest relative overflow-hidden flex items-center justify-center border border-outline-variant">
+<!-- Simplified logic map visualization -->
+<div class="absolute inset-0 opacity-20 dot-grid"></div>
+<div class="flex gap-4">
+<div class="w-3 h-3 rounded-full bg-tertiary-fixed-dim shadow-[0_0_8px_rgba(221,183,255,0.5)]"></div>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+<div class="w-3 h-3 rounded-full bg-primary-fixed-dim"></div>
+</div>
+<svg class="absolute inset-0 w-full h-full pointer-events-none">
+<path d="M 50 32 L 350 32" fill="none" stroke="#3b4b37" stroke-dasharray="4 4"></path>
+</svg>
+</div>
+<span class="font-code-xs text-code-xs text-outline block mt-2">Dijkstra variant applied | Traffic weighting: true</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Final Delivery -->
+<div class="relative border-l-2 border-outline pl-8">
+<div class="absolute -left-[11px] top-0 w-5 h-5 bg-outline rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-surface text-[12px]" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+</div>
+<div class="mb-4">
+<span class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">handshake</span>
+                            Final Delivery & Settlement
+                        </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-surface-container border border-outline-variant p-3 flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-on-surface">POST /delivery/start</span>
+<span class="font-code-xs text-code-xs text-outline">Courier confirms pickup. ETA starts.</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-3 flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-on-surface">POST /proof/upload</span>
+<span class="font-code-xs text-code-xs text-outline">Base64 signature + Photo GPS lock.</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-3 flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">POST /escrow/release</span>
+<span class="font-code-xs text-code-xs text-outline">Trigger payout to driver and seller.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Webhook Catalog (Bento) -->
+<section class="mt-lane-margin pt-lane-margin border-t border-outline-variant">
+<h3 class="font-headline-md text-headline-md text-on-surface-variant mb-6 uppercase tracking-widest">Global Webhook Events</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-primary-fixed-dim transition-colors group">
+<span class="font-code-sm text-code-sm text-on-surface group-hover:text-primary-fixed-dim">fulfillment.failed</span>
+<p class="font-code-xs text-code-xs text-outline mt-1">Exhausted retry policy.</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-secondary transition-colors group">
+<span class="font-code-sm text-code-sm text-on-surface group-hover:text-secondary">inventory.low_stock</span>
+<p class="font-code-xs text-code-xs text-outline mt-1">Threshold breach in WH-01.</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-tertiary-fixed-dim transition-colors group">
+<span class="font-code-sm text-code-sm text-on-surface group-hover:text-tertiary-fixed-dim">courier.arrived</span>
+<p class="font-code-xs text-code-xs text-outline mt-1">Geofence entry detected.</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-primary-fixed-dim transition-colors group">
+<span class="font-code-sm text-code-sm text-on-surface group-hover:text-primary-fixed-dim">settlement.complete</span>
+<p class="font-code-xs text-code-xs text-outline mt-1">Ledger reconciliation closed.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Status Bar -->
+<footer class="h-10 bg-surface-container-lowest border-t border-outline-variant flex items-center px-node-gutter justify-between">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-outline">MODE:</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SYSTEM_ADMIN</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-outline">LOC:</span>
+<span class="font-code-xs text-code-xs text-on-surface">blueprint.contracts.wf017</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-outline">UTF-8</span>
+<span class="font-code-xs text-code-xs text-outline">LN: 402, COL: 12</span>
+<span class="material-symbols-outlined text-sm text-outline">notifications</span>
+</div>
+</footer>
+</div>
+<!-- Node Config Drawer (Contextual) -->
+<div class="hidden fixed right-0 top-0 bottom-0 w-80 bg-surface-container-high border-l border-outline-variant glass-panel z-[100] transform translate-x-full transition-transform duration-300" id="configDrawer">
+<div class="p-6 h-full flex flex-col">
+<div class="flex justify-between items-center mb-8">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">NODE_CONFIG</span>
+<button class="material-symbols-outlined text-outline" onclick="toggleDrawer()">close</button>
+</div>
+<div class="flex-1 space-y-6">
+<div class="space-y-2">
+<label class="font-code-xs text-code-xs text-outline">ENDPOINT_ALIAS</label>
+<input class="w-full bg-transparent border border-outline-variant text-primary-fixed-dim font-code-sm focus:ring-0 focus:border-primary-fixed-dim" type="text" value="fulfillment_create_v1"/>
+</div>
+<div class="space-y-2">
+<label class="font-code-xs text-code-xs text-outline">MAX_RETRIES</label>
+<input class="w-full bg-transparent border border-outline-variant text-on-surface font-code-sm focus:ring-0 focus:border-primary-fixed-dim" type="number" value="3"/>
+</div>
+<div class="space-y-2">
+<label class="font-code-xs text-code-xs text-outline">FAILOVER_STRATEGY</label>
+<select class="w-full bg-transparent border border-outline-variant text-on-surface font-code-sm focus:ring-0 focus:border-primary-fixed-dim">
+<option>EXPONENTIAL_BACKOFF</option>
+<option>IMMEDIATE_CIRCUIT_BREAK</option>
+<option>DEAD_LETTER_QUEUE</option>
+</select>
+</div>
+</div>
+<button class="w-full py-3 bg-primary-fixed-dim text-on-primary-fixed font-label-caps text-label-caps mt-auto hover:bg-primary-container transition-colors">
+                COMMIT_CHANGES
+            </button>
+</div>
+</div>
+<script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('configDrawer');
+            if (drawer.classList.contains('translate-x-full')) {
+                drawer.classList.remove('hidden', 'translate-x-full');
+                drawer.classList.add('translate-x-0');
+            } else {
+                drawer.classList.add('translate-x-full');
+                drawer.classList.remove('translate-x-0');
+            }
+        }
+
+        // Simulating some UI micro-interactions
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('click', () => {
+                toggleDrawer();
+            });
+            node.classList.add('cursor-pointer', 'transition-transform', 'hover:scale-[1.01]');
+        });
+    </script>
+</body></html>

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-017 | Developer Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #84967e;
+            z-index: -1;
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.1);
+            position: absolute;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#2c0051",
+                        "outline": "#84967e",
+                        "on-secondary-fixed": "#001356",
+                        "on-surface": "#d4e4fa",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-background": "#d4e4fa",
+                        "surface-variant": "#273647",
+                        "on-primary-fixed": "#002203",
+                        "surface": "#051424",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "on-tertiary-container": "#862ed4",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "inverse-primary": "#006e16",
+                        "on-primary-container": "#007117",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-secondary": "#002388",
+                        "primary": "#ebffe2",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#dde1ff",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-container-high": "#1c2b3c",
+                        "on-tertiary": "#490080",
+                        "tertiary": "#fff6ff",
+                        "surface-container": "#122131",
+                        "error": "#ffb4ab",
+                        "on-primary": "#003907",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-error": "#690005",
+                        "outline-variant": "#3b4b37",
+                        "background": "#051424",
+                        "surface-dim": "#051424",
+                        "surface-tint": "#00e639",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-secondary-container": "#c6ceff",
+                        "inverse-on-surface": "#233143",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#00530e",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary-fixed-variant": "#6900b3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden text-on-surface">
+<!-- TopAppBar Execution -->
+<header class="flex justify-between items-center w-full px-node-gutter h-16 bg-surface dark:bg-surface docked full-width top-0 border-b border-outline-variant flat no shadows z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">SYSTEM_ORCHESTRATOR_v2.1</h1>
+</div>
+<div class="flex items-center gap-8">
+<div class="hidden md:flex gap-6">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">MODULE: WF-017_CORE</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">BRANCH: main/v2-impl</span>
+</div>
+<div class="font-code-sm text-code-sm text-primary-fixed-dim">UPTIME: 99.98% | LATENCY: 24ms</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer Execution -->
+<aside class="flex flex-col h-full py-lane-margin gap-stack-gap bg-surface-container-lowest dark:bg-surface-container-lowest docked left-0 w-64 border-r border-outline-variant flat no shadows shrink-0">
+<div class="px-6 mb-6">
+<h2 class="font-headline-md text-headline-md text-primary-fixed-dim">MODULE_INDEX</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center px-6 py-3 gap-3 transition-colors duration-150 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">account_tree</span> NODE_MAP
+                </a>
+<a class="flex items-center px-6 py-3 gap-3 transition-colors duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">receipt_long</span> SEQUENCE_LOGS
+                </a>
+<a class="flex items-center px-6 py-3 gap-3 transition-colors duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">reorder</span> LOAD_BALANCER
+                </a>
+<a class="flex items-center px-6 py-3 gap-3 transition-colors duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">database</span> DB_SHARDS
+                </a>
+<a class="flex items-center px-6 py-3 gap-3 transition-colors duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">security</span> AUTH_GATEWAY
+                </a>
+<a class="flex items-center px-6 py-3 gap-3 transition-colors duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">analytics</span> METRICS_EXPORT
+                </a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto custom-scrollbar relative">
+<div class="scanline pointer-events-none opacity-20"></div>
+<!-- Header Section -->
+<div class="p-lane-margin border-b border-outline-variant bg-surface-container-low">
+<div class="flex justify-between items-end">
+<div>
+<div class="font-label-caps text-label-caps text-outline mb-2">TECHNICAL_SPECIFICATION // WF-017</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Integrated Fulfillment Logistics Orchestration</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">This implementation guide details the required microservice topology, API hook-points, and state-machine transitions for the WF-017 lifecycle (Order to Settlement).</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<span class="px-3 py-1 bg-primary-container text-on-primary-container font-label-caps text-label-caps rounded-sm">STATUS: PROTOTYPE_FINAL</span>
+<span class="font-code-xs text-code-xs text-outline">HASH: 7f89a2c1...09e</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid - Technical Core -->
+<div class="p-node-gutter grid grid-cols-12 gap-stack-gap bg-surface-dim">
+<!-- Owning Microservices Swimlane -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container border border-outline-variant p-grid-unit">
+<div class="flex items-center gap-2 mb-4 p-2 border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="font-label-caps text-label-caps">OWNING_MICROSERVICES</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+<!-- Fulfillment Node -->
+<div class="p-3 bg-surface-container-highest border border-primary-fixed-dim/30">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">ID: SRVC-FUL</div>
+<div class="font-code-sm text-code-sm text-on-surface">Fulfillment</div>
+<div class="mt-4 flex gap-1">
+<div class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<!-- Warehouse Node -->
+<div class="p-3 bg-surface-container-highest border border-outline-variant">
+<div class="font-label-caps text-label-caps text-outline mb-1">ID: SRVC-WHS</div>
+<div class="font-code-sm text-code-sm text-on-surface">Warehouse</div>
+<div class="mt-4 flex gap-1">
+<div class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-outline-variant rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<!-- Inventory Node -->
+<div class="p-3 bg-surface-container-highest border border-outline-variant">
+<div class="font-label-caps text-label-caps text-outline mb-1">ID: SRVC-INV</div>
+<div class="font-code-sm text-code-sm text-on-surface">Inventory</div>
+<div class="mt-4 flex gap-1">
+<div class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></div>
+</div>
+</div>
+<!-- Shipment Node -->
+<div class="p-3 bg-surface-container-highest border border-outline-variant">
+<div class="font-label-caps text-label-caps text-outline mb-1">ID: SRVC-SHP</div>
+<div class="font-code-sm text-code-sm text-on-surface">Shipment</div>
+<div class="mt-4 flex gap-1">
+<div class="w-1.5 h-1.5 bg-outline-variant rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-outline-variant rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<!-- Driver Node -->
+<div class="p-3 bg-surface-container-highest border border-outline-variant">
+<div class="font-label-caps text-label-caps text-outline mb-1">ID: SRVC-DRV</div>
+<div class="font-code-sm text-code-sm text-on-surface">Driver</div>
+</div>
+<!-- Route Node -->
+<div class="p-3 bg-surface-container-highest border border-outline-variant">
+<div class="font-label-caps text-label-caps text-outline mb-1">ID: SRVC-RTE</div>
+<div class="font-code-sm text-code-sm text-on-surface">Route</div>
+</div>
+<!-- Escrow Node -->
+<div class="p-3 bg-surface-container-highest border border-primary-fixed-dim/30">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">ID: SRVC-ESC</div>
+<div class="font-code-sm text-code-sm text-on-surface">Escrow</div>
+</div>
+<!-- Gateway Node -->
+<div class="p-3 bg-surface-container-highest border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-outline">add</span>
+</div>
+</div>
+</div>
+<!-- Database & Cache Dependencies -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container border border-outline-variant p-grid-unit">
+<div class="flex items-center gap-2 mb-4 p-2 border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">database</span>
+<span class="font-label-caps text-label-caps">DATA_PERSISTENCE_LAYER</span>
+</div>
+<div class="space-y-2 px-2">
+<div class="flex justify-between items-center p-2 bg-surface-container-lowest border-l-2 border-primary-fixed-dim">
+<div>
+<div class="font-code-sm text-code-sm">PostgreSQL (Primary)</div>
+<div class="font-code-xs text-code-xs text-outline">Cluster: node-west-01</div>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">check_circle</span>
+</div>
+<div class="flex justify-between items-center p-2 bg-surface-container-lowest border-l-2 border-primary-fixed-dim">
+<div>
+<div class="font-code-sm text-code-sm">Redis (Hot Cache)</div>
+<div class="font-code-xs text-code-xs text-outline">TTL: 3600s | Eviction: LFU</div>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">check_circle</span>
+</div>
+<div class="flex justify-between items-center p-2 bg-surface-container-lowest border-l-2 border-outline-variant">
+<div>
+<div class="font-code-sm text-code-sm">Elasticsearch (Logs)</div>
+<div class="font-code-xs text-code-xs text-outline">Schema: trace-v4</div>
+</div>
+<span class="material-symbols-outlined text-outline text-sm">sync</span>
+</div>
+</div>
+</div>
+<!-- Workflow Visualization (n8n & Logic) -->
+<div class="col-span-12 bg-surface-container border border-outline-variant p-grid-unit h-96 relative overflow-hidden">
+<div class="flex items-center justify-between mb-4 p-2 border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">schema</span>
+<span class="font-label-caps text-label-caps">EXECUTION_RUNTIME_MAP // n8n_FLOW_ID: WF-L017-X</span>
+</div>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 bg-primary-fixed-dim rounded-full"></span> SUCCESS</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 bg-error-container rounded-full"></span> EXCEPTION</span>
+</div>
+</div>
+<!-- Flow Diagram Emulation -->
+<div class="absolute inset-x-0 bottom-0 top-16 flex items-center justify-around px-20">
+<!-- Node 1 -->
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-32 h-16 bg-surface-container-highest border border-primary-fixed-dim flex flex-col items-center justify-center p-2 text-center">
+<div class="font-label-caps text-[9px] text-primary-fixed-dim">WEBHOOK</div>
+<div class="font-code-sm text-code-sm">Order.Created</div>
+</div>
+<div class="font-code-xs text-code-xs text-outline">ID: 0xFD1</div>
+</div>
+<!-- Connector 1 -->
+<div class="h-[2px] flex-1 bg-primary-fixed-dim/30 relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-l-[6px] border-l-primary-fixed-dim"></div>
+</div>
+<!-- Node 2 -->
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-32 h-16 bg-surface-container-highest border border-outline-variant flex flex-col items-center justify-center p-2 text-center">
+<div class="font-label-caps text-[9px] text-outline">LOGIC_BRANCH</div>
+<div class="font-code-sm text-code-sm">Verify.Escrow</div>
+</div>
+<div class="font-code-xs text-code-xs text-outline">ID: 0xFD2</div>
+</div>
+<!-- Connector 2 (Vertical Zig Zag) -->
+<div class="h-[2px] flex-1 bg-outline-variant relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-l-[6px] border-l-outline"></div>
+<div class="absolute top-0 left-1/2 w-px h-12 bg-error-container -mt-12"></div>
+<div class="absolute -top-24 left-1/2 -translate-x-1/2 w-24 h-12 border border-error-container bg-surface-container-lowest p-1 flex items-center justify-center">
+<span class="font-code-xs text-code-xs text-error">ERR_ESCROW</span>
+</div>
+</div>
+<!-- Node 3 -->
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-32 h-16 bg-surface-container-highest border border-outline-variant flex flex-col items-center justify-center p-2 text-center">
+<div class="font-label-caps text-[9px] text-outline">ACTION</div>
+<div class="font-code-sm text-code-sm">Emit.Shipment</div>
+</div>
+<div class="font-code-xs text-code-xs text-outline">ID: 0xFD3</div>
+</div>
+<!-- Connector 3 -->
+<div class="h-[2px] flex-1 bg-outline-variant relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-l-[6px] border-l-outline"></div>
+</div>
+<!-- Node 4 -->
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-32 h-16 bg-surface-container-highest border border-primary-fixed-dim border-dashed flex flex-col items-center justify-center p-2 text-center">
+<div class="font-label-caps text-[9px] text-primary-fixed-dim">TERMINAL</div>
+<div class="font-code-sm text-code-sm">Job.Settled</div>
+</div>
+<div class="font-code-xs text-code-xs text-outline">ID: 0xFD4</div>
+</div>
+</div>
+</div>
+<!-- API Hooks & Shared Components -->
+<div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant p-grid-unit">
+<div class="flex items-center gap-2 mb-4 p-2 border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">api</span>
+<span class="font-label-caps text-label-caps">REQUIRED_API_HOOKS</span>
+</div>
+<div class="space-y-1">
+<div class="p-3 bg-surface-container-lowest border border-outline-variant hover:border-primary-fixed-dim transition-colors group cursor-pointer">
+<div class="flex justify-between items-center mb-2">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim font-bold">POST /v1/fulfillment/sync</span>
+<span class="px-1.5 py-0.5 bg-surface-container-highest text-outline font-code-xs text-[9px] border border-outline-variant">INTERNAL</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Synchronizes inventory state across distributed warehouse nodes. Supports idempotency via X-Request-ID.</p>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant hover:border-primary-fixed-dim transition-colors group cursor-pointer">
+<div class="flex justify-between items-center mb-2">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim font-bold">GET /v2/driver/nearest</span>
+<span class="px-1.5 py-0.5 bg-surface-container-highest text-outline font-code-xs text-[9px] border border-outline-variant">PUBLIC_INTERNAL</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Spatial query for driver availability within 5km radius. Returns GeoJSON collection.</p>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant hover:border-primary-fixed-dim transition-colors group cursor-pointer">
+<div class="flex justify-between items-center mb-2">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim font-bold">PATCH /v1/escrow/lock</span>
+<span class="px-1.5 py-0.5 bg-error-container text-on-error-container font-code-xs text-[9px] border border-outline-variant">MUTATION_LOCK</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Locks transaction funds in secure wallet. Triggered on Fulfillment handshake.</p>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant p-grid-unit">
+<div class="flex items-center gap-2 mb-4 p-2 border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">widgets</span>
+<span class="font-label-caps text-label-caps">SHARED_UI_COMPONENTS</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="p-3 border border-outline-variant bg-surface-container-lowest flex flex-col gap-2">
+<div class="font-code-xs text-code-xs text-outline">UI-C01</div>
+<div class="h-1 bg-primary-fixed-dim w-3/4"></div>
+<div class="font-code-sm text-code-sm">StatusBadge.v2</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant mt-2">Props: variant, label, pulse</div>
+</div>
+<div class="p-3 border border-outline-variant bg-surface-container-lowest flex flex-col gap-2">
+<div class="font-code-xs text-code-xs text-outline">UI-C04</div>
+<div class="flex gap-1">
+<div class="w-2 h-2 border border-outline"></div>
+<div class="w-2 h-2 border border-outline"></div>
+<div class="w-2 h-2 border border-outline"></div>
+</div>
+<div class="font-code-sm text-code-sm">TraceLog.v1</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant mt-2">Props: endpoint, maxRows</div>
+</div>
+<div class="p-3 border border-outline-variant bg-surface-container-lowest flex flex-col gap-2">
+<div class="font-code-xs text-code-xs text-outline">UI-C07</div>
+<div class="w-full h-1 bg-outline-variant"></div>
+<div class="font-code-sm text-code-sm">MetricMini.v3</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant mt-2">Props: stream, color</div>
+</div>
+<div class="p-3 border border-outline-variant bg-surface-container-lowest flex flex-col gap-2">
+<div class="font-code-xs text-code-xs text-outline">UI-C12</div>
+<div class="w-4 h-4 rounded-full border-2 border-primary-fixed-dim flex items-center justify-center"><div class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></div></div>
+<div class="font-code-sm text-code-sm">NodeToggle.v2</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant mt-2">Props: activeState, label</div>
+</div>
+</div>
+</div>
+<!-- Completion Criteria -->
+<div class="col-span-12 bg-surface-container border border-outline-variant p-grid-unit">
+<div class="flex items-center gap-2 mb-4 p-2 border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+<span class="font-label-caps text-label-caps">COMPLETION_CRITERIA &amp; GATEWAY_CHECKS</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 py-2">
+<div class="space-y-3">
+<div class="font-label-caps text-[10px] text-outline border-b border-outline-variant pb-1">ENGINEERING</div>
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-primary-fixed-dim text-primary-fixed-dim focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm">95% Code coverage (Unit)</span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-primary-fixed-dim text-primary-fixed-dim focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm">Traceability ID injection</span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input class="mt-1 bg-transparent border-outline text-primary-fixed-dim focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm text-on-surface-variant">GraphQL Schema Federation</span>
+</label>
+</div>
+<div class="space-y-3">
+<div class="font-label-caps text-[10px] text-outline border-b border-outline-variant pb-1">INFRASTRUCTURE</div>
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-primary-fixed-dim text-primary-fixed-dim focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm">K8s Pod Autoscaling Policy</span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input class="mt-1 bg-transparent border-outline text-primary-fixed-dim focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Canary Deployment Strategy</span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-primary-fixed-dim text-primary-fixed-dim focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm">Secret Rotation Configured</span>
+</label>
+</div>
+<div class="space-y-3">
+<div class="font-label-caps text-[10px] text-outline border-b border-outline-variant pb-1">OBSERVABILITY</div>
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-primary-fixed-dim text-primary-fixed-dim focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm">Grafana Alerting Thresholds</span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input class="mt-1 bg-transparent border-outline text-primary-fixed-dim focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm text-on-surface-variant">SLA Breach Notification</span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-primary-fixed-dim text-primary-fixed-dim focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm">P50/P99 Latency Monitoring</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Meta -->
+<footer class="p-8 flex justify-between items-center bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-outline">description</span>
+</div>
+<div>
+<div class="font-code-sm text-code-sm">DOC_OWNER: Arch_Team_Alpha</div>
+<div class="font-code-xs text-code-xs text-outline">Last Modified: 2023-11-24T14:22:01Z</div>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="px-4 py-2 border border-outline-variant font-label-caps text-label-caps hover:bg-surface-variant transition-colors">EXPORT_PDF</button>
+<button class="px-4 py-2 bg-primary-fixed-dim text-on-primary-fixed font-label-caps text-label-caps hover:brightness-110 transition-all">GENERATE_BOILERPLATE</button>
+</div>
+</footer>
+</main>
+<!-- Right Side: Micro-Telemetry & Logs Drawer -->
+<aside class="hidden xl:flex flex-col w-80 bg-surface-container-low border-l border-outline-variant">
+<div class="p-4 border-b border-outline-variant bg-surface-container">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim">SYSTEM_TELEMETRY</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
+<!-- Activity Feed -->
+<div class="space-y-3">
+<div class="font-code-xs text-code-xs text-outline tracking-widest uppercase">Live Activity</div>
+<div class="space-y-2">
+<div class="font-code-xs text-code-xs border-l border-primary-fixed-dim pl-2 py-1">
+<span class="text-primary-fixed-dim">[14:35:12]</span> Sync fulfillment payload detected...
+                        </div>
+<div class="font-code-xs text-code-xs border-l border-outline-variant pl-2 py-1">
+<span class="text-outline">[14:35:08]</span> DB Shard-04 heartbeat: OK
+                        </div>
+<div class="font-code-xs text-code-xs border-l border-primary-fixed-dim pl-2 py-1">
+<span class="text-primary-fixed-dim">[14:35:01]</span> ESCROW_LOCK response (200 OK)
+                        </div>
+<div class="font-code-xs text-code-xs border-l border-error-container pl-2 py-1">
+<span class="text-error">[14:34:55]</span> Inventory warning: Item 4492 low
+                        </div>
+</div>
+</div>
+<!-- Network Visualization Mini -->
+<div class="space-y-3">
+<div class="font-code-xs text-code-xs text-outline tracking-widest uppercase">Node Distribution</div>
+<div class="relative h-32 bg-surface-container-highest border border-outline-variant overflow-hidden">
+
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="font-code-xs text-code-xs bg-surface/80 p-1 border border-primary-fixed-dim/30">NODES: 128 ACTIVE</div>
+</div>
+</div>
+</div>
+<!-- Dependency Map Summary -->
+<div class="space-y-3">
+<div class="font-code-xs text-code-xs text-outline tracking-widest uppercase">Orphaned Nodes</div>
+<div class="p-3 bg-error-container/10 border border-error-container/30">
+<div class="font-code-sm text-code-sm text-error">CRITICAL: SRVC-DRV</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant mt-1">Missing 'Route.Assigned' consumer group in Kafka cluster.</div>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-highest border-t border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-code-xs text-code-xs">RESOURCE_LOAD</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">42%</span>
+</div>
+<div class="w-full h-1 bg-outline-variant">
+<div class="h-full bg-primary-fixed-dim w-[42%]"></div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Micro-Interaction Scripts -->
+<script>
+        // Simple logic to simulate terminal-like interaction
+        document.querySelectorAll('.cursor-pointer').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                el.style.transform = 'translateX(4px)';
+                el.style.backgroundColor = '#1c2b3c';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'translateX(0)';
+                el.style.backgroundColor = '';
+            });
+        });
+
+        // Dynamic timestamp update
+        const timeDisplay = document.querySelector('.text-primary-fixed-dim:last-child');
+        setInterval(() => {
+            const now = new Date();
+            const timeStr = now.toISOString().split('T')[1].split('.')[0];
+            // Just updating visually for effect
+        }, 1000);
+    </script>
+</body></html>

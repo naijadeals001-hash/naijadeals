@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SYSTEM_ORCHESTRATOR_v2.1 | WF-017_VALIDATION</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background-color: #3b4b37;
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            animation: scanline 8s linear infinite;
+        }
+        @keyframes scanline {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#2c0051",
+                        "outline": "#84967e",
+                        "on-secondary-fixed": "#001356",
+                        "on-surface": "#d4e4fa",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-background": "#d4e4fa",
+                        "surface-variant": "#273647",
+                        "on-primary-fixed": "#002203",
+                        "surface": "#051424",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "on-tertiary-container": "#862ed4",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "inverse-primary": "#006e16",
+                        "on-primary-container": "#007117",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-secondary": "#002388",
+                        "primary": "#ebffe2",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#dde1ff",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-container-high": "#1c2b3c",
+                        "on-tertiary": "#490080",
+                        "tertiary": "#fff6ff",
+                        "surface-container": "#122131",
+                        "error": "#ffb4ab",
+                        "on-primary": "#003907",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-error": "#690005",
+                        "outline-variant": "#3b4b37",
+                        "background": "#051424",
+                        "surface-dim": "#051424",
+                        "surface-tint": "#00e639",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-secondary-container": "#c6ceff",
+                        "inverse-on-surface": "#233143",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#00530e",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary-fixed-variant": "#6900b3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-hidden flex flex-col h-screen">
+<!-- Top App Bar -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-node-gutter h-16 shrink-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="terminal">terminal</span>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">SYSTEM_ORCHESTRATOR_v2.1</span>
+<span class="font-code-xs text-code-xs text-outline">ENVIRONMENT: PRODUCTION_SHADOW</span>
+</div>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<div class="flex flex-col items-end">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">UPTIME: 99.98% | LATENCY: 24ms</span>
+<span class="font-code-xs text-code-xs text-outline">STABLE_RELEASE_HASH: 7f82a1c</span>
+</div>
+<button class="bg-surface-variant hover:bg-surface-container-high transition-colors duration-150 p-2 rounded">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings_input_component">settings_input_component</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Navigation Drawer -->
+<nav class="bg-surface-container-lowest border-r border-outline-variant flex flex-col h-full w-64 py-lane-margin gap-stack-gap shrink-0 hidden md:flex">
+<div class="px-6 mb-6">
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">MODULE_INDEX</span>
+</div>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">NODE_MAP</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-label-caps text-label-caps">SEQUENCE_LOGS</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="reorder">reorder</span>
+<span class="font-label-caps text-label-caps">LOAD_BALANCER</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">DB_SHARDS</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-label-caps text-label-caps">AUTH_GATEWAY</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-caps text-label-caps">METRICS_EXPORT</span>
+</a>
+<div class="mt-auto px-6 pt-6 border-t border-outline-variant">
+<div class="bg-surface-container-high p-4 rounded border border-outline-variant">
+<span class="font-code-xs text-code-xs text-on-surface-variant block mb-2">AUTH_TOKEN_EXPIRY</span>
+<div class="w-full bg-surface-container-low h-1 mb-1">
+<div class="bg-primary-fixed-dim h-full w-[65%]"></div>
+</div>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">04:12:33 REMAINING</span>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto relative p-node-gutter">
+<div class="scanline"></div>
+<!-- Hero Header Section -->
+<div class="mb-lane-margin">
+<div class="flex items-baseline gap-4 mb-2">
+<h1 class="font-headline-lg text-headline-lg text-primary">WF-017: FULFILLMENT_CODE_VALIDATION</h1>
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-sm text-code-sm uppercase tracking-tighter">Status: ACCEPTANCE_TESTING</span>
+</div>
+<p class="font-body-md text-on-surface-variant max-w-2xl">Institutional Blueprint for multi-actor fulfillment flows. Validating the integrity of automated picking, secure handovers, and atomic escrow releases.</p>
+</div>
+<!-- Validation Matrix (Bento Grid) -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-node-gutter mb-lane-margin">
+<!-- Main Acceptance Matrix Card -->
+<div class="md:col-span-8 bg-surface-container-lowest border border-outline-variant p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[120px]" data-icon="fact_check">fact_check</span>
+</div>
+<div class="relative z-10">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-label-caps text-label-caps text-primary-fixed-dim">VALIDATION_MATRIX_V1.4</h2>
+<span class="font-code-xs text-code-xs text-outline">REVISION_4421</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="py-3 font-code-sm text-code-sm text-outline">MODULE</th>
+<th class="py-3 font-code-sm text-code-sm text-outline">TEST_PARAMETER</th>
+<th class="py-3 font-code-sm text-code-sm text-outline">RESULT</th>
+<th class="py-3 font-code-sm text-code-sm text-outline text-right">STABILITY</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<tr>
+<td class="py-4 font-code-sm text-code-sm">AUTO_PICKING</td>
+<td class="py-4 font-body-md text-on-surface">SKU Identity & Bin Weight Parity</td>
+<td class="py-4"><span class="text-primary-fixed-dim font-code-sm">PASS</span></td>
+<td class="py-4 text-right font-code-sm">99.9%</td>
+</tr>
+<tr>
+<td class="py-4 font-code-sm text-code-sm">DRIVER_ASSIGN</td>
+<td class="py-4 font-body-md text-on-surface">Dynamic Geofence Verification</td>
+<td class="py-4"><span class="text-primary-fixed-dim font-code-sm">PASS</span></td>
+<td class="py-4 text-right font-code-sm">98.4%</td>
+</tr>
+<tr>
+<td class="py-4 font-code-sm text-code-sm text-error">QR_HANDOVER</td>
+<td class="py-4 font-body-md text-on-surface">Asymmetric Encryption Handshake</td>
+<td class="py-4"><span class="text-error font-code-sm">PENDING</span></td>
+<td class="py-4 text-right font-code-sm">--</td>
+</tr>
+<tr>
+<td class="py-4 font-code-sm text-code-sm">GPS_TELEMETRY</td>
+<td class="py-4 font-body-md text-on-surface">Sub-meter Drift Correction</td>
+<td class="py-4"><span class="text-primary-fixed-dim font-code-sm">PASS</span></td>
+<td class="py-4 text-right font-code-sm">99.1%</td>
+</tr>
+<tr>
+<td class="py-4 font-code-sm text-code-sm">ESCROW_RELEASE</td>
+<td class="py-4 font-body-md text-on-surface">Atomic Transaction Settlement</td>
+<td class="py-4"><span class="text-primary-fixed-dim font-code-sm">PASS</span></td>
+<td class="py-4 text-right font-code-sm">100%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- API Logs / Real-time Telemetry -->
+<div class="md:col-span-4 space-y-node-gutter">
+<div class="bg-surface-container-low border border-outline-variant p-6 h-[220px] flex flex-col">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-label-caps text-label-caps text-outline">API_TEST_STREAM</h2>
+<div class="flex gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim animate-pulse" style="animation-delay: 0.2s"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim animate-pulse" style="animation-delay: 0.4s"></div>
+</div>
+</div>
+<div class="flex-1 overflow-hidden font-code-xs text-code-xs space-y-1 opacity-80">
+<div class="text-primary-fixed-dim">14:22:01 <span class="text-on-surface">POST /v2/orders/771/verify_qr</span> - 200 OK</div>
+<div class="text-primary-fixed-dim">14:22:04 <span class="text-on-surface">GET /v2/inventory/bin_B44</span> - 200 OK</div>
+<div class="text-primary-fixed-dim">14:22:15 <span class="text-on-surface">PATCH /v2/driver/telemetry</span> - 200 OK</div>
+<div class="text-primary-fixed-dim">14:22:18 <span class="text-on-surface">PUT /v2/escrow/release_trigger</span> - 200 OK</div>
+<div class="text-error">14:22:25 <span class="text-on-surface">POST /v2/audit/log_dump</span> - 503 ERROR</div>
+<div class="text-primary-fixed-dim">14:22:31 <span class="text-on-surface">GET /v2/system/health_check</span> - 200 OK</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-6">
+<h2 class="font-label-caps text-label-caps text-outline mb-4">DB_VALIDATION_HASH</h2>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface-variant">RELATION_ID</span>
+<span class="text-primary-fixed-dim">#WF-DB-099</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface-variant">PARITY_CHECK</span>
+<span class="text-primary-fixed-dim">MATCHED</span>
+</div>
+<div class="mt-2 p-2 bg-surface border border-outline-variant text-center font-code-xs text-code-xs text-outline break-all">
+                                4f3a8b2c9e1d0f5g7h9i0j1k2l3m4n5o6p7q8r9s0t
+                            </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Workflow Visualizer Section -->
+<div class="mb-lane-margin">
+<div class="flex items-center gap-4 mb-6">
+<h2 class="font-label-caps text-label-caps text-primary-fixed-dim">LOGIC_FLOW_VISUALIZER</h2>
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+</div>
+<div class="relative w-full h-[300px] bg-surface-container-lowest border border-outline-variant overflow-hidden p-6 grid grid-cols-4 gap-8">
+<!-- Workflow Node 1 -->
+<div class="flex flex-col gap-stack-gap">
+<div class="bg-surface border border-primary-fixed-dim p-4 rounded-sm relative">
+<div class="absolute -top-2 left-2 bg-surface px-2 font-label-caps text-code-xs text-primary-fixed-dim">NODE_01</div>
+<span class="font-code-sm text-code-sm text-on-surface block">ORDER_INIT</span>
+<span class="font-code-xs text-code-xs text-outline">Event: User_Checkout</span>
+</div>
+<div class="flex justify-center">
+<span class="material-symbols-outlined text-outline" data-icon="arrow_downward">arrow_downward</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-2 rounded-sm opacity-50">
+<span class="font-code-xs text-code-xs text-on-surface-variant block">PARALLEL: FRAUD_SCRUB</span>
+</div>
+</div>
+<!-- Workflow Node 2 -->
+<div class="flex flex-col gap-stack-gap">
+<div class="bg-surface border border-primary-fixed-dim p-4 rounded-sm relative">
+<div class="absolute -top-2 left-2 bg-surface px-2 font-label-caps text-code-xs text-primary-fixed-dim">NODE_02</div>
+<span class="font-code-sm text-code-sm text-on-surface block">WAREHOUSE_PICK</span>
+<span class="font-code-xs text-code-xs text-outline">Input: SKU_4482_M</span>
+</div>
+<div class="flex items-center h-full px-4">
+<div class="w-full h-[1px] bg-primary-fixed-dim/30"></div>
+</div>
+</div>
+<!-- Workflow Node 3 -->
+<div class="flex flex-col gap-stack-gap">
+<div class="bg-surface border border-outline-variant p-4 rounded-sm relative border-dashed">
+<div class="absolute -top-2 left-2 bg-surface px-2 font-label-caps text-code-xs text-outline">NODE_03</div>
+<span class="font-code-sm text-code-sm text-on-surface block">HANDOVER_AUTH</span>
+<span class="font-code-xs text-code-xs text-error">Status: WAIT_QR</span>
+</div>
+<div class="flex justify-center p-2">
+<span class="material-symbols-outlined text-error animate-pulse" data-icon="warning">warning</span>
+</div>
+</div>
+<!-- Workflow Node 4 -->
+<div class="flex flex-col gap-stack-gap">
+<div class="bg-surface border border-outline-variant p-4 rounded-sm relative opacity-40">
+<div class="absolute -top-2 left-2 bg-surface px-2 font-label-caps text-code-xs text-outline">NODE_04</div>
+<span class="font-code-sm text-code-sm text-on-surface block">FINAL_SETTLE</span>
+<span class="font-code-xs text-code-xs text-outline">Post: Escrow_Contract</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Validation Checklists Section -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-node-gutter">
+<!-- Developer Checklist -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="code">code</span>
+<h3 class="font-label-caps text-label-caps">DEVELOPER_CHECKLIST</h3>
+</div>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-md text-on-surface">Unit tests coverage > 92%</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-md text-on-surface">Linting / Style compliance</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline text-sm" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="font-body-md text-on-surface">Security scan: Critical/High resolved</span>
+</li>
+</ul>
+</div>
+<!-- QA Checklist -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="bug_report">bug_report</span>
+<h3 class="font-label-caps text-label-caps">QA_VALIDATION_SUITE</h3>
+</div>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-md text-on-surface">Edge case: Network timeout handling</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline text-sm" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="font-body-md text-on-surface">UX: Driver handoff UI responsiveness</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-md text-on-surface">Localization: RTL string support</span>
+</li>
+</ul>
+</div>
+<!-- Release Management -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="rocket_launch">rocket_launch</span>
+<h3 class="font-label-caps text-label-caps">RELEASE_GATEKEEPING</h3>
+</div>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline text-sm" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="font-body-md text-on-surface">Rollback scripts verified</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline text-sm" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="font-body-md text-on-surface">Blue/Green deployment readiness</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-md text-on-surface">Legal/GDPR compliance sign-off</span>
+</li>
+</ul>
+</div>
+</div>
+</main>
+</div>
+<!-- Institutional Footer / Status Bar -->
+<footer class="h-8 bg-surface-container-lowest border-t border-outline-variant px-node-gutter flex items-center justify-between font-code-xs text-code-xs z-50">
+<div class="flex gap-4">
+<span class="text-primary-fixed-dim">SYSTEM: ONLINE</span>
+<span class="text-outline">WORKFLOW: WF-017_REVISION_J</span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline">LAST_SYNC: 2023-11-24T14:24:02Z</span>
+<span class="text-on-surface-variant bg-surface-container-high px-2">ADMIN_PRIVILEGES_ACTIVE</span>
+</div>
+</footer>
+<!-- Overlay Micro-interactions -->
+<script>
+        // Micro-interaction for UI feel
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.classList.add('scale-[0.98]');
+            });
+            el.addEventListener('mouseup', () => {
+                el.classList.remove('scale-[0.98]');
+            });
+        });
+
+        // Simulate some telemetry activity
+        const apiLog = document.querySelector('.md\\:col-span-4 .flex-1.overflow-hidden');
+        if (apiLog) {
+            setInterval(() => {
+                const logs = apiLog.children;
+                if (logs.length > 10) logs[0].remove();
+                
+                const newLog = document.createElement('div');
+                const now = new Date();
+                const time = now.getHours().toString().padStart(2, '0') + ':' + 
+                             now.getMinutes().toString().padStart(2, '0') + ':' + 
+                             now.getSeconds().toString().padStart(2, '0');
+                
+                const isError = Math.random() > 0.9;
+                newLog.className = isError ? 'text-error animate-pulse' : 'text-primary-fixed-dim';
+                newLog.innerHTML = `${time} <span class="text-on-surface">PING /v2/heartbeat</span> - 200 OK`;
+                apiLog.appendChild(newLog);
+            }, 5000);
+        }
+    </script>
+</body></html>

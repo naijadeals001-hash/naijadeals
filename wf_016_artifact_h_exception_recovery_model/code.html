@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-016 | Exception &amp; Recovery Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-line {
+            position: absolute;
+            z-index: 0;
+            border: 0;
+            background-color: #3b4b37;
+        }
+        .node-glow:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.15);
+        }
+        @keyframes pulse-red {
+            0%, 100% { border-color: #93000a; }
+            50% { border-color: #ffb4ab; }
+        }
+        .error-border {
+            animation: pulse-red 2s infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#00ff41",
+                        "inverse-on-surface": "#233143",
+                        "surface-container-low": "#0d1c2d",
+                        "on-tertiary-container": "#862ed4",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "error-container": "#93000a",
+                        "outline": "#84967e",
+                        "surface-container-high": "#1c2b3c",
+                        "on-surface": "#d4e4fa",
+                        "surface-tint": "#00e639",
+                        "primary-fixed-dim": "#00e639",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-error": "#690005",
+                        "surface-dim": "#051424",
+                        "secondary-container": "#0043eb",
+                        "on-secondary": "#002388",
+                        "on-primary-container": "#007117",
+                        "secondary-fixed": "#dde1ff",
+                        "primary": "#ebffe2",
+                        "on-background": "#d4e4fa",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-variant": "#273647",
+                        "surface": "#051424",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006e16",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-secondary-fixed": "#001356",
+                        "surface-container": "#122131",
+                        "on-primary": "#003907",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "surface-container-highest": "#273647",
+                        "tertiary": "#fff6ff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "tertiary-fixed": "#f0dbff",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-container": "#c6ceff",
+                        "background": "#051424",
+                        "surface-bright": "#2c3a4c",
+                        "surface-container-lowest": "#010f1f",
+                        "on-primary-fixed": "#002203",
+                        "on-primary-fixed-variant": "#00530e",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-fixed": "#72ff70"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-12 px-lane-margin w-full fixed top-0 z-50 bg-background border-b border-outline-variant">
+<div class="flex items-center gap-2 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">CORE_ENGINE_V2</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 px-3 py-1 bg-surface-container-high rounded text-label-caps font-label-caps text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+                ACTIVE_NODE: WF-016
+            </div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors p-1 rounded">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer (Suppressed for focused task, but kept layout integrity) -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container-low border-r border-outline-variant hidden md:flex flex-col pt-stack-gap z-40">
+<div class="px-6 py-4">
+<h2 class="font-label-caps text-label-caps text-on-surface opacity-50 tracking-widest">MODULE_REGISTRY</h2>
+</div>
+<nav class="flex flex-col flex-1">
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Inventory_Flow</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed cursor-default select-none">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Order_Lifecycle</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Payment_Gateway</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Audit_Logs</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-default select-none">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">n8n_Connectors</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:pl-64 pt-12 min-h-screen">
+<div class="p-lane-margin max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="mb-12">
+<div class="flex items-center gap-3 mb-2">
+<span class="px-2 py-0.5 bg-error-container text-on-error-container text-[10px] font-bold rounded uppercase tracking-tighter">Resilience Map</span>
+<span class="text-on-surface-variant font-code-xs text-code-xs">ID: ARTIFACT_H_016</span>
+</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">Exception &amp; Recovery Model: WF-016</h2>
+<p class="text-on-surface-variant max-w-2xl mt-2">Formal logic mapping of transactional fault states and automated remediation paths within the core settlement engine.</p>
+</div>
+<!-- Resilience Flow Map (The Grid) -->
+<div class="relative grid grid-cols-1 lg:grid-cols-4 gap-node-gutter">
+<!-- Swimlane 1: Trigger Event -->
+<div class="space-y-node-gutter relative">
+<div class="sticky top-16 bg-background/80 backdrop-blur pb-4 z-10">
+<div class="flex items-center gap-2 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary-fixed text-sm">bolt</span>
+<span class="font-label-caps text-label-caps uppercase opacity-70">Detection_Layer</span>
+</div>
+</div>
+<!-- Node: Inventory Changed -->
+<div class="bg-surface-container border border-outline p-4 rounded-sm node-glow transition-all relative">
+<div class="flex justify-between items-start mb-3">
+<span class="text-[9px] font-bold text-primary-fixed uppercase tracking-widest px-1.5 py-0.5 bg-surface-container-high border border-outline-variant rounded">E-101</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant">monitoring</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Inventory Changed</h4>
+<p class="text-code-xs text-on-surface-variant opacity-80 leading-relaxed">SKU stock level mismatch detected during pre-locking phase.</p>
+<div class="mt-4 flex items-center justify-between">
+<span class="text-[8px] font-code-xs opacity-50 uppercase">Latency: 12ms</span>
+<span class="material-symbols-outlined text-sm text-primary-fixed">arrow_forward</span>
+</div>
+</div>
+<!-- Node: Price Changed -->
+<div class="bg-surface-container border border-outline p-4 rounded-sm node-glow transition-all relative">
+<div class="flex justify-between items-start mb-3">
+<span class="text-[9px] font-bold text-primary-fixed uppercase tracking-widest px-1.5 py-0.5 bg-surface-container-high border border-outline-variant rounded">E-102</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant">attach_money</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Price Changed</h4>
+<p class="text-code-xs text-on-surface-variant opacity-80 leading-relaxed">Upstream pricing engine updated quote during active session.</p>
+<div class="mt-4 flex items-center justify-between">
+<span class="text-[8px] font-code-xs opacity-50 uppercase">Latency: 45ms</span>
+<span class="material-symbols-outlined text-sm text-primary-fixed">arrow_forward</span>
+</div>
+</div>
+<!-- Node: Payment Failed -->
+<div class="bg-surface-container border border-error p-4 rounded-sm node-glow transition-all relative error-border">
+<div class="flex justify-between items-start mb-3">
+<span class="text-[9px] font-bold text-error uppercase tracking-widest px-1.5 py-0.5 bg-error-container/30 border border-error-container rounded">E-402</span>
+<span class="material-symbols-outlined text-sm text-error">credit_card_off</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Payment Failed</h4>
+<p class="text-code-xs text-on-surface-variant opacity-80 leading-relaxed">Processor timeout or insufficient authorization token response.</p>
+<div class="mt-4 flex items-center justify-between">
+<span class="text-[8px] font-code-xs opacity-50 uppercase">Latency: 2.4s</span>
+<span class="material-symbols-outlined text-sm text-error">arrow_forward</span>
+</div>
+</div>
+<!-- Node: Escrow Failure -->
+<div class="bg-surface-container border border-error p-4 rounded-sm node-glow transition-all relative">
+<div class="flex justify-between items-start mb-3">
+<span class="text-[9px] font-bold text-error uppercase tracking-widest px-1.5 py-0.5 bg-error-container/30 border border-error-container rounded">E-503</span>
+<span class="material-symbols-outlined text-sm text-error">lock_reset</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Escrow Failure</h4>
+<p class="text-code-xs text-on-surface-variant opacity-80 leading-relaxed">Inability to secure funds in temporary hold vault.</p>
+<div class="mt-4 flex items-center justify-between">
+<span class="text-[8px] font-code-xs opacity-50 uppercase">Critical: High</span>
+<span class="material-symbols-outlined text-sm text-error">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Swimlane 2: Decision Engine -->
+<div class="space-y-node-gutter relative lg:border-l lg:border-dashed lg:border-outline-variant lg:pl-node-gutter">
+<div class="sticky top-16 bg-background/80 backdrop-blur pb-4 z-10">
+<div class="flex items-center gap-2 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-secondary text-sm">settings_suggest</span>
+<span class="font-label-caps text-label-caps uppercase opacity-70">Logic_Filter</span>
+</div>
+</div>
+<div class="h-16 flex items-center justify-center">
+<div class="w-full h-[1px] bg-outline-variant relative">
+<div class="absolute right-0 -top-1 w-2 h-2 rounded-full bg-outline-variant"></div>
+</div>
+</div>
+<!-- Policy Check Nodes -->
+<div class="bg-surface-container-low border border-outline-variant border-l-4 border-l-secondary p-4 rounded-sm">
+<h5 class="text-[9px] font-label-caps uppercase text-secondary mb-1">Recovery Policy v4</h5>
+<p class="text-code-sm font-code-sm leading-tight">Evaluate State Persistance &amp; User Intent</p>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-8">
+<div class="p-2 border border-outline-variant rounded-sm text-center">
+<div class="text-[8px] font-bold opacity-40 mb-1">AUTO</div>
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">auto_mode</span>
+</div>
+<div class="p-2 border border-outline-variant rounded-sm text-center">
+<div class="text-[8px] font-bold opacity-40 mb-1">MANUAL</div>
+<span class="material-symbols-outlined text-on-surface-variant text-lg">person_alert</span>
+</div>
+</div>
+</div>
+<!-- Swimlane 3: Remediation Action -->
+<div class="space-y-node-gutter relative lg:border-l lg:border-dashed lg:border-outline-variant lg:pl-node-gutter lg:col-span-2">
+<div class="sticky top-16 bg-background/80 backdrop-blur pb-4 z-10">
+<div class="flex items-center gap-2 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-sm">rebase_edit</span>
+<span class="font-label-caps text-label-caps uppercase opacity-70">Execution_Path</span>
+</div>
+</div>
+<!-- Action: Refresh -->
+<div class="flex items-center gap-4 group">
+<div class="flex-none w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center bg-surface-container-high text-primary-fixed group-hover:bg-primary-fixed group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined">refresh</span>
+</div>
+<div class="flex-1 bg-surface-container-high/50 p-4 border border-outline-variant rounded-sm">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-code-sm text-code-sm text-on-surface">Path: Refresh</h4>
+<span class="text-[8px] font-code-xs text-primary-fixed bg-on-primary-fixed px-1 rounded">SAFE</span>
+</div>
+<p class="text-code-xs text-on-surface-variant leading-relaxed">Silently poll stock update. If unavailable, soft-fail UI and return to PDP.</p>
+</div>
+</div>
+<!-- Action: Confirmation -->
+<div class="flex items-center gap-4 group">
+<div class="flex-none w-10 h-10 rounded-full border border-secondary flex items-center justify-center bg-surface-container-high text-secondary group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
+<span class="material-symbols-outlined">notification_important</span>
+</div>
+<div class="flex-1 bg-surface-container-high/50 p-4 border border-outline-variant rounded-sm">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-code-sm text-code-sm text-on-surface">Path: Confirmation</h4>
+<span class="text-[8px] font-code-xs text-secondary bg-on-secondary px-1 rounded">USER_ACK</span>
+</div>
+<p class="text-code-xs text-on-surface-variant leading-relaxed">Interrupt checkout. Present new quote with 60s lock. Requires explicit opt-in.</p>
+</div>
+</div>
+<!-- Action: Retry -->
+<div class="flex items-center gap-4 group">
+<div class="flex-none w-10 h-10 rounded-full border border-error flex items-center justify-center bg-surface-container-high text-error group-hover:bg-error group-hover:text-on-error transition-colors">
+<span class="material-symbols-outlined">cached</span>
+</div>
+<div class="flex-1 bg-surface-container-high/50 p-4 border border-outline-variant rounded-sm">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-code-sm text-code-sm text-on-surface">Path: Retry</h4>
+<span class="text-[8px] font-code-xs text-error bg-on-error px-1 rounded">EXP_BACKOFF</span>
+</div>
+<p class="text-code-xs text-on-surface-variant leading-relaxed">Trigger 3-stage exponential backoff (2s, 10s, 30s) for idempotent gateway calls.</p>
+</div>
+</div>
+<!-- Action: Rollback -->
+<div class="flex items-center gap-4 group">
+<div class="flex-none w-10 h-10 rounded-full border border-on-tertiary-container flex items-center justify-center bg-surface-container-high text-on-tertiary-container group-hover:bg-on-tertiary-container group-hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined">history</span>
+</div>
+<div class="flex-1 bg-surface-container-high/50 p-4 border border-outline-variant rounded-sm">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-code-sm text-code-sm text-on-surface">Path: Rollback</h4>
+<span class="text-[8px] font-code-xs text-on-tertiary-container bg-tertiary-container px-1 rounded">DESTRUCTIVE</span>
+</div>
+<p class="text-code-xs text-on-surface-variant leading-relaxed">Full transaction neutralization. Release stock, void auth, and purge session logs.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Metrics & Status -->
+<div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="p-4 bg-surface-container-low border border-outline-variant rounded-sm">
+<div class="text-[10px] font-label-caps text-on-surface-variant opacity-50 mb-1">RECOVERY_SUCCESS_RATE</div>
+<div class="text-headline-md font-headline-md text-primary-fixed">98.42%</div>
+</div>
+<div class="p-4 bg-surface-container-low border border-outline-variant rounded-sm">
+<div class="text-[10px] font-label-caps text-on-surface-variant opacity-50 mb-1">AVG_RECOVERY_TIME</div>
+<div class="text-headline-md font-headline-md text-on-surface">412ms</div>
+</div>
+<div class="p-4 bg-surface-container-low border border-outline-variant rounded-sm">
+<div class="text-[10px] font-label-caps text-on-surface-variant opacity-50 mb-1">TOTAL_RECOVERIES_24H</div>
+<div class="text-headline-md font-headline-md text-on-surface">1,204</div>
+</div>
+<div class="p-4 bg-surface-container-low border border-outline-variant rounded-sm">
+<div class="text-[10px] font-label-caps text-on-surface-variant opacity-50 mb-1">SYSTEM_STABILITY</div>
+<div class="flex items-center gap-2">
+<div class="text-headline-md font-headline-md text-primary-fixed">NOMINAL</div>
+<div class="w-3 h-3 rounded-full bg-primary-fixed shadow-[0_0_8px_rgba(0,255,65,0.5)]"></div>
+</div>
+</div>
+</div>
+<!-- Bento Detail Panel -->
+<div class="mt-node-gutter grid grid-cols-1 md:grid-cols-3 gap-4 h-64">
+<div class="md:col-span-2 bg-surface-container-lowest border border-outline-variant relative overflow-hidden rounded-sm group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary-fixed/5 to-transparent pointer-events-none"></div>
+<div class="p-6 relative z-10">
+<h3 class="font-label-caps text-label-caps text-on-surface mb-4">HEURISTIC_DASHBOARD</h3>
+<div class="flex items-end gap-1 h-32">
+<!-- Visualizing data spikes -->
+<div class="bg-primary-fixed/20 w-full h-[60%] border-t border-primary-fixed"></div>
+<div class="bg-primary-fixed/20 w-full h-[40%] border-t border-primary-fixed"></div>
+<div class="bg-primary-fixed/20 w-full h-[80%] border-t border-primary-fixed"></div>
+<div class="bg-primary-fixed/20 w-full h-[55%] border-t border-primary-fixed"></div>
+<div class="bg-primary-fixed/20 w-full h-[90%] border-t border-primary-fixed"></div>
+<div class="bg-primary-fixed/20 w-full h-[70%] border-t border-primary-fixed"></div>
+<div class="bg-primary-fixed/20 w-full h-[45%] border-t border-primary-fixed"></div>
+<div class="bg-error-container/40 w-full h-[95%] border-t border-error"></div>
+<div class="bg-primary-fixed/20 w-full h-[60%] border-t border-primary-fixed"></div>
+<div class="bg-primary-fixed/20 w-full h-[50%] border-t border-primary-fixed"></div>
+</div>
+<div class="mt-4 flex justify-between text-[8px] font-code-xs text-on-surface-variant opacity-50 uppercase tracking-tighter">
+<span>00:00 UTC</span>
+<span>Critical Spike (E-402)</span>
+<span>Current: 14:45 UTC</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-6 rounded-sm flex flex-col justify-between">
+<div>
+<h3 class="font-label-caps text-label-caps text-on-surface mb-2">AUDIT_STUB_016</h3>
+<p class="text-code-xs text-on-surface-variant">Last manual intervention: 4h 12m ago. Actor: <code>SYS_RECOVERY_BOT_B</code>. Result: <code>SUCCESSFUL_ROLLBACK</code>.</p>
+</div>
+<button class="w-full py-2 bg-surface-container-highest border border-outline-variant text-label-caps text-on-surface hover:bg-primary-fixed hover:text-on-primary-fixed transition-all">VIEW_FULL_LOGS</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only Icons) -->
+<div class="md:hidden fixed bottom-0 left-0 w-full flex justify-center pb-4 z-50">
+<div class="w-fit rounded-full mb-4 mx-auto bg-surface-container-highest border border-outline-variant shadow-lg flex gap-2 p-1 px-4">
+<div class="text-primary-fixed bg-surface-container-high rounded-full p-2 scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined">zoom_in</span>
+</div>
+<div class="text-on-surface-variant p-2 scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined">zoom_out</span>
+</div>
+<div class="text-on-surface-variant p-2 scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined">grid_4x4</span>
+</div>
+<div class="text-on-surface-variant p-2 scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined">file_download</span>
+</div>
+</div>
+</div>
+<!-- Micro-Telemetry Interactions -->
+<script>
+        document.addEventListener('mousemove', (e) => {
+            const nodes = document.querySelectorAll('.node-glow');
+            nodes.forEach(node => {
+                const rect = node.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
+                    node.style.borderColor = 'var(--tw-colors-primary-fixed)';
+                } else {
+                    node.style.borderColor = '';
+                }
+            });
+        });
+
+        // Simple script to toggle visual "heartbeat" on logs
+        setInterval(() => {
+            const telemetry = document.querySelector('.animate-pulse');
+            if (telemetry) {
+                telemetry.classList.toggle('opacity-50');
+            }
+        }, 800);
+    </script>
+</body></html>

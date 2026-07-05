@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-019 API Contract Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dot-grid {
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .line-grid {
+            background-image: linear-gradient(to right, rgba(59, 75, 55, 0.1) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(59, 75, 55, 0.1) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #051424; }
+        ::-webkit-scrollbar-thumb { background: #1c2b3c; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #273647; }
+        
+        .node-connector {
+            position: absolute;
+            background: #00e639;
+            z-index: 0;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-container": "#c6ceff",
+                      "tertiary": "#fff6ff",
+                      "on-secondary": "#002388",
+                      "inverse-surface": "#d4e4fa",
+                      "on-surface": "#d4e4fa",
+                      "surface-tint": "#00e639",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-bright": "#2c3a4c",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "error-container": "#93000a",
+                      "error": "#ffb4ab",
+                      "surface": "#051424",
+                      "outline-variant": "#3b4b37",
+                      "inverse-primary": "#006e16",
+                      "surface-variant": "#273647",
+                      "outline": "#84967e",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-primary-container": "#007117",
+                      "surface-container-lowest": "#010f1f",
+                      "surface-container-high": "#1c2b3c",
+                      "on-primary-fixed": "#002203",
+                      "primary": "#ebffe2",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-secondary-fixed": "#001356",
+                      "primary-fixed": "#72ff70",
+                      "primary-container": "#00ff41",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary": "#003907",
+                      "tertiary-fixed": "#f0dbff",
+                      "background": "#051424",
+                      "on-tertiary-fixed": "#2c0051",
+                      "secondary": "#b8c3ff",
+                      "on-tertiary": "#490080",
+                      "secondary-container": "#0043eb",
+                      "primary-fixed-dim": "#00e639",
+                      "on-error": "#690005",
+                      "secondary-fixed": "#dde1ff",
+                      "on-tertiary-container": "#862ed4",
+                      "on-background": "#d4e4fa",
+                      "inverse-on-surface": "#233143",
+                      "surface-dim": "#051424",
+                      "surface-container-low": "#0d1c2d",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "surface-container-highest": "#273647",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#122131"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container dot-grid min-h-screen overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 z-50 flex justify-between items-center w-full px-grid-unit h-12 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<span class="font-label-caps text-label-caps tracking-tighter text-primary-container dark:text-primary-container uppercase">NAIJADEALS_ATLAS_V2.0</span>
+</div>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">SPEC_VIEWER</a>
+<a class="font-label-caps text-label-caps text-primary font-bold" href="#">API_CONTRACT</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">TELEMETRY</a>
+</nav>
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">settings_input_component</span>
+</button>
+</div>
+</header>
+<!-- Side Navigation Drawer -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 pb-4 z-40 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant w-64">
+<div class="px-4 mb-6">
+<h2 class="font-headline-md text-headline-md text-primary uppercase">SYSTEM_MODULES</h2>
+</div>
+<div class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Logic</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 bg-primary-container text-on-primary-container font-bold border-l-4 border-surface-tint scale-[0.99] transition-transform" href="#">
+<span class="material-symbols-outlined">api</span>
+<span class="font-label-caps text-label-caps">API</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 pt-16 p-8 min-h-screen">
+<div class="max-w-6xl mx-auto space-y-12">
+<!-- Header & Global Config -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-2 space-y-4">
+<div class="inline-flex items-center gap-2 px-2 py-1 bg-surface-container-high border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">DOC_ID: WF-019_BLUEPRINT</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Settlement Pipeline API Contract</h1>
+<p class="font-body-md text-on-surface-variant max-w-2xl">
+                        This specification defines the asynchronous and synchronous endpoints required for high-fidelity fund settlement, ledger synchronization, and third-party bank disbursements.
+                    </p>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 space-y-4 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-10">
+<span class="material-symbols-outlined text-[64px]">security</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary border-b border-outline-variant pb-2">GLOBAL_SECURITY_CONFIG</h3>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Auth Protocol</span>
+<span class="font-code-sm text-code-sm text-secondary">mTLS + OAuth2</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Gateway Timeout</span>
+<span class="font-code-sm text-code-sm text-secondary">3000ms</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Retry Strategy</span>
+<span class="font-code-sm text-code-sm text-secondary">3x Exponential</span>
+</div>
+</div>
+</div>
+</section>
+<!-- API Endpoint Grid (Bento Style) -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<!-- Core Flow: Settlement -->
+<div class="md:col-span-2 bg-surface-container-high border border-outline p-4 flex flex-col justify-between hover:border-primary-container transition-all group">
+<div class="space-y-2">
+<div class="flex justify-between items-start">
+<span class="px-2 py-0.5 bg-on-primary-container text-primary font-label-caps text-[10px]">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-50">/v1/settlement</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-primary">/settlement/create</h4>
+<p class="font-body-md text-xs text-on-surface-variant">Initializes a new settlement entity in PENDING status. Required for transaction grouping.</p>
+</div>
+<div class="mt-4 flex items-center justify-between border-t border-outline-variant pt-2">
+<span class="font-code-xs text-code-xs text-surface-tint">IDEMPOTENCY: REQUIRED</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm group-hover:translate-x-1 transition-transform">arrow_forward_ios</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col justify-between hover:border-primary-container transition-all group">
+<div class="space-y-2">
+<div class="flex justify-between items-start">
+<span class="px-2 py-0.5 bg-surface-variant text-secondary font-label-caps text-[10px]">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-50">/v1/calc</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-primary">/settlement/calculate</h4>
+<p class="font-body-md text-xs text-on-surface-variant">Idempotent net-worth calculation.</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm self-end">calculate</span>
+</div>
+<!-- Webhooks & Events (The small units) -->
+<div class="bg-surface-container border border-outline-variant p-4 space-y-4">
+<h3 class="font-label-caps text-label-caps text-secondary">WEBHOOK_SCHEMA</h3>
+<div class="space-y-2">
+<div class="p-2 bg-surface-container-lowest border-l-2 border-primary-container">
+<code class="text-[10px] text-primary">PAYOUT.COMPLETED</code>
+</div>
+<div class="p-2 bg-surface-container-lowest border-l-2 border-error">
+<code class="text-[10px] text-error">SETTLEMENT.HELD</code>
+</div>
+</div>
+</div>
+<!-- Ledger & Wallet -->
+<div class="md:col-span-2 bg-surface-container border border-outline-variant p-4 hover:border-primary-container transition-all">
+<div class="flex gap-4 h-full">
+<div class="flex-1 space-y-4">
+<div class="flex justify-between items-start">
+<span class="px-2 py-0.5 bg-on-primary-container text-primary font-label-caps text-[10px]">POST</span>
+<h4 class="font-code-sm text-code-sm text-primary">/ledger/post</h4>
+</div>
+<p class="font-body-md text-xs text-on-surface-variant">Commits transaction records to the immutable double-entry ledger system.</p>
+<div class="flex gap-2">
+<span class="text-[10px] font-code-xs bg-surface-variant px-1 text-on-surface-variant">v2.1_STABLE</span>
+<span class="text-[10px] font-code-xs bg-surface-variant px-1 text-on-surface-variant">HIGH_PRIORITY</span>
+</div>
+</div>
+<div class="w-px bg-outline-variant"></div>
+<div class="flex-1 space-y-4">
+<div class="flex justify-between items-start">
+<span class="px-2 py-0.5 bg-on-primary-container text-primary font-label-caps text-[10px]">POST</span>
+<h4 class="font-code-sm text-code-sm text-primary">/wallet/credit</h4>
+</div>
+<p class="font-body-md text-xs text-on-surface-variant">Executes virtual balance adjustment for participant nodes within the network.</p>
+</div>
+</div>
+</div>
+<!-- Banking Integration -->
+<div class="md:col-span-2 bg-surface-container border border-outline-variant p-4 grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<span class="px-2 py-0.5 bg-on-primary-container text-primary font-label-caps text-[10px]">POST</span>
+<h4 class="font-code-sm text-code-sm text-primary">/payout/create</h4>
+<p class="text-[10px] text-on-surface-variant">Queues disbursement order.</p>
+</div>
+<div class="space-y-2">
+<span class="px-2 py-0.5 bg-on-primary-container text-primary font-label-caps text-[10px]">POST</span>
+<h4 class="font-code-sm text-code-sm text-primary">/bank/transfer</h4>
+<p class="text-[10px] text-on-surface-variant">Initiates SWIFT/ACH/NIP.</p>
+</div>
+</div>
+<!-- Tertiary Operations -->
+<div class="bg-surface-container border border-outline-variant p-4 space-y-2">
+<span class="px-2 py-0.5 bg-surface-variant text-secondary font-label-caps text-[10px]">POST</span>
+<h4 class="font-code-sm text-code-sm text-primary">/tax/calculate</h4>
+<span class="font-code-xs text-[9px] text-on-surface-variant">REGULATORY_COMPLIANCE</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 space-y-2">
+<span class="px-2 py-0.5 bg-surface-variant text-secondary font-label-caps text-[10px]">POST</span>
+<h4 class="font-code-sm text-code-sm text-primary">/notification/send</h4>
+<span class="font-code-xs text-[9px] text-on-surface-variant">PUB_SUB_DISPATCH</span>
+</div>
+</section>
+<!-- Error Mapping & Failure Handling -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">report</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Failure Code Matrix</h3>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant divide-y divide-outline-variant">
+<div class="p-4 flex items-center justify-between group hover:bg-surface-variant transition-colors cursor-help">
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-error">E_BANK_UNAVAILABLE</span>
+<span class="font-body-md text-[11px] text-on-surface-variant">External gateway is not responding to handshake.</span>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant bg-surface px-2 py-1">RETRY: TRUE</span>
+</div>
+<div class="p-4 flex items-center justify-between group hover:bg-surface-variant transition-colors cursor-help">
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-error">E_LEDGER_MISMATCH</span>
+<span class="font-body-md text-[11px] text-on-surface-variant">Source and destination hash checksum failure.</span>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant bg-surface px-2 py-1">RETRY: FALSE</span>
+</div>
+<div class="p-4 flex items-center justify-between group hover:bg-surface-variant transition-colors cursor-help">
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-error">E_AUTH_EXPIRED</span>
+<span class="font-body-md text-[11px] text-on-surface-variant">mTLS certificate or OAuth2 token is stale.</span>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant bg-surface px-2 py-1">RETRY: TRUE</span>
+</div>
+</div>
+</div>
+<!-- Interactive Code Preview -->
+<div class="bg-surface-container-highest border border-outline rounded-lg overflow-hidden flex flex-col">
+<div class="bg-surface px-4 py-2 flex items-center justify-between border-b border-outline-variant">
+<div class="flex gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-secondary/40"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary-container/40"></div>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">SAMPLE_PAYLOAD.JSON</span>
+</div>
+<div class="p-6 font-code-sm text-code-sm text-primary leading-relaxed overflow-x-auto whitespace-pre">
+<span class="text-on-surface-variant">{</span>
+<span class="text-secondary">"settlement_id"</span>: <span class="text-primary-container">"WF-019-X24"</span>,
+  <span class="text-secondary">"actors"</span>: <span class="text-on-surface-variant">[</span><span class="text-primary-container">"MERCH_99"</span>, <span class="text-primary-container">"USER_12"</span><span class="text-on-surface-variant">]</span>,
+  <span class="text-secondary">"config"</span>: {
+    <span class="text-secondary">"timeout"</span>: <span class="text-primary-fixed-dim">3000</span>,
+    <span class="text-secondary">"idempotency_key"</span>: <span class="text-primary-container">"uuid-v4-..."</span>
+  },
+  <span class="text-secondary">"audit"</span>: {
+    <span class="text-secondary">"endpoint"</span>: <span class="text-primary-container">"/audit/write"</span>,
+    <span class="text-secondary">"level"</span>: <span class="text-primary-container">"TRACE"</span>
+  }
+<span class="text-on-surface-variant">}</span></div>
+<div class="mt-auto p-3 bg-surface flex justify-end">
+<button class="bg-primary-container text-on-primary-container px-4 py-1.5 font-label-caps text-[11px] flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+                            COPY_SCHEMA
+                        </button>
+</div>
+</div>
+</section>
+<!-- Technical Sequence Overview -->
+<section class="space-y-6 border-t border-outline-variant pt-12">
+<div class="flex justify-between items-end">
+<div class="space-y-2">
+<h3 class="font-headline-md text-headline-md text-primary uppercase">Execution_Pipeline</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Linear process flow for settlement lifecycle</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 border border-primary-container"></span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Sync</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 border border-primary-container border-dashed"></span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Async</span>
+</div>
+</div>
+</div>
+<div class="relative min-h-[120px] flex items-center justify-between px-10 overflow-x-auto pb-4">
+<!-- Nodes -->
+<div class="flex items-center gap-16 relative">
+<!-- Step 1 -->
+<div class="relative z-10 w-40 p-3 bg-surface-container border border-primary-container">
+<span class="font-label-caps text-[9px] text-primary-container block mb-1">01_INIT</span>
+<span class="font-code-sm text-code-sm">/create</span>
+</div>
+<div class="w-16 h-[2px] bg-primary-container opacity-30"></div>
+<!-- Step 2 -->
+<div class="relative z-10 w-40 p-3 bg-surface-container border border-primary-container">
+<span class="font-label-caps text-[9px] text-primary-container block mb-1">02_SYNC</span>
+<span class="font-code-sm text-code-sm">/ledger/post</span>
+</div>
+<div class="w-16 h-[2px] bg-primary-container opacity-30"></div>
+<!-- Step 3 -->
+<div class="relative z-10 w-40 p-3 bg-surface-container border border-primary-container border-dashed">
+<span class="font-label-caps text-[9px] text-secondary block mb-1">03_DISPATCH</span>
+<span class="font-code-sm text-code-sm">/payout</span>
+</div>
+<div class="w-16 h-[2px] bg-primary-container opacity-30"></div>
+<!-- Step 4 -->
+<div class="relative z-10 w-40 p-3 bg-surface-container border border-primary-container">
+<span class="font-label-caps text-[9px] text-primary-container block mb-1">04_AUDIT</span>
+<span class="font-code-sm text-code-sm">/audit/write</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Visual Polish: Telemetry Micro-Data -->
+<div class="fixed bottom-4 right-4 z-50 pointer-events-none">
+<div class="p-3 bg-surface-container-high/80 backdrop-blur border border-outline-variant space-y-1">
+<div class="flex items-center justify-between gap-8">
+<span class="font-code-xs text-code-xs text-on-surface-variant">LATENCY</span>
+<span class="font-code-xs text-code-xs text-primary-container">42ms</span>
+</div>
+<div class="flex items-center justify-between gap-8">
+<span class="font-code-xs text-code-xs text-on-surface-variant">UPTIME</span>
+<span class="font-code-xs text-code-xs text-primary-container">99.998%</span>
+</div>
+<div class="w-full h-1 bg-surface mt-2 overflow-hidden">
+<div class="h-full bg-primary-container w-[75%] animate-[pulse_2s_infinite]"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Nav for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container border-t border-outline-variant flex justify-around p-2 z-50">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined">api</span>
+<span class="font-label-caps text-[9px]">API</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-[9px]">DOCS</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-label-caps text-[9px]">CONFIG</span>
+</button>
+</nav>
+<script>
+        // Simple micro-interaction for code copy
+        document.querySelector('button:contains("COPY_SCHEMA")')?.addEventListener('click', function() {
+            this.textContent = 'COPIED!';
+            setTimeout(() => {
+                this.innerHTML = '<span class="material-symbols-outlined text-sm">content_copy</span>COPY_SCHEMA';
+            }, 2000);
+        });
+
+        // Add line grid to specific sections
+        document.querySelectorAll('section').forEach(el => {
+            el.classList.add('line-grid');
+        });
+    </script>
+</body></html>

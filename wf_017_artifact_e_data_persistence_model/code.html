@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-017 | Data Persistence Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#2c0051",
+                    "outline": "#84967e",
+                    "on-secondary-fixed": "#001356",
+                    "on-surface": "#d4e4fa",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-background": "#d4e4fa",
+                    "surface-variant": "#273647",
+                    "on-primary-fixed": "#002203",
+                    "surface": "#051424",
+                    "secondary-container": "#0043eb",
+                    "primary-fixed": "#72ff70",
+                    "primary-container": "#00ff41",
+                    "on-tertiary-container": "#862ed4",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "inverse-primary": "#006e16",
+                    "on-primary-container": "#007117",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-secondary": "#002388",
+                    "primary": "#ebffe2",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-container-high": "#1c2b3c",
+                    "on-tertiary": "#490080",
+                    "tertiary": "#fff6ff",
+                    "surface-container": "#122131",
+                    "error": "#ffb4ab",
+                    "on-primary": "#003907",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-error": "#690005",
+                    "outline-variant": "#3b4b37",
+                    "background": "#051424",
+                    "surface-dim": "#051424",
+                    "surface-tint": "#00e639",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-container-highest": "#273647",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-secondary-container": "#c6ceff",
+                    "inverse-on-surface": "#233143",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#00530e",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary-fixed-variant": "#6900b3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background-color: rgba(1, 15, 31, 0.85);
+        }
+        .operation-badge {
+            font-family: 'JetBrains Mono';
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            text-transform: uppercase;
+        }
+        .sql-lock { border: 1px solid #ffb4ab; color: #ffb4ab; }
+        .sql-commit { border: 1px solid #00e639; color: #00e639; }
+        .sql-insert { border: 1px solid #b8c3ff; color: #b8c3ff; }
+        
+        /* Custom scrollbar for dense data */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #010f1f; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface text-primary-fixed-dim dark:text-primary-fixed-dim docked full-width top-0 border-b border-outline-variant flex justify-between items-center w-full px-node-gutter h-16 z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim">terminal</span>
+<h1 class="font-headline-md text-headline-md font-code-sm text-code-sm uppercase tracking-widest">SYSTEM_ORCHESTRATOR_v2.1</h1>
+</div>
+<div class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">
+            UPTIME: 99.98% | LATENCY: 24ms
+        </div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="bg-surface-container-lowest dark:bg-surface-container-lowest border-r border-outline-variant flex flex-col h-full py-lane-margin gap-stack-gap w-64 hidden md:flex">
+<div class="px-6 mb-4">
+<h2 class="font-headline-md text-headline-md text-primary-fixed-dim uppercase tracking-tighter">MODULE_INDEX</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-75" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">NODE_MAP</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-75" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-caps text-label-caps">SEQUENCE_LOGS</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">DB_SHARDS</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-75" href="#">
+<span class="material-symbols-outlined">reorder</span>
+<span class="font-label-caps text-label-caps">LOAD_BALANCER</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-75" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-label-caps text-label-caps">AUTH_GATEWAY</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-75" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">METRICS_EXPORT</span>
+</a>
+</nav>
+</aside>
+<!-- Main Workspace -->
+<main class="flex-1 overflow-auto relative p-node-gutter">
+<!-- Breadcrumb / Model Info -->
+<div class="mb-8 flex justify-between items-end">
+<div>
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">ARTIFACT_E // PERSISTENCE_LAYER</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">WF-017 RELATIONAL SCHEMA</h2>
+</div>
+<div class="flex gap-4">
+<div class="glass-panel border border-outline-variant p-2 px-4 rounded flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ISOLATION: REPEATABLE_READ</span>
+</div>
+</div>
+</div>
+<!-- Schema Canvas (Grid Layout for Tables) -->
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 relative">
+<!-- Table: Fulfillment -->
+<div class="bg-surface-container-low border border-primary-fixed-dim/30 rounded flex flex-col overflow-hidden shadow-xl shadow-black/40">
+<div class="bg-primary-fixed-dim/10 border-b border-primary-fixed-dim/30 p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">TABLE :: FULFILLMENT</span>
+<span class="operation-badge sql-insert">INSERT</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK fulfillment_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>order_ref</span><span>VARCHAR(32)</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>status</span><span>ENUM_STATE</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>created_at</span><span>TIMESTAMP</span></div>
+<div class="mt-2 pt-2 border-t border-outline-variant/30 flex items-center gap-2 text-primary-fixed-dim/70">
+<span class="material-symbols-outlined text-[14px]">link</span>
+<span class="text-[10px]">FK to Settlement</span>
+</div>
+</div>
+</div>
+<!-- Table: WarehouseTask -->
+<div class="bg-surface-container-low border border-outline-variant rounded flex flex-col overflow-hidden">
+<div class="bg-surface-variant/50 border-b border-outline-variant p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">TABLE :: WAREHOUSE_TASK</span>
+<span class="operation-badge sql-lock">LOCK</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK w_task_id</span><span>UUID</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK fulfillment_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>zone_id</span><span>INT4</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>priority</span><span>INT2</span></div>
+</div>
+</div>
+<!-- Table: PickingTask -->
+<div class="bg-surface-container-low border border-outline-variant rounded flex flex-col overflow-hidden">
+<div class="bg-surface-variant/50 border-b border-outline-variant p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">TABLE :: PICKING_TASK</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK pick_id</span><span>UUID</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK w_task_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>sku_code</span><span>VARCHAR(16)</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>quantity</span><span>NUMERIC</span></div>
+</div>
+</div>
+<!-- Table: Shipment -->
+<div class="bg-surface-container-low border border-primary-fixed-dim/30 rounded flex flex-col overflow-hidden">
+<div class="bg-primary-fixed-dim/10 border-b border-primary-fixed-dim/30 p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">TABLE :: SHIPMENT</span>
+<span class="operation-badge sql-commit">COMMIT</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK shipment_id</span><span>UUID</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK fulfillment_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>carrier_code</span><span>VARCHAR(8)</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>tracking_no</span><span>VARCHAR(64)</span></div>
+</div>
+</div>
+<!-- Table: DriverAssignment -->
+<div class="bg-surface-container-low border border-outline-variant rounded flex flex-col overflow-hidden">
+<div class="bg-surface-variant/50 border-b border-outline-variant p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">TABLE :: DRIVER_ASSIGN</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK assignment_id</span><span>UUID</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK shipment_id</span><span>UUID</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK driver_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>assigned_at</span><span>TIMESTAMP</span></div>
+</div>
+</div>
+<!-- Table: Route -->
+<div class="bg-surface-container-low border border-outline-variant rounded flex flex-col overflow-hidden">
+<div class="bg-surface-variant/50 border-b border-outline-variant p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">TABLE :: ROUTE</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK route_id</span><span>UUID</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK assignment_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>waypoints</span><span>JSONB</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>est_duration</span><span>INTERVAL</span></div>
+</div>
+</div>
+<!-- Table: ProofOfDelivery -->
+<div class="bg-surface-container-low border border-outline-variant rounded flex flex-col overflow-hidden">
+<div class="bg-surface-variant/50 border-b border-outline-variant p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">TABLE :: PROOF_OF_DELIVERY</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK pod_id</span><span>UUID</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK shipment_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>lat_lng</span><span>POINT</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>img_ref</span><span>URI</span></div>
+</div>
+</div>
+<!-- Table: Escrow -->
+<div class="bg-surface-container-low border border-outline-variant rounded flex flex-col overflow-hidden border-dashed border-tertiary-fixed-dim/50">
+<div class="bg-tertiary-container/10 border-b border-tertiary-fixed-dim/30 p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">TABLE :: ESCROW</span>
+<span class="operation-badge text-tertiary-fixed-dim border border-tertiary-fixed-dim/30">PENDING</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK escrow_id</span><span>UUID</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK fulfillment_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>vault_addr</span><span>X_CHAIN</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>locked_val</span><span>DECIMAL</span></div>
+</div>
+</div>
+<!-- Table: Settlement -->
+<div class="bg-surface-container-low border border-outline-variant rounded flex flex-col overflow-hidden">
+<div class="bg-surface-variant/50 border-b border-outline-variant p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">TABLE :: SETTLEMENT</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK settle_id</span><span>UUID</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK escrow_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>payout_ts</span><span>TIMESTAMP</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>fee_deduction</span><span>NUMERIC</span></div>
+</div>
+</div>
+<!-- Table: TrustEvent -->
+<div class="bg-surface-container-low border border-outline-variant rounded flex flex-col overflow-hidden col-span-1 md:col-span-2">
+<div class="bg-surface-variant/50 border-b border-outline-variant p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">TABLE :: TRUST_EVENT_AUDIT</span>
+<span class="operation-badge sql-commit">WAL_LOG</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<div class="flex justify-between text-primary-fixed-dim"><span class="font-bold">PK audit_id</span><span>BIGSERIAL</span></div>
+<div class="flex justify-between text-secondary-fixed-dim"><span>FK actor_id</span><span>UUID</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>action_type</span><span>VARCHAR</span></div>
+</div>
+<div class="space-y-1 border-l border-outline-variant/30 pl-4">
+<div class="flex justify-between text-on-surface-variant"><span>diff_payload</span><span>JSONB</span></div>
+<div class="flex justify-between text-on-surface-variant"><span>checksum</span><span>CHAR(64)</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Action Lane (Visualizing State Transitions) -->
+<div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- State Map Overlay -->
+<div class="lg:col-span-2 glass-panel border border-outline-variant rounded-lg p-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">hub</span>
+<h3 class="font-label-caps text-label-caps text-on-surface uppercase">Transaction Logic State Machine</h3>
+</div>
+<div class="flex flex-wrap items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="bg-surface-container-highest border border-outline-variant px-3 py-1 rounded text-code-sm">INIT_PENDING</div>
+<span class="material-symbols-outlined text-on-surface-variant">arrow_forward</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="bg-primary-container/20 border border-primary-fixed-dim px-3 py-1 rounded text-code-sm text-primary-fixed-dim">ESCR_LOCKED</div>
+<span class="material-symbols-outlined text-on-surface-variant">arrow_forward</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="bg-surface-container-highest border border-outline-variant px-3 py-1 rounded text-code-sm">PHYS_PICKED</div>
+<span class="material-symbols-outlined text-on-surface-variant">arrow_forward</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="bg-surface-container-highest border border-outline-variant px-3 py-1 rounded text-code-sm">TRANSIT_ACTIVE</div>
+<span class="material-symbols-outlined text-on-surface-variant">arrow_forward</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="bg-primary-container/20 border border-primary-fixed-dim px-3 py-1 rounded text-code-sm text-primary-fixed-dim">POD_VERIFIED</div>
+<span class="material-symbols-outlined text-on-surface-variant">arrow_forward</span>
+</div>
+<div class="bg-primary-fixed-dim text-on-primary font-bold px-3 py-1 rounded text-code-sm">SETTLED</div>
+</div>
+<div class="mt-6 font-code-xs text-code-xs text-on-surface-variant/60 leading-relaxed italic">
+                        * All transitions require 2FA signature validation against TrustEvent log. Integrity violations trigger immediate LOCK on Fulfillment entity.
+                    </div>
+</div>
+<!-- Telemetry Panel -->
+<div class="bg-surface-container-high border border-outline-variant rounded-lg p-6 flex flex-col">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant">SCHEMA TELEMETRY</h3>
+<span class="material-symbols-outlined text-primary-fixed-dim animate-pulse">monitoring</span>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">INDEX_BLOAT</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">0.02%</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">VACUUM_FREQ</span>
+<span class="font-code-sm text-code-sm text-on-surface">180s</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">LOCK_WAIT_AVG</span>
+<span class="font-code-sm text-code-sm text-error">4ms</span>
+</div>
+<div class="mt-auto pt-4">
+<button class="w-full bg-primary-fixed-dim text-on-primary-fixed font-label-caps text-label-caps py-2 rounded hover:brightness-110 transition-all">
+                                TRIGGER RE-INDEX
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Visualization Placeholder for Logic Flow (Atmospheric) -->
+<div class="absolute top-0 right-0 w-1/4 h-full pointer-events-none opacity-20 overflow-hidden">
+
+</div>
+</main>
+</div>
+<!-- Micro-Telemetry Footer Overlay -->
+<div class="fixed bottom-0 left-0 right-0 h-8 bg-surface-container-lowest border-t border-outline-variant flex items-center px-6 justify-between text-code-xs text-on-surface-variant z-[60]">
+<div class="flex gap-6">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span> NODE_01_REPLICA: SYNCED</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span> NODE_02_REPLICA: SYNCED</span>
+</div>
+<div class="flex gap-4">
+<span class="opacity-50">QUERY_PLAN: INDEX_SCAN</span>
+<span class="text-primary-fixed-dim">TRANSACTION_ID: TX_0192_8B</span>
+</div>
+</div>
+<script>
+        // Simple Micro-interaction for table hover effects
+        document.querySelectorAll('.bg-surface-container-low').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.borderColor = 'var(--primary-fixed-dim)';
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s ease-out';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.borderColor = '';
+                node.style.transform = 'translateY(0px)';
+            });
+        });
+    </script>
+</body></html>

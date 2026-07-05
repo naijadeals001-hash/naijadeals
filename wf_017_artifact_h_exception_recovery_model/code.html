@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-017: Exception &amp; Recovery Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#2c0051",
+                    "outline": "#84967e",
+                    "on-secondary-fixed": "#001356",
+                    "on-surface": "#d4e4fa",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-background": "#d4e4fa",
+                    "surface-variant": "#273647",
+                    "on-primary-fixed": "#002203",
+                    "surface": "#051424",
+                    "secondary-container": "#0043eb",
+                    "primary-fixed": "#72ff70",
+                    "primary-container": "#00ff41",
+                    "on-tertiary-container": "#862ed4",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "inverse-primary": "#006e16",
+                    "on-primary-container": "#007117",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-secondary": "#002388",
+                    "primary": "#ebffe2",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-container-high": "#1c2b3c",
+                    "on-tertiary": "#490080",
+                    "tertiary": "#fff6ff",
+                    "surface-container": "#122131",
+                    "error": "#ffb4ab",
+                    "on-primary": "#003907",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-error": "#690005",
+                    "outline-variant": "#3b4b37",
+                    "background": "#051424",
+                    "surface-dim": "#051424",
+                    "surface-tint": "#00e639",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-container-highest": "#273647",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-secondary-container": "#c6ceff",
+                    "inverse-on-surface": "#233143",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#00530e",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary-fixed-variant": "#6900b3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-h { height: 2px; }
+        .connector-v { width: 2px; }
+        .dashed-red { background-image: linear-gradient(to right, #ffb4ab 50%, transparent 50%); background-size: 8px 100%; }
+        .dashed-red-v { background-image: linear-gradient(to bottom, #ffb4ab 50%, transparent 50%); background-size: 100% 8px; }
+        .node-pulse { animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse-border {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .4; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-hidden flex h-screen w-screen">
+<!-- NAVIGATION DRAWER -->
+<aside class="bg-surface-container-lowest border-r border-outline-variant flex flex-col h-full w-64 py-lane-margin gap-stack-gap shrink-0 z-20">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary-fixed-dim">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined mr-3">account_tree</span> NODE_MAP
+            </a>
+<a class="flex items-center px-6 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined mr-3">receipt_long</span> SEQUENCE_LOGS
+            </a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined mr-3">reorder</span> LOAD_BALANCER
+            </a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined mr-3">database</span> DB_SHARDS
+            </a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined mr-3">security</span> AUTH_GATEWAY
+            </a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high duration-75 ease-in-out font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined mr-3">analytics</span> METRICS_EXPORT
+            </a>
+</nav>
+</aside>
+<!-- MAIN CANVAS -->
+<main class="flex-1 flex flex-col relative overflow-hidden">
+<!-- TOP APP BAR -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-node-gutter h-16 shrink-0 z-10">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">terminal</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">SYSTEM_ORCHESTRATOR_v2.1</span>
+</div>
+<div class="flex items-center gap-6">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">UPTIME: 99.98% | LATENCY: 24ms</span>
+<div class="h-8 w-px bg-outline-variant"></div>
+<div class="flex gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed-dim transition-colors">settings</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed-dim transition-colors">notifications</button>
+</div>
+</div>
+</header>
+<!-- WORKFLOW CONTENT -->
+<section class="flex-1 overflow-auto p-lane-margin relative">
+<!-- HEADER LABELS -->
+<div class="flex mb-12 gap-node-gutter border-b border-outline-variant/30 pb-4">
+<div class="w-64 shrink-0 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">warehouse</span>
+<span class="font-headline-md text-headline-md uppercase">Fulfillment</span>
+</div>
+<div class="w-64 shrink-0 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+<span class="font-headline-md text-headline-md uppercase">Transit</span>
+</div>
+<div class="w-64 shrink-0 flex items-center gap-2">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">report_problem</span>
+<span class="font-headline-md text-headline-md uppercase">Exception</span>
+</div>
+<div class="w-64 shrink-0 flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" style="font-variation-settings: 'FILL' 1;">settings_backup_restore</span>
+<span class="font-headline-md text-headline-md uppercase">Recovery</span>
+</div>
+</div>
+<!-- THE UNHAPPY PATH GRID -->
+<div class="relative min-w-[1200px]">
+<!-- ROW 1: Out of Stock -->
+<div class="flex items-start gap-node-gutter mb-20">
+<!-- NODE -->
+<div class="w-64 bg-surface-container border border-outline p-grid-unit rounded shadow-sm relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">ORIGIN: WH-A1</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">LVL_0</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-3">ORDER_PICK_PROCESS</h3>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim shadow-[0_0_8px_rgba(0,230,57,0.5)]"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ACTIVE_LISTEN</span>
+</div>
+</div>
+<!-- CONNECTOR -->
+<div class="flex-none w-16 h-2 mt-10 dashed-red relative">
+<div class="absolute -top-6 left-0 right-0 text-center font-code-xs text-code-xs text-error">OUT_OF_STOCK</div>
+</div>
+<!-- ERROR NODE -->
+<div class="w-64 bg-surface-container border border-error p-grid-unit rounded relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error">EXCEPTION_ID: E_001</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">INVENTORY_GAP_DETECTED</h3>
+<div class="bg-error-container/20 p-2 rounded border border-error/30">
+<span class="font-code-xs text-code-xs text-error block">SKU: #883-X9</span>
+<span class="font-code-xs text-code-xs text-error block">MISSING_QTY: 14</span>
+</div>
+</div>
+<!-- RECOVERY PATH -->
+<div class="flex-none w-16 h-2 mt-10 bg-primary-fixed-dim"></div>
+<!-- RECOVERY NODE -->
+<div class="w-64 bg-surface-container border border-primary-fixed-dim p-grid-unit rounded relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">RECOVERY: WH_B</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">ALT_WAREHOUSE_SYNC</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-2">Rerouting fulfillment to secondary node.</p>
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">LATENCY: +12m</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">REPAIRED</span>
+</div>
+</div>
+</div>
+<!-- ROW 2: Driver Rejects -->
+<div class="flex items-start gap-node-gutter mb-20">
+<div class="w-64 h-16"></div> <!-- Spacer -->
+<div class="w-64 bg-surface-container border border-secondary p-grid-unit rounded relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-secondary">AGENT: D_4419</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-3">ASSIGNMENT_OFFER</h3>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">schedule</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">EXPIRES: 45s</span>
+</div>
+</div>
+<div class="flex-none w-16 h-2 mt-10 dashed-red relative">
+<div class="absolute -top-6 left-0 right-0 text-center font-code-xs text-code-xs text-error">REJECTED</div>
+</div>
+<div class="w-64 bg-surface-container border border-error p-grid-unit rounded relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error">EXCEPTION_ID: E_004</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">DISPATCH_ABORT_SIGNAL</h3>
+<p class="font-code-xs text-code-xs text-error bg-error-container/10 p-1">REASON: Outside service hours.</p>
+</div>
+<div class="flex-none w-16 h-2 mt-10 bg-primary-fixed-dim"></div>
+<div class="w-64 bg-surface-container border border-primary-fixed-dim p-grid-unit rounded relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">RECOVERY: AUTO_REASSIGN</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">QUEUE_RE_ORCHESTRATION</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Scanning radius 5km for tier-2 agents...</p>
+</div>
+</div>
+<!-- ROW 3: Package Damaged / Returns -->
+<div class="flex items-start gap-node-gutter">
+<div class="w-64 h-16"></div>
+<div class="w-64 h-16"></div>
+<div class="w-64 bg-surface-container border border-error p-grid-unit rounded relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error">EXCEPTION_ID: E_012</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">UNIT_INTEGRITY_FAILURE</h3>
+<div class="w-full h-24 rounded bg-surface overflow-hidden relative border border-outline-variant/30 mb-2">
+<img class="object-cover w-full h-full opacity-60" data-alt="High-contrast macro photograph of a damaged industrial shipping container with a visible crack on the side, displayed on a sleek digital interface. The lighting is cold and clinical, highlighting the jagged texture of the tear. Deep shadows and neon green diagnostic overlays emphasize the technical nature of the asset inspection process." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABWhYf3xEK-E7AUqS6IpTH9-cs4j3mXiVfHUNKpT8xOcakmfOeLQ8-c0Let-Z9ZwcWhmSel-_AHIY--2AY4QXk4Sw42VGgl_mbasCzFOqBlDJPUI3oqjDEem5DaArL2kRHOtZGKZ5G0bVtqLzDLx_JDqlpy07K8LnnZJXTVNDlqmJZhda-lLwTPOSnIAI3Y6WwcRX0o5vagDYVYOemRTMa5UqWL2EvZwE9TQX8CRLZ6rTAKv5t1AOkC5AU0TCJhzIYCMd8JZzgAzQ"/>
+<div class="absolute bottom-1 right-1 px-1 bg-error text-[8px] font-bold">CRITICAL_DAMAGE</div>
+</div>
+<div class="flex items-center justify-between font-code-xs text-code-xs text-on-surface-variant">
+<span>RECOVERY_COST: $42.00</span>
+<span class="text-error">RETURN_REQ</span>
+</div>
+</div>
+<div class="flex-none w-16 h-2 mt-10 bg-primary-fixed-dim"></div>
+<div class="w-64 bg-surface-container border border-primary-fixed-dim p-grid-unit rounded relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">RECOVERY: REPLACEMENT</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">REVERSE_LOGISTICS_INIT</h3>
+<div class="space-y-1 mt-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[10px] text-primary-fixed-dim">check_circle</span>
+<span class="font-code-xs text-code-xs">Return Label Gen</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[10px] text-primary-fixed-dim">check_circle</span>
+<span class="font-code-xs text-code-xs">Inventory Hold</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[10px]">circle</span>
+<span class="font-code-xs text-code-xs">Courier Dispatch</span>
+</div>
+</div>
+</div>
+</div>
+<!-- VERTICAL CONNECTORS -->
+<div class="absolute left-[304px] top-40 w-2 h-96 dashed-red-v z-0"></div>
+<div class="absolute left-[592px] top-40 w-2 h-96 dashed-red-v z-0"></div>
+</div>
+</section>
+<!-- SIDE ANALYTICS PANEL (FLOAT) -->
+<aside class="absolute right-node-gutter top-24 w-80 bg-surface-container-highest border border-outline-variant p-4 backdrop-blur-md bg-opacity-80 z-20">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-caps text-label-caps text-on-surface">RESILIENCE_METRICS</span>
+<span class="material-symbols-outlined text-primary-fixed-dim">monitoring</span>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between font-code-xs text-code-xs mb-1">
+<span>AUTO_RECOVERY_RATE</span>
+<span class="text-primary-fixed-dim">84.2%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant">
+<div class="h-full bg-primary-fixed-dim" style="width: 84.2%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-code-xs text-code-xs mb-1">
+<span>HUMAN_INTERVENTION</span>
+<span class="text-error">15.8%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant">
+<div class="h-full bg-error" style="width: 15.8%"></div>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-2">REAL-TIME_EXCEPTIONS</h4>
+<ul class="space-y-2">
+<li class="flex items-start gap-2 bg-surface p-2 border-l-2 border-error">
+<span class="font-code-xs text-code-xs text-error">14:02:11</span>
+<span class="font-code-xs text-code-xs text-on-surface">E_042: GEO_FENCE_MISS</span>
+</li>
+<li class="flex items-start gap-2 bg-surface p-2 border-l-2 border-primary-fixed-dim">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">13:58:04</span>
+<span class="font-code-xs text-code-xs text-on-surface">R_011: REDELIVERY_SYNC_OK</span>
+</li>
+</ul>
+</div>
+<button class="w-full py-2 bg-primary-fixed-dim text-on-primary-fixed font-label-caps text-label-caps flex items-center justify-center gap-2 hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-sm">download_for_offline</span>
+                    GENERATE_RESILIENCE_REPORT
+                </button>
+</div>
+</aside>
+<!-- FOOTER STATUS -->
+<footer class="h-8 bg-surface-container-low border-t border-outline-variant px-node-gutter flex items-center justify-between z-10">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim node-pulse"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ORCHESTRATOR_ONLINE</span>
+</div>
+<span class="font-code-xs text-code-xs text-outline">SESSION: WF-017-X</span>
+</div>
+<div class="flex gap-4 font-code-xs text-code-xs text-on-surface-variant">
+<span>MEM: 4.2GB / 16GB</span>
+<span>CPU: 12%</span>
+</div>
+</footer>
+</main>
+<!-- FLOATING ACTION BUTTON (Contextual: Add Node) -->
+<button class="fixed bottom-12 right-12 w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-30 group">
+<span class="material-symbols-outlined text-3xl">add</span>
+<div class="absolute right-16 px-3 py-1 bg-on-surface text-surface font-label-caps text-label-caps whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">INJECT_EXCEPTION</div>
+</button>
+<script>
+        // Micro-interaction: Mouse tracking for subtle parallax on canvas
+        const canvas = document.querySelector('section');
+        canvas.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            // Subtle shift logic could go here if needed
+        });
+
+        // Toggle Active State Simulation
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.forEach(l => {
+                    l.classList.remove('bg-secondary-container', 'text-on-secondary-container', 'border-l-4', 'border-primary-fixed-dim');
+                    l.classList.add('text-on-surface-variant');
+                });
+                link.classList.add('bg-secondary-container', 'text-on-secondary-container', 'border-l-4', 'border-primary-fixed-dim');
+                link.classList.remove('text-on-surface-variant');
+            });
+        });
+    </script>
+</body></html>

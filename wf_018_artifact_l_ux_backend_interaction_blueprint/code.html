@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-018: Artifact L — Interaction Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#D1E1FF",
+                        "primary-fixed": "#D1E1FF",
+                        "primary-fixed-dim": "#ADC6FF",
+                        "on-primary-container": "#001B3D",
+                        "surface": "#111318",
+                        "surface-container": "#1E2025",
+                        "surface-container-low": "#191C20",
+                        "surface-container-lowest": "#0F1115",
+                        "surface-container-highest": "#33353A",
+                        "on-surface": "#E2E2E9",
+                        "on-surface-variant": "#C4C6D0",
+                        "outline-variant": "#44474E",
+                        "primary-container": "#2E446E",
+                        "secondary-container": "#3E4759"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "sm": "0.125rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Public Sans", "sans-serif"],
+                        display: ["Public Sans", "sans-serif"],
+                        body: ["Public Sans", "sans-serif"],
+                        label: ["Public Sans", "sans-serif"],
+                        code: ["JetBrains Mono", "monospace"]
+                    },
+                    spacing: {
+                        "lane-margin": "2rem",
+                        "node-gutter": "1.5rem",
+                        "grid-unit": "0.5rem"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .font-label-caps { font-family: 'Public Sans'; font-weight: 600; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .font-code-sm { font-family: 'JetBrains Mono'; font-weight: 400; font-size: 0.75rem; }
+        .font-code-xs { font-family: 'JetBrains Mono'; font-weight: 400; font-size: 0.625rem; }
+        .font-headline-md { font-family: 'Public Sans'; font-weight: 700; font-size: 1.25rem; }
+        
+        .connection-line {
+            background: linear-gradient(90deg, transparent, #ADC6FF, transparent);
+            background-size: 200% 100%;
+            animation: flow 3s linear infinite;
+        }
+        @keyframes flow {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .node-pulse {
+            animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 2px #ADC6FF); }
+            50% { opacity: 0.6; filter: drop-shadow(0 0 8px #ADC6FF); }
+        }
+        .scan-line {
+            height: 2px;
+            width: 100%;
+            background: rgba(173, 198, 255, 0.2);
+            position: absolute;
+            top: 0;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-primary min-h-screen flex flex-col overflow-x-hidden">
+<!-- TopAppBar (From JSON) -->
+<header class="flex justify-between items-center px-lane-margin h-16 w-full top-0 border-b border-outline-variant bg-surface sticky z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed">REVERSE_LOGISTICS_v4.2</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-6 items-center mr-8">
+<span class="font-code-sm text-primary-fixed-dim cursor-pointer transition-colors">LIVE_FEED</span>
+<span class="font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 rounded cursor-pointer">LATENCY_MAP</span>
+<span class="font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 rounded cursor-pointer">NODE_STATUS</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-highest transition-colors p-2 rounded-full cursor-pointer">settings_input_component</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer (From JSON) -->
+<aside class="hidden md:flex flex-col h-full py-node-gutter h-screen w-64 border-r border-outline-variant bg-surface-container-low shrink-0">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary">CORE_ENGINE</h2>
+<div class="h-1 w-12 bg-primary mt-2"></div>
+</div>
+<nav class="flex flex-col gap-1 px-2">
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out rounded-sm" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">System Map</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-primary-fixed bg-surface-container-highest border-l-4 border-primary-fixed transition-all duration-150 ease-in-out rounded-sm" href="#">
+<span class="material-symbols-outlined">api</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">API Contracts</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out rounded-sm" href="#">
+<span class="material-symbols-outlined">settings_ethernet</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Logic Gates</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out rounded-sm" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Audit Logs</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out rounded-sm" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-caps text-label-caps font-code-sm text-code-sm">Telemetry</span>
+</a>
+</nav>
+<div class="mt-auto px-6 py-4">
+<div class="bg-surface-container-highest rounded p-3 border border-outline-variant">
+<p class="font-code-xs text-on-surface-variant uppercase mb-1">Active Instance</p>
+<p class="font-code-sm text-primary">US-EAST-1_PROD</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-surface-container-lowest relative">
+
+<div class="relative z-10 p-lane-margin max-w-7xl mx-auto">
+<!-- Header -->
+<div class="mb-12 border-l-2 border-primary pl-6">
+<h2 class="text-4xl font-display font-extrabold tracking-tight mb-2">Artifact L</h2>
+<p class="text-on-surface-variant font-code-sm max-w-2xl">UX ↔ Backend Interaction Blueprint: Sequential mapping for the critical "Return Item" trigger flow across global infrastructure.</p>
+</div>
+<!-- Sequence Diagram / Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Trigger Node -->
+<div class="lg:col-span-3 bg-surface-container border border-outline-variant p-6 rounded-xl flex flex-col items-center justify-center relative overflow-hidden group">
+<div class="scan-line"></div>
+<span class="material-symbols-outlined text-5xl text-primary mb-4 node-pulse">touch_app</span>
+<h3 class="font-label-caps text-center">Step 01: Client Trigger</h3>
+<p class="font-code-xs text-on-surface-variant mt-2 text-center">Customer clicks "Return Item" (React SPA)</p>
+<div class="mt-4 px-3 py-1 bg-primary-container text-primary rounded-full text-[10px] font-bold">LATENCY: 12ms</div>
+</div>
+<!-- Flow Connector -->
+<div class="hidden lg:flex lg:col-span-1 items-center justify-center">
+<div class="h-[2px] w-full connection-line"></div>
+</div>
+<!-- Middleware Hub -->
+<div class="lg:col-span-4 bg-surface-container border border-outline-variant p-6 rounded-xl relative">
+<div class="flex justify-between items-start mb-6">
+<span class="material-symbols-outlined text-primary-fixed-dim">hub</span>
+<span class="font-code-xs text-on-surface-variant">NODE_CLUSTER_02</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4 bg-surface-container-highest p-3 rounded border-l-4 border-primary">
+<span class="material-symbols-outlined text-sm">api</span>
+<div>
+<p class="font-code-sm">API Gateway (Auth/Rate-Limit)</p>
+<p class="text-[10px] text-on-surface-variant">Kong / Kubernetes</p>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-highest p-3 rounded border-l-4 border-primary-fixed-dim">
+<span class="material-symbols-outlined text-sm">settings_input_component</span>
+<div>
+<p class="font-code-sm">Returns Service (Core Logic)</p>
+<p class="text-[10px] text-on-surface-variant">Go Microservice</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Flow Connector -->
+<div class="hidden lg:flex lg:col-span-1 items-center justify-center">
+<div class="h-[2px] w-full connection-line"></div>
+</div>
+<!-- Merchant & Logistics -->
+<div class="lg:col-span-3 bg-surface-container border border-outline-variant p-6 rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex gap-2 mb-4">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="font-label-caps text-on-surface-variant">External Handshake</span>
+</div>
+<div class="space-y-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">store</span>
+<span class="font-code-sm">Merchant Approval</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">local_shipping</span>
+<span class="font-code-sm">NaijaSend Dispatch</span>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-4 border-t border-outline-variant">
+<div class="flex justify-between items-center font-code-xs">
+<span>ACK_TIME</span>
+<span class="text-primary">850ms</span>
+</div>
+</div>
+</div>
+<!-- Bottom Row: Warehouse to Frontend -->
+<div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-5 gap-6 mt-6">
+<!-- Warehouse Node -->
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-lg group hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-primary-fixed-dim mb-2">warehouse</span>
+<h4 class="font-label-caps text-[10px]">Warehouse Intake</h4>
+<p class="font-code-xs text-on-surface-variant mt-1">RFID Verification</p>
+</div>
+<!-- Inspection Node -->
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-lg group hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-primary-fixed-dim mb-2">fact_check</span>
+<h4 class="font-label-caps text-[10px]">Inspection Quality</h4>
+<p class="font-code-xs text-on-surface-variant mt-1">AI Visual Sweep</p>
+</div>
+<!-- Financials Node -->
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-lg group hover:border-primary transition-colors md:col-span-1 relative overflow-hidden">
+<div class="absolute -right-2 -bottom-2 opacity-10">
+<span class="material-symbols-outlined text-6xl">payments</span>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim mb-2">account_balance_wallet</span>
+<h4 class="font-label-caps text-[10px]">Escrow Release</h4>
+<p class="font-code-xs text-on-surface-variant mt-1">Wallet Transaction</p>
+</div>
+<!-- Notification Node -->
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-lg group hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-primary-fixed-dim mb-2">notifications_active</span>
+<h4 class="font-label-caps text-[10px]">Notification Push</h4>
+<p class="font-code-xs text-on-surface-variant mt-1">Firebase / WebSocket</p>
+</div>
+<!-- Client Success Node -->
+<div class="bg-primary-container border border-primary text-on-primary-container p-4 rounded-lg shadow-lg shadow-primary/10">
+<span class="material-symbols-outlined mb-2" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<h4 class="font-label-caps text-[10px] text-primary">UI_SYNCHRONIZED</h4>
+<p class="font-code-xs mt-1">Frontend Re-render</p>
+</div>
+</div>
+</div>
+<!-- Latency Analytics Section -->
+<div class="mt-12">
+<h3 class="font-label-caps text-on-surface-variant mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">analytics</span>
+                        Network Latency &amp; Timing Indicators
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-surface-container p-4 rounded border border-outline-variant">
+<div class="flex justify-between items-center mb-4">
+<span class="text-[10px] font-code-sm text-on-surface-variant">AVG_RTT</span>
+<span class="text-xs font-code-sm text-green-400">OPTIMAL</span>
+</div>
+<div class="flex items-end gap-1 h-12">
+<div class="bg-primary-container w-full h-[60%]"></div>
+<div class="bg-primary-container w-full h-[80%]"></div>
+<div class="bg-primary-container w-full h-[70%]"></div>
+<div class="bg-primary-container w-full h-[90%]"></div>
+<div class="bg-primary-fixed w-full h-[100%]"></div>
+</div>
+<p class="mt-3 text-2xl font-code-sm">142ms</p>
+</div>
+<div class="bg-surface-container p-4 rounded border border-outline-variant">
+<div class="flex justify-between items-center mb-4">
+<span class="text-[10px] font-code-sm text-on-surface-variant">DATA_THROUGHPUT</span>
+<span class="text-xs font-code-sm text-primary">ACTIVE</span>
+</div>
+<div class="flex items-center justify-center h-12">
+<span class="material-symbols-outlined text-4xl text-primary animate-spin">cyclone</span>
+</div>
+<p class="mt-3 text-2xl font-code-sm">4.2 GB/s</p>
+</div>
+<div class="bg-surface-container p-4 rounded border border-outline-variant">
+<div class="flex justify-between items-center mb-4">
+<span class="text-[10px] font-code-sm text-on-surface-variant">ERROR_RATE</span>
+<span class="text-xs font-code-sm text-on-surface-variant">STABLE</span>
+</div>
+<div class="h-12 flex items-center">
+<div class="w-full bg-outline-variant h-1 rounded-full overflow-hidden">
+<div class="bg-green-500 h-full w-[0.02%]"></div>
+</div>
+</div>
+<p class="mt-3 text-2xl font-code-sm">0.002%</p>
+</div>
+<div class="bg-surface-container p-4 rounded border border-outline-variant">
+<div class="flex justify-between items-center mb-4">
+<span class="text-[10px] font-code-sm text-on-surface-variant">ESCROW_HOLD</span>
+<span class="text-xs font-code-sm text-yellow-400">PENDING</span>
+</div>
+<div class="h-12 flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">lock_clock</span>
+</div>
+<p class="mt-3 text-2xl font-code-sm">₦12.4M</p>
+</div>
+</div>
+</div>
+<!-- Detailed Sequence Logs -->
+<div class="mt-12 bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden">
+<div class="bg-surface-container px-6 py-3 border-b border-outline-variant flex justify-between items-center">
+<span class="font-label-caps">Sequence Execution Logs</span>
+<span class="font-code-xs text-primary">REAL-TIME_STREAMING</span>
+</div>
+<div class="p-6 font-code-sm text-on-surface-variant space-y-2 max-h-64 overflow-y-auto">
+<p class="flex gap-4"><span class="text-primary">[14:20:01.002]</span> <span class="text-on-surface">POST /api/v1/returns/init</span> <span class="text-green-500">202_ACCEPTED</span></p>
+<p class="flex gap-4"><span class="text-primary">[14:20:01.045]</span> <span>AUTH_PASSTHROUGH_SUCCESS: ID_USER_9921</span></p>
+<p class="flex gap-4"><span class="text-primary">[14:20:01.210]</span> <span>MERC_NOTIFY: Handshake initiated with MERCHANT_SECURE_01</span></p>
+<p class="flex gap-4"><span class="text-primary">[14:20:01.550]</span> <span>LOGISTICS_BRIDGE: Dispatching carrier assignment for NaijaSend</span></p>
+<p class="flex gap-4"><span class="text-primary">[14:20:01.890]</span> <span>DB_WRITE: Return order persistent state: PENDING_PICKUP</span></p>
+<p class="flex gap-4"><span class="text-primary">[14:20:02.102]</span> <span class="text-on-surface">WS_EMIT: Event(return_status_update) to Client_881</span></p>
+<div class="h-4 w-1 bg-primary animate-pulse inline-block"></div>
+</div>
+</div>
+</div>
+<!-- Bottom spacing for mobile nav -->
+<div class="h-24 md:hidden"></div>
+</main>
+</div>
+<!-- BottomNavBar (From JSON) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-grid-unit bg-surface-container-lowest border-t border-outline-variant">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-sm p-1 scale-95 active:scale-90 transition-colors">
+<span class="material-symbols-outlined text-[20px]">memory</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Runtime</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined text-[20px]">schema</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Schema</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined text-[20px]">dns</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Gateway</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Metrics</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for sequence logs
+        const logContainer = document.querySelector('.max-h-64');
+        const appendLog = () => {
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false, fractionalSecondDigits: 3 });
+            const events = [
+                "HEARTBEAT: Health check OK for Node_04",
+                "METRIC_SYNC: Latency adjustment +0.02ms",
+                "WS_KEEPALIVE: Client connection stable",
+                "AUTH_REFRESH: JWT token renewed successfully",
+                "IO_BURST: Sequence cache optimized"
+            ];
+            const event = events[Math.floor(Math.random() * events.length)];
+            const p = document.createElement('p');
+            p.className = 'flex gap-4 opacity-0 transition-opacity duration-500';
+            p.innerHTML = `<span class="text-primary">[${time}]</span> <span>${event}</span>`;
+            logContainer.insertBefore(p, logContainer.firstChild);
+            setTimeout(() => p.classList.remove('opacity-0'), 10);
+            if (logContainer.children.length > 20) logContainer.lastChild.remove();
+        };
+        setInterval(appendLog, 4000);
+    </script>
+</body></html>
