@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-009: UNIFIED MESSAGING | ECOSYSTEM_ORCHESTRATOR</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#1c2b3c",
+                    "surface": "#051424",
+                    "inverse-on-surface": "#233143",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-primary": "#003907",
+                    "surface-dim": "#051424",
+                    "outline": "#84967e",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-container": "#122131",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-primary-fixed": "#002203",
+                    "tertiary": "#fff6ff",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary-fixed": "#001356",
+                    "surface-tint": "#00e639",
+                    "on-background": "#d4e4fa",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-tertiary": "#490080",
+                    "primary": "#ebffe2",
+                    "surface-variant": "#273647",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "secondary": "#b8c3ff",
+                    "on-primary-container": "#007117",
+                    "surface-container-highest": "#273647",
+                    "background": "#051424",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "primary-fixed-dim": "#00e639",
+                    "secondary-container": "#0043eb",
+                    "on-tertiary-container": "#862ed4",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "inverse-primary": "#006e16",
+                    "primary-container": "#00ff41",
+                    "on-secondary-container": "#c6ceff",
+                    "on-tertiary-fixed": "#2c0051",
+                    "tertiary-fixed": "#f0dbff",
+                    "error": "#ffb4ab",
+                    "error-container": "#93000a",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#002388",
+                    "inverse-surface": "#d4e4fa",
+                    "on-error": "#690005",
+                    "on-surface": "#d4e4fa",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "primary-fixed": "#72ff70"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "node-gutter": "24px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .workflow-canvas {
+            min-height: calc(100vh - 64px - 32px);
+        }
+        .node-border-glow {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.1);
+        }
+        .connector-line {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .connector-arrow::after {
+            content: '';
+            position: absolute;
+            width: 0; height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid #00e639;
+        }
+        .glass-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-lane-margin">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-8">
+<nav class="hidden md:flex gap-6">
+<a class="text-label-caps font-label-caps text-on-surface-variant hover:bg-surface-container-high px-2 py-1 transition-colors" href="#">DASHBOARD</a>
+<a class="text-label-caps font-label-caps text-primary border-b-2 border-primary px-2 py-1" href="#">WORKFLOWS</a>
+<a class="text-label-caps font-label-caps text-on-surface-variant hover:bg-surface-container-high px-2 py-1 transition-colors" href="#">NODES</a>
+</nav>
+<span class="text-label-caps font-label-caps text-primary bg-primary-container/10 px-3 py-1 rounded border border-primary-container/30">v4.2.0 LIVE</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container border-r border-outline-variant pt-20 z-40 flex flex-col hidden lg:flex">
+<div class="px-6 py-4">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</h2>
+</div>
+<nav class="flex-1 flex flex-col overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-code-sm">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-code-sm">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-code-sm">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-code-sm">mail</span>
+<span class="text-code-sm font-code-sm">WF-004: NOTIF</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 bg-surface-variant text-primary border-l-4 border-primary translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-code-sm">lan</span>
+<span class="text-code-sm font-code-sm">WF-009: EDGE</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-code-sm">settings_ethernet</span>
+<span class="text-code-sm font-code-sm">WF-010: CORE</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:pl-64 pt-16 pb-12 min-h-screen">
+<div class="workflow-canvas relative p-lane-margin overflow-x-auto">
+<!-- Swimlane Headers -->
+<div class="flex mb-8 gap-node-gutter">
+<div class="min-w-[320px] flex-1 border-b border-outline-variant pb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">person</span>
+<h3 class="text-headline-md font-headline-md text-primary">INGRESS_LAYER</h3>
+</div>
+<p class="text-code-xs font-code-xs text-on-surface-variant">SOURCE: UNIFIED_MESSAGING_API</p>
+</div>
+<div class="min-w-[320px] flex-1 border-b border-outline-variant pb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">psychology</span>
+<h3 class="text-headline-md font-headline-md text-primary">PROCESSING_CORE</h3>
+</div>
+<p class="text-code-xs font-code-xs text-on-surface-variant">ENGINE: AURA_AI_v2.4</p>
+</div>
+<div class="min-w-[320px] flex-1 border-b border-outline-variant pb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">storage</span>
+<h3 class="text-headline-md font-headline-md text-primary">PERSISTENCE_LAYER</h3>
+</div>
+<p class="text-code-xs font-code-xs text-on-surface-variant">REGION: GLOBAL_PRIMARY</p>
+</div>
+</div>
+<!-- Workflow Logic Map -->
+<div class="relative grid grid-cols-1 md:grid-cols-3 gap-x-node-gutter gap-y-12">
+<!-- START NODE -->
+<div class="flex flex-col gap-4">
+<div class="bg-surface-container-lowest border border-primary p-4 rounded node-border-glow relative z-10">
+<div class="flex justify-between mb-2">
+<span class="text-label-caps font-label-caps text-primary">WF-009-01</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">LATENCY: 4ms</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface uppercase mb-4">Customer Message Initiation</h4>
+<div class="flex items-center gap-2 bg-surface-container p-2 rounded">
+<span class="material-symbols-outlined text-primary text-[14px]">terminal</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">PAYLOAD_JSON: VALIDATED</span>
+</div>
+</div>
+<!-- Path Indicator -->
+<div class="h-12 w-0.5 bg-primary mx-auto relative">
+<div class="absolute bottom-0 -left-1 w-2.5 h-2.5 border-r-2 border-b-2 border-primary rotate-45"></div>
+</div>
+<!-- ATTACHMENT SCAN -->
+<div class="bg-surface-container-lowest border border-outline p-4 rounded relative z-10">
+<div class="flex justify-between mb-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WF-009-04</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">SCAN: ACTIVE</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface uppercase mb-4">Attachment Virus Scan &amp; Storage</h4>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container p-1 text-center">
+<span class="text-code-xs font-code-xs text-primary">S3_PUSH: OK</span>
+</div>
+<div class="bg-surface-container p-1 text-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">SANDBOXED</span>
+</div>
+</div>
+</div>
+</div>
+<!-- PROCESSING CORE -->
+<div class="flex flex-col gap-4">
+<!-- AI ACTION -->
+<div class="bg-surface-container-lowest border border-primary-container p-4 rounded relative z-10">
+<div class="flex justify-between mb-2">
+<span class="text-label-caps font-label-caps text-primary-container">WF-009-02</span>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">AURA_AI_PROCESS</span>
+</div>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface uppercase mb-4">Sentiment Analysis &amp; Translation</h4>
+<div class="space-y-1">
+<div class="flex justify-between text-code-xs font-code-xs">
+<span class="text-on-surface-variant">SENTIMENT:</span>
+<span class="text-primary-container">NEUTRAL [0.84]</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs">
+<span class="text-on-surface-variant">LANG_ISO:</span>
+<span class="text-primary-container">EN_US</span>
+</div>
+</div>
+</div>
+<div class="h-12 w-0.5 bg-outline mx-auto"></div>
+<!-- MODERATION -->
+<div class="bg-surface-container-lowest border border-secondary p-4 rounded relative z-10">
+<div class="flex justify-between mb-2">
+<span class="text-label-caps font-label-caps text-secondary">WF-009-05</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface uppercase mb-4">Aura AI Content Filter</h4>
+<div class="bg-surface-container p-2 border-l-2 border-secondary">
+<p class="text-code-xs font-code-xs text-on-surface-variant italic">"No prohibited sequences detected in buffer_09..."</p>
+</div>
+</div>
+<div class="h-12 w-0.5 bg-outline mx-auto"></div>
+<!-- ROUTING -->
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded relative z-10">
+<div class="flex justify-between mb-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WF-009-03</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface uppercase mb-4">Router Node</h4>
+<div class="flex flex-wrap gap-2">
+<span class="text-code-xs font-code-xs px-2 py-0.5 bg-surface-variant text-on-surface-variant border border-outline-variant">MERCHANT</span>
+<span class="text-code-xs font-code-xs px-2 py-0.5 bg-surface-variant text-on-surface-variant border border-outline-variant">DRIVER</span>
+<span class="text-code-xs font-code-xs px-2 py-0.5 bg-primary-container/20 text-primary border border-primary-container">SUPPORT</span>
+<span class="text-code-xs font-code-xs px-2 py-0.5 bg-surface-variant text-on-surface-variant border border-outline-variant">ADMIN</span>
+</div>
+</div>
+</div>
+<!-- PERSISTENCE LAYER -->
+<div class="flex flex-col gap-4">
+<!-- THREADING -->
+<div class="bg-surface-container-lowest border border-outline p-4 rounded relative z-10">
+<div class="flex justify-between mb-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WF-009-06</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface uppercase mb-4">Conversation Threading</h4>
+<div class="space-y-1">
+<div class="w-full bg-outline-variant h-1 rounded overflow-hidden">
+<div class="bg-primary h-full w-3/4"></div>
+</div>
+<p class="text-code-xs font-code-xs text-on-surface-variant">SEQ_ID: 110922-8A</p>
+</div>
+</div>
+<div class="h-12 w-0.5 bg-outline mx-auto"></div>
+<!-- ARCHIVE -->
+<div class="bg-surface-container-lowest border border-error-container p-4 rounded relative z-10">
+<div class="flex justify-between mb-2">
+<span class="text-label-caps font-label-caps text-error">WF-009-07</span>
+<span class="material-symbols-outlined text-error text-[16px]">lock</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface uppercase mb-4">Security Logging</h4>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2 text-code-xs font-code-xs text-on-surface-variant">
+<span class="w-1 h-1 bg-error rounded-full"></span>
+                                AUDIT_TRAIL: ENCRYPTED_SHA256
+                            </div>
+<div class="flex items-center gap-2 text-code-xs font-code-xs text-on-surface-variant">
+<span class="w-1 h-1 bg-error rounded-full"></span>
+                                RETENTION: 7Y_COLD_STORAGE
+                            </div>
+</div>
+</div>
+<!-- EMERGENCY ESCALATION OVERLAY -->
+<div class="mt-8 bg-error-container/10 border-2 border-error border-dashed p-4 rounded">
+<h5 class="text-label-caps font-label-caps text-error mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                            EMERGENCY_ESCALATION_PATH
+                        </h5>
+<p class="text-code-xs font-code-xs text-on-error-container">Triggered on: AUTH_FAILURE | SENTIMENT_RED | SYSTEM_TIMEOUT</p>
+<div class="mt-2 flex justify-between">
+<span class="text-code-xs font-code-xs text-error font-bold underline cursor-pointer">BYPASS_AI()</span>
+<span class="text-code-xs font-code-xs text-error font-bold underline cursor-pointer">HUMAN_INTERVENE()</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Global Connectors (Visual Only) -->
+<svg class="absolute inset-0 pointer-events-none w-full h-full opacity-30" style="z-index: 0;">
+<path d="M 320 180 L 380 180" fill="none" stroke="#00e639" stroke-width="2"></path>
+<path d="M 640 180 L 700 180" fill="none" stroke="#00e639" stroke-width="2"></path>
+<path d="M 640 460 L 700 460" fill="none" stroke="#3b4b37" stroke-dasharray="4" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Telemetry HUD Overlay (Bottom Right) -->
+<div class="fixed bottom-16 right-8 z-30 glass-overlay border border-outline-variant p-4 w-64">
+<h5 class="text-label-caps font-label-caps text-primary mb-3">RUNTIME_METRICS</h5>
+<div class="space-y-2">
+<div class="flex justify-between">
+<span class="text-code-xs font-code-xs text-on-surface-variant">TPS:</span>
+<span class="text-code-xs font-code-xs text-primary">1,429/s</span>
+</div>
+<div class="flex justify-between">
+<span class="text-code-xs font-code-xs text-on-surface-variant">QUEUE_DEPTH:</span>
+<span class="text-code-xs font-code-xs text-on-surface">42 msgs</span>
+</div>
+<div class="flex justify-between">
+<span class="text-code-xs font-code-xs text-on-surface-variant">AI_CONFIDENCE:</span>
+<span class="text-code-xs font-code-xs text-primary">99.2%</span>
+</div>
+<div class="h-0.5 bg-outline-variant w-full my-2"></div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[12px] text-primary">cloud_done</span>
+<span class="text-code-xs font-code-xs text-primary">SYNC_STATUS: ACTIVE</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-low border-t border-outline-variant flex justify-between items-center px-lane-margin py-2">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<span class="text-on-surface-variant opacity-30 text-code-xs">|</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant uppercase">Audit_Trail: Active</span>
+</div>
+<div class="flex gap-6">
+<a class="text-label-caps font-label-caps text-on-surface-variant hover:text-primary transition-colors duration-150" href="#">N8N_SYNC: OK</a>
+<a class="text-label-caps font-label-caps text-on-surface-variant hover:text-primary transition-colors duration-150" href="#">LATENCY: 12ms</a>
+</div>
+</footer>
+<!-- Interactive Layer Script -->
+<script>
+        // Micro-interaction: Node Pulse on Hover
+        document.querySelectorAll('.bg-surface-container-lowest').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('scale-[1.02]');
+                node.style.borderColor = '#00ff41';
+                node.style.transition = 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('scale-[1.02]');
+                node.style.borderColor = '';
+            });
+        });
+
+        // Atmospheric Effect: Console Log simulation
+        console.log("%c WF-009 UNIFIED MESSAGING ENGINE INITIALIZED ", "background: #003907; color: #ebffe2; font-weight: bold;");
+        console.log("%c [SYS] Handshaking with Aura AI... ", "color: #b9ccb2;");
+        console.log("%c [OK] System Latency Nominal: 12ms ", "color: #00e639;");
+    </script>
+</body></html>

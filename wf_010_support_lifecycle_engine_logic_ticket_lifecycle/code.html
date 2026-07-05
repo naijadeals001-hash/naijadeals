@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-010: SUPPORT & TICKET LIFECYCLE | ECOSYSTEM_ORCHESTRATOR</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dot-grid {
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector-line {
+            position: absolute;
+            z-index: 0;
+            border: 1px solid #00e639;
+            pointer-events: none;
+        }
+        .node-connector-arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid #00e639;
+            z-index: 1;
+        }
+        /* Custom Scrollbar for Enterprise Density */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #051424; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #84967e; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#1c2b3c",
+                        "surface": "#051424",
+                        "inverse-on-surface": "#233143",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-primary": "#003907",
+                        "surface-dim": "#051424",
+                        "outline": "#84967e",
+                        "secondary-fixed": "#dde1ff",
+                        "surface-container": "#122131",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-primary-fixed": "#002203",
+                        "tertiary": "#fff6ff",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-fixed": "#001356",
+                        "surface-tint": "#00e639",
+                        "on-background": "#d4e4fa",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-tertiary": "#490080",
+                        "primary": "#ebffe2",
+                        "surface-variant": "#273647",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "secondary": "#b8c3ff",
+                        "on-primary-container": "#007117",
+                        "surface-container-highest": "#273647",
+                        "background": "#051424",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "primary-fixed-dim": "#00e639",
+                        "secondary-container": "#0043eb",
+                        "on-tertiary-container": "#862ed4",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "inverse-primary": "#006e16",
+                        "primary-container": "#00ff41",
+                        "on-secondary-container": "#c6ceff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "tertiary-fixed": "#f0dbff",
+                        "error": "#ffb4ab",
+                        "error-container": "#93000a",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#002388",
+                        "inverse-surface": "#d4e4fa",
+                        "on-error": "#690005",
+                        "on-surface": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "primary-fixed": "#72ff70"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lane-margin": "32px",
+                        "grid-unit": "8px",
+                        "node-gutter": "24px",
+                        "stack-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface text-primary dark:text-primary docked full-width top-0 border-b border-outline-variant dark:border-outline-variant flat no shadows flex justify-between items-center w-full px-lane-margin h-16 fixed z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-headline-md">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary dark:text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8 h-full items-center">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-high px-2 py-1 transition-colors text-label-caps font-label-caps" href="#">DASHBOARD</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-high px-2 py-1 transition-colors text-label-caps font-label-caps" href="#">ANALYTICS</a>
+<a class="text-primary dark:text-primary border-b-2 border-primary px-2 py-1 text-label-caps font-label-caps" href="#">WORKFLOWS</a>
+</nav>
+<div class="text-label-caps font-label-caps opacity-80 border border-outline-variant px-3 py-1 bg-surface-container-low">v4.2.0 LIVE</div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="bg-surface-container dark:bg-surface-container fixed left-0 top-0 h-full z-40 flex flex-col pt-20 border-r border-outline-variant dark:border-outline-variant docked left-0 h-full w-64 flat no shadows">
+<div class="px-6 mb-6">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase">WORKFLOW_INDEX</span>
+</div>
+<nav class="flex flex-col gap-1 overflow-y-auto">
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest dark:hover:bg-surface-container-highest flex items-center gap-3 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">fingerprint</span> WF-001: AUTH
+            </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest dark:hover:bg-surface-container-highest flex items-center gap-3 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">payments</span> WF-002: PAY
+            </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest dark:hover:bg-surface-container-highest flex items-center gap-3 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">security</span> WF-003: RISK
+            </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest dark:hover:bg-surface-container-highest flex items-center gap-3 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">mail</span> WF-004: NOTIF
+            </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest dark:hover:bg-surface-container-highest flex items-center gap-3 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">database</span> WF-005: DATA
+            </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest dark:hover:bg-surface-container-highest flex items-center gap-3 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">sync</span> WF-006: SYNC
+            </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest dark:hover:bg-surface-container-highest flex items-center gap-3 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">history</span> WF-007: LOGS
+            </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest dark:hover:bg-surface-container-highest flex items-center gap-3 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">psychology</span> WF-008: AI_INF
+            </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest dark:hover:bg-surface-container-highest flex items-center gap-3 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">lan</span> WF-009: EDGE
+            </a>
+<a class="bg-surface-variant dark:bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 flex items-center gap-3 font-code-sm text-code-sm translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-[18px]">settings_ethernet</span> WF-010: CORE
+            </a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pl-64 pt-16 pb-12 w-full h-screen overflow-auto dot-grid relative">
+<!-- Workflow Orchestrator Toolbar -->
+<div class="sticky top-0 z-30 w-full px-8 py-4 bg-surface/80 backdrop-blur-md flex justify-between items-center border-b border-outline-variant/30">
+<div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">WF-010: SUPPORT & TICKET LIFECYCLE</h2>
+<div class="flex gap-4 mt-1">
+<span class="text-code-xs font-code-xs text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">STATUS: OPERATIONAL</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">REGION: AWS-US-EAST-1</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">LOAD: 42.4 tps</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-highest text-on-surface px-4 py-2 rounded border border-outline-variant flex items-center gap-2 hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-sm">play_arrow</span>
+<span class="text-label-caps font-label-caps">SIMULATE</span>
+</button>
+<button class="bg-surface-container-highest text-on-surface px-4 py-2 rounded border border-outline-variant flex items-center gap-2 hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-sm">save</span>
+<span class="text-label-caps font-label-caps">EXPORT_JSON</span>
+</button>
+</div>
+</div>
+<!-- BPMN SWIMLANES -->
+<div class="flex flex-col min-w-[1600px] p-8 space-y-0 border-l border-t border-outline-variant/20 ml-lane-margin mr-lane-margin mt-8 mb-32 bg-surface-container-lowest/50 backdrop-blur-sm">
+<!-- Lane: USER -->
+<div class="flex border-b border-outline-variant/20 min-h-[160px]">
+<div class="w-16 bg-surface-container-high flex flex-col items-center justify-center border-r border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">person</span>
+<span class="text-label-caps font-label-caps rotate-[-90deg] whitespace-nowrap tracking-widest text-on-surface-variant">USER</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center gap-24">
+<!-- NODE: START -->
+<div class="relative z-10 w-48 bg-surface-container p-3 border border-primary-fixed shadow-[0_0_15px_rgba(114,255,112,0.1)]" id="node-1">
+<div class="text-label-caps font-label-caps text-primary mb-1">EVT_001</div>
+<div class="text-code-sm font-code-sm text-on-surface">Issue Reported</div>
+<div class="mt-2 flex justify-between items-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">Entry: Web/App</span>
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+</div>
+</div>
+<div class="flex-1"></div>
+<!-- NODE: RESOLUTION -->
+<div class="relative z-10 w-48 bg-surface-container p-3 border border-outline-variant" id="node-7">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-1">TASK_007</div>
+<div class="text-code-sm font-code-sm text-on-surface">Customer Confirmation</div>
+<div class="mt-2 text-code-xs font-code-xs text-outline italic">Awaiting response...</div>
+</div>
+</div>
+</div>
+<!-- Lane: AURA AI -->
+<div class="flex border-b border-outline-variant/20 min-h-[220px]">
+<div class="w-16 bg-surface-container-high flex flex-col items-center justify-center border-r border-outline-variant">
+<span class="material-symbols-outlined text-primary mb-2" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="text-label-caps font-label-caps rotate-[-90deg] whitespace-nowrap tracking-widest text-primary">AURA AI</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center gap-24">
+<!-- NODE: CLASSIFICATION -->
+<div class="relative z-10 w-56 bg-surface-container-highest p-3 border border-primary shadow-lg" id="node-2">
+<div class="text-label-caps font-label-caps text-primary mb-1">AI_ACTION_002</div>
+<div class="text-code-sm font-code-sm text-on-surface">Classification & Priority</div>
+<div class="mt-2 p-2 bg-black/40 rounded">
+<div class="flex justify-between text-code-xs font-code-xs mb-1">
+<span>INTENT:</span><span class="text-primary font-bold">BILLING_QUERY</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs">
+<span>CONF:</span><span class="text-primary">98.4%</span>
+</div>
+</div>
+</div>
+<!-- NODE: AUTO RESOLUTION -->
+<div class="relative z-10 w-56 bg-surface-container-highest p-3 border border-primary" id="node-3">
+<div class="text-label-caps font-label-caps text-primary mb-1">TASK_003</div>
+<div class="text-code-sm font-code-sm text-on-surface">Automated Resolution</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Executing script: billing_sync_v2</div>
+<div class="mt-1 h-1 w-full bg-outline-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[75%] animate-[shimmer_2s_infinite]"></div>
+</div>
+</div>
+<!-- DECISION: RESOLVED -->
+<div class="relative z-10 w-32 h-32 rotate-45 border-2 border-outline flex items-center justify-center bg-surface-container" id="node-4">
+<div class="-rotate-45 text-center">
+<div class="text-label-caps font-label-caps text-on-surface-variant">DEC_004</div>
+<div class="text-code-sm font-code-sm text-on-surface">Resolved?</div>
+</div>
+<!-- Micro Telemetry -->
+<div class="-rotate-45 absolute -top-8 -right-16 text-code-xs font-code-xs text-on-surface-variant bg-surface p-1 border border-outline-variant">
+                            AI_PASS_RATE: 64%
+                        </div>
+</div>
+</div>
+</div>
+<!-- Lane: SUPPORT AGENT -->
+<div class="flex border-b border-outline-variant/20 min-h-[220px]">
+<div class="w-16 bg-surface-container-high flex flex-col items-center justify-center border-r border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">support_agent</span>
+<span class="text-label-caps font-label-caps rotate-[-90deg] whitespace-nowrap tracking-widest text-on-surface-variant">AGENT</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center justify-center gap-24">
+<!-- NODE: INVESTIGATION -->
+<div class="relative z-10 w-64 bg-surface-container p-4 border border-secondary shadow-md" id="node-5">
+<div class="text-label-caps font-label-caps text-secondary mb-1">TASK_005</div>
+<div class="text-code-sm font-code-sm text-on-surface font-bold uppercase tracking-tight">Investigation & Internal Threading</div>
+<div class="mt-3 flex flex-col gap-2">
+<div class="flex items-center gap-2 text-code-xs font-code-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">schedule</span> SLA: 01:42:04 left
+                            </div>
+<div class="flex items-center gap-2 text-code-xs font-code-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">forum</span> Internal Notes: 4
+                            </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Lane: SUPERVISOR & ARBITRATION -->
+<div class="flex border-b border-outline-variant/20 min-h-[220px]">
+<div class="w-16 bg-surface-container-high flex flex-col items-center justify-center border-r border-outline-variant">
+<span class="material-symbols-outlined text-error mb-2">gavel</span>
+<span class="text-label-caps font-label-caps rotate-[-90deg] whitespace-nowrap tracking-widest text-error">ARBITRATOR</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center justify-end gap-24 pr-48">
+<!-- NODE: ESCALATION -->
+<div class="relative z-10 w-64 bg-surface-container p-4 border border-error border-dashed" id="node-6">
+<div class="text-label-caps font-label-caps text-error mb-1">ESCALATION_006</div>
+<div class="text-code-sm font-code-sm text-on-surface">Supervisor Review -> Arbitration</div>
+<div class="mt-2 p-2 bg-error-container/30 border border-error/20 text-code-xs font-code-xs text-error">
+                            SLA BREACH TRIGGERED at T+120m
+                        </div>
+</div>
+<!-- NODE: AUDIT -->
+<div class="relative z-10 w-48 bg-surface-container-low p-3 border border-outline-variant" id="node-8">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-1">AUDIT_008</div>
+<div class="text-code-sm font-code-sm text-on-surface">Post-Mortem & CSAT</div>
+<div class="mt-2 flex gap-1">
+<span class="material-symbols-outlined text-xs text-on-surface-variant">star</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant">star</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant">star</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant">star_half</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Micro-Telemetry Float Panel -->
+<div class="fixed bottom-12 right-8 w-80 bg-surface-container border border-outline-variant p-4 z-40 shadow-2xl">
+<div class="flex justify-between items-center mb-4">
+<span class="text-label-caps font-label-caps text-primary">TELEMETRY_LOGS</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant animate-pulse">LIVE UPDATE</span>
+</div>
+<div class="space-y-2 font-code-xs text-code-xs">
+<div class="flex justify-between py-1 border-b border-outline-variant/20">
+<span class="text-on-surface-variant">SYS.LATENCY</span>
+<span class="text-on-surface">12.4ms</span>
+</div>
+<div class="flex justify-between py-1 border-b border-outline-variant/20">
+<span class="text-on-surface-variant">SLA.HEALTH</span>
+<span class="text-primary">OPTIMAL (94%)</span>
+</div>
+<div class="flex justify-between py-1 border-b border-outline-variant/20">
+<span class="text-on-surface-variant">AI.TAKEOVER</span>
+<span class="text-on-surface">62,842 sessions/hr</span>
+</div>
+<div class="flex justify-between py-1">
+<span class="text-on-surface-variant">ERR.RATE</span>
+<span class="text-error">0.02%</span>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant">
+<div class="h-24 w-full bg-black/50 rounded flex items-end gap-1 p-1">
+<div class="bg-primary w-1/12 h-[20%]"></div>
+<div class="bg-primary w-1/12 h-[40%]"></div>
+<div class="bg-primary w-1/12 h-[35%]"></div>
+<div class="bg-primary w-1/12 h-[60%]"></div>
+<div class="bg-primary w-1/12 h-[80%]"></div>
+<div class="bg-primary-container w-1/12 h-[95%]"></div>
+<div class="bg-primary w-1/12 h-[70%]"></div>
+<div class="bg-primary w-1/12 h-[55%]"></div>
+<div class="bg-primary w-1/12 h-[40%]"></div>
+<div class="bg-primary w-1/12 h-[45%]"></div>
+<div class="bg-primary w-1/12 h-[30%]"></div>
+<div class="bg-primary w-1/12 h-[50%]"></div>
+</div>
+<div class="text-[8px] font-code-xs text-center mt-1 text-on-surface-variant tracking-widest">TRANSACTION_DENSITY_24H</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-surface-container-low text-primary dark:text-primary docked bottom-0 full-width border-t border-outline-variant dark:border-outline-variant flat no shadows fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+</div>
+<div class="flex items-center gap-8">
+<a class="text-on-surface-variant dark:text-on-surface-variant text-code-xs font-code-xs hover:text-primary dark:hover:text-primary transition-colors" href="#">AUDIT_TRAIL: ACTIVE</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant text-code-xs font-code-xs hover:text-primary dark:hover:text-primary transition-colors" href="#">N8N_SYNC: OK</a>
+<a class="text-primary font-bold text-code-xs font-code-xs transition-colors" href="#">LATENCY: 12ms</a>
+</div>
+</footer>
+<!-- Flow Connectors Layer (Simulated via script for accuracy) -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const connectors = [
+                { from: 'node-1', to: 'node-2', type: 'primary' },
+                { from: 'node-2', to: 'node-3', type: 'primary' },
+                { from: 'node-3', to: 'node-4', type: 'primary' },
+                { from: 'node-4', to: 'node-7', type: 'primary', label: 'YES' },
+                { from: 'node-4', to: 'node-5', type: 'warning', label: 'NO' },
+                { from: 'node-5', to: 'node-6', type: 'error', label: 'TIMEOUT' },
+                { from: 'node-6', to: 'node-7', type: 'primary' },
+                { from: 'node-7', to: 'node-8', type: 'primary' }
+            ];
+
+            const main = document.querySelector('main');
+            
+            connectors.forEach(conn => {
+                const start = document.getElementById(conn.from);
+                const end = document.getElementById(conn.to);
+                
+                if (start && end) {
+                    const rect1 = start.getBoundingClientRect();
+                    const rect2 = end.getBoundingClientRect();
+                    const mainRect = main.getBoundingClientRect();
+
+                    const x1 = rect1.right - mainRect.left + main.scrollLeft;
+                    const y1 = rect1.top + rect1.height/2 - mainRect.top + main.scrollTop;
+                    const x2 = rect2.left - mainRect.left + main.scrollLeft;
+                    const y2 = rect2.top + rect2.height/2 - mainRect.top + main.scrollTop;
+
+                    // Simplified Orthogonal Lines
+                    const line = document.createElement('div');
+                    line.className = 'node-connector-line';
+                    
+                    if (conn.type === 'error') line.style.borderStyle = 'dashed';
+                    if (conn.type === 'error') line.style.borderColor = '#ffb4ab';
+                    if (conn.type === 'warning') line.style.borderColor = '#b8c3ff';
+
+                    // Path logic
+                    if (Math.abs(y1 - y2) < 5) {
+                        // Straight Horizontal
+                        line.style.left = x1 + 'px';
+                        line.style.top = y1 + 'px';
+                        line.style.width = (x2 - x1) + 'px';
+                        line.style.height = '1px';
+                    } else {
+                        // L-Shape
+                        const polyline = document.createElement('div');
+                        polyline.className = 'absolute z-0 pointer-events-none';
+                        
+                        // Horizontal segment
+                        const hLine = document.createElement('div');
+                        hLine.style.position = 'absolute';
+                        hLine.style.border = '1px solid ' + (conn.type === 'error' ? '#ffb4ab' : conn.type === 'warning' ? '#b8c3ff' : '#00e639');
+                        if (conn.type === 'error') hLine.style.borderStyle = 'dashed';
+                        hLine.style.left = x1 + 'px';
+                        hLine.style.top = y1 + 'px';
+                        hLine.style.width = ((x2 - x1) / 2) + 'px';
+                        hLine.style.height = '1px';
+                        
+                        // Vertical segment
+                        const vLine = document.createElement('div');
+                        vLine.style.position = 'absolute';
+                        vLine.style.borderLeft = '2px ' + (conn.type === 'error' ? 'dashed #ffb4ab' : conn.type === 'warning' ? 'solid #b8c3ff' : 'solid #00e639');
+                        vLine.style.left = (x1 + (x2-x1)/2) + 'px';
+                        vLine.style.top = Math.min(y1, y2) + 'px';
+                        vLine.style.height = Math.abs(y2 - y1) + 'px';
+                        vLine.style.width = '1px';
+
+                        // Remaining horizontal segment
+                        const hLine2 = document.createElement('div');
+                        hLine2.style.position = 'absolute';
+                        hLine2.style.border = '1px solid ' + (conn.type === 'error' ? '#ffb4ab' : conn.type === 'warning' ? '#b8c3ff' : '#00e639');
+                        if (conn.type === 'error') hLine2.style.borderStyle = 'dashed';
+                        hLine2.style.left = (x1 + (x2-x1)/2) + 'px';
+                        hLine2.style.top = y2 + 'px';
+                        hLine2.style.width = ((x2 - x1) / 2) + 'px';
+                        hLine2.style.height = '1px';
+
+                        main.appendChild(hLine);
+                        main.appendChild(vLine);
+                        main.appendChild(hLine2);
+                    }
+
+                    if (!line.style.left) main.appendChild(line);
+
+                    // Add Arrowhead
+                    const arrow = document.createElement('div');
+                    arrow.className = 'node-connector-arrow';
+                    if (conn.type === 'error') arrow.style.borderTopColor = '#ffb4ab';
+                    if (conn.type === 'warning') arrow.style.borderTopColor = '#b8c3ff';
+                    arrow.style.left = (x2 - 8) + 'px';
+                    arrow.style.top = (y2 - 4) + 'px';
+                    arrow.style.transform = 'rotate(-90deg)';
+                    main.appendChild(arrow);
+
+                    // Add Label if exists
+                    if (conn.label) {
+                        const lbl = document.createElement('div');
+                        lbl.className = 'absolute text-[9px] font-code-sm px-1 bg-surface border border-outline-variant z-20';
+                        lbl.textContent = conn.label;
+                        lbl.style.left = (x1 + 20) + 'px';
+                        lbl.style.top = (y1 - 10) + 'px';
+                        main.appendChild(lbl);
+                    }
+                }
+            });
+        });
+    </script>
+</body></html>

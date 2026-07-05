@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-009: EXCEPTION_RECOVERY_MODEL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .workflow-connector {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .node-pulse {
+            animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(235, 255, 226, 0.3); }
+            50% { border-color: rgba(255, 180, 171, 0.8); }
+        }
+        .error-path {
+            stroke-dasharray: 4;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -1000; }
+        }
+        .glass-panel {
+            background: rgba(18, 33, 49, 0.8);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+<!-- Tailwind Config Execution -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-container": "#007117",
+                    "inverse-primary": "#006e16",
+                    "background": "#051424",
+                    "surface-dim": "#051424",
+                    "on-error-container": "#ffdad6",
+                    "tertiary": "#fff6ff",
+                    "surface-container-lowest": "#010f1f",
+                    "surface-tint": "#00e639",
+                    "error-container": "#93000a",
+                    "error": "#ffb4ab",
+                    "on-primary-fixed": "#002203",
+                    "primary": "#ebffe2",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-secondary": "#002388",
+                    "secondary-fixed": "#dde1ff",
+                    "on-tertiary-fixed": "#2c0051",
+                    "inverse-on-surface": "#233143",
+                    "surface-variant": "#273647",
+                    "on-surface-variant": "#b9ccb2",
+                    "secondary": "#b8c3ff",
+                    "on-secondary-fixed": "#001356",
+                    "on-primary": "#003907",
+                    "secondary-container": "#0043eb",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "outline-variant": "#3b4b37",
+                    "surface-bright": "#2c3a4c",
+                    "on-tertiary": "#490080",
+                    "on-secondary-container": "#c6ceff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "primary-fixed-dim": "#00e639",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface-container": "#122131",
+                    "primary-container": "#00ff41",
+                    "on-background": "#d4e4fa",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-container-low": "#0d1c2d",
+                    "outline": "#84967e",
+                    "on-tertiary-container": "#862ed4",
+                    "surface-container-highest": "#273647",
+                    "on-surface": "#d4e4fa",
+                    "primary-fixed": "#72ff70",
+                    "surface-container-high": "#1c2b3c",
+                    "on-error": "#690005",
+                    "surface": "#051424"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 h-16 border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6 h-full">
+<nav class="hidden md:flex items-center h-full gap-8">
+<a class="text-on-surface-variant hover:bg-surface-container-high px-2 py-1 transition-colors font-label-caps text-label-caps" href="#">MONITOR</a>
+<a class="text-primary border-b-2 border-primary h-full flex items-center px-2 font-label-caps text-label-caps" href="#">EXCEPTIONS</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high px-2 py-1 transition-colors font-label-caps text-label-caps" href="#">RECOVERY</a>
+</nav>
+<div class="text-label-caps font-label-caps text-primary bg-primary/10 px-3 py-1 rounded">v4.2.0 LIVE</div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container border-r border-outline-variant w-64">
+<div class="px-6 mb-8">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</span>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="payments">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="security">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</a>
+<a class="flex items-center gap-3 bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="lan">lan</span>
+<span class="text-code-sm font-code-sm">WF-009: EDGE</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="text-code-sm font-code-sm">WF-010: CORE</span>
+</a>
+</nav>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 pt-16 pb-12 min-h-screen relative">
+<!-- SVG Connector Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="min-height: 1200px;">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#84967e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker></defs>
+<marker id="arrowhead-error" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#ffb4ab" points="0 0, 10 3.5, 0 7"></polygon>
+<!-- Orchestration Lines -->
+<path d="M 120 180 L 120 220" fill="none" marker-end="url(#arrowhead)" stroke="#84967e" stroke-width="1"></path>
+<path class="error-path" d="M 320 240 L 400 240" fill="none" marker-end="url(#arrowhead-error)" stroke="#ffb4ab" stroke-width="1"></path>
+</marker></svg>
+<!-- Swimlanes & Content -->
+<div class="px-8 pt-8 grid grid-cols-12 gap-8">
+<!-- Exception Header -->
+<div class="col-span-12 mb-8 flex justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<span class="text-label-caps font-label-caps text-on-surface-variant block mb-2">FLOW_ARTIFACT: H</span>
+<h2 class="text-headline-lg font-headline-lg text-error">Exception &amp; Recovery Model</h2>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col items-end">
+<span class="text-code-xs font-code-xs text-on-surface-variant">ACTIVE_FAILURES</span>
+<span class="text-headline-md font-headline-md text-error">12.4k</span>
+</div>
+<div class="flex flex-col items-end border-l border-outline-variant pl-4">
+<span class="text-code-xs font-code-xs text-on-surface-variant">RECOVERY_RATE</span>
+<span class="text-headline-md font-headline-md text-primary">99.2%</span>
+</div>
+</div>
+</div>
+<!-- Workflow Row: Input & Failures -->
+<div class="col-span-3 space-y-6">
+<div class="p-2 border-l-2 border-primary bg-surface-container-low">
+<span class="text-label-caps font-label-caps text-primary opacity-60">SOURCE_INBOUND</span>
+<h3 class="text-code-sm font-code-sm uppercase">Message_Stream_Primary</h3>
+</div>
+<!-- Exception Nodes -->
+<div class="relative z-10 space-y-4">
+<!-- Message Node -->
+<div class="bg-surface-container border border-outline-variant p-4 rounded-sm shadow-lg hover:border-error transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">NODE_ERR_01</span>
+<span class="material-symbols-outlined text-error text-[16px]" data-icon="error">error</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface mb-2">MESSAGE_MALFORMED</h4>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-error animate-pulse"></div>
+<span class="text-code-xs font-code-xs text-on-surface-variant">LATENCY: 2ms</span>
+</div>
+</div>
+<!-- Attachment Node -->
+<div class="bg-surface-container border border-outline-variant p-4 rounded-sm shadow-lg hover:border-error transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">NODE_ERR_02</span>
+<span class="material-symbols-outlined text-error text-[16px]" data-icon="attachment">attachment</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface mb-2">ATTACHMENT_SCAN_FAIL</h4>
+<span class="text-code-xs font-code-xs text-error">CODE: 413_PAYLOAD_TOO_LARGE</span>
+</div>
+<!-- Recipient Node -->
+<div class="bg-surface-container border border-outline-variant p-4 rounded-sm shadow-lg border-primary-container/30">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">NODE_QUE_01</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="hourglass_empty">hourglass_empty</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface mb-2">RECIPIENT_OFFLINE</h4>
+<div class="bg-surface-container-highest px-2 py-1 flex justify-between items-center">
+<span class="text-code-xs font-code-xs">QUEUE_RETENTION</span>
+<span class="text-code-xs font-code-xs text-primary">72H</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Recovery Logic Column -->
+<div class="col-span-6 space-y-8">
+<!-- Recovery Controller -->
+<div class="glass-panel border border-outline-variant p-6 rounded-lg relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-error via-primary to-error"></div>
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-headline-md font-headline-md text-primary">Recovery_Orchestrator_v2</h3>
+<div class="flex gap-2">
+<button class="bg-error-container text-on-error-container px-3 py-1 rounded-sm text-label-caps font-label-caps flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="emergency_home">emergency_home</span>
+                                EMERGENCY_STOP
+                            </button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Path A -->
+<div class="p-4 border border-outline-variant bg-surface-container-lowest flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-tertiary-container" data-icon="translate">translate</span>
+<span class="text-label-caps font-label-caps">TRANSLATION_FAIL</span>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">AUTOMATED RECOVERY PATH:</div>
+<div class="flex items-center justify-between text-code-sm">
+<span>RETRY_LLM_V4</span>
+<span class="text-primary">RUNNING</span>
+</div>
+<div class="w-full bg-surface-container h-1 mt-auto">
+<div class="bg-primary h-full w-2/3"></div>
+</div>
+</div>
+<!-- Path B -->
+<div class="p-4 border border-outline-variant bg-surface-container-lowest flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error" data-icon="gavel">gavel</span>
+<span class="text-label-caps font-label-caps">MODERATION_FLAG</span>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">RECOVERY PATH:</div>
+<div class="flex items-center justify-between text-code-sm">
+<span>MANUAL_ESCALATION</span>
+<span class="text-error">QUEUED</span>
+</div>
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border border-surface bg-surface-variant flex items-center justify-center text-[10px] font-bold">JD</div>
+<div class="w-6 h-6 rounded-full border border-surface bg-surface-variant flex items-center justify-center text-[10px] font-bold">AL</div>
+<div class="w-6 h-6 rounded-full border border-surface bg-primary-container text-on-primary-container flex items-center justify-center text-[10px] font-bold">+4</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Exception Feed -->
+<div class="bg-surface-container-low border border-outline-variant rounded-sm overflow-hidden">
+<div class="px-4 py-2 bg-surface-container-highest border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps">TELEMETRY_EXCEPTION_LOG</span>
+<span class="text-code-xs font-code-xs opacity-50">SYNC: 12ms</span>
+</div>
+<div class="h-64 overflow-y-auto p-4 font-code-xs text-code-xs space-y-2">
+<div class="flex gap-4 text-error">
+<span class="opacity-50">14:02:11.04</span>
+<span class="font-bold">[ERR_MOD]</span>
+<span>Critical Content Violation in Segment_448 - Routing to Human_Ops</span>
+</div>
+<div class="flex gap-4 text-on-surface-variant">
+<span class="opacity-50">14:02:10.99</span>
+<span class="font-bold">[QUE_OK]</span>
+<span>User_019 Reconnected - Flushing stored buffers (4.2 MB)</span>
+</div>
+<div class="flex gap-4 text-on-surface-variant">
+<span class="opacity-50">14:02:10.82</span>
+<span class="font-bold">[TRN_RT]</span>
+<span>Translation Latency &gt; 500ms - Triggering Async_Worker_B</span>
+</div>
+<div class="flex gap-4 text-error">
+<span class="opacity-50">14:02:10.45</span>
+<span class="font-bold">[ERR_ATT]</span>
+<span>Malformed MIME Header on UID_8829 - Terminating Path</span>
+</div>
+<div class="flex gap-4 text-primary">
+<span class="opacity-50">14:02:09.11</span>
+<span class="font-bold">[REC_SUC]</span>
+<span>Recovery Successful for Ticket_0028 - Merging to Mainline</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Escalation & Routing -->
+<div class="col-span-3 space-y-4">
+<div class="bg-surface-container border border-outline-variant p-4">
+<h5 class="text-label-caps font-label-caps text-on-surface-variant mb-4">ESCALATION_HIERARCHY</h5>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-3 bg-surface-container-highest border-l-4 border-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="support_agent">support_agent</span>
+<div>
+<div class="text-code-sm font-code-sm">LEVEL_1_SUPPORT</div>
+<div class="text-code-xs font-code-xs opacity-50">ETA: 4 mins</div>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-highest opacity-50">
+<span class="material-symbols-outlined text-[20px]" data-icon="engineering">engineering</span>
+<div>
+<div class="text-code-sm font-code-sm">CORE_ENGINEERING</div>
+<div class="text-code-xs font-code-xs opacity-50">ON_CALL: ACTIVE</div>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-highest opacity-50">
+<span class="material-symbols-outlined text-[20px]" data-icon="admin_panel_settings">admin_panel_settings</span>
+<div>
+<div class="text-code-sm font-code-sm">SECURITY_COMPLIANCE</div>
+<div class="text-code-xs font-code-xs opacity-50">DORMANT</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 border border-dashed border-outline-variant flex flex-col items-center justify-center gap-4 text-center">
+<span class="material-symbols-outlined text-on-surface-variant text-[40px]" data-icon="psychology">psychology</span>
+<div class="text-code-sm font-code-sm uppercase">AI_Self_Correction</div>
+<p class="text-code-xs font-code-xs text-on-surface-variant">Orchestrator is currently analyzing 4 recurring failure patterns to update edge logic.</p>
+<button class="w-full py-2 bg-surface-container-highest border border-outline hover:bg-primary hover:text-on-primary transition-all text-label-caps font-label-caps">GENERATE_PATCH</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-8 py-2 border-t border-outline-variant">
+<div class="flex items-center gap-6">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-4">
+<a class="text-on-surface-variant hover:text-primary transition-colors text-label-caps font-label-caps" href="#">AUDIT_TRAIL: ACTIVE</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-label-caps font-label-caps" href="#">N8N_SYNC: OK</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-label-caps font-label-caps" href="#">LATENCY: 12ms</a>
+</div>
+</div>
+<div class="text-code-xs font-code-xs opacity-40">
+            SYSTEM_INTEGRITY_VERIFIED // 009_EXCEPTION_LAYER
+        </div>
+</footer>
+<!-- Micro-Interactions script -->
+<script>
+        // Simulate real-time data updates
+        setInterval(() => {
+            const errorCount = document.querySelector('.text-headline-md.text-error');
+            if (errorCount) {
+                const current = parseFloat(errorCount.innerText);
+                const noise = (Math.random() * 0.2 - 0.1);
+                errorCount.innerText = (current + noise).toFixed(1) + 'k';
+            }
+        }, 3000);
+
+        // Simple mouse tracking for background depth
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) / 50;
+            const moveY = (e.clientY - window.innerHeight / 2) / 50;
+            document.body.style.backgroundPosition = `${moveX}px ${moveY}px`;
+        });
+    </script>
+</body></html>

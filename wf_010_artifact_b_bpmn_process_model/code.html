@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-010: ENTERPRISE_BPMN_ORCHESTRATOR</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow: hidden; /* Canvas scrolling handled by container */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .workflow-canvas {
+            cursor: grab;
+            user-select: none;
+        }
+        .workflow-canvas:active {
+            cursor: grabbing;
+        }
+        .node-port {
+            width: 6px;
+            height: 6px;
+            background: #00ff41;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .node-port.input { left: -3px; top: 50%; transform: translateY(-50%); }
+        .node-port.output { right: -3px; top: 50%; transform: translateY(-50%); }
+        .decision-diamond {
+            width: 48px;
+            height: 48px;
+            background: #0f0f0f;
+            border: 1px solid #84967e;
+            transform: rotate(45deg);
+        }
+        .decision-content {
+            transform: rotate(-45deg);
+        }
+        .connector-line {
+            position: absolute;
+            background: #00e639;
+            height: 2px;
+            z-index: 0;
+        }
+        .connector-arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+            border-left: 6px solid #00e639;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #051424; }
+        ::-webkit-scrollbar-thumb { background: #1c2b3c; border-radius: 10px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error-container": "#ffdad6",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "tertiary-fixed": "#f0dbff",
+                      "surface-dim": "#051424",
+                      "surface-bright": "#2c3a4c",
+                      "surface-container-high": "#1c2b3c",
+                      "on-tertiary-fixed": "#2c0051",
+                      "surface-tint": "#00e639",
+                      "tertiary-container": "#ecd3ff",
+                      "on-error": "#690005",
+                      "secondary": "#b8c3ff",
+                      "on-tertiary-container": "#862ed4",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary-fixed": "#001356",
+                      "surface-container-lowest": "#010f1f",
+                      "primary-fixed-dim": "#00e639",
+                      "inverse-primary": "#006e16",
+                      "primary": "#ebffe2",
+                      "primary-container": "#00ff41",
+                      "surface-container-low": "#0d1c2d",
+                      "secondary-container": "#0043eb",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "surface": "#051424",
+                      "tertiary": "#fff6ff",
+                      "on-primary-container": "#007117",
+                      "on-background": "#d4e4fa",
+                      "error": "#ffb4ab",
+                      "error-container": "#93000a",
+                      "background": "#051424",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary": "#002388",
+                      "secondary-fixed": "#dde1ff",
+                      "inverse-surface": "#d4e4fa",
+                      "outline": "#84967e",
+                      "on-primary-fixed": "#002203",
+                      "on-primary": "#003907",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-surface-variant": "#b9ccb2",
+                      "surface-variant": "#273647",
+                      "inverse-on-surface": "#233143",
+                      "surface-container": "#122131",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-tertiary": "#490080",
+                      "surface-container-highest": "#273647",
+                      "on-secondary-container": "#c6ceff",
+                      "primary-fixed": "#72ff70",
+                      "on-primary-fixed-variant": "#00530e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+<!-- TopAppBar from JSON -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin h-16 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary dark:text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8 items-center h-full">
+<a class="text-label-caps font-label-caps text-primary dark:text-primary border-b-2 border-primary h-16 flex items-center px-2" href="#">DIAGRAM</a>
+<a class="text-label-caps font-label-caps text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high px-2 h-16 flex items-center transition-opacity" href="#">SIMULATOR</a>
+<a class="text-label-caps font-label-caps text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high px-2 h-16 flex items-center transition-opacity" href="#">LOGS</a>
+</nav>
+<span class="text-label-caps font-label-caps bg-primary-container text-on-primary-container px-3 py-1 rounded">v4.2.0 LIVE</span>
+</div>
+</header>
+<!-- NavigationDrawer from JSON -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant w-64 hidden lg:flex">
+<div class="px-6 mb-6">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-transform" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="payments">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="security">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</a>
+<a class="flex items-center gap-3 bg-surface-variant dark:bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 translate-x-1" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="text-code-sm font-code-sm">WF-010: CORE</span>
+</a>
+<div class="my-2 border-t border-outline-variant mx-4"></div>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="database">database</span>
+<span class="text-code-sm font-code-sm">WF-005: DATA</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="psychology">psychology</span>
+<span class="text-code-sm font-code-sm">WF-008: AI_INF</span>
+</a>
+</nav>
+</aside>
+<!-- Main Canvas Area -->
+<main class="flex-1 mt-16 ml-0 lg:ml-64 relative overflow-auto workflow-canvas" id="canvas-container">
+<!-- Zoom/Pan Controls -->
+<div class="fixed bottom-12 right-8 z-30 flex flex-col gap-2">
+<button class="bg-surface-container-high border border-outline-variant p-2 hover:bg-surface-bright text-primary"><span class="material-symbols-outlined" data-icon="add">add</span></button>
+<button class="bg-surface-container-high border border-outline-variant p-2 hover:bg-surface-bright text-primary"><span class="material-symbols-outlined" data-icon="remove">remove</span></button>
+<button class="bg-surface-container-high border border-outline-variant p-2 hover:bg-surface-bright text-primary"><span class="material-symbols-outlined" data-icon="center_focus_weak">center_focus_weak</span></button>
+</div>
+<!-- The BPMN Grid -->
+<div class="min-w-[4000px] flex flex-col" id="diagram-inner">
+<!-- Swimlane: Customer -->
+<section class="flex h-48 border-b border-outline-variant/30 group">
+<div class="w-16 bg-surface-container-low border-r border-outline-variant flex items-center justify-center relative">
+<span class="rotate-[-90deg] text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant group-hover:text-primary transition-colors">CUSTOMER [ACTOR_01]</span>
+</div>
+<div class="flex-1 relative p-8">
+<!-- Start Event -->
+<div class="absolute left-12 top-16 w-10 h-10 rounded-full border-2 border-primary bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="play_arrow">play_arrow</span>
+<div class="absolute -bottom-6 text-code-xs font-code-xs text-on-surface-variant">INIT_REQUEST</div>
+</div>
+<!-- Task: Submit Proposal -->
+<div class="absolute left-48 top-12 w-40 h-16 bg-surface-container border border-primary/40 rounded p-2 flex flex-col justify-between">
+<span class="text-label-caps font-label-caps text-[8px] text-primary">MANUAL_TASK</span>
+<span class="text-code-sm font-code-sm leading-tight">SUBMIT_SERVICE_REQUEST</span>
+<div class="node-port output"></div>
+</div>
+<!-- Telemetry -->
+<div class="absolute left-[240px] top-8 text-code-xs font-code-xs text-primary/50">LATENCY: 140ms</div>
+</div>
+</section>
+<!-- Swimlane: Aura AI -->
+<section class="flex h-48 border-b border-outline-variant/30 bg-surface-container-lowest/20 group">
+<div class="w-16 bg-surface-container-low border-r border-outline-variant flex items-center justify-center relative">
+<span class="rotate-[-90deg] text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant group-hover:text-primary transition-colors">AURA_AI [SYSTEM_CORE]</span>
+</div>
+<div class="flex-1 relative p-8">
+<!-- Task: Intent Analysis -->
+<div class="absolute left-96 top-12 w-48 h-16 bg-surface-variant border border-primary rounded p-2 flex flex-col justify-between shadow-lg shadow-primary/5">
+<div class="flex justify-between items-start">
+<span class="text-label-caps font-label-caps text-[8px] text-primary">AI_INFERENCE</span>
+<span class="material-symbols-outlined text-xs text-primary" data-icon="psychology">psychology</span>
+</div>
+<span class="text-code-sm font-code-sm leading-tight">ANALYZE_INTENT_ROUTING</span>
+<div class="node-port input"></div>
+<div class="node-port output"></div>
+</div>
+<!-- Decision: Valid Request? -->
+<div class="absolute left-[540px] top-12">
+<div class="decision-diamond flex items-center justify-center">
+<div class="decision-content text-code-xs font-code-xs text-center text-on-surface-variant">VALID?</div>
+</div>
+<div class="absolute -top-8 left-12 text-code-xs font-code-xs text-error">NO (DROP)</div>
+<div class="absolute -right-12 top-6 text-code-xs font-code-xs text-primary">YES</div>
+</div>
+</div>
+</section>
+<!-- Swimlane: n8n / Workflow Engine -->
+<section class="flex h-48 border-b border-outline-variant/30 group">
+<div class="w-16 bg-surface-container-low border-r border-outline-variant flex items-center justify-center relative">
+<span class="rotate-[-90deg] text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant group-hover:text-primary transition-colors">N8N [ORCHESTRATOR]</span>
+</div>
+<div class="flex-1 relative p-8">
+<!-- Task: Payload Transformation -->
+<div class="absolute left-[680px] top-12 w-44 h-16 bg-surface-container border border-outline rounded p-2 flex flex-col justify-between">
+<span class="text-label-caps font-label-caps text-[8px] text-on-surface-variant">DATA_MAPPING</span>
+<span class="text-code-sm font-code-sm leading-tight">TRANSFORM_TO_JSON</span>
+<div class="node-port input"></div>
+<div class="node-port output"></div>
+</div>
+<!-- SLA Timer -->
+<div class="absolute left-[880px] top-16 w-8 h-8 rounded-full border border-dashed border-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xs" data-icon="timer">timer</span>
+<div class="absolute -top-6 text-code-xs font-code-xs text-primary whitespace-nowrap">SLA: 2s</div>
+</div>
+</div>
+</section>
+<!-- Swimlane: Fraud Team -->
+<section class="flex h-48 border-b border-outline-variant/30 bg-error-container/5 group">
+<div class="w-16 bg-surface-container-low border-r border-outline-variant flex items-center justify-center relative">
+<span class="rotate-[-90deg] text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant group-hover:text-error transition-colors">FRAUD_TEAM [RISK]</span>
+</div>
+<div class="flex-1 relative p-8">
+<!-- Decision: High Risk? -->
+<div class="absolute left-[960px] top-12">
+<div class="decision-diamond border-error flex items-center justify-center">
+<div class="decision-content text-code-xs font-code-xs text-center text-error">RISK?</div>
+</div>
+</div>
+<!-- Manual Task: Human Review -->
+<div class="absolute left-[1100px] top-12 w-48 h-16 bg-surface-container border border-error/50 rounded p-2 flex flex-col justify-between">
+<span class="text-label-caps font-label-caps text-[8px] text-error">HUMAN_INTERVENTION</span>
+<span class="text-code-sm font-code-sm leading-tight">AUDIT_SUSPICIOUS_VAL</span>
+</div>
+</div>
+</section>
+<!-- Swimlane: Escrow & Merchant -->
+<section class="flex h-48 border-b border-outline-variant/30 group">
+<div class="w-16 bg-surface-container-low border-r border-outline-variant flex items-center justify-center relative">
+<span class="rotate-[-90deg] text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant group-hover:text-primary transition-colors">ESCROW_MERCHANT</span>
+</div>
+<div class="flex-1 relative p-8">
+<div class="absolute left-[1300px] top-12 w-52 h-16 bg-secondary-container/20 border border-secondary rounded p-2 flex flex-col justify-between">
+<span class="text-label-caps font-label-caps text-[8px] text-secondary">FINANCIAL_HOLD</span>
+<span class="text-code-sm font-code-sm leading-tight">LOCK_FUNDS_IN_ESCROW</span>
+</div>
+</div>
+</section>
+<!-- Swimlane: Notification Engine -->
+<section class="flex h-48 border-b border-outline-variant/30 group">
+<div class="w-16 bg-surface-container-low border-r border-outline-variant flex items-center justify-center relative">
+<span class="rotate-[-90deg] text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant group-hover:text-primary transition-colors">NOTIF_ENGINE</span>
+</div>
+<div class="flex-1 relative p-8">
+<div class="absolute left-[1600px] top-12 w-44 h-16 bg-surface-container-high border border-outline-variant rounded p-2 flex flex-col justify-between">
+<span class="text-label-caps font-label-caps text-[8px] text-on-surface-variant">WEBHOOK_OUT</span>
+<span class="text-code-sm font-code-sm leading-tight">PUSH_STATUS_UPDATE</span>
+</div>
+<!-- End Event -->
+<div class="absolute left-[1850px] top-16 w-10 h-10 rounded-full border-4 border-error/40 bg-error/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-sm" data-icon="stop">stop</span>
+<div class="absolute -bottom-6 text-code-xs font-code-xs text-on-surface-variant">PROCESS_END</div>
+</div>
+</div>
+</section>
+<!-- Custom Connectors (Visual Only) -->
+<div class="absolute top-0 left-0 pointer-events-none w-full h-full">
+<!-- Manual CSS paths for illustrative purposes -->
+<div class="connector-line" style="left: 100px; top: 88px; width: 90px;"></div>
+<div class="connector-arrow" style="left: 190px; top: 85px;"></div>
+<div class="connector-line" style="left: 350px; top: 88px; width: 40px;"></div>
+<div class="connector-line" style="left: 390px; top: 88px; width: 2px; height: 140px;"></div>
+<div class="connector-line" style="left: 392px; top: 228px; width: 4px;"></div>
+<div class="connector-arrow" style="left: 396px; top: 225px;"></div>
+<div class="connector-line" style="left: 580px; top: 228px; width: 100px;"></div>
+<div class="connector-line" style="left: 680px; top: 228px; width: 2px; height: 192px;"></div>
+<div class="connector-arrow" style="left: 680px; top: 417px; transform: rotate(90deg);"></div>
+</div>
+</div>
+</main>
+<!-- Side Panel: Audit/Telemetry -->
+<aside class="w-80 bg-surface-container-low border-l border-outline-variant flex flex-col hidden xl:flex">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps">AUDIT_TRAIL</span>
+<span class="text-[10px] text-primary animate-pulse">LIVE MONITOR</span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4">
+<div class="bg-surface p-2 border-l-2 border-primary">
+<div class="flex justify-between mb-1">
+<span class="text-code-xs font-code-xs text-primary">REQ_7721-X</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">14:22:01</span>
+</div>
+<p class="text-code-sm font-code-sm text-on-surface">Customer (id:882) submitted REQ_PROPOSAL.</p>
+</div>
+<div class="bg-surface p-2 border-l-2 border-primary">
+<div class="flex justify-between mb-1">
+<span class="text-code-xs font-code-xs text-primary">INF_AURA_1</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">14:22:04</span>
+</div>
+<p class="text-code-sm font-code-sm text-on-surface">Intent classified: HIGH_VALUE_TRADE. Confidence: 0.98.</p>
+</div>
+<div class="bg-surface p-2 border-l-2 border-error">
+<div class="flex justify-between mb-1">
+<span class="text-code-xs font-code-xs text-error">ERR_LTC_404</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">14:22:15</span>
+</div>
+<p class="text-code-sm font-code-sm text-on-surface">Latency threshold exceeded in NODE_FRAUD_SCAN (2400ms).</p>
+</div>
+<!-- Dynamic Placeholder for shader/animation -->
+<div class="relative h-32 w-full mt-8 rounded overflow-hidden border border-outline-variant">
+
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant text-[9px]">ENGINE_LOAD_HEARTBEAT</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-ping"></div>
+<span class="text-label-caps font-label-caps">N8N_CONNECTION: ACTIVE</span>
+</div>
+<div class="flex gap-1">
+<div class="h-1 flex-1 bg-primary"></div>
+<div class="h-1 flex-1 bg-primary"></div>
+<div class="h-1 flex-1 bg-primary/40"></div>
+<div class="h-1 flex-1 bg-primary/20"></div>
+</div>
+</div>
+</aside>
+<!-- Footer from JSON -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2 bg-surface-container-low dark:bg-surface-container-low border-t border-outline-variant dark:border-outline-variant">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-6">
+<a class="text-code-xs font-code-xs text-primary font-bold" href="#">AUDIT_TRAIL: ACTIVE</a>
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">N8N_SYNC: OK</a>
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">LATENCY: 12ms</a>
+</div>
+</footer>
+<script>
+        // Simple micro-interaction for canvas panning simulation
+        const canvas = document.getElementById('canvas-container');
+        let isDragging = false;
+        let startX, startY, scrollLeft, scrollTop;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.pageX - canvas.offsetLeft;
+            startY = e.pageY - canvas.offsetTop;
+            scrollLeft = canvas.scrollLeft;
+            scrollTop = canvas.scrollTop;
+        });
+
+        canvas.addEventListener('mouseleave', () => { isDragging = false; });
+        canvas.addEventListener('mouseup', () => { isDragging = false; });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - canvas.offsetLeft;
+            const y = e.pageY - canvas.offsetTop;
+            const walkX = (x - startX);
+            const walkY = (y - startY);
+            canvas.scrollLeft = scrollLeft - walkX;
+            canvas.scrollTop = scrollTop - walkY;
+        });
+    </script>
+</body></html>

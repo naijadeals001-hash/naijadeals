@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-010 ARTIFACT C: BUSINESS RULES ENGINE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface-dim": "#051424",
+                    "surface-bright": "#2c3a4c",
+                    "surface-container-high": "#1c2b3c",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-tint": "#00e639",
+                    "tertiary-container": "#ecd3ff",
+                    "on-error": "#690005",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary-container": "#862ed4",
+                    "on-surface": "#d4e4fa",
+                    "on-secondary-fixed": "#001356",
+                    "surface-container-lowest": "#010f1f",
+                    "primary-fixed-dim": "#00e639",
+                    "inverse-primary": "#006e16",
+                    "primary": "#ebffe2",
+                    "primary-container": "#00ff41",
+                    "surface-container-low": "#0d1c2d",
+                    "secondary-container": "#0043eb",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface": "#051424",
+                    "tertiary": "#fff6ff",
+                    "on-primary-container": "#007117",
+                    "on-background": "#d4e4fa",
+                    "error": "#ffb4ab",
+                    "error-container": "#93000a",
+                    "background": "#051424",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary": "#002388",
+                    "secondary-fixed": "#dde1ff",
+                    "inverse-surface": "#d4e4fa",
+                    "outline": "#84967e",
+                    "on-primary-fixed": "#002203",
+                    "on-primary": "#003907",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-surface-variant": "#b9ccb2",
+                    "surface-variant": "#273647",
+                    "inverse-on-surface": "#233143",
+                    "surface-container": "#122131",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-tertiary": "#490080",
+                    "surface-container-highest": "#273647",
+                    "on-secondary-container": "#c6ceff",
+                    "primary-fixed": "#72ff70",
+                    "on-primary-fixed-variant": "#00530e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle at 2px 2px, #1a1a1a 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .rule-row:hover {
+            background-color: rgba(0, 230, 57, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface antialiased overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-container-lowest text-primary dark:text-primary-fixed w-full top-0 border-b border-outline-variant flex justify-between items-center px-8 h-12 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<span class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<span class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed cursor-pointer transition-colors px-1">LOGIC_MATRICES</span>
+<span class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors cursor-pointer px-1">TELEMETRY_STREAMS</span>
+</nav>
+<span class="font-label-caps text-label-caps font-bold text-primary-fixed opacity-90">STATUS: OK</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="bg-surface-container dark:bg-surface-container h-[calc(100vh-48px)] w-64 border-r border-outline-variant flex flex-col shrink-0">
+<div class="p-6 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed block">MODULE_INDEX</span>
+</div>
+<nav class="flex-1 overflow-y-auto py-4">
+<div class="flex items-center gap-3 px-6 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer group">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow_Engine</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+<span class="font-label-caps text-label-caps">Logic_Matrices</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">insights</span>
+<span class="font-label-caps text-label-caps">Telemetry_Streams</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">settings_input_component</span>
+<span class="font-label-caps text-label-caps">Node_Registry</span>
+</div>
+</nav>
+<div class="p-6 border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-primary-fixed">ENGINE: ACTIVE</span>
+</div>
+<div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[72%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-hidden relative flex flex-col">
+<!-- Header Section -->
+<div class="px-node-gutter py-6 flex justify-between items-end border-b border-outline-variant bg-surface-container-lowest/50 backdrop-blur-sm">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tight">Business Rules Engine</h1>
+<p class="font-code-sm text-code-sm text-outline mt-1 uppercase">Matrix of logic governing case resolution [WF-010-ARTIFACT-C]</p>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-outline">ACTIVE_RULES</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">1,204</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-outline">THROUGHPUT</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">840 req/s</span>
+</div>
+</div>
+</div>
+<!-- Table Wrapper -->
+<div class="flex-1 overflow-auto scroll-hide p-node-gutter">
+<div class="min-w-[1200px] border border-outline-variant bg-surface-container-lowest">
+<!-- Table Header -->
+<div class="grid grid-cols-[1.5fr_2fr_1fr_1.5fr_1.5fr] border-b border-outline-variant bg-surface-container-low sticky top-0 z-10">
+<div class="p-4 font-label-caps text-label-caps text-outline border-r border-outline-variant">Display Rule</div>
+<div class="p-4 font-label-caps text-label-caps text-outline border-r border-outline-variant">Decision Logic</div>
+<div class="p-4 font-label-caps text-label-caps text-outline border-r border-outline-variant">Responsible Team</div>
+<div class="p-4 font-label-caps text-label-caps text-outline border-r border-outline-variant">Failure Result</div>
+<div class="p-4 font-label-caps text-label-caps text-outline">Recovery Path</div>
+</div>
+<!-- Rule Rows -->
+<div class="divide-y divide-outline-variant">
+<!-- Rule 1: Ticket Category -->
+<div class="grid grid-cols-[1.5fr_2fr_1fr_1.5fr_1.5fr] rule-row transition-colors">
+<div class="p-4 border-r border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed block mb-1">BR-TC-001</span>
+<span class="font-headline-md text-headline-md text-on-surface">Ticket Category Logic</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-code-sm text-code-sm text-on-surface-variant flex flex-col gap-2">
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+                                    IF payload.intent == "refund" &amp;&amp; status == "delivered" THEN tag: DISPUTE_QUALIFIED
+                                </div>
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+                                    IF payload.keywords CONTAINS ["stolen", "fraud"] THEN tag: URGENT_RISK
+                                </div>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-label-caps text-label-caps text-on-surface">ROUTING_OPS</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="font-code-sm text-code-sm text-error uppercase">MISROUTED_CASE_LATENCY</span>
+</div>
+<div class="p-4 flex items-center">
+<span class="font-code-sm text-code-sm text-outline">Manual triage re-injection; Auto-tagging refinement loop.</span>
+</div>
+</div>
+<!-- Rule 2: Priority Level -->
+<div class="grid grid-cols-[1.5fr_2fr_1fr_1.5fr_1.5fr] rule-row transition-colors">
+<div class="p-4 border-r border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed block mb-1">BR-PL-002</span>
+<span class="font-headline-md text-headline-md text-on-surface">Priority Level Assignment</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-code-sm text-code-sm text-on-surface-variant">
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+                                    ASSIGN (tier * val) + (wait_time * 1.5) -&gt; priority_index
+                                </div>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-label-caps text-label-caps text-on-surface">DATA_SCIENCE</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="font-code-sm text-code-sm text-error uppercase">SLA_VIOLATION_CASCADE</span>
+</div>
+<div class="p-4 flex items-center">
+<span class="font-code-sm text-code-sm text-outline">Emergency overflow queues; Priority override by supervisor.</span>
+</div>
+</div>
+<!-- Rule 3: Escalation Thresholds -->
+<div class="grid grid-cols-[1.5fr_2fr_1fr_1.5fr_1.5fr] rule-row transition-colors bg-surface-container-lowest">
+<div class="p-4 border-r border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed block mb-1">BR-ET-003</span>
+<span class="font-headline-md text-headline-md text-on-surface">Escalation Thresholds</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-code-sm text-code-sm text-on-surface-variant">
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+                                    IF dispute_duration &gt; 48h OR value &gt; $500 THEN escalate_to: L2_ARCHITECT
+                                </div>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-label-caps text-label-caps text-on-surface">SERVICE_EXEC</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="font-code-sm text-code-sm text-error uppercase">EXECUTIVE_BOTTLE_NECK</span>
+</div>
+<div class="p-4 flex items-center">
+<span class="font-code-sm text-code-sm text-outline">Dynamic threshold expansion based on queue health.</span>
+</div>
+</div>
+<!-- Rule 4: Fraud Detection -->
+<div class="grid grid-cols-[1.5fr_2fr_1fr_1.5fr_1.5fr] rule-row transition-colors">
+<div class="p-4 border-r border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed block mb-1">BR-FD-004</span>
+<span class="font-headline-md text-headline-md text-on-surface">Fraud Detection Triggers</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-code-sm text-code-sm text-on-surface-variant">
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+                                    CROSS_CHECK(user_id, IP_range, prev_claims) -&gt; IF risk_score &gt; 0.85 -&gt; LOCK_WALLET
+                                </div>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-label-caps text-label-caps text-on-surface">RISK_SEC</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="font-code-sm text-code-sm text-error uppercase">FALSE_POSITIVE_LOCKOUT</span>
+</div>
+<div class="p-4 flex items-center">
+<span class="font-code-sm text-code-sm text-outline">KYC verification re-trigger; Manual account audit.</span>
+</div>
+</div>
+<!-- Rule 5: Refund Eligibility -->
+<div class="grid grid-cols-[1.5fr_2fr_1fr_1.5fr_1.5fr] rule-row transition-colors">
+<div class="p-4 border-r border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed block mb-1">BR-RE-005</span>
+<span class="font-headline-md text-headline-md text-on-surface">Refund Eligibility Criteria</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-code-sm text-code-sm text-on-surface-variant">
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+                                    IF status == "RETURNED" &amp;&amp; inspect_code == "A1" THEN initiate_payout
+                                </div>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-label-caps text-label-caps text-on-surface">FINANCE_OPS</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="font-code-sm text-code-sm text-error uppercase">UNAUTHORIZED_DISBURSEMENT</span>
+</div>
+<div class="p-4 flex items-center">
+<span class="font-code-sm text-code-sm text-outline">Ledger reversal protocol; Audit trail generation.</span>
+</div>
+</div>
+<!-- Rule 6: Escrow Dispute logic -->
+<div class="grid grid-cols-[1.5fr_2fr_1fr_1.5fr_1.5fr] rule-row transition-colors">
+<div class="p-4 border-r border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed block mb-1">BR-ED-006</span>
+<span class="font-headline-md text-headline-md text-on-surface">Escrow Dispute Logic</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-code-sm text-code-sm text-on-surface-variant">
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+                                    IF proof_submitted == false AFTER 72h THEN auto_release_to_vendor
+                                </div>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-label-caps text-label-caps text-on-surface">ARBITRATION</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="font-code-sm text-code-sm text-error uppercase">MERCHANT_LOSS_EXPOSURE</span>
+</div>
+<div class="p-4 flex items-center">
+<span class="font-code-sm text-code-sm text-outline">Temporary hold activation; Multi-sig manual release.</span>
+</div>
+</div>
+<!-- Rule 7: Response Overdue Timeouts -->
+<div class="grid grid-cols-[1.5fr_2fr_1fr_1.5fr_1.5fr] rule-row transition-colors">
+<div class="p-4 border-r border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed block mb-1">BR-OT-007</span>
+<span class="font-headline-md text-headline-md text-on-surface">Response Overdue Timeouts</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-code-sm text-code-sm text-on-surface-variant">
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+                                    TIMEOUT(Customer) = 48h; TIMEOUT(Merchant) = 24h -&gt; IF exceeded -&gt; JUMP_TO_AUTO_RESOLUTION
+                                </div>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-label-caps text-label-caps text-on-surface">AUTOMATION</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="font-code-sm text-code-sm text-error uppercase">CX_DISSATISFACTION_SPIKE</span>
+</div>
+<div class="p-4 flex items-center">
+<span class="font-code-sm text-code-sm text-outline">Courtesy notification injection; 12h grace period toggle.</span>
+</div>
+</div>
+<!-- Rule 8: SLA Breach protocols -->
+<div class="grid grid-cols-[1.5fr_2fr_1fr_1.5fr_1.5fr] rule-row transition-colors">
+<div class="p-4 border-r border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed block mb-1">BR-SB-008</span>
+<span class="font-headline-md text-headline-md text-on-surface">SLA Breach Protocols</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-code-sm text-code-sm text-on-surface-variant">
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+                                    IF case.age &gt; SLA_LIMIT THEN alert: SYSTEM_ADMIN; flag: CRITICAL_FAILURE
+                                </div>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-label-caps text-label-caps text-on-surface">CORE_ENGINEERING</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center">
+<span class="font-code-sm text-code-sm text-error uppercase">CONTRACTUAL_PENALTY_HIT</span>
+</div>
+<div class="p-4 flex items-center">
+<span class="font-code-sm text-code-sm text-outline">Post-mortem log dump; Priority 0 queue re-routing.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Audit Panel (Floating) -->
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-80 bg-surface-container border-l border-t border-b border-outline-variant p-4 flex flex-col gap-4 transform translate-x-72 hover:translate-x-0 transition-transform duration-300 shadow-2xl">
+<div class="flex items-center gap-2 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary-fixed text-[18px]">history</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">REAL_TIME_AUDIT</span>
+</div>
+<div class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-hide">
+<div class="border-l-2 border-primary-container pl-3 py-1">
+<span class="font-code-xs text-code-xs text-outline">14:20:01</span>
+<p class="font-code-sm text-code-sm">BR-FD-004 triggered for UID: 9822</p>
+</div>
+<div class="border-l-2 border-secondary-container pl-3 py-1">
+<span class="font-code-xs text-code-xs text-outline">14:19:55</span>
+<p class="font-code-sm text-code-sm">BR-TC-001 updated: Category mapped</p>
+</div>
+<div class="border-l-2 border-error-container pl-3 py-1">
+<span class="font-code-xs text-code-xs text-outline">14:18:30</span>
+<p class="font-code-sm text-code-sm">SLA Breach alert on CASE_7741</p>
+</div>
+<div class="border-l-2 border-primary-container pl-3 py-1">
+<span class="font-code-xs text-code-xs text-outline">14:15:22</span>
+<p class="font-code-sm text-code-sm">Escrow release BR-ED-006 executed</p>
+</div>
+</div>
+<div class="pt-2 border-t border-outline-variant flex justify-center">
+<button class="font-label-caps text-label-caps text-primary hover:underline transition-all">EXPAND_LOG_DUMP</button>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-surface-container-lowest text-primary-fixed w-full bottom-0 border-t border-outline-variant h-8 flex items-center justify-between px-8 z-50 fixed">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<div class="flex items-center gap-6">
+<span class="font-code-xs text-code-xs text-outline hover:text-primary-fixed cursor-pointer">DOCS</span>
+<span class="font-code-xs text-code-xs text-outline hover:text-primary-fixed cursor-pointer">API</span>
+<span class="font-code-xs text-code-xs text-outline hover:text-primary-fixed cursor-pointer">LOGS</span>
+<span class="font-code-xs text-code-xs text-outline opacity-50 select-none">© 2024 CORE_OS_LTD</span>
+</div>
+</footer>
+<!-- Atmosphere/Micro-Telemetry Effects -->
+<script>
+        // Simple micro-interaction for rows
+        document.querySelectorAll('.rule-row').forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                const id = row.querySelector('.font-code-sm').textContent;
+                console.log(`Focusing rule: ${id}`);
+            });
+        });
+
+        // Simulating telemetry updates
+        setInterval(() => {
+            const throughput = document.querySelector('main .flex-col:last-child .font-code-sm');
+            if(throughput) {
+                const val = 800 + Math.floor(Math.random() * 100);
+                throughput.textContent = `${val} req/s`;
+            }
+        }, 3000);
+    </script>
+</body></html>

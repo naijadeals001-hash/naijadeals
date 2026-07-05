@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-009: ECOSYSTEM_ORCHESTRATOR - Event Bus Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-line {
+            position: absolute;
+            background-color: #84967e;
+            z-index: 0;
+        }
+        .node-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.15);
+        }
+        .node-glow-error {
+            box-shadow: 0 0 15px rgba(255, 180, 171, 0.15);
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+        }
+        .telemetry-pulse {
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+        .glass-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+    </style>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#007117",
+                        "inverse-primary": "#006e16",
+                        "background": "#051424",
+                        "surface-dim": "#051424",
+                        "on-error-container": "#ffdad6",
+                        "tertiary": "#fff6ff",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-tint": "#00e639",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#002203",
+                        "primary": "#ebffe2",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-secondary": "#002388",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "inverse-on-surface": "#233143",
+                        "surface-variant": "#273647",
+                        "on-surface-variant": "#b9ccb2",
+                        "secondary": "#b8c3ff",
+                        "on-secondary-fixed": "#001356",
+                        "on-primary": "#003907",
+                        "secondary-container": "#0043eb",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "outline-variant": "#3b4b37",
+                        "surface-bright": "#2c3a4c",
+                        "on-tertiary": "#490080",
+                        "on-secondary-container": "#c6ceff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary-fixed-dim": "#00e639",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container": "#122131",
+                        "primary-container": "#00ff41",
+                        "on-background": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-low": "#0d1c2d",
+                        "outline": "#84967e",
+                        "on-tertiary-container": "#862ed4",
+                        "surface-container-highest": "#273647",
+                        "on-surface": "#d4e4fa",
+                        "primary-fixed": "#72ff70",
+                        "surface-container-high": "#1c2b3c",
+                        "on-error": "#690005",
+                        "surface": "#051424"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin h-16 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-headline-md" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-8 h-full">
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high px-3 py-1 transition-colors" href="#">TOPOLOGY</a>
+<a class="text-primary font-label-caps text-label-caps border-b-2 border-primary px-3 py-1" href="#">EVENT_MAP</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high px-3 py-1 transition-colors" href="#">METRICS</a>
+</nav>
+<div class="text-label-caps font-label-caps bg-surface-container-highest px-3 py-1 text-primary-fixed-dim border border-outline-variant">
+                v4.2.0 LIVE
+            </div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 w-64 bg-surface-container border-r border-outline-variant">
+<div class="px-6 py-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</span>
+</div>
+<nav class="flex-1 overflow-y-auto space-y-1">
+<div class="text-on-surface-variant font-code-sm text-code-sm px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 transition-transform hover:translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="fingerprint">fingerprint</span> WF-001: AUTH
+            </div>
+<div class="text-on-surface-variant font-code-sm text-code-sm px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 transition-transform hover:translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="payments">payments</span> WF-002: PAY
+            </div>
+<div class="text-on-surface-variant font-code-sm text-code-sm px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 transition-transform hover:translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="security">security</span> WF-003: RISK
+            </div>
+<div class="text-on-surface-variant font-code-sm text-code-sm px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 transition-transform hover:translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="mail">mail</span> WF-004: NOTIF
+            </div>
+<div class="text-on-surface-variant font-code-sm text-code-sm px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 transition-transform hover:translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="database">database</span> WF-005: DATA
+            </div>
+<div class="text-on-surface-variant font-code-sm text-code-sm px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 transition-transform hover:translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="sync">sync</span> WF-006: SYNC
+            </div>
+<div class="text-on-surface-variant font-code-sm text-code-sm px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 transition-transform hover:translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="history">history</span> WF-007: LOGS
+            </div>
+<div class="text-on-surface-variant font-code-sm text-code-sm px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 transition-transform hover:translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span> WF-008: AI_INF
+            </div>
+<div class="bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 font-code-sm text-code-sm flex items-center gap-3 translate-x-1">
+<span class="material-symbols-outlined" data-icon="lan">lan</span> WF-009: EDGE
+            </div>
+<div class="text-on-surface-variant font-code-sm text-code-sm px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 transition-transform hover:translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span> WF-010: CORE
+            </div>
+</nav>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 mt-16 p-lane-margin h-[calc(100vh-64px-36px)] overflow-hidden relative">
+<!-- Top Telemetry Row -->
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div>
+<h2 class="text-headline-lg font-headline-lg text-primary uppercase tracking-tight">Artifact F: Event Bus &amp; n8n Map</h2>
+<div class="flex items-center gap-4 mt-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary-container telemetry-pulse"></span>
+                        BUS_STATUS: OPERATIONAL
+                    </span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">
+                        THROUGHPUT: 1.4k events/s
+                    </span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">
+                        LATENCY_P99: 42ms
+                    </span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high border border-outline-variant px-4 py-2 text-label-caps font-label-caps hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="bolt">bolt</span> PURGE_QUEUES
+                </button>
+<button class="bg-primary text-on-primary px-4 py-2 text-label-caps font-label-caps hover:opacity-90 transition-opacity flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span> NEW_TRIGGER
+                </button>
+</div>
+</div>
+<!-- Network Topology Simulation -->
+<div class="relative w-full h-full border border-outline-variant bg-surface-container-lowest overflow-auto p-12">
+<!-- Swimlane: INBOUND EVENTS -->
+<div class="absolute left-12 top-12 bottom-12 w-64 border-r border-dashed border-outline-variant flex flex-col">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-6 px-4 py-1 bg-surface-container flex items-center gap-2 border-l-2 border-primary">
+<span class="material-symbols-outlined text-[14px]" data-icon="input">input</span>
+                    INBOUND_BUS
+                </div>
+<!-- Event Nodes -->
+<div class="space-y-4">
+<div class="node bg-surface border border-outline-variant p-3 node-glow">
+<span class="text-code-xs font-code-xs text-primary block mb-1">EVT_ID: 0x2A1</span>
+<div class="font-code-sm text-code-sm text-on-surface font-bold">ConversationCreated</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Source: CORE_API</div>
+</div>
+<div class="node bg-surface border border-outline-variant p-3 node-glow">
+<span class="text-code-xs font-code-xs text-primary block mb-1">EVT_ID: 0x2A2</span>
+<div class="font-code-sm text-code-sm text-on-surface font-bold">MessageSent</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Source: SOCKET_IO</div>
+</div>
+<div class="node bg-surface border border-outline-variant p-3">
+<span class="text-code-xs font-code-xs text-primary block mb-1">EVT_ID: 0x2A3</span>
+<div class="font-code-sm text-code-sm text-on-surface font-bold opacity-60">MessageRead</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Idle: 12.4s</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: PROCESSING n8n -->
+<div class="absolute left-96 top-12 bottom-12 right-96 flex flex-col items-center">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-6 px-4 py-1 bg-surface-container flex items-center gap-2 border-l-2 border-secondary">
+<span class="material-symbols-outlined text-[14px]" data-icon="schema">schema</span>
+                    N8N_ORCHESTRATOR
+                </div>
+<!-- Central Processing Clusters -->
+<div class="grid grid-cols-2 gap-8 w-full px-12">
+<!-- Cluster 1 -->
+<div class="flex flex-col gap-4">
+<div class="bg-[#0F0F0F] border-2 border-primary-container p-4 node-glow relative">
+<div class="absolute -top-3 -right-3 bg-primary-container text-on-primary-container text-[10px] font-bold px-2 py-0.5 rounded">RUNNING</div>
+<span class="text-label-caps text-label-caps text-primary">WF-009A</span>
+<div class="text-code-sm font-code-sm text-on-surface mt-1">TranslationCompleted</div>
+<div class="mt-3 flex gap-2">
+<span class="text-code-xs text-on-surface-variant bg-surface-variant px-1">L: 8ms</span>
+<span class="text-code-xs text-on-surface-variant bg-surface-variant px-1">C: 99.4%</span>
+</div>
+</div>
+<div class="bg-[#0F0F0F] border border-outline-variant p-4">
+<span class="text-label-caps text-label-caps text-secondary">WF-009B</span>
+<div class="text-code-sm font-code-sm text-on-surface mt-1">AttachmentUploaded</div>
+<div class="mt-3 flex gap-2">
+<span class="text-code-xs text-on-surface-variant bg-surface-variant px-1">S3: OK</span>
+</div>
+</div>
+</div>
+<!-- Cluster 2 -->
+<div class="flex flex-col gap-4">
+<div class="bg-[#0F0F0F] border border-outline-variant p-4">
+<span class="text-label-caps text-label-caps text-primary">WF-009C</span>
+<div class="text-code-sm font-code-sm text-on-surface mt-1">ModerationCompleted</div>
+<div class="mt-3 flex gap-2 text-code-xs text-primary-fixed-dim">
+                                ANALYZING_TENSORS...
+                            </div>
+</div>
+<!-- DEAD LETTER QUEUE -->
+<div class="bg-[#200505] border-2 border-error p-4 node-glow-error">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps text-label-caps text-error">DEAD_LETTER_QUEUE</span>
+<span class="material-symbols-outlined text-error text-[16px]" data-icon="warning">warning</span>
+</div>
+<div class="text-code-sm font-code-sm text-error">RETRIES_EXCEEDED</div>
+<div class="mt-2 text-code-xs text-on-error-container">Total: 42 events</div>
+</div>
+</div>
+</div>
+<!-- Realtime Stream -->
+<div class="mt-12 w-full max-w-lg bg-surface border border-outline-variant p-4">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps text-label-caps text-on-surface-variant">REALTIME_EVENTS</span>
+<span class="text-code-xs text-primary">SYNC_OK</span>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between font-code-xs text-code-xs py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant">14:22:01.44</span>
+<span class="text-primary">CONV_CREATED [UUID_441]</span>
+<span class="text-on-surface-variant">ACK: 1ms</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant">14:22:01.48</span>
+<span class="text-secondary">MSG_SENT [UUID_823]</span>
+<span class="text-on-surface-variant">ACK: 2ms</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs py-1">
+<span class="text-on-surface-variant">14:22:01.52</span>
+<span class="text-error">DLQ_INGEST [ERR_503]</span>
+<span class="text-on-surface-variant">ACK: 12ms</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: DESTINATIONS -->
+<div class="absolute right-12 top-12 bottom-12 w-64 border-l border-dashed border-outline-variant flex flex-col items-end">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-6 px-4 py-1 bg-surface-container flex items-center gap-2 border-r-2 border-primary-container">
+                    OUTBOUND_SYNC
+                    <span class="material-symbols-outlined text-[14px]" data-icon="output">output</span>
+</div>
+<div class="space-y-4 w-full">
+<div class="bg-surface-container-high border border-outline-variant p-4 flex flex-col items-end">
+<div class="font-code-sm text-code-sm text-on-surface">ELASTIC_SEARCH</div>
+<div class="text-code-xs text-on-surface-variant mt-1">Indexing: Active</div>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-4 flex flex-col items-end">
+<div class="font-code-sm text-code-sm text-on-surface">POSTGRES_MASTER</div>
+<div class="text-code-xs text-on-surface-variant mt-1">Write Through: OK</div>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-4 flex flex-col items-end">
+<div class="font-code-sm text-code-sm text-on-surface">REDIS_CACHE</div>
+<div class="text-code-xs text-on-surface-variant mt-1">Pub/Sub: 1.2k sub</div>
+</div>
+</div>
+</div>
+<!-- Network Topology Visual Connectors (Mocked with SVGs) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#84967e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Lines connecting Inbound to n8n -->
+<path d="M 312 160 L 384 160" marker-end="url(#arrowhead)" stroke="#84967e" stroke-width="2"></path>
+<path d="M 312 240 L 340 240 L 340 180 L 384 180" marker-end="url(#arrowhead)" stroke="#84967e" stroke-width="1"></path>
+<!-- Lines connecting n8n to Outbound -->
+<path d="M 640 180 L 700 180 L 700 160 L 752 160" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<path d="M 640 280 L 700 280 L 700 320 L 752 320" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="1"></path>
+<!-- Error Line to DLQ -->
+<path d="M 512 350 L 512 400" marker-end="url(#arrowhead)" stroke="#ffb4ab" stroke-dasharray="4" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Node Configuration Drawer (Glassmorphism) -->
+<div class="absolute top-0 right-0 w-80 h-full glass-overlay border-l border-outline-variant transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col" id="node-config">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-headline-md font-headline-md text-primary">NODE_INFO</h3>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface" data-icon="close" onclick="toggleConfig()">close</button>
+</div>
+<div class="space-y-6 flex-1 overflow-y-auto">
+<section>
+<div class="text-label-caps text-label-caps text-on-surface-variant mb-2">IDENTIFIER</div>
+<div class="bg-surface-container-highest p-3 border border-outline-variant font-code-sm text-code-sm text-primary">
+                        WF-009A: TRANSLATION_V4
+                    </div>
+</section>
+<section>
+<div class="text-label-caps text-label-caps text-on-surface-variant mb-2">PROPERTIES</div>
+<div class="space-y-2">
+<div class="flex justify-between text-code-xs">
+<span class="text-on-surface-variant">TIMEOUT:</span>
+<span class="text-on-surface">5000ms</span>
+</div>
+<div class="flex justify-between text-code-xs">
+<span class="text-on-surface-variant">RETRY_POLICY:</span>
+<span class="text-on-surface">EXPONENTIAL</span>
+</div>
+<div class="flex justify-between text-code-xs">
+<span class="text-on-surface-variant">CONCURRENCY:</span>
+<span class="text-on-surface">10</span>
+</div>
+</div>
+</section>
+<section>
+<div class="text-label-caps text-label-caps text-on-surface-variant mb-2">LOG_PREVIEW</div>
+<div class="bg-black/40 p-3 font-code-xs text-[9px] leading-tight text-primary-fixed-dim border border-outline-variant h-40 overflow-hidden">
+                        [14:21:00] INGEST: translation_req<br/>
+                        [14:21:00] AUTH: session_valid<br/>
+                        [14:21:01] ENGINE: gpt-4o-translate<br/>
+                        [14:21:01] LATENCY: 844ms<br/>
+                        [14:21:02] SYNC: elastic_search_success<br/>
+                        [14:21:02] BUS: translation_completed_sent<br/>
+                        ...
+                    </div>
+</section>
+</div>
+<div class="pt-6 border-t border-outline-variant mt-auto">
+<button class="w-full bg-surface-container border border-primary-container text-primary font-label-caps text-label-caps py-2 hover:bg-primary-container hover:text-on-primary-container transition-all">
+                    EDIT_WORKFLOW
+                </button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-6">
+<span class="text-code-sm font-code-sm text-primary font-bold">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-4">
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">AUDIT_TRAIL: <span class="text-primary font-bold">ACTIVE</span></a>
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">N8N_SYNC: <span class="text-primary font-bold">OK</span></a>
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">LATENCY: <span class="text-primary font-bold">12ms</span></a>
+</div>
+</div>
+<div class="text-label-caps font-label-caps text-on-surface-variant">
+            © 2024 ECOSYSTEM_ORCHESTRATOR
+        </div>
+</footer>
+<script>
+        function toggleConfig() {
+            const drawer = document.getElementById('node-config');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        // Simulating clicks on nodes to open drawer
+        document.querySelectorAll('.node, .bg-[#0F0F0F]').forEach(node => {
+            node.style.cursor = 'pointer';
+            node.addEventListener('click', () => {
+                const drawer = document.getElementById('node-config');
+                drawer.classList.remove('translate-x-full');
+            });
+        });
+
+        // Small interaction: telemetry data simulation
+        setInterval(() => {
+            const latencies = document.querySelectorAll('.text-primary.font-bold');
+            if(latencies.length > 2) {
+                const newLat = Math.floor(Math.random() * 5) + 10;
+                latencies[2].innerText = newLat + 'ms';
+            }
+        }, 3000);
+    </script>
+</body></html>

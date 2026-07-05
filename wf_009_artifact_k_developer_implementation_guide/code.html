@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-009 Artifact K: Developer Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: absolute;
+            border: 2px solid #00ff41;
+            z-index: 0;
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(18, 33, 49, 0.8);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-container": "#007117",
+                      "inverse-primary": "#006e16",
+                      "background": "#051424",
+                      "surface-dim": "#051424",
+                      "on-error-container": "#ffdad6",
+                      "tertiary": "#fff6ff",
+                      "surface-container-lowest": "#010f1f",
+                      "surface-tint": "#00e639",
+                      "error-container": "#93000a",
+                      "error": "#ffb4ab",
+                      "on-primary-fixed": "#002203",
+                      "primary": "#ebffe2",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-secondary": "#002388",
+                      "secondary-fixed": "#dde1ff",
+                      "on-tertiary-fixed": "#2c0051",
+                      "inverse-on-surface": "#233143",
+                      "surface-variant": "#273647",
+                      "on-surface-variant": "#b9ccb2",
+                      "secondary": "#b8c3ff",
+                      "on-secondary-fixed": "#001356",
+                      "on-primary": "#003907",
+                      "secondary-container": "#0043eb",
+                      "inverse-surface": "#d4e4fa",
+                      "tertiary-fixed": "#f0dbff",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "outline-variant": "#3b4b37",
+                      "surface-bright": "#2c3a4c",
+                      "on-tertiary": "#490080",
+                      "on-secondary-container": "#c6ceff",
+                      "on-primary-fixed-variant": "#00530e",
+                      "primary-fixed-dim": "#00e639",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "surface-container": "#122131",
+                      "primary-container": "#00ff41",
+                      "on-background": "#d4e4fa",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-container-low": "#0d1c2d",
+                      "outline": "#84967e",
+                      "on-tertiary-container": "#862ed4",
+                      "surface-container-highest": "#273647",
+                      "on-surface": "#d4e4fa",
+                      "primary-fixed": "#72ff70",
+                      "surface-container-high": "#1c2b3c",
+                      "on-error": "#690005",
+                      "surface": "#051424"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface flex justify-between items-center px-lane-margin h-16 border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6 h-full">
+<nav class="hidden md:flex items-center gap-8 h-full">
+<a class="h-full flex items-center px-2 text-on-surface-variant hover:bg-surface-container-high transition-opacity text-label-caps font-label-caps" href="#">DOCS</a>
+<a class="h-full flex items-center px-2 text-primary border-b-2 border-primary opacity-80 transition-opacity text-label-caps font-label-caps" href="#">ARTIFACT_K</a>
+<a class="h-full flex items-center px-2 text-on-surface-variant hover:bg-surface-container-high transition-opacity text-label-caps font-label-caps" href="#">REPOSITORY</a>
+</nav>
+<span class="text-label-caps font-label-caps bg-surface-container-high px-3 py-1 border border-outline-variant text-primary">v4.2.0 LIVE</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-surface-container border-r border-outline-variant flex flex-col pt-20">
+<div class="px-6 mb-8">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant mb-2 uppercase tracking-widest opacity-50">System Index</h2>
+<div class="text-headline-md font-headline-md text-primary font-bold">WORKFLOW_INDEX</div>
+</div>
+<nav class="flex flex-col flex-1 overflow-y-auto">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="payments">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="security">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="mail">mail</span>
+<span class="text-code-sm font-code-sm">WF-004: NOTIF</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="database">database</span>
+<span class="text-code-sm font-code-sm">WF-005: DATA</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="sync">sync</span>
+<span class="text-code-sm font-code-sm">WF-006: SYNC</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="history">history</span>
+<span class="text-code-sm font-code-sm">WF-007: LOGS</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="psychology">psychology</span>
+<span class="text-code-sm font-code-sm">WF-008: AI_INF</span>
+</a>
+<a class="bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 flex items-center gap-3 translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="lan">lan</span>
+<span class="text-code-sm font-code-sm">WF-009: EDGE</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest group" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="text-code-sm font-code-sm">WF-010: CORE</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 pt-24 pb-16 px-lane-margin min-h-screen">
+<!-- Hero Title -->
+<div class="mb-12">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-label-caps font-label-caps text-primary px-2 py-1 bg-primary-container/20 rounded">TECHNICAL_SPEC</span>
+<span class="text-label-caps font-label-caps text-on-surface-variant">DOC_ID: WF-009-K</span>
+</div>
+<h2 class="text-[48px] leading-tight font-bold font-headline-lg tracking-tight mb-4">Artifact K: Developer Implementation Guide</h2>
+<p class="text-on-surface-variant font-body-md max-w-2xl">A comprehensive architectural blueprint for the conversation engine ecosystem. This guide outlines service orchestration, dependency mapping, and deployment protocols for the high-concurrency messaging pipeline.</p>
+</div>
+<!-- System Architecture Visualization (Swimlanes) -->
+<section class="mb-16">
+<h3 class="text-label-caps font-label-caps text-primary mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="hub">hub</span>
+                SYSTEM_TOPOLOGY_MAP
+            </h3>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-0 border border-outline-variant bg-surface-container-low overflow-hidden rounded-lg">
+<!-- Swimlane: Owning Services -->
+<div class="border-r border-outline-variant">
+<div class="p-4 border-b border-outline-variant bg-surface-container">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="dns">dns</span>
+<span class="text-label-caps font-label-caps text-primary">SERVICES</span>
+</div>
+<div class="text-headline-md font-headline-md">OWNERS</div>
+</div>
+<div class="p-4 space-y-4">
+<div class="bg-surface p-3 border border-outline-variant rounded relative z-10">
+<span class="text-label-caps font-label-caps text-on-surface-variant block mb-1">SVC-01</span>
+<div class="text-code-sm font-code-sm text-primary">MESSAGING_ENGINE</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant mt-2">Latency: 4ms</div>
+</div>
+<div class="bg-surface p-3 border border-outline-variant rounded">
+<span class="text-label-caps font-label-caps text-on-surface-variant block mb-1">SVC-02</span>
+<div class="text-code-sm font-code-sm text-primary">CONVO_MANAGER</div>
+</div>
+<div class="bg-surface p-3 border border-outline-variant rounded">
+<span class="text-label-caps font-label-caps text-on-surface-variant block mb-1">SVC-03</span>
+<div class="text-code-sm font-code-sm text-primary">TRANSLATION_BUS</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: Data Logic -->
+<div class="border-r border-outline-variant">
+<div class="p-4 border-b border-outline-variant bg-surface-container">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="database">database</span>
+<span class="text-label-caps font-label-caps text-primary">PERSISTENCE</span>
+</div>
+<div class="text-headline-md font-headline-md">STORAGE</div>
+</div>
+<div class="p-4 flex flex-col justify-center h-full space-y-4 pt-12">
+<div class="bg-surface p-3 border-dashed border-2 border-outline-variant rounded">
+<div class="text-code-sm font-code-sm text-on-surface-variant">EVENT_STORE_S3</div>
+</div>
+<div class="bg-surface p-3 border border-primary/50 rounded shadow-[0_0_15px_rgba(0,255,65,0.1)]">
+<div class="text-code-sm font-code-sm text-primary">POSTGRES_CDC</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant mt-1">Sync: Active</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: Orchestration (n8n) -->
+<div class="border-r border-outline-variant col-span-2">
+<div class="p-4 border-b border-outline-variant bg-surface-container">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="schema">schema</span>
+<span class="text-label-caps font-label-caps text-primary">WORKFLOWS</span>
+</div>
+<div class="text-headline-md font-headline-md">N8N_PIPELINES</div>
+</div>
+<div class="p-6 relative">
+<!-- Connector Lines Placeholder -->
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-4">
+<div class="bg-surface-container-high p-4 border-l-4 border-primary rounded relative">
+<span class="text-label-caps font-label-caps text-primary">WF_ID: 8829</span>
+<div class="text-code-sm font-code-sm">MODERATION_FILTER</div>
+<div class="flex gap-2 mt-3">
+<div class="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+<div class="w-2 h-2 bg-primary/20 rounded-full"></div>
+</div>
+</div>
+<div class="bg-surface-container-high p-4 border-l-4 border-outline rounded relative">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WF_ID: 1044</span>
+<div class="text-code-sm font-code-sm text-on-surface-variant">LOG_AGGREGATOR</div>
+</div>
+</div>
+<div class="flex items-center justify-center">
+<div class="p-4 border border-error border-dashed bg-error-container/5 rounded text-center">
+<span class="material-symbols-outlined text-error mb-2 block" data-icon="warning">warning</span>
+<div class="text-code-xs font-code-xs text-error">ERR_FALLBACK</div>
+<div class="text-label-caps font-label-caps mt-1 text-on-error-container">QUEUE_DLQ</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: Consumers -->
+<div>
+<div class="p-4 border-b border-outline-variant bg-surface-container">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="terminal">terminal</span>
+<span class="text-label-caps font-label-caps text-primary">ENDPOINTS</span>
+</div>
+<div class="text-headline-md font-headline-md">CLIENTS</div>
+</div>
+<div class="p-4 space-y-4">
+<div class="flex items-center gap-3 p-2 border border-outline-variant rounded">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="smartphone">smartphone</span>
+<span class="text-code-sm font-code-sm">MOBILE_APP</span>
+</div>
+<div class="flex items-center gap-3 p-2 border border-outline-variant rounded">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="web">web</span>
+<span class="text-code-sm font-code-sm">ADMIN_DASH</span>
+</div>
+<div class="flex items-center gap-3 p-2 border border-outline-variant rounded">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="api">api</span>
+<span class="text-code-sm font-code-sm">EXT_API_V2</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Implementation Details -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+<!-- Dependency List -->
+<div class="md:col-span-2 bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h4 class="text-headline-md font-headline-md text-primary">API/DB DEPENDENCIES</h4>
+<p class="text-code-xs font-code-xs text-on-surface-variant mt-1">Core services required for execution.</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="linked_services">linked_services</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="p-4 bg-surface rounded border border-outline-variant hover:border-primary transition-colors cursor-help">
+<div class="flex justify-between items-center mb-3">
+<span class="text-label-caps font-label-caps text-on-surface-variant">REDIS_CLUSTER</span>
+<span class="text-code-xs font-code-xs text-primary bg-primary/10 px-1">STABLE</span>
+</div>
+<div class="text-code-sm font-code-sm mb-2 text-primary">CONVO_CACHE_V4</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant line-clamp-2">In-memory storage for active session metadata and rate limiting counters.</div>
+</div>
+<div class="p-4 bg-surface rounded border border-outline-variant hover:border-primary transition-colors cursor-help">
+<div class="flex justify-between items-center mb-3">
+<span class="text-label-caps font-label-caps text-on-surface-variant">DEEPL_API</span>
+<span class="text-code-xs font-code-xs text-primary bg-primary/10 px-1">99.9% SLI</span>
+</div>
+<div class="text-code-sm font-code-sm mb-2 text-primary">TRANSLATION_BRIDGE</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant line-clamp-2">Real-time neural machine translation for multilingual conversation threads.</div>
+</div>
+<div class="p-4 bg-surface rounded border border-outline-variant hover:border-primary transition-colors cursor-help">
+<div class="flex justify-between items-center mb-3">
+<span class="text-label-caps font-label-caps text-on-surface-variant">ELASTICSEARCH</span>
+<span class="text-code-xs font-code-xs text-error bg-error/10 px-1">LATENCY_HIGH</span>
+</div>
+<div class="text-code-sm font-code-sm mb-2 text-primary">SEARCH_INDEX_MESSAGING</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant line-clamp-2">Full-text indexing of history logs. Requires shards re-balancing.</div>
+</div>
+<div class="p-4 bg-surface rounded border border-outline-variant hover:border-primary transition-colors cursor-help">
+<div class="flex justify-between items-center mb-3">
+<span class="text-label-caps font-label-caps text-on-surface-variant">AUTH_GATEWAY</span>
+<span class="text-code-xs font-code-xs text-primary bg-primary/10 px-1">HEALTHY</span>
+</div>
+<div class="text-code-sm font-code-sm mb-2 text-primary">WF-001: AUTH_SVC</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant line-clamp-2">Identity provider for all conversation participants and internal service meshes.</div>
+</div>
+</div>
+</div>
+<!-- Testing & Deployment Card -->
+<div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col justify-between overflow-hidden relative">
+<div class="absolute -right-12 -top-12 opacity-10 rotate-12">
+<span class="material-symbols-outlined text-[160px]" data-icon="deployed_code">deployed_code</span>
+</div>
+<div>
+<h4 class="text-headline-md font-headline-md text-primary mb-2">DEPLOY_PROTOCOLS</h4>
+<p class="text-body-md text-on-surface-variant mb-6">CI/CD pipeline requirements for WF-009 deployment.</p>
+<div class="space-y-4">
+<div class="flex gap-4">
+<div class="text-primary font-bold text-headline-md">01</div>
+<div>
+<div class="text-code-sm font-code-sm">UNIT_TEST_COVERAGE</div>
+<div class="w-full bg-surface h-1 mt-1">
+<div class="bg-primary h-full w-[85%]"></div>
+</div>
+<span class="text-code-xs font-code-xs text-on-surface-variant">Min 85% required</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="text-primary font-bold text-headline-md">02</div>
+<div>
+<div class="text-code-sm font-code-sm">CANARY_ROLLOUT</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">Phase 1: 5% traffic (Region: US-EAST)</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="text-primary font-bold text-headline-md">03</div>
+<div>
+<div class="text-code-sm font-code-sm">DB_MIGRATION_LOCK</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">Zero-downtime shadow migration only.</div>
+</div>
+</div>
+</div>
+</div>
+<button class="mt-8 bg-primary text-on-primary font-label-caps text-label-caps py-3 rounded uppercase tracking-widest hover:brightness-110 transition-all">
+                    Initiate Staging Push
+                </button>
+</div>
+</section>
+<!-- Technical README Segment -->
+<section class="mb-16">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+<div class="bg-surface-container px-6 py-3 border-b border-outline-variant flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="description">description</span>
+<span class="text-code-sm font-code-sm text-on-surface-variant">README_V4_2.md</span>
+</div>
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+</div>
+</div>
+<div class="p-8 font-code-sm text-on-surface prose prose-invert max-w-none">
+<h3 class="text-primary border-b border-outline-variant pb-2 mb-4">## QUICKSTART</h3>
+<pre class="bg-surface p-4 rounded border border-outline-variant mb-6 text-on-primary-fixed-variant"><code>$ docker-compose up -d messaging-gateway
+$ npx n8n-cli run --id 8829 --context staging
+$ curl -X POST localhost:8080/v1/init -d '{"app_id":"wf-009"}'</code></pre>
+<h3 class="text-primary border-b border-outline-variant pb-2 mb-4">## CONTEXTUAL_RULES</h3>
+<ul class="list-disc ml-6 space-y-2 text-on-surface-variant">
+<li><strong class="text-on-surface">Messaging:</strong> All payloads must be signed using SHA-256 HMAC via the Auth service bridge.</li>
+<li><strong class="text-on-surface">Translation:</strong> Use <code class="bg-surface px-1">SVC-03</code> for asynchronous batching to avoid blocking the main UI thread.</li>
+<li><strong class="text-on-surface">Moderation:</strong> Failure in the moderation workflow (<code class="bg-surface px-1">WF_ID: 8829</code>) results in a hard-lock of the conversation until human review.</li>
+</ul>
+<div class="mt-8 p-4 border border-primary/20 bg-primary/5 rounded-lg flex gap-4 items-start">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<div class="text-code-xs font-code-xs leading-relaxed text-on-surface-variant">
+<strong>NOTE:</strong> Telemetry metrics are broadcast on channel <code>0x99A</code>. Ensure your local Prometheus instance is scraping the <code>/metrics</code> endpoint at 15s intervals for high-fidelity log resolution during the implementation phase.
+                        </div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-low flex justify-between items-center px-lane-margin py-2 border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-2">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#00ff41]"></div>
+<span class="text-code-xs font-code-xs text-on-surface-variant">LATENCY: 12ms</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<a class="text-label-caps font-label-caps text-on-surface-variant hover:text-primary transition-colors duration-150" href="#">AUDIT_TRAIL: ACTIVE</a>
+<a class="text-label-caps font-label-caps text-primary font-bold hover:text-primary transition-colors duration-150" href="#">N8N_SYNC: OK</a>
+<span class="text-code-xs font-code-xs text-on-surface-variant opacity-40">© 2024 ECOSYSTEM_ORCHESTRATOR</span>
+</div>
+</footer>
+<!-- Animated Micro-Telemetry Background Decoration -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none opacity-[0.03] z-[-1] overflow-hidden">
+<div class="absolute top-1/4 left-1/4 animate-pulse">
+<pre class="text-[10px] text-primary">EXEC_COUNT: 12.4k<br/>LOAD_AVG: 0.42<br/>THREAD_POOL: 12/64</pre>
+</div>
+<div class="absolute bottom-1/4 right-1/4 animate-pulse" style="animation-delay: 1.5s;">
+<pre class="text-[10px] text-primary">MEMORY_USAGE: 442MB<br/>HEAP_P: 12%<br/>GC_EVENT: NONE</pre>
+</div>
+</div>
+<script>
+        // Simple Interaction logic
+        document.querySelectorAll('nav a, aside a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Mock navigation behavior
+                if(!link.classList.contains('active')) {
+                   // Visual feedback only
+                   console.log('Navigating to:', link.innerText);
+                }
+            });
+        });
+
+        // Add a subtle scanline effect
+        const scanline = document.createElement('div');
+        scanline.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 65, 0.02) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        `;
+        document.body.appendChild(scanline);
+    </script>
+</body></html>

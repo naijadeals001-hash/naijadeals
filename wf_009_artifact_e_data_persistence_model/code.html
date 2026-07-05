@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-009 Artifact E: Data Persistence Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(18, 33, 49, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-container": "#007117",
+                      "inverse-primary": "#006e16",
+                      "background": "#051424",
+                      "surface-dim": "#051424",
+                      "on-error-container": "#ffdad6",
+                      "tertiary": "#fff6ff",
+                      "surface-container-lowest": "#010f1f",
+                      "surface-tint": "#00e639",
+                      "error-container": "#93000a",
+                      "error": "#ffb4ab",
+                      "on-primary-fixed": "#002203",
+                      "primary": "#ebffe2",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-secondary": "#002388",
+                      "secondary-fixed": "#dde1ff",
+                      "on-tertiary-fixed": "#2c0051",
+                      "inverse-on-surface": "#233143",
+                      "surface-variant": "#273647",
+                      "on-surface-variant": "#b9ccb2",
+                      "secondary": "#b8c3ff",
+                      "on-secondary-fixed": "#001356",
+                      "on-primary": "#003907",
+                      "secondary-container": "#0043eb",
+                      "inverse-surface": "#d4e4fa",
+                      "tertiary-fixed": "#f0dbff",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "outline-variant": "#3b4b37",
+                      "surface-bright": "#2c3a4c",
+                      "on-tertiary": "#490080",
+                      "on-secondary-container": "#c6ceff",
+                      "on-primary-fixed-variant": "#00530e",
+                      "primary-fixed-dim": "#00e639",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "surface-container": "#122131",
+                      "primary-container": "#00ff41",
+                      "on-background": "#d4e4fa",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-container-low": "#0d1c2d",
+                      "outline": "#84967e",
+                      "on-tertiary-container": "#862ed4",
+                      "surface-container-highest": "#273647",
+                      "on-surface": "#d4e4fa",
+                      "primary-fixed": "#72ff70",
+                      "surface-container-high": "#1c2b3c",
+                      "on-error": "#690005",
+                      "surface": "#051424"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface flex justify-between items-center px-lane-margin h-16 border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<a class="text-on-surface-variant hover:bg-surface-container-high px-2 py-1 transition-opacity" href="#">DOCS</a>
+<a class="text-primary border-b-2 border-primary px-2 py-1 transition-opacity" href="#">ARTIFACTS</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high px-2 py-1 transition-opacity" href="#">MONITOR</a>
+</nav>
+<span class="text-label-caps font-label-caps bg-primary-container text-on-primary-container px-2 py-1 rounded">v4.2.0 LIVE</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 w-64 bg-surface-container border-r border-outline-variant hidden lg:flex">
+<div class="px-6 mb-6">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant opacity-60">WORKFLOW_INDEX</h2>
+</div>
+<nav class="flex flex-col flex-1 overflow-y-auto">
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-transform" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</div>
+</a>
+<!-- ... repeated items ... -->
+<a class="bg-surface-variant text-primary border-l-4 border-primary px-4 py-3 translate-x-1" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]" data-icon="lan">lan</span>
+<span class="text-code-sm font-code-sm">WF-009: EDGE</span>
+</div>
+</a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-transform" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="text-code-sm font-code-sm">WF-010: CORE</span>
+</div>
+</a>
+</nav>
+</aside>
+<!-- Main Canvas -->
+<main class="lg:ml-64 pt-16 pb-12 min-h-screen px-lane-margin">
+<!-- Header Section -->
+<section class="py-8 flex flex-col md:flex-row justify-between items-end gap-4 border-b border-outline-variant mb-8">
+<div>
+<span class="text-label-caps font-label-caps text-primary mb-2 block">ARTIFACT_TYPE: PERSISTENCE_MODEL</span>
+<h2 class="text-headline-lg font-headline-lg">WF-009 Artifact E: Relational Data Schema</h2>
+<p class="text-body-md text-on-surface-variant mt-2 max-w-2xl">High-density visual representation of the communication ecosystem's database architecture. Engineered for distributed atomicity and compliant retention policies.</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-highest border border-outline-variant px-4 py-2 text-code-sm flex items-center gap-2 hover:bg-surface-bright">
+<span class="material-symbols-outlined" data-icon="download">download</span> SQL_EXPORT
+                </button>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 text-code-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span> DEPLOY_MIGRATION
+                </button>
+</div>
+</section>
+<!-- Schema Map -->
+<div class="relative w-full overflow-x-auto pb-12">
+<div class="min-w-[1200px] grid grid-cols-4 gap-8 relative p-8">
+<!-- SVG Connectors Layer (Simplified visualization using lines) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30" xmlns="http://www.w3.org/2000/svg">
+<path d="M 280 180 L 340 180" fill="none" stroke="#72ff70" stroke-dasharray="4" stroke-width="1.5"></path>
+<path d="M 280 250 L 640 250" fill="none" stroke="#72ff70" stroke-width="1.5"></path>
+<path d="M 580 180 L 640 180" fill="none" stroke="#72ff70" stroke-width="1.5"></path>
+</svg>
+<!-- Column 1: Core Orchestration -->
+<div class="space-y-6">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-4 border-l-2 border-primary pl-2">01_CORE_ENTITIES</div>
+<!-- Table: Conversation -->
+<div class="bg-surface-container-low border border-outline-variant rounded-none overflow-hidden flex flex-col shadow-lg">
+<div class="bg-surface-variant p-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-primary">CONVERSATION</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="table_chart">table_chart</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between text-primary-fixed-dim"><span>id</span> <span class="opacity-50 italic">UUID (PK)</span></div>
+<div class="flex justify-between"><span>title</span> <span class="opacity-50 italic">VARCHAR(255)</span></div>
+<div class="flex justify-between"><span>type</span> <span class="opacity-50 italic">ENUM('P2P','GRP')</span></div>
+<div class="flex justify-between"><span>created_at</span> <span class="opacity-50 italic">TIMESTAMPTZ</span></div>
+<div class="flex justify-between"><span>metadata</span> <span class="opacity-50 italic">JSONB</span></div>
+</div>
+<div class="bg-surface-container p-1 border-t border-outline-variant">
+<div class="text-code-xs text-on-surface-variant px-2 italic">Idx: conv_type_idx, created_idx</div>
+</div>
+</div>
+<!-- Table: Participant -->
+<div class="bg-surface-container-low border border-outline-variant rounded-none overflow-hidden flex flex-col shadow-lg">
+<div class="bg-surface-variant p-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-primary">PARTICIPANT</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="group">group</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between text-primary-fixed-dim"><span>id</span> <span class="opacity-50 italic">UUID (PK)</span></div>
+<div class="flex justify-between text-secondary"><span>conversation_id</span> <span class="opacity-50 italic">UUID (FK)</span></div>
+<div class="flex justify-between text-secondary"><span>user_id</span> <span class="opacity-50 italic">UUID (FK)</span></div>
+<div class="flex justify-between"><span>role</span> <span class="opacity-50 italic">VARCHAR(50)</span></div>
+<div class="flex justify-between"><span>joined_at</span> <span class="opacity-50 italic">TIMESTAMPTZ</span></div>
+</div>
+</div>
+</div>
+<!-- Column 2: Message Flow -->
+<div class="space-y-6">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-4 border-l-2 border-secondary pl-2">02_TRANSACTIONAL_DATA</div>
+<!-- Table: Message -->
+<div class="bg-surface-container-low border border-outline-variant rounded-none overflow-hidden flex flex-col shadow-xl ring-1 ring-primary/20">
+<div class="bg-surface-container-high p-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-primary">MESSAGE</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="chat">chat</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between text-primary-fixed-dim"><span>id</span> <span class="opacity-50 italic">UUID (PK)</span></div>
+<div class="flex justify-between text-secondary"><span>conversation_id</span> <span class="opacity-50 italic">UUID (FK)</span></div>
+<div class="flex justify-between text-secondary"><span>sender_id</span> <span class="opacity-50 italic">UUID (FK)</span></div>
+<div class="flex justify-between"><span>content</span> <span class="opacity-50 italic">TEXT</span></div>
+<div class="flex justify-between"><span>m_type</span> <span class="opacity-50 italic">ENUM('TXT','ATT','VC')</span></div>
+<div class="flex justify-between"><span>ts_sent</span> <span class="opacity-50 italic">TIMESTAMPTZ</span></div>
+</div>
+<div class="bg-primary/5 p-2 border-t border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-code-xs font-bold text-primary">WRITE_INTENSIVE</span>
+</div>
+</div>
+</div>
+<!-- Table: ReadReceipt -->
+<div class="bg-surface-container-low border border-outline-variant rounded-none overflow-hidden flex flex-col shadow-lg opacity-80">
+<div class="bg-surface-variant p-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-on-surface">READ_RECEIPT</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between text-secondary"><span>message_id</span> <span class="opacity-50 italic">FK</span></div>
+<div class="flex justify-between text-secondary"><span>user_id</span> <span class="opacity-50 italic">FK</span></div>
+<div class="flex justify-between"><span>read_at</span> <span class="opacity-50 italic">TIMESTAMPTZ</span></div>
+</div>
+</div>
+</div>
+<!-- Column 3: Rich Media & State -->
+<div class="space-y-6">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-4 border-l-2 border-tertiary-fixed-dim pl-2">03_RICH_MEDIA</div>
+<!-- Table: Attachment -->
+<div class="bg-surface-container-low border border-outline-variant rounded-none overflow-hidden flex flex-col shadow-lg">
+<div class="bg-surface-variant p-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps">ATTACHMENT</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="attachment">attachment</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between text-secondary"><span>message_id</span> <span class="opacity-50 italic">FK</span></div>
+<div class="flex justify-between"><span>file_url</span> <span class="opacity-50 italic">TEXT</span></div>
+<div class="flex justify-between"><span>file_size</span> <span class="opacity-50 italic">INT8</span></div>
+</div>
+</div>
+<!-- Table: VoiceNote -->
+<div class="bg-surface-container-low border border-outline-variant rounded-none overflow-hidden flex flex-col shadow-lg">
+<div class="bg-surface-variant p-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps">VOICE_NOTE</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="mic">mic</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between text-secondary"><span>message_id</span> <span class="opacity-50 italic">FK</span></div>
+<div class="flex justify-between"><span>duration_sec</span> <span class="opacity-50 italic">INT4</span></div>
+<div class="flex justify-between"><span>sample_rate</span> <span class="opacity-50 italic">INT4</span></div>
+</div>
+</div>
+<!-- Table: TypingStatus -->
+<div class="bg-surface-container-low border border-outline-variant border-dashed rounded-none overflow-hidden flex flex-col shadow-lg">
+<div class="bg-surface-container-highest p-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps">TYPING_STATUS (EPHEMERAL)</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm text-on-surface-variant">
+<div class="italic">In-memory store only. Non-persistent.</div>
+<div class="flex justify-between text-secondary"><span>user_id</span> <span>TTL: 5s</span></div>
+</div>
+</div>
+</div>
+<!-- Column 4: Governance & Intelligence -->
+<div class="space-y-6">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-4 border-l-2 border-error-container pl-2">04_SECURITY_LOGS</div>
+<!-- Table: Translation -->
+<div class="bg-surface-container-low border border-outline-variant rounded-none overflow-hidden flex flex-col shadow-lg">
+<div class="bg-surface-variant p-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps">TRANSLATION</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="translate">translate</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between text-secondary"><span>message_id</span> <span class="opacity-50 italic">FK</span></div>
+<div class="flex justify-between"><span>lang_code</span> <span class="opacity-50 italic">CHAR(2)</span></div>
+<div class="flex justify-between"><span>content_tx</span> <span class="opacity-50 italic">TEXT</span></div>
+</div>
+</div>
+<!-- Table: ModerationEvent -->
+<div class="bg-surface-container-low border border-error-container rounded-none overflow-hidden flex flex-col shadow-lg">
+<div class="bg-error-container/20 p-2 border-b border-error-container flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-error">MODERATION_EVENT</span>
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="security">security</span>
+</div>
+<div class="p-3 space-y-1 font-code-sm text-code-sm">
+<div class="flex justify-between text-secondary"><span>target_id</span> <span class="opacity-50 italic">UUID</span></div>
+<div class="flex justify-between"><span>violation_type</span> <span class="opacity-50 italic">ENUM</span></div>
+<div class="flex justify-between text-error"><span>risk_score</span> <span class="opacity-50 italic">FLOAT</span></div>
+</div>
+</div>
+<!-- Telemetry Widget -->
+<div class="p-4 bg-surface-container-highest border border-outline-variant space-y-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">LIVE_TELEMETRY</span>
+<div class="flex justify-between items-end">
+<div>
+<div class="text-code-xs text-on-surface-variant">DB_LATENCY</div>
+<div class="text-headline-md font-code-sm text-primary">12.4ms</div>
+</div>
+<div class="h-8 w-16 flex items-end gap-[2px]">
+<div class="w-2 bg-primary/20 h-4"></div>
+<div class="w-2 bg-primary/40 h-6"></div>
+<div class="w-2 bg-primary h-8"></div>
+<div class="w-2 bg-primary/60 h-5"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Logic & Retention Policies -->
+<section class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- INSERT Logic -->
+<div class="p-6 bg-surface-container border-l-4 border-primary shadow-sm h-full">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="add_box">add_box</span>
+<h3 class="text-label-caps font-label-caps">01_INSERT_LOGIC</h3>
+</div>
+<div class="space-y-4">
+<p class="text-code-xs text-on-surface-variant leading-relaxed">
+                        Messages are ingested via <span class="text-primary">ACID-compliant</span> transactions. Foreign keys are validated against <span class="text-secondary">PARTICIPANT</span> existence before <span class="text-secondary">MESSAGE</span> commit.
+                    </p>
+<div class="bg-black/20 p-2 rounded font-code-sm text-code-xs">
+<pre class="text-on-surface-variant opacity-70">BEGIN;<br/>INSERT INTO messages...<br/>UPDATE conversations SET last_msg_id...<br/>COMMIT;</pre>
+</div>
+</div>
+</div>
+<!-- UPDATE Logic -->
+<div class="p-6 bg-surface-container border-l-4 border-secondary shadow-sm h-full">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary" data-icon="edit_square">edit_square</span>
+<h3 class="text-label-caps font-label-caps">02_UPDATE_LOGIC</h3>
+</div>
+<div class="space-y-4">
+<p class="text-code-xs text-on-surface-variant leading-relaxed">
+                        Immutability enforced for content audits. Updates trigger <span class="text-secondary">MODERATION_EVENT</span> if content score changes by &gt;15%. System-level locks applied during multi-table syncs.
+                    </p>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-secondary-container text-on-secondary-container text-[9px] font-bold">LOCK_WAIT: 5ms</span>
+<span class="px-2 py-1 bg-secondary-container text-on-secondary-container text-[9px] font-bold">RETRY: ON_FAIL</span>
+</div>
+</div>
+</div>
+<!-- ARCHIVE Logic -->
+<div class="p-6 bg-surface-container border-l-4 border-outline shadow-sm h-full">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-outline" data-icon="archive">archive</span>
+<h3 class="text-label-caps font-label-caps">03_ARCHIVE_LOGIC</h3>
+</div>
+<div class="space-y-4">
+<p class="text-code-xs text-on-surface-variant leading-relaxed">
+                        Data inactive for &gt;180 days is moved to <span class="text-on-surface italic">Cold Storage (Artifact S3)</span>. Primary indices are pruned to maintain throughput.
+                    </p>
+<div class="w-full bg-outline-variant/30 h-1 mt-2 relative">
+<div class="absolute left-0 top-0 h-full w-2/3 bg-outline"></div>
+</div>
+<div class="flex justify-between text-[9px] text-on-surface-variant">
+<span>LIVE_DB (33%)</span>
+<span>ARCHIVE (66%)</span>
+</div>
+</div>
+</div>
+<!-- RETENTION Policy -->
+<div class="p-6 bg-surface-container border-l-4 border-error shadow-sm h-full">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-error" data-icon="history">history</span>
+<h3 class="text-label-caps font-label-caps">04_RETENTION_POLICY</h3>
+</div>
+<div class="space-y-4">
+<ul class="text-code-xs text-on-surface-variant space-y-2">
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-error rounded-full"></span> EPHEMERAL: 30 SECONDS</li>
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-error rounded-full"></span> TRANSACTIONAL: 7 YEARS</li>
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-error rounded-full"></span> MODERATION: INDEFINITE</li>
+</ul>
+<div class="bg-error/10 border border-error/20 p-2">
+<span class="text-[9px] text-error font-bold">GDPR_COMPLIANT_PURGE: ENABLED</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Audit Summary Section -->
+<section class="mt-12">
+<div class="bg-surface-container-lowest border border-outline-variant p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="space-y-3">
+<div class="text-label-caps font-label-caps text-on-surface-variant">SCHEMA_STABILITY</div>
+<div class="text-headline-lg font-headline-lg text-primary">99.98%</div>
+<p class="text-code-xs text-on-surface-variant">Consistency check passed for all 24 shards across multi-region deployment.</p>
+</div>
+<div class="space-y-3 border-x border-outline-variant px-8">
+<div class="text-label-caps font-label-caps text-on-surface-variant">INGESTION_RATE</div>
+<div class="text-headline-lg font-headline-lg text-secondary">42.5k /s</div>
+<p class="text-code-xs text-on-surface-variant">Peak message throughput recorded at T-Minus 12:00:00 UTC.</p>
+</div>
+<div class="space-y-3">
+<div class="text-label-caps font-label-caps text-on-surface-variant">ACTIVE_SESSIONS</div>
+<div class="text-headline-lg font-headline-lg text-on-surface">1.2M</div>
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border border-surface bg-surface-variant"></div>
+<div class="w-6 h-6 rounded-full border border-surface bg-surface-variant"></div>
+<div class="w-6 h-6 rounded-full border border-surface bg-surface-variant"></div>
+<div class="flex items-center justify-center w-6 h-6 rounded-full border border-surface bg-primary text-[8px] font-bold text-on-primary-container">+800k</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-low flex justify-between items-center px-lane-margin py-2 border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="h-3 w-[1px] bg-outline-variant"></div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">SYSTEM_STATUS: NOMINAL</span>
+</div>
+<div class="flex items-center gap-6 text-code-xs font-code-xs">
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">AUDIT_TRAIL: ACTIVE</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">N8N_SYNC: OK</a>
+<a class="text-primary font-bold transition-colors" href="#">LATENCY: 12ms</a>
+</div>
+</footer>
+<!-- Micro-Telemetry Interactions -->
+<script>
+        // Simple hover effect for table nodes
+        document.querySelectorAll('.bg-surface-container-low').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('ring-2', 'ring-primary', 'transition-all');
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('ring-2', 'ring-primary');
+            });
+        });
+
+        // Simulating telemetry update
+        setInterval(() => {
+            const latencyEl = document.querySelector('.text-headline-md.text-primary');
+            if (latencyEl) {
+                const val = (Math.random() * (14.5 - 11.2) + 11.2).toFixed(1);
+                latencyEl.innerText = `${val}ms`;
+            }
+        }, 3000);
+    </script>
+</body></html>

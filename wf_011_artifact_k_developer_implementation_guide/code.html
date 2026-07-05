@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-011: Artifact K — Developer Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-tint": "#00e639",
+                        "primary": "#ebffe2",
+                        "on-primary-fixed": "#002203",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-container-highest": "#273647",
+                        "outline": "#84967e",
+                        "error": "#ffb4ab",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-fixed": "#2c0051",
+                        "tertiary-fixed": "#f0dbff",
+                        "tertiary-container": "#ecd3ff",
+                        "background": "#051424",
+                        "tertiary": "#fff6ff",
+                        "outline-variant": "#3b4b37",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-container-high": "#1c2b3c",
+                        "on-surface": "#d4e4fa",
+                        "inverse-on-surface": "#233143",
+                        "on-secondary": "#002388",
+                        "surface-bright": "#2c3a4c",
+                        "primary-container": "#00ff41",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-dim": "#051424",
+                        "surface-container": "#122131",
+                        "secondary-fixed": "#dde1ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-primary": "#003907",
+                        "secondary": "#b8c3ff",
+                        "surface": "#051424",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-container-low": "#0d1c2d",
+                        "on-tertiary": "#490080",
+                        "on-surface-variant": "#b9ccb2",
+                        "inverse-primary": "#006e16",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-primary-container": "#007117",
+                        "on-tertiary-container": "#862ed4",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#001356",
+                        "surface-variant": "#273647",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed": "#72ff70"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "lane-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: theme('colors.outline-variant');
+        }
+        .horizontal-connector::after {
+            height: 1px;
+            width: 24px;
+            right: -24px;
+            top: 50%;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: theme('colors.surface-container-lowest');
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: theme('colors.outline-variant');
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 flex justify-between items-center px-grid-unit h-12 w-full border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<span class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<a class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed px-1 py-3" href="#">WF-011_ARTIFACT_K</a>
+<a class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors px-1 py-3" href="#">DOCUMENTATION</a>
+<a class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors px-1 py-3" href="#">RESOURCES</a>
+</nav>
+<span class="font-label-caps text-label-caps font-bold text-primary px-3 py-1 bg-surface-container-highest rounded border border-outline-variant">STATUS: OK</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 flex flex-col border-r border-outline-variant bg-surface-container z-40 hidden lg:flex">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed">MODULE_INDEX</span>
+</div>
+<nav class="flex-1 overflow-y-auto custom-scrollbar">
+<div class="flex flex-col">
+<a class="flex items-center gap-3 px-4 py-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps">System_Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps">Workflow_Engine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+<span class="font-code-sm text-code-sm font-label-caps">Logic_Matrices</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]">insights</span>
+<span class="font-code-sm text-code-sm font-label-caps">Telemetry_Streams</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]">settings_input_component</span>
+<span class="font-code-sm text-code-sm font-label-caps">Node_Registry</span>
+</a>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-outline">Uptime: 144:12:09</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed h-full w-2/3"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-12 pb-8 min-h-screen">
+<div class="p-8 max-w-[1400px] mx-auto">
+<!-- Header Section -->
+<div class="mb-12 border-l-4 border-primary-fixed pl-6 py-2">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-2">WF-011: Artifact K — Developer Implementation Guide</h1>
+<div class="flex gap-4 items-center">
+<span class="font-code-sm text-code-sm text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">PRIORITY: CRITICAL</span>
+<span class="font-code-sm text-code-sm text-outline">REF_ID: ARC-0982-K</span>
+<span class="font-code-sm text-code-sm text-outline">VRSN: 2.0.4-BETA</span>
+</div>
+</div>
+<!-- Bento Grid Layout for Technical Specs -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
+<!-- Microservices Architecture (Large Span) -->
+<section class="md:col-span-8 bg-surface-container-low border border-outline-variant rounded-lg p-6">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">hub</span>
+                            Owning Microservices
+                        </h2>
+<span class="font-code-xs text-code-xs text-outline-variant">SYSTEM_MAP_01</span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+<!-- Service Nodes -->
+<div class="p-4 bg-surface-container border border-primary/30 rounded flex flex-col gap-2 hover:border-primary transition-colors cursor-pointer group">
+<span class="font-label-caps text-label-caps text-primary/60 group-hover:text-primary">SRVC-01</span>
+<span class="font-headline-md text-headline-md text-on-surface">Cart</span>
+<div class="flex gap-1 mt-2">
+<div class="h-1 flex-1 bg-primary/40 rounded-full"></div>
+<div class="h-1 flex-1 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<div class="p-4 bg-surface-container border border-primary/30 rounded flex flex-col gap-2 hover:border-primary transition-colors cursor-pointer group">
+<span class="font-label-caps text-label-caps text-primary/60 group-hover:text-primary">SRVC-02</span>
+<span class="font-headline-md text-headline-md text-on-surface">Order</span>
+<div class="flex gap-1 mt-2">
+<div class="h-1 flex-1 bg-primary/40 rounded-full"></div>
+<div class="h-1 flex-1 bg-primary/40 rounded-full"></div>
+</div>
+</div>
+<div class="p-4 bg-surface-container border border-primary/30 rounded flex flex-col gap-2 hover:border-primary transition-colors cursor-pointer group">
+<span class="font-label-caps text-label-caps text-primary/60 group-hover:text-primary">SRVC-03</span>
+<span class="font-headline-md text-headline-md text-on-surface">Inventory</span>
+<div class="flex gap-1 mt-2">
+<div class="h-1 flex-1 bg-primary/40 rounded-full"></div>
+<div class="h-1 flex-1 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<div class="p-4 bg-surface-container border border-primary/30 rounded flex flex-col gap-2 hover:border-primary transition-colors cursor-pointer group">
+<span class="font-label-caps text-label-caps text-primary/60 group-hover:text-primary">SRVC-04</span>
+<span class="font-headline-md text-headline-md text-on-surface">Wallet</span>
+<div class="flex gap-1 mt-2">
+<div class="h-1 flex-1 bg-primary/40 rounded-full"></div>
+<div class="h-1 flex-1 bg-primary/40 rounded-full"></div>
+</div>
+</div>
+<div class="p-4 bg-surface-container border border-outline-variant rounded flex flex-col gap-2 hover:border-primary transition-colors cursor-pointer group">
+<span class="font-label-caps text-label-caps text-primary/60 group-hover:text-primary">SRVC-05</span>
+<span class="font-headline-md text-headline-md text-on-surface">Escrow</span>
+<div class="flex gap-1 mt-2">
+<div class="h-1 flex-1 bg-outline-variant rounded-full"></div>
+<div class="h-1 flex-1 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<div class="p-4 bg-surface-container border border-outline-variant rounded flex flex-col gap-2 hover:border-primary transition-colors cursor-pointer group">
+<span class="font-label-caps text-label-caps text-primary/60 group-hover:text-primary">SRVC-06</span>
+<span class="font-headline-md text-headline-md text-on-surface">Shipment</span>
+<div class="flex gap-1 mt-2">
+<div class="h-1 flex-1 bg-outline-variant rounded-full"></div>
+<div class="h-1 flex-1 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<div class="p-4 bg-surface-container border border-outline-variant rounded flex flex-col gap-2 hover:border-primary transition-colors cursor-pointer group">
+<span class="font-label-caps text-label-caps text-primary/60 group-hover:text-primary">SRVC-07</span>
+<span class="font-headline-md text-headline-md text-on-surface">Trust</span>
+<div class="flex gap-1 mt-2">
+<div class="h-1 flex-1 bg-outline-variant rounded-full"></div>
+<div class="h-1 flex-1 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<div class="p-4 bg-surface-container border border-outline-variant rounded flex flex-col gap-2 hover:border-primary transition-colors cursor-pointer group">
+<span class="font-label-caps text-label-caps text-primary/60 group-hover:text-primary">SRVC-08</span>
+<span class="font-headline-md text-headline-md text-on-surface">Notify</span>
+<div class="flex gap-1 mt-2">
+<div class="h-1 flex-1 bg-primary/40 rounded-full"></div>
+<div class="h-1 flex-1 bg-primary/40 rounded-full"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Workflow Visualization (Bento Sidebar) -->
+<section class="md:col-span-4 bg-surface-container-low border border-outline-variant rounded-lg p-6 flex flex-col relative overflow-hidden">
+
+<div class="relative z-10">
+<div class="flex items-center justify-between mb-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">n8n Flows</h2>
+<span class="font-code-xs text-code-xs text-primary bg-primary/10 px-1 rounded">LIVE</span>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center justify-between p-3 bg-surface-container-lowest/50 border border-outline-variant rounded">
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-on-surface">ORDER_INIT_TRANS</span>
+<span class="font-code-xs text-code-xs text-outline">ID: f78a-921c-k</span>
+</div>
+<span class="material-symbols-outlined text-primary-fixed">chevron_right</span>
+</li>
+<li class="flex items-center justify-between p-3 bg-surface-container-lowest/50 border border-outline-variant rounded">
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-on-surface">ESCROW_RELEASE_V4</span>
+<span class="font-code-xs text-code-xs text-outline">ID: b22e-1100-p</span>
+</div>
+<span class="material-symbols-outlined text-primary-fixed">chevron_right</span>
+</li>
+<li class="flex items-center justify-between p-3 bg-surface-container-lowest/50 border border-outline-variant rounded">
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-on-surface">NOTIF_BATCH_PUSH</span>
+<span class="font-code-xs text-code-xs text-outline">ID: x009-0012-q</span>
+</div>
+<span class="material-symbols-outlined text-primary-fixed">chevron_right</span>
+</li>
+</ul>
+</div>
+</section>
+<!-- Required APIs (Full Width Column Inside Section) -->
+<section class="md:col-span-6 bg-surface-container-low border border-outline-variant rounded-lg p-6">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">api</span>
+                        Required APIs
+                    </h2>
+<div class="space-y-4">
+<div class="border-b border-outline-variant pb-4">
+<div class="flex justify-between items-center mb-1">
+<span class="font-code-sm text-code-sm text-on-surface">GET /v2/inventory/lock</span>
+<span class="font-label-caps text-[10px] text-primary border border-primary px-1">AUTH: BEARER</span>
+</div>
+<p class="font-body-md text-outline text-xs">Locks inventory items for transaction duration. Required for Escrow handshake.</p>
+</div>
+<div class="border-b border-outline-variant pb-4">
+<div class="flex justify-between items-center mb-1">
+<span class="font-code-sm text-code-sm text-on-surface">POST /v1/wallet/ledger/hold</span>
+<span class="font-label-caps text-[10px] text-primary border border-primary px-1">AUTH: INTERNAL</span>
+</div>
+<p class="font-body-md text-outline text-xs">Initiates hold on user balance for K-type artifacts. Immediate ledger entry.</p>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="font-code-sm text-code-sm text-on-surface">PATCH /v1/shipment/update</span>
+<span class="font-label-caps text-[10px] text-primary border border-primary px-1">AUTH: WEBHOOK</span>
+</div>
+<p class="font-body-md text-outline text-xs">Updates artifact status via carrier integration. Triggers notification flow.</p>
+</div>
+</div>
+</section>
+<!-- Database Dependencies -->
+<section class="md:col-span-6 bg-surface-container-low border border-outline-variant rounded-lg p-6">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">database</span>
+                        Database Dependencies
+                    </h2>
+<div class="flex flex-col gap-4">
+<div class="flex items-start gap-4 p-4 bg-surface-container-lowest border border-outline-variant">
+<div class="mt-1 p-2 bg-primary/10 rounded">
+<span class="material-symbols-outlined text-primary text-[20px]">layers</span>
+</div>
+<div class="flex-1">
+<span class="font-code-sm text-code-sm text-on-surface block">PostgreSQL (Primary Cluster)</span>
+<span class="font-code-xs text-code-xs text-outline">Schemas: schema_order, schema_wallet, schema_trust</span>
+</div>
+</div>
+<div class="flex items-start gap-4 p-4 bg-surface-container-lowest border border-outline-variant">
+<div class="mt-1 p-2 bg-primary/10 rounded">
+<span class="material-symbols-outlined text-primary text-[20px]">cached</span>
+</div>
+<div class="flex-1">
+<span class="font-code-sm text-code-sm text-on-surface block">Redis (State Cache)</span>
+<span class="font-code-xs text-code-xs text-outline">Keyspace: artifact_k_session_*, inventory_lock_*</span>
+</div>
+</div>
+<div class="flex items-start gap-4 p-4 bg-surface-container-lowest border border-outline-variant">
+<div class="mt-1 p-2 bg-primary/10 rounded">
+<span class="material-symbols-outlined text-primary text-[20px]">search</span>
+</div>
+<div class="flex-1">
+<span class="font-code-sm text-code-sm text-on-surface block">Elasticsearch (Audit Log)</span>
+<span class="font-code-xs text-code-xs text-outline">Index: artifact-logs-v1-*</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Deployment & Completion (Bottom Strip) -->
+<section class="md:col-span-12 bg-surface-container-low border border-outline-variant rounded-lg overflow-hidden flex flex-col md:flex-row">
+<div class="md:w-1/2 p-8 border-r border-outline-variant">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">rocket_launch</span>
+                            Deployment Requirements
+                        </h2>
+<ul class="space-y-4">
+<li class="flex gap-3">
+<span class="font-code-sm text-code-sm text-primary">01</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Kubernetes Cluster v1.25+ with at least 3 active nodes (m5.large).</span>
+</li>
+<li class="flex gap-3">
+<span class="font-code-sm text-code-sm text-primary">02</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Istio Service Mesh for inter-service mTLS communication.</span>
+</li>
+<li class="flex gap-3">
+<span class="font-code-sm text-code-sm text-primary">03</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Environmental Variables: <code>ARTIFACT_K_SECRET</code>, <code>GATEWAY_TOKEN</code>.</span>
+</li>
+</ul>
+</div>
+<div class="md:w-1/2 p-8 bg-primary/5">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">verified</span>
+                            Completion Criteria
+                        </h2>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<input checked="" class="form-checkbox bg-surface-container-highest border-outline-variant rounded text-primary focus:ring-0 focus:ring-offset-0" disabled="" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">Unit tests coverage &gt; 85% for all owning services.</span>
+</div>
+<div class="flex items-center gap-3">
+<input class="form-checkbox bg-surface-container-highest border-outline-variant rounded text-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">Successful hand-off between Escrow and Shipment services.</span>
+</div>
+<div class="flex items-center gap-3">
+<input class="form-checkbox bg-surface-container-highest border-outline-variant rounded text-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">Latency for <code>POST /wallet/ledger</code> below 150ms.</span>
+</div>
+<div class="flex items-center gap-3">
+<input class="form-checkbox bg-surface-container-highest border-outline-variant rounded text-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">Load testing confirmation for 500 concurrent artifact sessions.</span>
+</div>
+</div>
+<button class="mt-8 w-full py-3 bg-primary text-on-primary font-label-caps text-label-caps tracking-widest rounded hover:opacity-90 active:opacity-80 transition-all">
+                            INITIALIZE_ARTIFACT_K_DEPLOYMENT
+                        </button>
+</div>
+</section>
+</div>
+<!-- Detailed System Image / Visualization -->
+<div class="relative h-[400px] w-full rounded-xl overflow-hidden border border-outline-variant mb-12">
+<div class="absolute inset-0 z-0" data-alt="A highly complex technical blueprint and 3D architectural visualization of a microservices network. The image features interconnected nodes and data streams rendered in a dark, glowing aesthetic with neon green and blue accents. Detailed engineering labels and code snippets are integrated into the background, evoking a sophisticated command center interface. The lighting is low-key, emphasizing the luminescent pathways and the futuristic, brutalist structure of the digital ecosystem." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDkUUBiU_8VzkDPsZWz5GAI81qvjI-boZJqEnrxLf6e8T8vK41jzrWDqgpduTQlEF9YHwFcWc3YQcOUUTIN_9F9UwUn3N8wVUFYkILajQqWRRE7tb6WFEcvhtm1vG2ChYJCnazxmAAWLO-LNNIvjqYVQL7gYcLF4V6se--eNDyLgm8zGxDccm8jWykzvmImxNwCKjXDKfjDwNNfM6lZ1uZDxXLVZqZ02vSsIcd4ekfMkRKDUg8KV4jO_jFTVjJYRcyZvYuo0tWdY68')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10"></div>
+<div class="absolute bottom-6 left-6 z-20">
+<span class="font-label-caps text-label-caps text-primary-fixed bg-surface-container/80 backdrop-blur px-2 py-1 mb-2 inline-block">VISUAL_AUDIT_LOG</span>
+<h3 class="font-headline-lg text-headline-lg text-white">System Interdependency Mapping</h3>
+<p class="font-body-md text-outline max-w-lg">Real-time visualization of the artifact handshake protocol across the core services cluster.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-grid-unit z-50 border-t border-outline-variant bg-surface-container-lowest">
+<span class="font-code-xs text-code-xs text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+<div class="flex gap-4">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed opacity-90 hover:opacity-100 transition-all" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed opacity-90 hover:opacity-100 transition-all" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed opacity-90 hover:opacity-100 transition-all" href="#">LOGS</a>
+</div>
+</footer>
+<script>
+        // Simple micro-interaction for node selection
+        document.querySelectorAll('.cursor-pointer').forEach(node => {
+            node.addEventListener('click', () => {
+                // Flash effect
+                node.style.backgroundColor = 'rgba(114, 255, 112, 0.1)';
+                setTimeout(() => {
+                    node.style.backgroundColor = '';
+                }, 200);
+            });
+        });
+
+        // Console logger simulation
+        setInterval(() => {
+            const regions = ['US-EAST-1', 'EU-CENTRAL-1', 'AP-NORTHEAST-1'];
+            const latencies = Math.floor(Math.random() * 20) + 5;
+            const region = regions[Math.floor(Math.random() * regions.length)];
+            const footerText = document.querySelector('footer span');
+            if(footerText) {
+                footerText.textContent = `SYS_HEALTH: NOMINAL [LATENCY: ${latencies}ms] [REGION: ${region}]`;
+            }
+        }, 5000);
+    </script>
+</body></html>

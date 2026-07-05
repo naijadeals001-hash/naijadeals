@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-011: Artifact D — API Contract Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-tint": "#00e639",
+                        "primary": "#ebffe2",
+                        "on-primary-fixed": "#002203",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-container-highest": "#273647",
+                        "outline": "#84967e",
+                        "error": "#ffb4ab",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-fixed": "#2c0051",
+                        "tertiary-fixed": "#f0dbff",
+                        "tertiary-container": "#ecd3ff",
+                        "background": "#051424",
+                        "tertiary": "#fff6ff",
+                        "outline-variant": "#3b4b37",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-container-high": "#1c2b3c",
+                        "on-surface": "#d4e4fa",
+                        "inverse-on-surface": "#233143",
+                        "on-secondary": "#002388",
+                        "surface-bright": "#2c3a4c",
+                        "primary-container": "#00ff41",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-dim": "#051424",
+                        "surface-container": "#122131",
+                        "secondary-fixed": "#dde1ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-primary": "#003907",
+                        "secondary": "#b8c3ff",
+                        "surface": "#051424",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-container-low": "#0d1c2d",
+                        "on-tertiary": "#490080",
+                        "on-surface-variant": "#b9ccb2",
+                        "inverse-primary": "#006e16",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-primary-container": "#007117",
+                        "on-tertiary-container": "#862ed4",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#001356",
+                        "surface-variant": "#273647",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed": "#72ff70"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "lane-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 flex justify-between items-center px-grid-unit h-12 w-full border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed uppercase">CORE_OS_v2.4.1-STABLE</span>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary-fixed border-b-2 border-primary-fixed font-label-caps text-label-caps h-full flex items-center px-2" href="#">CONTRACT_BLUEPRINT</a>
+<a class="text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors font-label-caps text-label-caps h-full flex items-center px-2" href="#">VERSIONING</a>
+<a class="text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors font-label-caps text-label-caps h-full flex items-center px-2" href="#">AUTH_GATE</a>
+</nav>
+<span class="font-label-caps text-label-caps text-primary cursor-pointer border border-primary px-2 py-0.5">STATUS: OK</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 border-r border-outline-variant bg-surface-container flex flex-col z-40">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary-fixed uppercase">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1 overflow-y-auto custom-scrollbar">
+<div class="flex flex-col">
+<a class="flex items-center gap-3 px-4 py-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow_Engine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="grid_view">grid_view</span>
+<span class="font-label-caps text-label-caps">Logic_Matrices</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="insights">insights</span>
+<span class="font-label-caps text-label-caps">Telemetry_Streams</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps">Node_Registry</span>
+</a>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-outline">SECURE TUNNEL ACTIVE</span>
+</div>
+<div class="text-outline font-code-xs text-code-xs leading-relaxed">
+                MTLS: ENABLED<br/>
+                HMAC_SIG: REQUIRED<br/>
+                TTL: 3600s
+            </div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 mb-8 h-[calc(100vh-80px)] overflow-x-auto overflow-y-auto custom-scrollbar p-lane-margin relative">
+<!-- Workflow Background Grid -->
+<div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: linear-gradient(#3b4b37 1px, transparent 1px), linear-gradient(90deg, #3b4b37 1px, transparent 1px); background-size: 48px 48px;"></div>
+<!-- Swimlane Headers -->
+<div class="flex gap-node-gutter min-w-[2000px] mb-8">
+<div class="w-[380px] flex items-center gap-3 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary" data-icon="shopping_cart">shopping_cart</span>
+<h3 class="font-headline-md text-headline-md uppercase tracking-tight">Commerce_Tier</h3>
+</div>
+<div class="w-[380px] flex items-center gap-3 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary" data-icon="account_balance">account_balance</span>
+<h3 class="font-headline-md text-headline-md uppercase tracking-tight">FinOps_Gateway</h3>
+</div>
+<div class="w-[380px] flex items-center gap-3 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary" data-icon="inventory_2">inventory_2</span>
+<h3 class="font-headline-md text-headline-md uppercase tracking-tight">SupplyChain_Node</h3>
+</div>
+<div class="w-[380px] flex items-center gap-3 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary" data-icon="local_shipping">local_shipping</span>
+<h3 class="font-headline-md text-headline-md uppercase tracking-tight">Logistic_Matrix</h3>
+</div>
+<div class="w-[380px] flex items-center gap-3 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary" data-icon="security">security</span>
+<h3 class="font-headline-md text-headline-md uppercase tracking-tight">Audit_Compliance</h3>
+</div>
+</div>
+<!-- Node Canvas -->
+<div class="flex gap-node-gutter min-w-[2000px] pb-12">
+<!-- Column 1: Commerce -->
+<div class="w-[380px] flex flex-col gap-6">
+<!-- Node 1: Cart Add -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded-sm relative group hover:border-primary-fixed transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">POST /cart/add</span>
+<span class="text-primary-fixed-dim font-code-xs text-code-xs">IDEMP: REQ</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3">Sync item state to persistent session cluster.</div>
+<div class="bg-surface-container-highest p-2 rounded-sm mb-2">
+<code class="block font-code-xs text-code-xs text-primary">{"sku": "STR-44", "qty": 1}</code>
+</div>
+<div class="flex justify-between items-center">
+<span class="flex items-center gap-1 font-code-xs text-code-xs text-outline">
+<span class="material-symbols-outlined text-[14px]" data-icon="history">history</span> Retries: 3
+                        </span>
+<span class="text-error font-code-xs text-code-xs">403_STOCK_FAIL</span>
+</div>
+<div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-primary-container z-0 opacity-50"></div>
+</div>
+<!-- Node 2: Checkout -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded-sm relative group hover:border-primary-fixed transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">POST /checkout</span>
+<span class="text-primary-fixed-dim font-code-xs text-code-xs">AUTH: JWT+HMAC</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3">Initialize transaction state machine.</div>
+<div class="flex justify-between items-center">
+<span class="flex items-center gap-1 font-code-xs text-code-xs text-outline">
+<span class="material-symbols-outlined text-[14px]" data-icon="timer">timer</span> 200ms
+                        </span>
+<span class="text-error font-code-xs text-code-xs">401_UNAUTH</span>
+</div>
+<div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-primary-container z-0 opacity-50"></div>
+</div>
+<!-- Node 3: Order Create -->
+<div class="bg-surface-container-low border border-primary-fixed-dim p-3 rounded-sm relative group">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed">POST /order/create</span>
+<span class="text-primary-fixed font-code-xs text-code-xs">CRITICAL</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3">Commit record to main ledger and trigger events.</div>
+<div class="bg-surface-container-highest p-2 rounded-sm mb-2 border-l-2 border-primary-container">
+<code class="block font-code-xs text-code-xs text-on-surface">201_CREATED -> order_uuid_v4</code>
+</div>
+<div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-primary-container z-0"></div>
+</div>
+</div>
+<!-- Column 2: FinOps -->
+<div class="w-[380px] flex flex-col gap-6">
+<div class="h-[120px] invisible"></div> <!-- Alignment spacer -->
+<!-- Node 4: Wallet Authorize -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded-sm relative group hover:border-primary-fixed transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">POST /wallet/authorize</span>
+<span class="text-primary-fixed-dim font-code-xs text-code-xs">PCI_DSS</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3">Pre-auth credit reservation for fulfillment.</div>
+<div class="flex justify-between items-center">
+<span class="flex items-center gap-1 font-code-xs text-code-xs text-outline">
+<span class="material-symbols-outlined text-[14px]" data-icon="refresh">refresh</span> Exponent. Backoff
+                        </span>
+<span class="text-error font-code-xs text-code-xs">503_GATEWAY_DOWN</span>
+</div>
+<div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-primary-container z-0 opacity-50"></div>
+</div>
+<!-- Node 5: Escrow Create -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded-sm relative group hover:border-primary-fixed transition-colors mt-12">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">POST /escrow/create</span>
+<span class="text-primary-fixed-dim font-code-xs text-code-xs">ATOMIC</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3">Lock funds in intermediary digital vault.</div>
+<div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-primary-container z-0 opacity-50"></div>
+</div>
+</div>
+<!-- Column 3: Supply Chain -->
+<div class="w-[380px] flex flex-col gap-6">
+<div class="h-[280px] invisible"></div> <!-- Alignment spacer -->
+<!-- Node 6: Inventory Reserve -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded-sm relative group hover:border-primary-fixed transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">POST /inventory/reserve</span>
+<span class="text-primary-fixed-dim font-code-xs text-code-xs">FIFO</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3">Decrement available count in regional DC.</div>
+<div class="flex justify-between items-center">
+<span class="flex items-center gap-1 font-code-xs text-code-xs text-outline">
+<span class="material-symbols-outlined text-[14px]" data-icon="bolt">bolt</span> 45ms
+                        </span>
+<span class="text-error font-code-xs text-code-xs">410_GONE</span>
+</div>
+<div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-primary-container z-0 opacity-50"></div>
+</div>
+</div>
+<!-- Column 4: Logistics -->
+<div class="w-[380px] flex flex-col gap-6">
+<div class="h-[280px] invisible"></div> <!-- Alignment spacer -->
+<!-- Node 7: Shipment Create -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded-sm relative group hover:border-primary-fixed transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">POST /shipment/create</span>
+<span class="text-primary-fixed-dim font-code-xs text-code-xs">L3_ASYNC</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3">Manifest generation and courier dispatch hook.</div>
+<div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-primary-container z-0 opacity-50"></div>
+</div>
+<!-- Node 8: Tracking Start -->
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded-sm relative group hover:border-primary-fixed transition-colors mt-4">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">POST /tracking/start</span>
+<span class="text-primary-fixed-dim font-code-xs text-code-xs">MQTT_PUSH</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3">Enable real-time telemetry stream for order.</div>
+<div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-primary-container z-0 opacity-50"></div>
+</div>
+</div>
+<!-- Column 5: Audit -->
+<div class="w-[380px] flex flex-col gap-6">
+<!-- Node 9: Audit Write (High Frequency) -->
+<div class="bg-surface-container-low border-2 border-outline p-3 rounded-sm relative group bg-opacity-80 backdrop-blur-sm">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary">POST /audit/write</span>
+<span class="text-secondary font-code-xs text-code-xs">IMMUTABLE</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3">Write event signature to distributed compliance log.</div>
+<div class="border-t border-outline-variant pt-2">
+<div class="flex justify-between items-center mb-1">
+<span class="font-code-xs text-code-xs text-outline">LATENCY:</span>
+<span class="font-code-xs text-code-xs text-primary">12ms</span>
+</div>
+<div class="flex justify-between items-center mb-1">
+<span class="font-code-xs text-code-xs text-outline">AVAIL:</span>
+<span class="font-code-xs text-code-xs text-primary">99.999%</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-outline">REPLICA:</span>
+<span class="font-code-xs text-code-xs text-primary">3-NODE-MIN</span>
+</div>
+</div>
+</div>
+<!-- Sidebar Tool: Live Logs -->
+<div class="mt-8 bg-surface-container-lowest border border-outline-variant p-4 rounded-sm">
+<h4 class="font-label-caps text-label-caps text-outline mb-3 border-b border-outline-variant pb-2">AUDIT_STUB_STREAM</h4>
+<div class="space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar">
+<div class="font-code-xs text-code-xs text-on-surface-variant">
+<span class="text-primary-fixed opacity-60">[14:22:01.03]</span> WRITE_SUCCESS: ORD-723
+                        </div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">
+<span class="text-primary-fixed opacity-60">[14:22:01.08]</span> RETRY_START: WALLET_AUTH_3
+                        </div>
+<div class="font-code-xs text-code-xs text-error">
+<span class="opacity-60">[14:22:02.14]</span> ERROR: 410_GONE (SKU: STR-44)
+                        </div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">
+<span class="text-primary-fixed opacity-60">[14:22:03.22]</span> SYNC_COMPLETE: CART_NODE_4
+                        </div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">
+<span class="text-primary-fixed opacity-60">[14:22:04.45]</span> HEARTBEAT: LOGISTICS_PRIMARY
+                        </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Float Info Panel -->
+<div class="fixed right-8 bottom-12 w-80 bg-surface-container-high border border-primary-fixed-dim shadow-xl p-4 z-50">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="info">info</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">ENDPOINT_CONFIG_DRAWER</span>
+</div>
+<div class="space-y-4">
+<div>
+<label class="font-code-xs text-code-xs text-outline uppercase block mb-1">Global Auth Strategy</label>
+<div class="text-on-surface font-code-sm text-code-sm">Bearer JWT + X-HMAC-Signature (SHA256)</div>
+</div>
+<div>
+<label class="font-code-xs text-code-xs text-outline uppercase block mb-1">Retry Policy</label>
+<div class="text-on-surface font-code-sm text-code-sm">Exponential backoff (2^n) up to 5 attempts for 5xx errors.</div>
+</div>
+<div>
+<label class="font-code-xs text-code-xs text-outline uppercase block mb-1">Rate Limits</label>
+<div class="text-on-surface font-code-sm text-code-sm">5000 req/sec (Tier-1 Cluster)</div>
+</div>
+</div>
+<button class="mt-6 w-full py-2 bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:bg-surface-tint transition-colors">DOWNLOAD_OPENAPI_SPEC</button>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-grid-unit z-50 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-outline uppercase">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors opacity-90 hover:opacity-100" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors opacity-90 hover:opacity-100" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors opacity-90 hover:opacity-100" href="#">LOGS</a>
+</div>
+</footer>
+<!-- Canvas Interactions Script -->
+<script>
+        // Simple logic for node highlights
+        document.querySelectorAll('.bg-surface-container-low').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                const icon = node.querySelector('.material-symbols-outlined');
+                if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+            });
+            node.addEventListener('mouseleave', () => {
+                const icon = node.querySelector('.material-symbols-outlined');
+                if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+            });
+        });
+
+        // Dynamic terminal text effect for the logs
+        const logContainer = document.querySelector('.space-y-2');
+        setInterval(() => {
+            if (logContainer.children.length > 20) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false }) + '.' + Math.floor(Math.random() * 99);
+            const status = Math.random() > 0.9 ? 'WARN' : 'INFO';
+            const logEntry = document.createElement('div');
+            logEntry.className = 'font-code-xs text-code-xs text-on-surface-variant opacity-0 transition-opacity duration-300';
+            logEntry.innerHTML = `<span class="text-primary-fixed opacity-60">[${time}]</span> ${status}: NODE_HEARTBEAT_PING ${Math.random().toString(36).substring(7).toUpperCase()}`;
+            logContainer.appendChild(logEntry);
+            setTimeout(() => logEntry.classList.remove('opacity-0'), 10);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }, 3000);
+    </script>
+</body></html>
