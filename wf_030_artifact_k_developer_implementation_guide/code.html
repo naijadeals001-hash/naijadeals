@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-030 Implementation Guide | PIM_ENGINE_V2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(132, 150, 126, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector-line {
+            background: repeating-linear-gradient(90deg, #00e639 0px, #00e639 4px, transparent 4px, transparent 8px);
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(13, 28, 45, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#00e639",
+                      "on-primary-fixed": "#002203",
+                      "on-secondary-container": "#c6ceff",
+                      "error-container": "#93000a",
+                      "secondary-container": "#0043eb",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-tertiary-container": "#862ed4",
+                      "tertiary-fixed": "#f0dbff",
+                      "inverse-on-surface": "#233143",
+                      "on-tertiary": "#490080",
+                      "outline": "#84967e",
+                      "surface": "#051424",
+                      "inverse-surface": "#d4e4fa",
+                      "tertiary": "#fff6ff",
+                      "surface-variant": "#273647",
+                      "surface-container-lowest": "#010f1f",
+                      "on-background": "#d4e4fa",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "error": "#ffb4ab",
+                      "on-surface": "#d4e4fa",
+                      "tertiary-container": "#ecd3ff",
+                      "on-secondary": "#002388",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-low": "#0d1c2d",
+                      "background": "#051424",
+                      "primary-fixed-dim": "#00e639",
+                      "primary-container": "#00ff41",
+                      "on-tertiary-fixed": "#2c0051",
+                      "on-error": "#690005",
+                      "on-primary": "#003907",
+                      "secondary-fixed": "#dde1ff",
+                      "primary": "#ebffe2",
+                      "secondary": "#b8c3ff",
+                      "on-primary-container": "#007117",
+                      "surface-bright": "#2c3a4c",
+                      "surface-container": "#122131",
+                      "inverse-primary": "#006e16",
+                      "surface-dim": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "surface-container-high": "#1c2b3c",
+                      "primary-fixed": "#72ff70",
+                      "on-primary-fixed-variant": "#00530e",
+                      "surface-container-highest": "#273647",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary-fixed": "#001356"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lane-margin": "32px",
+                      "grid-unit": "8px",
+                      "stack-gap": "4px",
+                      "node-gutter": "24px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface dark:bg-surface border-b border-outline-variant flex justify-between items-center px-grid-unit h-14 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">PIM_ENGINE_V2</span>
+</div>
+<div class="flex gap-6 items-center">
+<nav class="hidden md:flex gap-6">
+<a class="font-label-caps text-label-caps text-primary dark:text-primary transition-colors cursor-pointer active:opacity-80" href="#">WF-030_IMPLEMENTATION</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:opacity-80" href="#">SCHEMA_V4</a>
+</nav>
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex min-h-screen">
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="h-full w-64 fixed left-0 top-0 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant hidden lg:flex flex-col gap-stack-gap pt-node-gutter z-40">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-on-surface">MODULE_INDEX</h2>
+</div>
+<nav class="flex flex-col w-full">
+<a class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed-dim transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data Schema</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="alt_route">alt_route</span>
+<span class="font-label-caps text-label-caps">Workflow Nodes</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-caps text-label-caps">Asset Mapping</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps">System Logs</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 lg:ml-64 p-node-gutter pb-20">
+<!-- Header Section -->
+<div class="mb-lane-margin">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-surface-container-highest border border-outline text-primary-fixed-dim font-code-xs text-code-xs">STABLE_BUILD_2024</span>
+<span class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs">CRITICAL_PATH</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg mb-2">WF-030: IMPLEMENTATION_GUIDE</h1>
+<p class="text-on-surface-variant font-code-sm text-code-sm max-w-3xl">Architectural blueprint for the technical deployment of the Workflow-030 logic cluster. This document defines microservice ownership, cross-service dependencies, and data persistence layers.</p>
+</div>
+<!-- Blueprint Grid Section -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-node-gutter">
+<!-- Left Column: Microservices & Ownership -->
+<div class="xl:col-span-2 space-y-node-gutter">
+<div class="border border-outline-variant bg-surface-container p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-10">
+<span class="material-symbols-outlined text-[120px]" data-icon="hub">hub</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="settings_b_roll">settings_b_roll</span>
+                            OWNING_MICROSERVICES
+                        </h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Service Node 1 -->
+<div class="border border-primary-fixed-dim/30 bg-surface-container-lowest p-4">
+<div class="flex justify-between items-start mb-4">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SRV-01</span>
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="analytics" data-weight="fill" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-1">Analytics Service</h4>
+<div class="h-1 w-full bg-surface-container-highest mb-3">
+<div class="h-full bg-primary-fixed-dim w-3/4"></div>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Telemetry ingestion and real-time event aggregation.</p>
+</div>
+<!-- Service Node 2 -->
+<div class="border border-secondary-fixed-dim/30 bg-surface-container-lowest p-4">
+<div class="flex justify-between items-start mb-4">
+<span class="font-code-xs text-code-xs text-secondary-fixed-dim">SRV-02</span>
+<span class="material-symbols-outlined text-secondary-fixed-dim" data-icon="online_prediction" data-weight="fill" style="font-variation-settings: 'FILL' 1;">online_prediction</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-1">Forecast Service</h4>
+<div class="h-1 w-full bg-surface-container-highest mb-3">
+<div class="h-full bg-secondary-fixed-dim w-1/2"></div>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">ML-driven trend analysis and future-state modeling.</p>
+</div>
+<!-- Service Node 3 -->
+<div class="border border-tertiary-fixed-dim/30 bg-surface-container-lowest p-4">
+<div class="flex justify-between items-start mb-4">
+<span class="font-code-xs text-code-xs text-tertiary-fixed-dim">SRV-03</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="memory" data-weight="fill" style="font-variation-settings: 'FILL' 1;">memory</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-1">Optimization Engine</h4>
+<div class="h-1 w-full bg-surface-container-highest mb-3">
+<div class="h-full bg-tertiary-fixed-dim w-full"></div>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Constraint resolution and resource pathing logic.</p>
+</div>
+</div>
+</div>
+<!-- Workflow Visualizer -->
+<div class="border border-outline-variant bg-surface-container p-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-8">N8N_WORKFLOW_ARCHITECTURE</h3>
+<div class="flex flex-col md:flex-row items-center justify-between gap-8 py-4">
+<!-- Node 1 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-16 h-16 rounded-full border-2 border-primary-fixed-dim flex items-center justify-center bg-surface-container-lowest">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="input">input</span>
+</div>
+<div class="text-center">
+<div class="font-code-sm text-code-sm">WF-ID: 8821</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Payload Ingress</div>
+</div>
+</div>
+<div class="flex-1 h-0.5 node-connector-line hidden md:block"></div>
+<!-- Node 2 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-16 h-16 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center bg-surface-container-lowest">
+<span class="material-symbols-outlined text-secondary-fixed-dim" data-icon="transform">transform</span>
+</div>
+<div class="text-center">
+<div class="font-code-sm text-code-sm">WF-ID: 9004</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Logic Fork</div>
+</div>
+</div>
+<div class="flex-1 h-0.5 node-connector-line hidden md:block"></div>
+<!-- Node 3 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-16 h-16 rounded-full border-2 border-tertiary-fixed-dim flex items-center justify-center bg-surface-container-lowest">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<div class="text-center">
+<div class="font-code-sm text-code-sm">WF-ID: 7210</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Engine Dispatch</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Dependencies & Infrastructure -->
+<div class="space-y-node-gutter">
+<!-- DB Dependencies -->
+<div class="border border-outline-variant bg-surface-container p-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-6">PERSISTENCE_LAYER</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-4 p-3 bg-surface-container-low border-l-4 border-primary-container">
+<span class="material-symbols-outlined text-primary-container" data-icon="storage">storage</span>
+<div>
+<div class="font-code-sm text-code-sm">BigQuery (Warehouse)</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Cold storage &amp; Batch analysis</div>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 bg-surface-container-low border-l-4 border-on-secondary-container">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="bolt">bolt</span>
+<div>
+<div class="font-code-sm text-code-sm">ClickHouse (OLAP)</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Real-time metrics &amp; Hot paths</div>
+</div>
+</div>
+</div>
+</div>
+<!-- K8s Namespace -->
+<div class="border border-outline-variant bg-surface-container p-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-4">DEPLOYMENT_REQS</h3>
+<div class="bg-surface-container-lowest p-4 border border-outline-variant">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-[10px] text-on-surface-variant">K8S_NAMESPACE</span>
+<span class="material-symbols-outlined text-xs" data-icon="content_copy">content_copy</span>
+</div>
+<div class="font-code-sm text-code-sm text-primary-fixed-dim">prod-pim-wf-030-v2</div>
+</div>
+<div class="mt-4 space-y-2">
+<div class="flex justify-between text-code-xs font-code-xs py-1 border-b border-outline-variant">
+<span class="text-on-surface-variant">Replica Count</span>
+<span>3 (Min) / 12 (Max)</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs py-1 border-b border-outline-variant">
+<span class="text-on-surface-variant">Memory Limit</span>
+<span>4Gi per Pod</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs py-1">
+<span class="text-on-surface-variant">Autoscale Trigger</span>
+<span>CPU &gt; 75%</span>
+</div>
+</div>
+</div>
+<!-- Micro-Telemetry -->
+<div class="grid grid-cols-2 gap-stack-gap">
+<div class="bg-surface-container-low p-3 flex flex-col items-center border border-outline-variant">
+<div class="font-code-xs text-code-xs text-on-surface-variant">LATENCY</div>
+<div class="font-headline-md text-headline-md text-primary-fixed-dim">12ms</div>
+</div>
+<div class="bg-surface-container-low p-3 flex flex-col items-center border border-outline-variant">
+<div class="font-code-xs text-code-xs text-on-surface-variant">UPTIME</div>
+<div class="font-headline-md text-headline-md text-primary-fixed-dim">99.99%</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Dependencies Table -->
+<div class="mt-node-gutter border border-outline-variant bg-surface-container overflow-x-auto">
+<table class="w-full text-left font-code-sm text-code-sm">
+<thead class="bg-surface-container-high border-b border-outline-variant">
+<tr>
+<th class="px-6 py-3 font-label-caps text-label-caps">COMPONENT</th>
+<th class="px-6 py-3 font-label-caps text-label-caps">DEPENDENCY_ID</th>
+<th class="px-6 py-3 font-label-caps text-label-caps">VERSION</th>
+<th class="px-6 py-3 font-label-caps text-label-caps">STATUS</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr>
+<td class="px-6 py-4 text-on-surface">Redis Cluster</td>
+<td class="px-6 py-4 text-on-surface-variant">RED-OS-099</td>
+<td class="px-6 py-4">7.2.0-alpine</td>
+<td class="px-6 py-4"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span> ACTIVE</span></td>
+</tr>
+<tr>
+<td class="px-6 py-4 text-on-surface">Kafka Stream</td>
+<td class="px-6 py-4 text-on-surface-variant">KAF-TOP-WF030</td>
+<td class="px-6 py-4">3.5.1</td>
+<td class="px-6 py-4"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span> ACTIVE</span></td>
+</tr>
+<tr>
+<td class="px-6 py-4 text-on-surface">Auth Gateway</td>
+<td class="px-6 py-4 text-on-surface-variant">IAM-V2-PROXY</td>
+<td class="px-6 py-4">LATEST</td>
+<td class="px-6 py-4"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary-container"></span> STANDBY</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full fixed bottom-0 z-10 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-node-gutter py-1 h-8">
+<div class="flex gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CORE_ENGINE_STABLE</span>
+</div>
+<div class="flex gap-6">
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim transition-opacity duration-200 cursor-pointer">LATENCY: 12ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim transition-opacity duration-200 cursor-pointer">UPTIME: 99.99%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim transition-opacity duration-200 cursor-pointer">THROUGHPUT: 4.2k/s</span>
+</div>
+</footer>
+<!-- Micro-Telemetry Interactions -->
+<script>
+        // Simple interactivity for nodes
+        document.querySelectorAll('.border-outline-variant').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.borderColor = 'rgba(0, 230, 57, 0.4)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = '';
+            });
+        });
+
+        // Simulating data throughput updates
+        setInterval(() => {
+            const throughput = (4.0 + Math.random() * 0.5).toFixed(1);
+            const footerThroughput = document.querySelector('footer div:last-child span:last-child');
+            if(footerThroughput) footerThroughput.innerText = `THROUGHPUT: ${throughput}k/s`;
+        }, 3000);
+    </script>
+</body></html>

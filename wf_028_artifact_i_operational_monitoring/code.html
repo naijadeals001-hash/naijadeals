@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-028 // OPERATIONAL MONITORING</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#d4e4fa",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface-container-high": "#1c2b3c",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-primary": "#003907",
+                    "surface": "#051424",
+                    "on-error": "#690005",
+                    "surface-variant": "#273647",
+                    "on-primary-fixed": "#002203",
+                    "surface-container-lowest": "#010f1f",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-bright": "#2c3a4c",
+                    "primary": "#ebffe2",
+                    "surface-dim": "#051424",
+                    "inverse-primary": "#006e16",
+                    "on-secondary": "#002388",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-primary-container": "#007117",
+                    "inverse-surface": "#d4e4fa",
+                    "secondary": "#b8c3ff",
+                    "background": "#051424",
+                    "on-secondary-container": "#c6ceff",
+                    "on-secondary-fixed": "#001356",
+                    "tertiary-container": "#ecd3ff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-tertiary": "#490080",
+                    "error-container": "#93000a",
+                    "outline": "#84967e",
+                    "surface-container-highest": "#273647",
+                    "secondary-container": "#0043eb",
+                    "surface-container": "#122131",
+                    "inverse-on-surface": "#233143",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#0d1c2d",
+                    "primary-container": "#00ff41",
+                    "tertiary": "#fff6ff",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface-tint": "#00e639",
+                    "primary-fixed": "#72ff70",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-tertiary-container": "#862ed4",
+                    "on-surface": "#d4e4fa",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed": "#dde1ff",
+                    "outline-variant": "#3b4b37",
+                    "on-surface-variant": "#b9ccb2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-border {
+            border: 1px solid rgba(59, 75, 55, 0.5);
+        }
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .4; }
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to bottom, transparent, #00ff41, transparent);
+            opacity: 0.1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: scan 8s linear infinite;
+        }
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden">
+<div class="scanline pointer-events-none"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full border-b border-outline-variant bg-surface-dim flex justify-between items-center h-12 px-node-gutter z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">hub</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary bg-surface-container-high px-2 py-1 border border-outline-variant">
+                WF-028 // LOGISTICS ENGINE
+            </h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-4 font-code-sm text-on-surface-variant">
+<span class="hover:bg-surface-variant/50 transition-colors px-2 py-1 cursor-pointer">SYS_READY</span>
+<span class="hover:bg-surface-variant/50 transition-colors px-2 py-1 cursor-pointer text-primary-fixed-dim">UPTIME: 99.98%</span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer (Desktop Only) -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 border-r border-outline-variant bg-surface-container-low hidden md:flex flex-col gap-stack-gap pt-lane-margin">
+<div class="px-6 mb-4">
+<h2 class="font-label-caps text-label-caps text-primary">CORE ENGINE</h2>
+</div>
+<nav class="flex flex-col">
+<a class="text-on-surface-variant hover:text-on-surface px-4 py-2 hover:bg-surface-container-high transition-all font-code-sm flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">inventory_2</span> Inventory Schema
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface px-4 py-2 hover:bg-surface-container-high transition-all font-code-sm flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">account_tree</span> BPMN Swimlanes
+            </a>
+<a class="bg-primary-container text-on-primary-container font-bold border-l-2 border-primary-fixed-dim px-4 py-2 font-code-sm flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">analytics</span> Telemetry Hub
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface px-4 py-2 hover:bg-surface-container-high transition-all font-code-sm flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">api</span> API Registry
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface px-4 py-2 hover:bg-surface-container-high transition-all font-code-sm flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">terminal</span> Sequence Logs
+            </a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 mt-12 pb-24 md:pb-8 min-h-screen">
+<div class="p-node-gutter">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+<div>
+<h3 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tighter">Operational Monitoring</h3>
+<p class="font-code-sm text-on-surface-variant">Active Instance: NODE_DELTA_WAREHOUSE_028</p>
+</div>
+<div class="flex gap-2">
+<div class="flex items-center gap-2 bg-surface-container px-3 py-1 border border-outline-variant rounded">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim status-pulse"></span>
+<span class="font-label-caps text-label-caps text-primary">LIVE FEED</span>
+</div>
+</div>
+</div>
+<!-- Dashboard Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+<!-- KPI Section: Warehouse Capacity -->
+<div class="md:col-span-4 bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between h-48 group hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant">WAREHOUSE CAPACITY</span>
+<span class="material-symbols-outlined text-primary opacity-50">warehouse</span>
+</div>
+<div class="mt-4">
+<div class="flex justify-between items-baseline mb-1">
+<span class="font-headline-lg text-headline-lg text-on-surface">84.2%</span>
+<span class="font-code-xs text-primary-fixed-dim">+2.1% Δ</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full" style="width: 84.2%;"></div>
+</div>
+</div>
+<div class="flex justify-between font-code-xs text-on-surface-variant mt-2 uppercase">
+<span>Total: 1.2M Units</span>
+<span>Avail: 190K Units</span>
+</div>
+</div>
+<!-- Hub Utilization Shader Block -->
+<div class="md:col-span-8 bg-surface-container-low border border-outline-variant relative overflow-hidden h-48">
+
+<div class="relative z-10 p-4 h-full flex flex-col">
+<div class="flex justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant">HUB UTILIZATION // REAL-TIME TRAFFIC</span>
+<span class="font-code-xs text-primary-fixed-dim">DATA_STREAM: ACTIVE</span>
+</div>
+<div class="flex-grow flex items-center justify-center gap-8">
+<div class="text-center">
+<div class="font-headline-lg text-headline-lg">92%</div>
+<div class="font-code-xs text-on-surface-variant">LANE A</div>
+</div>
+<div class="text-center">
+<div class="font-headline-lg text-headline-lg">78%</div>
+<div class="font-code-xs text-on-surface-variant">LANE B</div>
+</div>
+<div class="text-center">
+<div class="font-headline-lg text-headline-lg text-error">98%</div>
+<div class="font-code-xs text-on-surface-variant">LANE C</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Metrics: Swimlane Layout -->
+<div class="md:col-span-12 grid grid-cols-1 lg:grid-cols-4 gap-4">
+<!-- Column 1: Inbound -->
+<div class="flex flex-col gap-4">
+<div class="border-l-2 border-primary-fixed-dim pl-4 py-2">
+<span class="font-label-caps text-label-caps text-primary">INBOUND ENGINE</span>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-code-xs text-on-surface-variant mb-2">RECEIVING QUEUE</div>
+<div class="font-headline-md text-headline-md text-on-surface">142 Trucks</div>
+<div class="mt-2 h-12 flex items-end gap-1">
+<div class="w-2 bg-primary-fixed-dim/20 h-4"></div>
+<div class="w-2 bg-primary-fixed-dim/40 h-8"></div>
+<div class="w-2 bg-primary-fixed-dim/60 h-6"></div>
+<div class="w-2 bg-primary-fixed-dim h-10"></div>
+<div class="w-2 bg-primary-fixed-dim/40 h-5"></div>
+</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-code-xs text-on-surface-variant mb-2">CROSS-DOCK VOL.</div>
+<div class="font-headline-md text-headline-md text-on-surface">4,520 P/H</div>
+<div class="font-code-xs text-primary-fixed-dim mt-1">OPTIMAL FLOW</div>
+</div>
+</div>
+<!-- Column 2: Storage & Transfer -->
+<div class="flex flex-col gap-4">
+<div class="border-l-2 border-secondary-fixed-dim pl-4 py-2">
+<span class="font-label-caps text-label-caps text-secondary">INTERNAL DYNAMICS</span>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-code-xs text-on-surface-variant mb-2">TRANSFER QUEUE</div>
+<div class="font-headline-md text-headline-md text-on-surface">892 Cycles</div>
+<div class="font-code-xs text-on-surface-variant mt-1">LATENCY: 12ms</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-code-xs text-on-surface-variant mb-2">INVENTORY ACCURACY</div>
+<div class="font-headline-md text-headline-md text-primary-fixed-dim">99.94%</div>
+<div class="w-full bg-surface-variant h-1 mt-2">
+<div class="bg-primary-fixed-dim h-full" style="width: 99.9%;"></div>
+</div>
+</div>
+</div>
+<!-- Column 3: Processing -->
+<div class="flex flex-col gap-4">
+<div class="border-l-2 border-tertiary-fixed-dim pl-4 py-2">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">PROCESS SPEED</span>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-code-xs text-on-surface-variant mb-2">PICKING PERF.</div>
+<div class="font-headline-md text-headline-md text-on-surface">2.4k Units/H</div>
+<div class="flex gap-1 mt-2">
+<span class="text-[8px] bg-primary-fixed-dim/10 text-primary-fixed-dim px-1 border border-primary-fixed-dim/20">AUTO_MODE</span>
+</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="font-code-xs text-on-surface-variant mb-2">PACKING PERF.</div>
+<div class="font-headline-md text-headline-md text-on-surface">1.8k Units/H</div>
+<div class="font-code-xs text-on-surface-variant mt-1">SLA: WITHIN_RANGE</div>
+</div>
+</div>
+<!-- Column 4: Compliance & Alerts -->
+<div class="flex flex-col gap-4">
+<div class="border-l-2 border-error-container pl-4 py-2">
+<span class="font-label-caps text-label-caps text-error">SLA STATUS</span>
+</div>
+<div class="bg-surface-container-high p-4 border border-error-container/50">
+<div class="flex justify-between items-center mb-4">
+<span class="font-code-sm text-error">ALERT LOG</span>
+<span class="material-symbols-outlined text-error text-sm">emergency_home</span>
+</div>
+<div class="space-y-3">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between font-code-xs">
+<span class="text-on-surface">NODE_ERR_04</span>
+<span class="text-on-surface-variant">14:22:01</span>
+</div>
+<div class="text-[10px] text-error opacity-80 uppercase tracking-tighter">Congestion detected Lane C-4</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between font-code-xs">
+<span class="text-on-surface">SLA_WARN</span>
+<span class="text-on-surface-variant">14:18:55</span>
+</div>
+<div class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Receiving wait time &gt; 45m</div>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-surface-variant hover:bg-surface-container-highest transition-colors font-label-caps text-label-caps text-on-surface border border-outline-variant flex items-center justify-center gap-2">
+                            GENERATE REPORT <span class="material-symbols-outlined text-xs">open_in_new</span>
+</button>
+</div>
+</div>
+<!-- Full Width Telemetry Graph -->
+<div class="md:col-span-12 bg-surface-container-low border border-outline-variant p-6 min-h-[300px] flex flex-col">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-surface-container-high border border-outline-variant">
+<span class="material-symbols-outlined text-primary">monitoring</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-on-surface">Network Throughput</h4>
+<span class="font-code-xs text-on-surface-variant">PERIOD: LAST 24 HOURS // INTERVAL: 5M</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-surface-container-highest border border-primary-fixed-dim text-primary font-code-sm">REALTIME</button>
+<button class="px-3 py-1 bg-surface-container-high border border-outline-variant text-on-surface-variant font-code-sm">HISTORICAL</button>
+</div>
+</div>
+<div class="flex-grow flex items-end gap-2 px-2 relative overflow-hidden">
+<!-- Mock Waveform Visualization -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
+
+</div>
+<!-- Graph Bars -->
+<div class="w-full h-48 flex items-end justify-between gap-1">
+<div class="flex-grow bg-primary/20 h-[40%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[45%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[30%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[60%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[85%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[70%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[50%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[65%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[80%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[95%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[75%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[60%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[40%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[30%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[20%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[40%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+<div class="flex-grow bg-primary/20 h-[55%] hover:bg-primary/40 transition-all border-t border-primary-fixed-dim/30"></div>
+</div>
+</div>
+<div class="flex justify-between mt-4 font-code-xs text-on-surface-variant">
+<span>T-24H</span>
+<span>T-12H</span>
+<span>NOW [ACTIVE]</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full h-14 border-t border-outline-variant bg-surface-container-lowest flex justify-around items-center px-4 md:hidden z-50">
+<div class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg px-3 py-1 transition-transform scale-95 active:scale-90">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-code-xs text-code-xs">Monitor</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:opacity-100 transition-transform scale-95 active:scale-90">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-code-xs text-code-xs">Node Map</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:opacity-100 transition-transform scale-95 active:scale-90">
+<span class="material-symbols-outlined">reorder</span>
+<span class="font-code-xs text-code-xs">Terminal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:opacity-100 transition-transform scale-95 active:scale-90">
+<span class="material-symbols-outlined">emergency_home</span>
+<span class="font-code-xs text-code-xs">Alerts</span>
+</div>
+</nav>
+<!-- Visual Scripting -->
+<script>
+        // Micro-interaction for simulating telemetry updates
+        setInterval(() => {
+            const telemetryValue = document.querySelector('.text-headline-md.text-on-surface');
+            if(telemetryValue) {
+                const currentVal = parseInt(telemetryValue.innerText);
+                const noise = Math.floor(Math.random() * 5) - 2;
+                telemetryValue.innerText = (currentVal + noise) + " Trucks";
+            }
+        }, 3000);
+    </script>
+</body></html>

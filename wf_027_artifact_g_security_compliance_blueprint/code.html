@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UCE_CORE_ENGINE_V2.4 | SECURITY_BLUEPRINT_WF-027</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+        }
+        .connector-h::after { height: 1px; width: 24px; top: 50%; right: -24px; }
+        .connector-v::after { width: 1px; height: 32px; left: 50%; bottom: -32px; }
+        
+        .glow-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.1);
+            position: absolute;
+            top: 0;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#1c2b3c",
+                        "surface-bright": "#2c3a4c",
+                        "outline-variant": "#3b4b37",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#00e639",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#84967e",
+                        "on-primary-container": "#007117",
+                        "tertiary": "#fff6ff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary": "#ebffe2",
+                        "surface-container-highest": "#273647",
+                        "on-error": "#690005",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-container": "#c6ceff",
+                        "background": "#051424",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-fixed": "#dde1ff",
+                        "on-surface": "#d4e4fa",
+                        "surface": "#051424",
+                        "surface-container-low": "#0d1c2d",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "surface-tint": "#00e639",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-fixed": "#72ff70",
+                        "inverse-primary": "#006e16",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-fixed": "#002203",
+                        "on-primary": "#003907",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "secondary-container": "#0043eb",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "primary-container": "#00ff41",
+                        "surface-dim": "#051424",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container": "#122131",
+                        "surface-variant": "#273647",
+                        "on-secondary": "#002388",
+                        "tertiary-container": "#ecd3ff",
+                        "on-secondary-fixed": "#001356",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-node-gutter h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<h1 class="font-label-caps text-headline-md tracking-tighter text-primary-fixed-dim">UCE_CORE_ENGINE_V2.4</h1>
+</div>
+<nav class="hidden md:flex gap-8">
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary py-5" href="#">SECURITY_BLUEPRINT</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-5" href="#">FLOW_MATRIX</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-5" href="#">COMPLIANCE_LOGS</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80" data-icon="terminal">terminal</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col h-full w-64 bg-surface-container border-r border-outline-variant py-lane-margin overflow-y-auto">
+<div class="px-6 mb-8">
+<h2 class="font-label-caps text-headline-md text-primary-fixed-dim">SYSTEM_EXPLORER</h2>
+</div>
+<div class="flex flex-col">
+<div class="bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim flex items-center px-6 py-3 gap-3 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-label-caps">Compliance_Logs</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high flex items-center px-6 py-3 gap-3 cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high flex items-center px-6 py-3 gap-3 cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Flow_Matrix</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high flex items-center px-6 py-3 gap-3 cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-label-caps text-label-caps">AI_Logic_Engine</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high flex items-center px-6 py-3 gap-3 cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="developer_board">developer_board</span>
+<span class="font-label-caps text-label-caps">Terminal_Console</span>
+</div>
+</div>
+<div class="mt-auto px-6 pt-8 border-t border-outline-variant/30">
+<div class="p-4 bg-surface-container-low rounded border border-outline-variant/50">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-[9px] text-primary-fixed-dim">ENCRYPTION: ACTIVE</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim glow-pulse"></div>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">AES-256-GCM / SHA-512</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto relative">
+<div class="scanline pointer-events-none"></div>
+<!-- Swimlane Header Area -->
+<div class="p-node-gutter space-y-lane-margin pb-32">
+<!-- Section Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-outline-variant pb-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">WF-027_SECURITY_BLUEPRINT</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">PROTO_REF: SECURITY_LAYER_EPSILON // AUTH_LEVEL: 04</p>
+</div>
+<div class="flex gap-2">
+<div class="px-3 py-1 bg-surface-container-high border border-outline-variant rounded flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+<span class="font-label-caps text-code-xs">GPS_SYNC: OK</span>
+</div>
+<div class="px-3 py-1 bg-surface-container-high border border-outline-variant rounded flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-label-caps text-code-xs">MANUAL_REV: REQUIRED</span>
+</div>
+</div>
+</div>
+<!-- Workflow Visualization (Bento Style Grid) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<!-- IDENTITY VALIDATION NODE -->
+<div class="md:col-span-1 bg-surface-container-low border border-primary-fixed-dim p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">SEC_NODE: 01</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="fingerprint">fingerprint</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-2">Identity Validation</h3>
+<p class="text-on-surface-variant font-code-sm text-code-sm mb-4">Multi-factor biometric handshake + DLT Ledger verification.</p>
+<div class="mt-auto pt-4 border-t border-outline-variant space-y-2">
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Latency:</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">12ms</span>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Method:</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">EIP-712</span>
+</div>
+</div>
+</div>
+<!-- CARGO & VERIFICATION -->
+<div class="md:col-span-2 bg-surface-container-low border border-outline-variant p-4 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SEC_NODE: 02-03</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="inventory_2">inventory_2</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<h3 class="font-headline-md text-headline-md mb-1">Cargo Verification</h3>
+<p class="text-on-surface-variant font-code-sm text-code-sm">Spectroscopic hash matching against manifest. Digital twin sync.</p>
+</div>
+<div class="bg-surface-container border-l-2 border-primary-fixed-dim p-3">
+<h3 class="font-headline-md text-headline-md mb-1">Seal Validation</h3>
+<p class="text-on-surface-variant font-code-sm text-code-sm">IoT Passive/Active tamper-evident telemetry stream.</p>
+</div>
+</div>
+<div class="mt-4 p-2 bg-surface-container-lowest border border-outline-variant/30 rounded">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="link">link</span>
+<span class="font-label-caps text-[9px] uppercase">AES-256-GCM_ENCRYPTED_TUNNEL</span>
+</div>
+<div class="w-full h-1 bg-surface-variant overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[85%]"></div>
+</div>
+</div>
+</div>
+<!-- CUSTOMS & COMPLIANCE -->
+<div class="md:col-span-1 bg-surface-container-low border border-outline-variant p-4 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SEC_NODE: 04</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="gavel">gavel</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-2">Customs Flow</h3>
+<p class="text-on-surface-variant font-code-sm text-code-sm mb-4">Real-time border agent clearance protocols.</p>
+<ul class="space-y-1">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-xs" data-icon="check_circle">check_circle</span>
+<span class="font-code-xs text-code-xs">HS_CODE_VALID</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-xs" data-icon="check_circle">check_circle</span>
+<span class="font-code-xs text-code-xs">TAX_ESCROW_LOCKED</span>
+</li>
+</ul>
+</div>
+<!-- FRAUD DETECTION & AI -->
+<div class="md:col-span-2 h-64 relative border border-outline-variant overflow-hidden">
+
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6 w-full">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="psychology">psychology</span>
+<h3 class="font-headline-md text-headline-md">AI Fraud Detection</h3>
+</div>
+<p class="text-on-surface-variant font-code-sm text-code-sm max-w-md">Anomalous pattern recognition engine monitoring flow WF-027 for deviations in temporal, spatial, and financial metadata.</p>
+</div>
+<div class="absolute top-4 right-4 bg-primary-container/20 text-primary-fixed-dim px-3 py-1 border border-primary-fixed-dim rounded-full text-[10px] font-bold">
+                            REAL_TIME_SCANNING
+                        </div>
+</div>
+<!-- GPS INTEGRITY -->
+<div class="md:col-span-2 bg-surface-container-low border border-outline-variant p-0 overflow-hidden flex flex-col">
+<div class="p-4 border-b border-outline-variant bg-surface-container">
+<div class="flex justify-between items-center">
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim">GPS_INTEGRITY_SHIELD</h3>
+<span class="font-code-xs text-code-xs">SAT_LOCK: 09</span>
+</div>
+</div>
+<div class="flex-1 min-h-[120px] relative">
+<div class="absolute inset-0 grayscale opacity-40 brightness-50" data-alt="A dark, high-contrast satellite view map of a global shipping corridor with glowing cyan vector lines indicating shipping routes. The aesthetic is industrial and high-tech, using deep navy and neon green accents for telemetry data points. Soft grid overlays and monospaced coordinate text provide a sense of precision and professional security monitoring." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAMMM3en5shLY5uk14LTNDHFgfVaDNFKA5VO1OWteQuWVcTqZB8lHwFvOaWaqZAlOsrQQAqiFADzLHHLdA_KOg3XipANU7Tz5GjD-Lzypd3-QWeUFcZkN6bGGjVIspC0QOd50KOIRFCAELet5l12FljkYCuZjpy5MWd-ZbM2IHCgEdY_Sb4Fbv471Fsv6R14jGTuUuckTPnyc_d5_KAqNhrXC_lQJwhhA7zVRDFgU7vDi1TJyFIhjq4CiGZ6fnFzo3tsRTUYPM_IZ4')"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-16 h-16 rounded-full border-2 border-primary-fixed-dim/30 animate-ping"></div>
+<div class="w-4 h-4 bg-primary-fixed-dim rounded-full shadow-[0_0_15px_#00e639]"></div>
+</div>
+<div class="absolute bottom-4 left-4 bg-background/80 border border-outline-variant p-2">
+<p class="font-code-xs text-code-xs">LAT: 34.0522° N</p>
+<p class="font-code-xs text-code-xs">LON: 118.2437° W</p>
+</div>
+</div>
+</div>
+<!-- AUDIT LOGGING (Manual Review Trigger) -->
+<div class="md:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+<div class="md:col-span-2 bg-surface-container-highest border border-outline-variant rounded-lg p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+                                    SYSTEM_AUDIT_STUB
+                                </h3>
+<button class="bg-primary-fixed-dim text-on-primary-fixed px-4 py-2 font-label-caps text-label-caps rounded hover:brightness-110 active:scale-95 transition-all">DOWNLOAD_LOGS</button>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 bg-surface border-l-2 border-primary-fixed-dim">
+<div class="flex gap-4">
+<span class="font-code-xs text-on-surface-variant">14:22:01.004</span>
+<span class="font-code-sm text-on-surface">SEC_HANDSHAKE_INIT</span>
+</div>
+<span class="font-code-xs text-primary-fixed-dim">SUCCESS</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface border-l-2 border-error">
+<div class="flex gap-4">
+<span class="font-code-xs text-on-surface-variant">14:22:05.892</span>
+<span class="font-code-sm text-on-surface">CONTAINER_SEAL_MISMATCH</span>
+</div>
+<span class="font-code-xs text-error">FAIL</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface border-l-2 border-outline-variant">
+<div class="flex gap-4">
+<span class="font-code-xs text-on-surface-variant">14:23:00.012</span>
+<span class="font-code-sm text-on-surface">GPS_RECALIBRATION</span>
+</div>
+<span class="font-code-xs text-on-surface-variant">PENDING</span>
+</div>
+</div>
+</div>
+<!-- Manual Review Trigger -->
+<div class="bg-error-container/10 border border-error p-6 flex flex-col">
+<div class="flex items-center gap-3 text-error mb-4">
+<span class="material-symbols-outlined text-[32px]" data-icon="warning">warning</span>
+<h3 class="font-headline-md text-headline-md">MANUAL_REVIEW</h3>
+</div>
+<p class="text-on-error-container font-body-md mb-6 leading-relaxed">
+                                Conflict detected in <span class="font-bold underline">Seal Validation</span> telemetry. 
+                                Human intervention required to override seal mismatch (CODE: ERR-409).
+                            </p>
+<div class="mt-auto space-y-3">
+<button class="w-full py-3 bg-error text-on-error font-label-caps text-label-caps rounded font-bold uppercase tracking-widest hover:brightness-90 transition-all">INITIATE_OVERRIDE</button>
+<button class="w-full py-3 border border-error text-error font-label-caps text-label-caps rounded font-bold uppercase tracking-widest hover:bg-error/10 transition-all">QUARANTINE_UNIT</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-grid-unit bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:bg-surface-container-high transition-transform scale-95 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-code-xs text-code-xs">Live_Telemetry</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:bg-surface-container-high transition-transform scale-95 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="dns">dns</span>
+<span class="font-code-xs text-code-xs">Node_Status</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container/10 text-primary-fixed-dim py-1 hover:bg-surface-container-high transition-transform scale-95 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="sync_alt">sync_alt</span>
+<span class="font-code-xs text-code-xs">Sync_Engine</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:bg-surface-container-high transition-transform scale-95 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="health_metrics">health_metrics</span>
+<span class="font-code-xs text-code-xs">System_Health</span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for node hovering
+        document.querySelectorAll('.bg-surface-container-low').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('shadow-[0_0_20px_rgba(0,230,57,0.1)]');
+                node.style.transform = 'translateY(-2px)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('shadow-[0_0_20px_rgba(0,230,57,0.1)]');
+                node.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Simple terminal typewriter effect simulation
+        const terminalText = "DECRYPTING_PACKETS... [OK] | SYNCING_LEDGER... [OK] | THREAT_SCAN: NEGATIVE";
+        console.log(`%c ${terminalText}`, "color: #00e639; font-family: monospace; font-size: 14px; font-weight: bold;");
+    </script>
+</body></html>

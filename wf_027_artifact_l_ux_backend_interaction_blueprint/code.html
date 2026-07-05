@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ENGINE: ESCROW_LIFECYCLE_WF-006</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#1c2b3c",
+                    "surface-bright": "#2c3a4c",
+                    "outline-variant": "#3b4b37",
+                    "error": "#ffb4ab",
+                    "primary-fixed-dim": "#00e639",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-error-container": "#ffdad6",
+                    "outline": "#84967e",
+                    "on-primary-container": "#007117",
+                    "tertiary": "#fff6ff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "primary": "#ebffe2",
+                    "surface-container-highest": "#273647",
+                    "on-error": "#690005",
+                    "on-background": "#d4e4fa",
+                    "on-tertiary-container": "#862ed4",
+                    "on-secondary-container": "#c6ceff",
+                    "background": "#051424",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary-fixed": "#dde1ff",
+                    "on-surface": "#d4e4fa",
+                    "surface": "#051424",
+                    "surface-container-low": "#0d1c2d",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary": "#490080",
+                    "surface-tint": "#00e639",
+                    "inverse-surface": "#d4e4fa",
+                    "primary-fixed": "#72ff70",
+                    "inverse-primary": "#006e16",
+                    "inverse-on-surface": "#233143",
+                    "on-primary-fixed": "#002203",
+                    "on-primary": "#003907",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "secondary-container": "#0043eb",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "primary-container": "#00ff41",
+                    "surface-dim": "#051424",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-container": "#122131",
+                    "surface-variant": "#273647",
+                    "on-secondary": "#002388",
+                    "tertiary-container": "#ecd3ff",
+                    "on-secondary-fixed": "#001356",
+                    "error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "node-gutter": "24px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, #122131 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .workflow-canvas {
+            min-width: 1600px;
+            height: 100vh;
+            padding-top: 64px;
+            padding-left: 280px;
+        }
+        .swimlane-border {
+            border-right: 1px solid #3b4b37;
+        }
+        .pulse-active {
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0px rgba(0, 230, 57, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 230, 57, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(0, 230, 57, 0); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-surface font-body-md overflow-x-auto">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-node-gutter h-12 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="terminal">terminal</span>
+<span class="font-headline-md text-headline-md font-bold text-primary-fixed tracking-tight">ENGINE: ESCROW_LIFECYCLE_WF-006</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="px-3 py-1 bg-surface-container-highest rounded border border-outline-variant font-code-sm text-code-sm text-primary-fixed">
+                V.4.2.1-STABLE
+            </div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-highest transition-colors p-1 rounded" data-icon="refresh">refresh</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 flex flex-col py-4 bg-surface-container-low border-r border-outline-variant z-40">
+<div class="px-6 mb-6">
+<span class="font-label-caps text-label-caps text-primary-fixed">SYSTEM_INDEX</span>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-6 py-3 bg-surface-container-highest text-primary-fixed border-l-4 border-primary-container transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow Index</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps">State Machine</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data Models</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">Logic Connectors</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-high hover:text-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</div>
+</nav>
+<div class="mt-auto px-6 pt-4 border-t border-outline-variant/30">
+<div class="flex items-center justify-between text-code-xs text-on-surface-variant mb-2">
+<span>SYSTEM STATUS</span>
+<span class="text-primary-fixed-dim">NOMINAL</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full w-[84%] animate-pulse"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="workflow-canvas relative flex">
+<!-- Background Animation Overlay (Shader) -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+
+</div>
+<!-- Swimlane: User Interface (Frontend) -->
+<div class="flex-none w-80 swimlane-border relative z-10 flex flex-col">
+<div class="sticky top-12 bg-background/80 backdrop-blur-sm p-4 border-b border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="devices">devices</span>
+<span class="font-headline-md text-headline-md text-on-surface">Client Node</span>
+</div>
+<div class="p-node-gutter flex flex-col gap-lane-margin">
+<!-- Node: Merchant Input -->
+<div class="bg-surface-container-lowest border border-secondary p-4 rounded-sm shadow-lg group hover:border-primary-fixed transition-all">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-secondary">UX_ENTRY</span>
+<span class="text-code-xs text-on-surface-variant">WS_CONNECTED</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Merchant Books Freight</h3>
+<div class="mt-3 flex gap-2">
+<div class="h-1 flex-1 bg-secondary rounded-full"></div>
+<div class="h-1 flex-1 bg-surface-container-highest rounded-full"></div>
+</div>
+</div>
+<!-- Node: State Receiver -->
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-sm pulse-active">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">WS_LISTENER</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Real-time Propagator</h3>
+<p class="text-code-xs text-on-surface-variant mt-2">Payload: { "status": "TRANSIT_APPROVED" }</p>
+</div>
+</div>
+</div>
+<!-- Swimlane: API Gateway & Auth -->
+<div class="flex-none w-80 swimlane-border relative z-10 flex flex-col">
+<div class="sticky top-12 bg-background/80 backdrop-blur-sm p-4 border-b border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="v鍵">vpn_key</span>
+<span class="font-headline-md text-headline-md text-on-surface">Gateway</span>
+</div>
+<div class="p-node-gutter pt-24 flex flex-col gap-lane-margin">
+<!-- Node: API Gateway -->
+<div class="bg-surface-container-lowest border border-primary-fixed-dim p-4 rounded-sm">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">API_GW_01</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Traffic Marshalling</h3>
+<div class="mt-2 text-code-xs text-on-primary-container font-bold">LATENCY: 12ms</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: Service Mesh (Freight/Container/Customs) -->
+<div class="flex-none w-[600px] swimlane-border relative z-10 flex flex-col">
+<div class="sticky top-12 bg-background/80 backdrop-blur-sm p-4 border-b border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="hub">hub</span>
+<span class="font-headline-md text-headline-md text-on-surface">Execution Core</span>
+</div>
+<div class="grid grid-cols-2 p-node-gutter gap-8">
+<!-- Node: Freight Service -->
+<div class="bg-surface-container-lowest border border-outline p-4 rounded-sm h-fit">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">SVC_FREIGHT</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Carrier Allocation</h3>
+<div class="mt-2 space-y-1">
+<div class="flex justify-between text-code-xs opacity-60"><span>Ref ID:</span><span>FR-902</span></div>
+<div class="flex justify-between text-code-xs opacity-60"><span>State:</span><span class="text-primary-fixed">RUNNING</span></div>
+</div>
+</div>
+<!-- Node: Container Service -->
+<div class="bg-surface-container-lowest border border-outline p-4 rounded-sm h-fit">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">SVC_UNIT</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Container ISO Validation</h3>
+<div class="mt-2 flex gap-1">
+<div class="w-2 h-2 bg-primary-fixed rounded-full"></div>
+<div class="w-2 h-2 bg-primary-fixed rounded-full"></div>
+<div class="w-2 h-2 bg-surface-container-highest rounded-full"></div>
+</div>
+</div>
+<!-- Node: Customs Logic -->
+<div class="bg-surface-container-lowest border border-error p-4 rounded-sm h-fit col-span-2">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error">CRITICAL_PATH</span>
+<span class="text-code-xs text-error">ASYNC_WAIT</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Customs Clearance Handler</h3>
+<div class="mt-2 p-2 bg-error-container/20 border border-error/30 rounded text-code-xs text-error">
+                        POL: SHA -&gt; POD: LAX | TAX_CODE: 2802.A
+                    </div>
+</div>
+<!-- Node: Insurance Engine -->
+<div class="bg-surface-container-lowest border border-tertiary-fixed-dim p-4 rounded-sm h-fit">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">SVC_FIN</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Premium Calc</h3>
+</div>
+<!-- Node: Tracking Aggregator -->
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-sm h-fit">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SVC_IOT</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Live GPS Sync</h3>
+</div>
+</div>
+</div>
+<!-- Swimlane: Financial & Finalization (Escrow/Notification) -->
+<div class="flex-none w-80 relative z-10 flex flex-col">
+<div class="sticky top-12 bg-background/80 backdrop-blur-sm p-4 border-b border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_balance">account_balance</span>
+<span class="font-headline-md text-headline-md text-on-surface">Escrow &amp; Finality</span>
+</div>
+<div class="p-node-gutter flex flex-col gap-lane-margin">
+<!-- Node: Escrow Ledger -->
+<div class="bg-surface-container-lowest border border-primary-fixed-dim p-4 rounded-sm relative overflow-hidden">
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]" data-icon="lock">lock</span>
+</div>
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">LEDGER_LOCK</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Escrow Funds Securing</h3>
+<p class="text-code-xs text-primary-fixed-dim mt-2">$24,500.00 USD HOLD</p>
+</div>
+<!-- Node: Notification Dispatch -->
+<div class="bg-surface-container-lowest border border-outline p-4 rounded-sm">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">OUTBOUND</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Notification Dispatch</h3>
+<div class="mt-2 flex gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="mail">mail</span>
+<span class="material-symbols-outlined text-sm" data-icon="sms">sms</span>
+<span class="material-symbols-outlined text-sm" data-icon="notifications_active">notifications_active</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Connector Visual Overlays (Abstract Lines) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-0" xmlns="http://www.w3.org/2000/svg">
+<!-- Merchant to API GW -->
+<path d="M 320 150 L 400 150 L 400 320 L 480 320" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- API GW to Freight -->
+<path d="M 800 320 L 880 320" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Freight to Container -->
+<path d="M 1180 320 L 1180 450 L 880 450" fill="none" stroke="#84967e" stroke-dasharray="4 2" stroke-width="1.5"></path>
+<!-- Service Core to Escrow -->
+<path d="M 1480 320 L 1580 320 L 1580 150 L 1680 150" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#00e639" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg>
+</main>
+<!-- Side Inspection Panel (Hidden by default, used for interaction) -->
+<div class="fixed right-0 top-12 bottom-0 w-80 bg-surface-container-high border-l border-outline-variant transform translate-x-full transition-transform duration-300 z-50 p-6" id="inspector">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline-md text-headline-md text-on-surface">Node Inspector</h2>
+<span class="material-symbols-outlined cursor-pointer" data-icon="close" onclick="toggleInspector()">close</span>
+</div>
+<div class="space-y-6">
+<section>
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-2">RAW_METRICS</h4>
+<div class="bg-surface-container-lowest p-3 rounded font-code-sm text-code-sm text-on-surface-variant space-y-1">
+<div class="flex justify-between"><span>Exec Count:</span><span class="text-on-surface">1,249</span></div>
+<div class="flex justify-between"><span>Err Rate:</span><span class="text-error">0.02%</span></div>
+<div class="flex justify-between"><span>Throughput:</span><span class="text-on-surface">144 req/s</span></div>
+</div>
+</section>
+<section>
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-2">LOG_STREAM</h4>
+<div class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+<div class="border-l-2 border-primary-fixed pl-3 py-1">
+<div class="text-code-xs text-on-surface-variant">12:04:11.02</div>
+<div class="text-code-sm">Payload validated: Escrow OK</div>
+</div>
+<div class="border-l-2 border-outline-variant pl-3 py-1 opacity-60">
+<div class="text-code-xs text-on-surface-variant">12:04:10.98</div>
+<div class="text-code-sm">Customs: Polling POD...</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Floating Action Button -->
+<button class="fixed bottom-8 right-8 bg-primary-container text-on-primary-container p-4 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 transition-transform z-50">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="font-label-caps text-label-caps">NEW_FORK</span>
+</button>
+<!-- UI Interaction Scripts -->
+<script>
+        function toggleInspector() {
+            const inspector = document.getElementById('inspector');
+            inspector.classList.toggle('translate-x-full');
+        }
+
+        // Add event listeners to all nodes to simulate inspection
+        document.querySelectorAll('.bg-surface-container-lowest').forEach(node => {
+            node.style.cursor = 'pointer';
+            node.addEventListener('click', () => {
+                const inspector = document.getElementById('inspector');
+                inspector.classList.remove('translate-x-full');
+            });
+        });
+
+        // Simple telemetry simulation
+        setInterval(() => {
+            const counters = document.querySelectorAll('.text-code-xs');
+            counters.forEach(counter => {
+                if(counter.textContent.includes('ms')) {
+                    const newLatency = Math.floor(Math.random() * 10) + 10;
+                    counter.textContent = `LATENCY: ${newLatency}ms`;
+                }
+            });
+        }, 3000);
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+            border-radius: 2px;
+        }
+    </style>
+</body></html>

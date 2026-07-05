@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PIM_ENGINE_V2 - WF-030 Event Bus Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#00e639",
+                        "on-primary-fixed": "#002203",
+                        "on-secondary-container": "#c6ceff",
+                        "error-container": "#93000a",
+                        "secondary-container": "#0043eb",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-tertiary-container": "#862ed4",
+                        "tertiary-fixed": "#f0dbff",
+                        "inverse-on-surface": "#233143",
+                        "on-tertiary": "#490080",
+                        "outline": "#84967e",
+                        "surface": "#051424",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary": "#fff6ff",
+                        "surface-variant": "#273647",
+                        "surface-container-lowest": "#010f1f",
+                        "on-background": "#d4e4fa",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "error": "#ffb4ab",
+                        "on-surface": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff",
+                        "on-secondary": "#002388",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#0d1c2d",
+                        "background": "#051424",
+                        "primary-fixed-dim": "#00e639",
+                        "primary-container": "#00ff41",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-error": "#690005",
+                        "on-primary": "#003907",
+                        "secondary-fixed": "#dde1ff",
+                        "primary": "#ebffe2",
+                        "secondary": "#b8c3ff",
+                        "on-primary-container": "#007117",
+                        "surface-bright": "#2c3a4c",
+                        "surface-container": "#122131",
+                        "inverse-primary": "#006e16",
+                        "surface-dim": "#051424",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-container-high": "#1c2b3c",
+                        "primary-fixed": "#72ff70",
+                        "on-primary-fixed-variant": "#00530e",
+                        "surface-container-highest": "#273647",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-fixed": "#001356"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lane-margin": "32px",
+                        "grid-unit": "8px",
+                        "stack-gap": "4px",
+                        "node-gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector-h {
+            height: 2px;
+            background: #3b4b37;
+            position: relative;
+        }
+        .node-connector-v {
+            width: 2px;
+            background: #3b4b37;
+            position: relative;
+        }
+        .glow-green { box-shadow: 0 0 15px -3px rgba(0, 230, 57, 0.3); }
+        .glow-red { box-shadow: 0 0 15px -3px rgba(255, 180, 171, 0.3); }
+        .workflow-canvas {
+            min-height: calc(100vh - 56px - 32px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-x-hidden">
+<!-- Top Navigation -->
+<header class="w-full top-0 sticky z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-grid-unit h-14 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">PIM_ENGINE_V2</span>
+</div>
+<div class="hidden md:flex gap-6 items-center">
+<nav class="flex gap-4">
+<a class="font-label-caps text-label-caps text-primary cursor-pointer hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">CORE_ORCHESTRATOR</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">QUEUE_MONITOR</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">LOG_STREAM</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<div class="flex">
+<!-- Sidebar -->
+<aside class="h-screen w-64 sticky left-0 top-14 bg-surface-container-low border-r border-outline-variant hidden md:flex flex-col gap-stack-gap pt-node-gutter">
+<div class="px-4 mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-50">MODULE_INDEX</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed-dim cursor-pointer">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data Schema</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">alt_route</span>
+<span class="font-label-caps text-label-caps">Workflow Nodes</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-caps text-label-caps">Asset Mapping</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-caps text-label-caps">System Logs</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-node-gutter relative overflow-auto workflow-canvas">
+<!-- Page Header -->
+<div class="mb-lane-margin">
+<div class="flex items-baseline gap-2 mb-1">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">WF-030: Unified Event Bus</h1>
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-0.5 text-primary-fixed-dim rounded border border-outline-variant">STABLE_V2.4</span>
+</div>
+<p class="font-body-md text-on-surface-variant max-w-2xl">Automation orchestration layer mapping n8n triggers to Kafka clusters for global logistics synchronization.</p>
+</div>
+<!-- Workflow Visualizer Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-node-gutter">
+<!-- Left Column: Source Events (Swimlane: Producer) -->
+<div class="lg:col-span-3 space-y-node-gutter">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">sensors</span>
+<h3 class="font-label-caps text-label-caps text-on-surface">EVENT_PRODUCERS</h3>
+</div>
+<!-- ShipmentCompleted Node -->
+<div class="bg-surface-container border border-primary-fixed-dim/30 p-3 glow-green relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim uppercase">ShipmentCompleted</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: E-772</span>
+</div>
+<h4 class="font-code-sm text-code-sm mb-2 text-on-surface">LOG_CORE_TRANSIT</h4>
+<div class="flex gap-2">
+<span class="font-code-xs text-code-xs px-1 bg-surface-container-high border border-outline-variant">KAFKA:MAIN</span>
+<span class="font-code-xs text-code-xs px-1 bg-surface-container-high border border-outline-variant">TOPIC:SHP_COMP</span>
+</div>
+</div>
+<!-- RouteCompleted Node -->
+<div class="bg-surface-container border border-primary-fixed-dim/30 p-3 glow-green relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim uppercase">RouteCompleted</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: E-819</span>
+</div>
+<h4 class="font-code-sm text-code-sm mb-2 text-on-surface">GEO_ENGINE_X</h4>
+<div class="flex gap-2">
+<span class="font-code-xs text-code-xs px-1 bg-surface-container-high border border-outline-variant">KAFKA:GEO</span>
+<span class="font-code-xs text-code-xs px-1 bg-surface-container-high border border-outline-variant">TOPIC:RTE_DONE</span>
+</div>
+</div>
+<!-- DriverPerformanceUpdated Node -->
+<div class="bg-surface-container border border-primary-fixed-dim/30 p-3 glow-green relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim uppercase">DriverPerf</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: E-330</span>
+</div>
+<h4 class="font-code-sm text-code-sm mb-2 text-on-surface">HR_SYNC_LAYER</h4>
+<div class="flex gap-2">
+<span class="font-code-xs text-code-xs px-1 bg-surface-container-high border border-outline-variant">RMQ:STAFF</span>
+<span class="font-code-xs text-code-xs px-1 bg-surface-container-high border border-outline-variant">QUEUE:DRV_METRIC</span>
+</div>
+</div>
+</div>
+<!-- Middle Column: Automation Logic (n8n Layer) -->
+<div class="lg:col-span-6 space-y-node-gutter">
+<div class="flex items-center justify-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary">memory</span>
+<h3 class="font-label-caps text-label-caps text-on-surface">N8N_ORCHESTRATION_LAYER</h3>
+</div>
+<!-- Central Processing Hub -->
+<div class="bg-surface-container-high border border-secondary p-6 rounded-lg relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between mb-4">
+<div>
+<span class="font-label-caps text-label-caps text-secondary block mb-1">WORKFLOW_ID: WF-030-MAIN</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Cluster: US-EAST-PROD</span>
+</div>
+<div class="text-right">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim block">UPTIME: 99.98%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">THROUGHPUT: 1.2k/s</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Automation Logic Block 1 -->
+<div class="border border-outline-variant bg-surface p-3 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">hub</span>
+<span class="font-label-caps text-[10px] text-on-surface">ForecastGenerated</span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">AUTOMATION_ID: N8N-99-XJ</div>
+<div class="h-1 w-full bg-surface-variant overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[65%] animate-pulse"></div>
+</div>
+</div>
+<!-- Automation Logic Block 2 -->
+<div class="border border-outline-variant bg-surface p-3 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">query_stats</span>
+<span class="font-label-caps text-[10px] text-on-surface">OptimizationSuggested</span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">AUTOMATION_ID: N8N-42-BT</div>
+<div class="h-1 w-full bg-surface-variant overflow-hidden">
+<div class="h-full bg-secondary w-[82%] animate-pulse"></div>
+</div>
+</div>
+</div>
+<!-- Maintenance Alert Bridge -->
+<div class="mt-4 border border-error-container/50 bg-error-container/10 p-3 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">warning</span>
+<div>
+<span class="font-label-caps text-[10px] text-error block">MaintenanceAlert</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">CRITICAL_NODE: RMQ-33</span>
+</div>
+</div>
+<button class="bg-error text-on-error font-label-caps text-[10px] px-3 py-1 rounded">TRIGGER_DLQ</button>
+</div>
+</div>
+<!-- DLQ Section -->
+<div class="border border-dashed border-error-container/60 p-4 bg-surface-container-lowest flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-error">DEAD_LETTER_QUEUE (DLQ)</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">RETENTION: 7D</span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<div class="p-2 border border-outline-variant bg-surface text-center">
+<div class="font-code-xs text-code-xs text-on-surface-variant mb-1">RETRY_1</div>
+<div class="font-label-caps text-[10px] text-on-surface">2s Delay</div>
+</div>
+<div class="p-2 border border-outline-variant bg-surface text-center">
+<div class="font-code-xs text-code-xs text-on-surface-variant mb-1">RETRY_2</div>
+<div class="font-label-caps text-[10px] text-on-surface">30s Delay</div>
+</div>
+<div class="p-2 border border-error-container bg-error-container/20 text-center">
+<div class="font-code-xs text-code-xs text-error mb-1">HALT</div>
+<div class="font-label-caps text-[10px] text-on-surface">Admin Manual</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Micro-Telemetry & Consumers -->
+<div class="lg:col-span-3 space-y-node-gutter">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">analytics</span>
+<h3 class="font-label-caps text-label-caps text-on-surface">CONSUMER_TELEMETRY</h3>
+</div>
+<!-- Metrics Card 1 -->
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-[10px] text-on-surface-variant mb-3 uppercase">Cluster_Status</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs">KAFKA_CLUSTER_A</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs">RMQ_EXCHANGE_01</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs">N8N_WORKER_PODS</span>
+<span class="font-code-sm text-code-sm text-secondary">8/8</span>
+</div>
+</div>
+</div>
+<!-- Active Logs -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-3 h-64 overflow-hidden flex flex-col">
+<div class="font-label-caps text-[10px] text-primary-fixed-dim mb-2 uppercase border-b border-outline-variant pb-1">Live_Stream</div>
+<div class="flex-1 overflow-y-auto space-y-1 font-code-xs text-code-xs opacity-70">
+<div class="text-on-surface-variant"><span class="text-primary-fixed-dim">[14:02:11]</span> EVENT.ACK - E-772 Received</div>
+<div class="text-on-surface-variant"><span class="text-primary-fixed-dim">[14:02:15]</span> N8N.FLOW - WF-030 Start</div>
+<div class="text-on-surface-variant"><span class="text-primary-fixed-dim">[14:02:18]</span> KAFKA.PUB - SHP_COMP Topic</div>
+<div class="text-error"><span class="text-error">[14:02:22]</span> NODE.ERR - Socket Timeout RMQ</div>
+<div class="text-on-surface-variant"><span class="text-primary-fixed-dim">[14:02:23]</span> RETRY.INIT - Job Q-4402</div>
+<div class="text-on-surface-variant"><span class="text-primary-fixed-dim">[14:02:24]</span> EVENT.ACK - E-819 Received</div>
+<div class="text-on-surface-variant"><span class="text-primary-fixed-dim">[14:02:25]</span> LOG.SYNC - Bulk Write Success</div>
+<div class="text-on-surface-variant"><span class="text-primary-fixed-dim">[14:02:29]</span> METRIC.UPD - Avg Latency 14ms</div>
+</div>
+</div>
+<!-- Audit Stub -->
+<div class="p-3 border-l-4 border-secondary-container bg-surface-container flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-sm">info</span>
+<div>
+<span class="font-label-caps text-[10px] text-on-surface block">Audit Persistence</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">All events indexed in ElasticSearch (v7.1)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Decoration Overlay (Blueprint lines) -->
+<div class="fixed inset-0 pointer-events-none opacity-5 z-0">
+<div class="absolute top-1/4 left-0 w-full h-[1px] bg-white"></div>
+<div class="absolute top-2/4 left-0 w-full h-[1px] bg-white"></div>
+<div class="absolute top-3/4 left-0 w-full h-[1px] bg-white"></div>
+<div class="absolute left-1/4 top-0 h-full w-[1px] bg-white"></div>
+<div class="absolute left-2/4 top-0 h-full w-[1px] bg-white"></div>
+<div class="absolute left-3/4 top-0 h-full w-[1px] bg-white"></div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full fixed bottom-0 z-10 bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-node-gutter py-1 h-8 w-full">
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CORE_ENGINE_STABLE</span>
+<span class="h-2 w-2 rounded-full bg-primary-fixed-dim"></span>
+</div>
+<div class="flex gap-6">
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim transition-opacity duration-200 cursor-pointer">LATENCY: 12ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim transition-opacity duration-200 cursor-pointer">UPTIME: 99.99%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim transition-opacity duration-200 cursor-pointer">THROUGHPUT: 4.2k/s</span>
+</div>
+</footer>
+<!-- Micro-Interaction Script -->
+<script>
+        // Simple console-like interaction for node hover
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.borderColor = 'rgba(0, 230, 57, 0.8)';
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s ease-out';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.borderColor = 'rgba(0, 230, 57, 0.3)';
+                node.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Background logic for live log stream simulation
+        const logContainer = document.querySelector('.flex-1.overflow-y-auto');
+        setInterval(() => {
+            if(Math.random() > 0.7) {
+                const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+                const logs = [
+                    `EVENT.ACK - Node_${Math.floor(Math.random()*100)} Processed`,
+                    `KAFKA.PUB - Routing successful`,
+                    `SYNC.BATCH - ${Math.floor(Math.random()*500)} records pushed`,
+                    `METRIC.LAT - 1${Math.floor(Math.random()*9)}ms`,
+                    `BUFFER.FLUSH - Buffer 0% full`
+                ];
+                const newLog = document.createElement('div');
+                newLog.className = 'text-on-surface-variant opacity-70';
+                newLog.innerHTML = `<span class="text-primary-fixed-dim">[${time}]</span> ${logs[Math.floor(Math.random()*logs.length)]}`;
+                logContainer.prepend(newLog);
+                if (logContainer.children.length > 20) logContainer.removeChild(logContainer.lastChild);
+            }
+        }, 3000);
+    </script>
+</body></html>

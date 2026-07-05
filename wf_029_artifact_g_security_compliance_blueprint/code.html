@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CORE-LOGISTICS.OS // SECURITY_BLUEPRINT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dot-grid {
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .glow-border {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.15);
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-container-lowest": "#010f1f",
+                "on-surface-variant": "#b9ccb2",
+                "on-primary-container": "#007117",
+                "surface-variant": "#273647",
+                "outline": "#84967e",
+                "inverse-primary": "#006e16",
+                "surface": "#051424",
+                "outline-variant": "#3b4b37",
+                "error": "#ffb4ab",
+                "surface-container-high": "#1c2b3c",
+                "inverse-surface": "#d4e4fa",
+                "tertiary": "#fff6ff",
+                "on-secondary": "#002388",
+                "on-secondary-container": "#c6ceff",
+                "tertiary-fixed-dim": "#ddb7ff",
+                "error-container": "#93000a",
+                "tertiary-container": "#ecd3ff",
+                "surface-bright": "#2c3a4c",
+                "surface-tint": "#00e639",
+                "on-surface": "#d4e4fa",
+                "on-tertiary-container": "#862ed4",
+                "secondary-fixed": "#dde1ff",
+                "on-error": "#690005",
+                "secondary-container": "#0043eb",
+                "primary-fixed-dim": "#00e639",
+                "on-tertiary": "#490080",
+                "surface-container": "#122131",
+                "on-error-container": "#ffdad6",
+                "surface-container-highest": "#273647",
+                "on-primary-fixed-variant": "#00530e",
+                "secondary-fixed-dim": "#b8c3ff",
+                "surface-dim": "#051424",
+                "surface-container-low": "#0d1c2d",
+                "on-background": "#d4e4fa",
+                "inverse-on-surface": "#233143",
+                "primary-fixed": "#72ff70",
+                "primary-container": "#00ff41",
+                "on-secondary-fixed": "#001356",
+                "on-secondary-fixed-variant": "#0035be",
+                "primary": "#ebffe2",
+                "on-primary-fixed": "#002203",
+                "secondary": "#b8c3ff",
+                "on-tertiary-fixed": "#2c0051",
+                "tertiary-fixed": "#f0dbff",
+                "background": "#051424",
+                "on-tertiary-fixed-variant": "#6900b3",
+                "on-primary": "#003907"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "stack-gap": "4px",
+                "lane-margin": "32px",
+                "grid-unit": "8px",
+                "node-gutter": "24px"
+            },
+            "fontFamily": {
+                "code-sm": ["JetBrains Mono"],
+                "headline-lg": ["Plus Jakarta Sans"],
+                "body-md": ["Plus Jakarta Sans"],
+                "label-caps": ["JetBrains Mono"],
+                "headline-md": ["Plus Jakarta Sans"],
+                "code-xs": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md selection:bg-surface-tint selection:text-on-primary-fixed overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-lane-margin h-16 w-full border-b border-outline-variant bg-surface-container-lowest z-50 fixed top-0">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-tighter text-on-surface uppercase">CORE-LOGISTICS.OS</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-end">
+<span class="font-code-xs text-code-xs text-surface-tint uppercase">ENCRYPTION: AES-256-GCM</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">AUTH_MODE: mTLS_ACTIVE</span>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-variant transition-colors p-2 rounded" data-icon="settings_input_component">settings_input_component</button>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-40 flex flex-col bg-surface-container-low border-r border-outline-variant">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-70 uppercase">MODULE_INDEX</span>
+</div>
+<nav class="flex-1 py-2">
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear group" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span class="font-code-sm text-code-sm">INCIDENT_QUEUE</span>
+</a>
+<a class="bg-secondary-container text-on-secondary-container border-r-4 border-surface-tint flex items-center gap-3 px-4 py-3 group" href="#">
+<span class="material-symbols-outlined" data-icon="security" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-code-sm text-code-sm">SECURITY_BLUEPRINT</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-code-sm text-code-sm">SYSTEM_HEALTH</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="font-code-sm text-code-sm">ACTOR_MAP</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-code-sm text-code-sm">NODE_EDITOR</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-code-sm text-code-sm">ARCHIVE_DB</span>
+</a>
+</nav>
+<div class="p-4 border-t border-outline-variant bg-surface-container">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">SOC2 COMPLIANCE</span>
+<span class="font-code-xs text-code-xs text-surface-tint">VALID</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-surface-tint h-full w-[94%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 mt-16 p-8 h-[calc(100vh-64px-32px)] overflow-y-auto dot-grid relative">
+<!-- Dashboard Header -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tight">Security & Compliance Artifact G</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">REF_ID: ARTIFACT_G_029 // INTEGRITY_LEVEL: HIGH</p>
+</div>
+<div class="flex gap-4">
+<div class="px-4 py-2 bg-surface-container-high border border-outline-variant rounded flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-surface-tint animate-pulse"></div>
+<span class="font-code-sm text-code-sm uppercase">Threat Engine Online</span>
+</div>
+<button class="bg-primary-container text-on-primary-fixed px-4 py-2 font-label-caps text-label-caps uppercase hover:brightness-110 transition-all">MANUAL REVIEW PROTOCOL</button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6 pb-12">
+<!-- Fraud Detection (Pattern Match) -->
+<div class="col-span-8 bg-surface-container-low border border-outline-variant p-6 relative overflow-hidden group">
+<div class="scanline"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-60">MODULE_01</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">FRAUD_DETECTION_ENGINE</h3>
+</div>
+<span class="material-symbols-outlined text-surface-tint" data-icon="biometric_setup">phonelink_setup</span>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div class="p-4 border border-outline-variant bg-surface-container-lowest">
+<span class="font-code-xs text-code-xs text-on-surface-variant block mb-1">PATTERN_MATCH</span>
+<span class="font-headline-md text-headline-md text-primary">99.8%</span>
+<div class="text-code-xs text-on-surface-variant mt-2 uppercase">Nominal Variance</div>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-lowest">
+<span class="font-code-xs text-code-xs text-on-surface-variant block mb-1">ANOMALY_INDEX</span>
+<span class="font-headline-md text-headline-md text-error">0.02%</span>
+<div class="text-code-xs text-on-surface-variant mt-2 uppercase">Critical Threshold 1.5%</div>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-lowest">
+<span class="font-code-xs text-code-xs text-on-surface-variant block mb-1">THREAT_VECTOR</span>
+<span class="font-headline-md text-headline-md text-on-surface">CLEAN</span>
+<div class="text-code-xs text-on-surface-variant mt-2 uppercase">Real-time Scanning</div>
+</div>
+</div>
+<div class="mt-6 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-center mb-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">LOG_STREAM: LIVE_ANALYSIS</span>
+<span class="font-code-xs text-code-xs text-surface-tint">EXEC: 12.4k/sec</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-lowest p-3 font-mono opacity-80">
+<p>> SEQ_492: HEURISTIC_PASS_SUCCESS [IP: 192.168.1.42]</p>
+<p>> SEQ_493: VELOCITY_CHECK_COMPLETE [NODE: ORD_772]</p>
+<p class="text-surface-tint">> SEQ_494: mTLS_HANDSHAKE_ESTABLISHED [ACTOR: WH_DRIVER_02]</p>
+</div>
+</div>
+</div>
+<!-- Evidence Integrity (Hash Valid) -->
+<div class="col-span-4 bg-surface-container-low border border-outline-variant p-6 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface">IMMUTABLE_HASH_CHAIN</h3>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="fingerprint">fingerprint</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex-1">
+<span class="font-code-sm text-code-sm block text-on-surface">EVIDENCE_001_PKG</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant block truncate">SHA-256: 7f83b16...92a1</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex-1">
+<span class="font-code-sm text-code-sm block text-on-surface">MANIFEST_VALID_SIGN</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant block truncate">SIG_RSA: 0x22a...cc4</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex-1">
+<span class="font-code-sm text-code-sm block text-on-surface">GEO_COORD_LOCK</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant block">VALID_FENCE: ZONE_A4</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant">
+<button class="w-full py-2 border border-outline text-label-caps text-label-caps uppercase hover:bg-surface-variant transition-colors">Verify Full Chain</button>
+</div>
+</div>
+<!-- GPS Validation (Map) -->
+<div class="col-span-4 bg-surface-container-low border border-outline-variant overflow-hidden group">
+<div class="p-4 border-b border-outline-variant bg-surface-container flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">GEO-FENCE_MATCH</span>
+<span class="font-code-xs text-code-xs text-surface-tint">± 2.4m PRECISION</span>
+</div>
+<div class="h-48 relative">
+<img class="w-full h-full object-cover grayscale opacity-50 contrast-125" data-alt="A top-down satellite view of a high-tech logistics hub and warehouse complex at night. Neon green digital lines overlay the geography, defining strict geometric geo-fencing zones. Small glowing icons represent delivery vehicles moving within the designated grid. The aesthetic is tactical and high-contrast, featuring deep blacks and vibrant emerald accents, resembling a military surveillance interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxmrrJAkovAY2OYkh5gqxcYi9wvBYxpIB5OFYFWt62gFj2f3B5_6c9F1NcKRN5_Ytuv2OPbQRt-m6wJej-Bz86v4TfQo1yCkHB2CrayVH5D1K0WguEzKxVNA6Tyew2V6iOjvI7MqPBhtuJLrHY3SZcAxw9_FoJltSgNIGh0xOz0t6-Pc19Y2bpCbGt0k3esmAjhUs_-oUSe-K3Oq-2emU2zaqi4JdupVUCP8l-bqt1-1WKfIfEzV4LIlaJ5etmu8aMPBQ20LbgNs4"/>
+<div class="absolute inset-0 bg-primary/10 pointer-events-none"></div>
+<!-- GPS HUD Overlays -->
+<div class="absolute top-2 left-2 p-2 bg-surface-container-lowest/80 border border-outline-variant text-code-xs">
+                        LAT: 34.0522° N<br/>LON: 118.2437° W
+                    </div>
+<div class="absolute bottom-2 right-2 flex gap-1">
+<div class="w-2 h-2 bg-surface-tint"></div>
+<div class="w-2 h-2 bg-surface-tint"></div>
+<div class="w-2 h-2 bg-surface-tint"></div>
+</div>
+</div>
+<div class="p-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Destination: WAREHOUSE_HUB_SOUTH</span>
+<div class="flex items-center gap-2 mt-1">
+<span class="material-symbols-outlined text-surface-tint text-base" data-icon="verified">verified</span>
+<span class="font-code-sm text-code-sm text-on-surface">Arrival Validated</span>
+</div>
+</div>
+</div>
+<!-- Photo Verification (AI-OCR) -->
+<div class="col-span-4 bg-surface-container-low border border-outline-variant flex flex-col">
+<div class="p-4 border-b border-outline-variant bg-surface-container flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">AI_PHOTO_OCR_VALID</span>
+<span class="font-code-xs text-code-xs text-primary">CONFIDENCE: 98%</span>
+</div>
+<div class="flex-1 p-4 flex gap-4">
+<div class="w-1/2 aspect-square border border-outline-variant relative">
+<img class="w-full h-full object-cover" data-alt="A macro close-up of a delivery manifest document and a barcode label on a cardboard box. Digital scanning lines and OCR recognition frames in neon green are overlaid on the text, highlighting key data points like delivery ID and recipient name. The lighting is harsh and industrial, casting long shadows. The style is professional cyber-security analysis, dominated by deep blues and terminal greens." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK4xlmw4KhTeGxkCr019DnpgT-vcuKKEDOUvyARfgu_EUFj7vcS5JXMOVvWqCgUv487Y2sXLTVsuEVJ_vp7_relMzklE5Tp8zK0Y2TciobtbLo5sKn1FjY4a03T7VWzxTkE5bsODRfXAO5ZrjHT0dApm4Ohfoydwwl0pkKfq_vt6E56nqK0ZmoJpJCviFt7jFE6IT4nvLNA7k6rs3QvmjUL_BFUdOVSpanGcQovdL6cEc0OfSg3GIqdOw3wCOEg4nNUtZrNqR0Nfs"/>
+<div class="absolute inset-0 border-2 border-surface-tint opacity-30 animate-pulse"></div>
+</div>
+<div class="flex-1 space-y-3">
+<div>
+<span class="font-code-xs text-code-xs text-on-surface-variant block uppercase">Extracted ID</span>
+<span class="font-code-sm text-code-sm text-on-surface font-bold tracking-widest">LOG-992-BX4</span>
+</div>
+<div>
+<span class="font-code-xs text-code-xs text-on-surface-variant block uppercase">Status</span>
+<span class="font-code-sm text-code-sm text-surface-tint">MATCH_FOUND</span>
+</div>
+<div class="pt-2">
+<div class="h-1 w-full bg-surface-variant">
+<div class="h-full w-full bg-surface-tint"></div>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant mt-1 block">Pixel Integrity Check</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Authentication (mTLS) -->
+<div class="col-span-4 bg-surface-container-low border border-outline-variant p-6 relative">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded bg-primary-container/20 border border-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="key">key</span>
+</div>
+<div>
+<h3 class="font-code-sm text-code-sm text-on-surface">ACTOR_AUTHENTICATION</h3>
+<span class="font-code-xs text-code-xs text-on-surface-variant">PROTOCOL: mTLS_v1.3</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center p-3 bg-surface-container-lowest border border-outline-variant">
+<span class="font-code-sm text-code-sm">CLIENT_CERT</span>
+<span class="text-surface-tint font-code-xs">VALIDATED</span>
+</div>
+<div class="flex justify-between items-center p-3 bg-surface-container-lowest border border-outline-variant">
+<span class="font-code-sm text-code-sm">ISSUER</span>
+<span class="text-on-surface-variant font-code-xs">ROOT_CA_01</span>
+</div>
+<div class="flex justify-between items-center p-3 bg-surface-container-lowest border border-outline-variant">
+<span class="font-code-sm text-code-sm">EXPIRATION</span>
+<span class="text-on-surface-variant font-code-xs">2025-12-31</span>
+</div>
+</div>
+</div>
+<!-- Compliance Monitoring (SOC2/GDPR) -->
+<div class="col-span-6 bg-surface-container-low border border-outline-variant p-6">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface uppercase">Compliance Monitor</h3>
+<p class="font-code-sm text-code-sm text-on-surface-variant">System-wide adherence tracking</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="gavel">gavel</span>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-code-sm text-code-sm">SOC2 Type II</span>
+<span class="px-2 py-0.5 bg-surface-tint/20 text-surface-tint text-[10px] border border-surface-tint rounded">COMPLIANT</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-code-sm text-code-sm">GDPR Article 32</span>
+<span class="px-2 py-0.5 bg-surface-tint/20 text-surface-tint text-[10px] border border-surface-tint rounded">ENFORCED</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-code-sm text-code-sm">ISO 27001</span>
+<span class="px-2 py-0.5 bg-surface-tint/20 text-surface-tint text-[10px] border border-surface-tint rounded">ACTIVE</span>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center p-4 border border-outline-variant bg-surface-container-lowest">
+<span class="font-code-xs text-code-xs text-on-surface-variant mb-2">RISK_SCORE_AGGREGATE</span>
+<div class="relative w-24 h-24 flex items-center justify-center">
+<svg class="w-full h-full rotate-[-90deg]">
+<circle class="text-surface-variant" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-surface-tint" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251" stroke-dashoffset="25" stroke-width="4"></circle>
+</svg>
+<span class="absolute font-headline-md text-headline-md text-on-surface">LOW</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Audit Logging (Immutable) -->
+<div class="col-span-6 bg-surface-container-low border border-outline-variant p-6 overflow-hidden">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface uppercase">Immutable Audit Log</h3>
+<div class="flex gap-2">
+<span class="w-2 h-2 rounded-full bg-surface-tint"></span>
+<span class="w-2 h-2 rounded-full bg-surface-tint"></span>
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+</div>
+</div>
+<div class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+<div class="flex justify-between font-code-xs text-code-xs border-l-2 border-surface-tint pl-3 py-1 bg-surface-container-lowest">
+<span class="text-on-surface">AUTH_SUCCESS: WH_SYS_LOGIN</span>
+<span class="text-on-surface-variant">14:02:11.451</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs border-l-2 border-outline pl-3 py-1">
+<span class="text-on-surface">WRITE_OP: LOG_001_UPDATE</span>
+<span class="text-on-surface-variant">14:02:10.882</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs border-l-2 border-surface-tint pl-3 py-1 bg-surface-container-lowest">
+<span class="text-on-surface">CERT_ROTATION: NODE_X9_RENEW</span>
+<span class="text-on-surface-variant">14:01:55.109</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs border-l-2 border-error pl-3 py-1">
+<span class="text-error">WARN: FENCE_BYPASS_ATTEMPT_DENIED</span>
+<span class="text-on-surface-variant">14:00:22.001</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs border-l-2 border-outline pl-3 py-1">
+<span class="text-on-surface">mTLS_CONNECT: HUB_WEST_04</span>
+<span class="text-on-surface-variant">13:58:44.229</span>
+</div>
+</div>
+<div class="mt-4 flex justify-end">
+<a class="font-code-xs text-code-xs text-primary underline" href="#">EXPORT_LOG_BUNDLE_PDF</a>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="flex justify-between items-center px-4 py-1 h-8 w-full z-50 fixed bottom-0 left-0 border-t border-outline-variant bg-surface-container-high">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs tracking-widest text-surface-tint uppercase">SYS_REF: 0x2A94F // LATENCY: 14ms // STATUS: NOMINAL</span>
+</div>
+<div class="flex gap-4">
+<a class="font-code-xs text-code-xs tracking-widest text-on-surface-variant hover:text-primary transition-colors cursor-crosshair uppercase" href="#">LOGS</a>
+<a class="font-code-xs text-code-xs tracking-widest text-on-surface-variant hover:text-primary transition-colors cursor-crosshair uppercase" href="#">METRICS</a>
+<a class="font-code-xs text-code-xs tracking-widest text-primary-fixed underline transition-colors cursor-crosshair uppercase" href="#">ALERTS</a>
+</div>
+</footer>
+<script>
+        // Micro-interactions for dashboard realism
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            // Add slight parallax or dynamic glow if needed here
+        });
+
+        // Simulating live data updates
+        setInterval(() => {
+            const scanline = document.querySelector('.scanline');
+            if (scanline) {
+                // Occasional "glitch" effect for aesthetic
+                if (Math.random() > 0.95) {
+                    scanline.style.opacity = '0.5';
+                    setTimeout(() => scanline.style.opacity = '0.1', 100);
+                }
+            }
+        }, 500);
+    </script>
+</body></html>

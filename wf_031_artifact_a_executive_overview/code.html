@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-031 // SYSTEM_CORE::DISCOVERY_ENGINE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#fff6ff",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary": "#b8c3ff",
+                        "surface-tint": "#00e639",
+                        "on-error": "#690005",
+                        "surface-variant": "#273647",
+                        "on-surface-variant": "#b9ccb2",
+                        "primary": "#ebffe2",
+                        "inverse-on-surface": "#233143",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed-dim": "#00e639",
+                        "secondary-fixed": "#dde1ff",
+                        "on-secondary": "#002388",
+                        "tertiary-fixed": "#f0dbff",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-dim": "#051424",
+                        "on-primary-container": "#007117",
+                        "inverse-surface": "#d4e4fa",
+                        "inverse-primary": "#006e16",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-tertiary-container": "#862ed4",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#0d1c2d",
+                        "surface": "#051424",
+                        "surface-container-highest": "#273647",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-fixed": "#001356",
+                        "primary-fixed": "#72ff70",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-container": "#122131",
+                        "surface-bright": "#2c3a4c",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-primary": "#003907",
+                        "on-background": "#d4e4fa",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary": "#490080",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-tertiary-fixed": "#2c0051",
+                        "primary-container": "#00ff41",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "outline": "#84967e",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#d4e4fa",
+                        "background": "#051424",
+                        "surface-container-high": "#1c2b3c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "lane-margin": "32px",
+                        "stack-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .workflow-node {
+            position: relative;
+            background: #0F0F0F;
+            border-left-width: 4px;
+        }
+        .connector-line {
+            width: 2px;
+            background-color: #3b4b37;
+        }
+        .connector-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #3b4b37;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface text-primary dark:text-primary w-full top-0 border-b border-outline-variant border-b border-outline-variant flat no shadows flex justify-between items-center px-lane-margin h-16 fixed z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+<span class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</span>
+</div>
+<nav class="hidden md:flex gap-8">
+<a class="font-code-sm text-code-sm text-primary border-b-2 border-primary py-5" href="#">FLOW_MAP</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:opacity-80 py-5" href="#">METRICS</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:opacity-80 py-5" href="#">REGISTRY</a>
+</nav>
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="settings_input_component">settings_input_component</span>
+</header>
+<!-- NavigationDrawer -->
+<aside class="bg-surface-container-low dark:bg-surface-container-low h-full w-64 border-r border-outline-variant fixed left-0 top-16 h-[calc(100vh-64px)] overflow-y-auto hidden lg:block z-40">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary">MODULE_REGISTRY</span>
+</div>
+<nav class="flex flex-col py-2">
+<!-- Mocking first few items from JSON -->
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-code-sm text-code-sm">Universal Search</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="font-code-sm text-code-sm">Eats</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+<span class="font-code-sm text-code-sm">Send</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="directions_car">directions_car</span>
+<span class="font-code-sm text-code-sm">Drive</span>
+</div>
+<div class="mt-4 px-4 py-2 opacity-30">
+<span class="font-label-caps text-[9px]">SYSTEM_TELEMETRY</span>
+<div class="mt-2 h-1 bg-outline-variant w-full">
+<div class="h-full bg-surface-tint w-3/4"></div>
+</div>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="mt-16 mb-12 lg:ml-64 p-lane-margin flex-grow overflow-x-hidden">
+<!-- Dashboard Header -->
+<div class="mb-12 border-l-4 border-surface-tint pl-6">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">WF-031 EXECUTIVE WORKFLOW OVERVIEW</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant max-w-2xl">Universal Search &amp; AI Recommendation Engine blueprint. Visualizing the semantic pipeline from intent acquisition to personalized feedback loops.</p>
+</div>
+<!-- Strategy & Objectives Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+<!-- Purpose -->
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="flag">flag</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">PURPOSE</span>
+</div>
+<p class="font-code-sm text-code-sm text-primary">Consolidate disparate data silos into a unified semantic discovery layer.</p>
+</div>
+<!-- Business Objective -->
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="trending_up">trending_up</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">BUSINESS_OBJECTIVE</span>
+</div>
+<p class="font-code-sm text-code-sm text-primary">Increase user retention via high-fidelity personalized suggestions.</p>
+</div>
+<!-- Actors -->
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="group">group</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">ACTORS</span>
+</div>
+<p class="font-code-sm text-code-sm text-primary">End User, Aura AI Core, Vector DB, Metadata Registry.</p>
+</div>
+<!-- Success Criteria -->
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="verified">verified</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">SUCCESS_CRITERIA</span>
+</div>
+<p class="font-code-sm text-code-sm text-primary">Latency &lt; 150ms, Search Accuracy &gt; 94.2%.</p>
+</div>
+</div>
+<!-- The Main Workflow Flow -->
+<div class="relative flex flex-col items-center">
+<!-- Lane Labels (Floating) -->
+<div class="absolute left-0 top-0 h-full w-full pointer-events-none hidden xl:block">
+<div class="sticky top-24 space-y-96">
+<div class="rotate-90 origin-left border-l border-outline-variant pl-2 font-label-caps text-[10px] text-outline">INPUT_LAYER</div>
+<div class="rotate-90 origin-left border-l border-outline-variant pl-2 font-label-caps text-[10px] text-outline">COGNITIVE_PROCESS</div>
+<div class="rotate-90 origin-left border-l border-outline-variant pl-2 font-label-caps text-[10px] text-outline">DATA_FETCH</div>
+<div class="rotate-90 origin-left border-l border-outline-variant pl-2 font-label-caps text-[10px] text-outline">OUTPUT_SYNTHESIS</div>
+</div>
+</div>
+<!-- Workflow Nodes -->
+<div class="flex flex-col items-center space-y-8 w-full max-w-3xl">
+<!-- Node 1: User Opens Search -->
+<div class="workflow-node border-primary w-full p-4 flex items-center justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">TRIGGER::01</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">User Opens Search</div>
+</div>
+<span class="material-symbols-outlined opacity-20" data-icon="input">input</span>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Node 2: Search Query -->
+<div class="workflow-node border-surface-tint w-full p-4 flex items-center justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">STREAM::CAPTURE</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Search Query Ingest</div>
+</div>
+<div class="text-right">
+<div class="font-code-xs text-code-xs text-surface-tint">LATENCY: 0.2ms</div>
+</div>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Node 3: NLP -->
+<div class="workflow-node border-secondary w-full p-4 flex items-center justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">PROCESS::NLP_V2</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Natural Language Processing</div>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="neurology" style="font-variation-settings: 'FILL' 1;">neurology</span>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Node 4 & 5 Grid (Parallel Detection) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+<div class="workflow-node border-outline w-full p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">DETECT::04</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Intent Detection</div>
+</div>
+<div class="workflow-node border-outline w-full p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">DETECT::05</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Context Detection</div>
+</div>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Node 6: Permission Validation -->
+<div class="workflow-node border-error w-full p-4 flex items-center justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">SECURITY::VAL</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Permission Validation</div>
+</div>
+<span class="material-symbols-outlined text-error" data-icon="lock">lock</span>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Node 7: Aura AI Analysis -->
+<div class="workflow-node border-surface-tint bg-surface-container-high w-full p-6 ring-2 ring-surface-tint/20 flex flex-col items-center justify-center">
+<div class="font-label-caps text-label-caps text-surface-tint mb-2">AI_CORE_HEARTBEAT</div>
+<div class="font-headline-md text-headline-md text-primary uppercase">Aura AI Analysis</div>
+<div class="mt-4 flex gap-4">
+<div class="px-2 py-1 border border-surface-tint/30 font-code-xs text-code-xs">CONFIDENCE: 99.8%</div>
+<div class="px-2 py-1 border border-surface-tint/30 font-code-xs text-code-xs">LOAD: 12%</div>
+</div>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Node 8, 9, 10 (Search Triplets) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+<div class="workflow-node border-secondary w-full p-4 text-center">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">LAYER::08</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Semantic Search</div>
+</div>
+<div class="workflow-node border-secondary w-full p-4 text-center">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">LAYER::09</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Keyword Search</div>
+</div>
+<div class="workflow-node border-secondary w-full p-4 text-center">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">LAYER::10</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Vector Search</div>
+</div>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Node 11: Ranking -->
+<div class="workflow-node border-outline-variant w-full p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">SORT::11</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Result Ranking &amp; Weighting</div>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Alternate Paths Junction -->
+<div class="relative w-full py-8 flex items-center justify-center">
+<div class="absolute h-px bg-outline-variant w-full"></div>
+<div class="bg-surface px-4 z-10 border border-outline-variant py-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">DECISION_POINT::TRUST_FILTER</span>
+</div>
+<!-- Branch to AI Suggestion -->
+<div class="absolute right-0 top-1/2 w-32 border-r-2 border-t-2 border-dashed border-secondary h-24 rounded-tr-lg translate-x-full">
+<div class="absolute -right-2 top-24 bg-surface-container-low border border-secondary p-3 w-48 shadow-xl">
+<div class="font-label-caps text-[9px] text-secondary mb-1">ALT_PATH::NO_RESULTS</div>
+<div class="font-code-xs text-code-xs">INIT_SUGGESTIONS_MODULE</div>
+</div>
+</div>
+<!-- Branch to Retry -->
+<div class="absolute left-0 top-1/2 w-32 border-l-2 border-t-2 border-dashed border-error h-24 rounded-tl-lg -translate-x-full">
+<div class="absolute -left-48 top-24 bg-surface-container-low border border-error p-3 w-48 shadow-xl">
+<div class="font-label-caps text-[9px] text-error mb-1">ALT_PATH::FAILURE</div>
+<div class="font-code-xs text-code-xs">INVOKE_RETRY_PROTOCOL</div>
+</div>
+</div>
+</div>
+<!-- Node 12: Recommendation Engine -->
+<div class="workflow-node border-surface-tint w-full p-4 flex items-center justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">ENGINE::REC_SYS</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Recommendation Engine</div>
+</div>
+<span class="material-symbols-outlined text-surface-tint" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Node 13: Personalization -->
+<div class="workflow-node border-primary w-full p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">TWEAK::UID_0x44</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Hyper-Personalization</div>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Node 14: Results Generated -->
+<div class="workflow-node border-primary bg-primary/10 w-full p-4 ring-1 ring-primary/40">
+<div class="font-label-caps text-label-caps text-primary mb-1">TERMINAL::OUTPUT</div>
+<div class="font-code-sm text-code-sm text-primary font-bold uppercase">Results Generated &amp; Displayed</div>
+</div>
+<div class="connector-line h-8 relative connector-arrow"></div>
+<!-- Feedback Loop -->
+<div class="relative w-full border-2 border-surface-tint/20 rounded-xl p-8 bg-surface-container-lowest">
+<div class="absolute -top-3 left-4 bg-surface px-2">
+<span class="font-label-caps text-[10px] text-surface-tint">FEEDBACK_LOOP_ACTIVE</span>
+</div>
+<div class="flex flex-col md:flex-row gap-8 items-center justify-around">
+<div class="text-center">
+<div class="font-label-caps text-label-caps text-on-surface-variant">15. LEARNING</div>
+<div class="font-code-sm text-code-sm">Telemetry Capture</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<div class="text-center">
+<div class="font-label-caps text-label-caps text-on-surface-variant">16. UPDATING</div>
+<div class="font-code-sm text-code-sm">Model Weight Adjustment</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detail Strategy Sections -->
+<div class="mt-24 grid grid-cols-1 lg:grid-cols-2 gap-8">
+<section class="border-t border-outline-variant pt-6">
+<h3 class="font-headline-md text-headline-md text-primary mb-4 uppercase tracking-tight">Search Strategy</h3>
+<div class="space-y-4">
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-surface-tint">01</span>
+<p class="font-body-md text-body-md text-on-surface">Hybrid Neural Search combining BM25 keyword matching with dense vector embeddings for semantic nuance.</p>
+</div>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-surface-tint">02</span>
+<p class="font-body-md text-body-md text-on-surface">Cross-lingual expansion utilizing BERT models to ensure discovery across local dialects and languages.</p>
+</div>
+</div>
+</section>
+<section class="border-t border-outline-variant pt-6">
+<h3 class="font-headline-md text-headline-md text-primary mb-4 uppercase tracking-tight">Recommendation Strategy</h3>
+<div class="space-y-4">
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-surface-tint">01</span>
+<p class="font-body-md text-body-md text-on-surface">Collaborative filtering augmented by real-time session intent (Aura AI) to avoid "echo-chamber" results.</p>
+</div>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-surface-tint">02</span>
+<p class="font-body-md text-body-md text-on-surface">Exploration/Exploitation balancing: 15% of recommendations are novelty-driven to surface new deals.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Dependencies / Telemetry Data -->
+<div class="mt-12 bg-surface-container-high border border-outline-variant p-6 overflow-hidden relative">
+<div class="absolute top-0 right-0 p-2 opacity-5 font-code-xs text-[120px] select-none pointer-events-none">DEP_REG</div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4">SYSTEM_DEPENDENCIES</h3>
+<div class="flex flex-wrap gap-stack-gap text-code-xs font-code-xs">
+<span class="px-2 py-1 bg-surface-container-lowest border border-outline-variant">AURA_LLM_v4.2</span>
+<span class="px-2 py-1 bg-surface-container-lowest border border-outline-variant">PINE_CONE_VECTOR_DB</span>
+<span class="px-2 py-1 bg-surface-container-lowest border border-outline-variant">AUTH_GATEWAY_Z7</span>
+<span class="px-2 py-1 bg-surface-container-lowest border border-outline-variant">TELEMETRY_PIPELINE_KAFKA</span>
+<span class="px-2 py-1 bg-surface-container-lowest border border-outline-variant">GEO_LOCATION_MICROSERVICE</span>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-surface-container-lowest text-on-surface-variant dark:text-on-surface-variant w-full bottom-0 border-t border-outline-variant flat no shadows fixed bottom-0 w-full flex flex-col md:flex-row justify-between items-center px-lane-margin py-stack-gap z-50">
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-surface-tint">NAIJADEALS_ECOSYSTEM</span>
+<span class="font-code-xs text-code-xs opacity-50">© 2024 SRV_ID: WF-031</span>
+</div>
+<div class="flex gap-6 mt-2 md:mt-0">
+<span class="font-code-xs text-code-xs hover:text-surface-tint transition-opacity cursor-default">SYSTEM_STATUS: <span class="text-surface-tint">OK</span></span>
+<span class="font-code-xs text-code-xs hover:text-surface-tint transition-opacity cursor-default">LATENCY: 24ms</span>
+<span class="font-code-xs text-code-xs hover:text-surface-tint transition-opacity cursor-default uppercase">AURA_CORE: ACTIVE</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction for nodes
+        document.querySelectorAll('.workflow-node').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.boxShadow = "0 0 15px rgba(0, 230, 57, 0.1)";
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.boxShadow = "none";
+            });
+        });
+    </script>
+</body></html>

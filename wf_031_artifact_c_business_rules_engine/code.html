@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-031 // MODULE_REGISTRY :: BUSINESS_RULES_ENGINE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#fff6ff",
+                    "error": "#ffb4ab",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary": "#b8c3ff",
+                    "surface-tint": "#00e639",
+                    "on-error": "#690005",
+                    "surface-variant": "#273647",
+                    "on-surface-variant": "#b9ccb2",
+                    "primary": "#ebffe2",
+                    "inverse-on-surface": "#233143",
+                    "secondary-container": "#0043eb",
+                    "primary-fixed-dim": "#00e639",
+                    "secondary-fixed": "#dde1ff",
+                    "on-secondary": "#002388",
+                    "tertiary-fixed": "#f0dbff",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-dim": "#051424",
+                    "on-primary-container": "#007117",
+                    "inverse-surface": "#d4e4fa",
+                    "inverse-primary": "#006e16",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-tertiary-container": "#862ed4",
+                    "error-container": "#93000a",
+                    "surface-container-low": "#0d1c2d",
+                    "surface": "#051424",
+                    "surface-container-highest": "#273647",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary-fixed": "#001356",
+                    "primary-fixed": "#72ff70",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-container": "#122131",
+                    "surface-bright": "#2c3a4c",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-primary": "#003907",
+                    "on-background": "#d4e4fa",
+                    "on-primary-fixed": "#002203",
+                    "on-tertiary": "#490080",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary-fixed": "#2c0051",
+                    "primary-container": "#00ff41",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "outline": "#84967e",
+                    "on-error-container": "#ffdad6",
+                    "on-surface": "#d4e4fa",
+                    "background": "#051424",
+                    "surface-container-high": "#1c2b3c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "grid-unit": "8px",
+                    "lane-margin": "32px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1.5fr 1.5fr 1.5fr;
+        }
+        .glow-border {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.1);
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.1);
+            position: absolute;
+            top: 0;
+            z-index: 10;
+            animation: scan 8s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 bg-surface text-primary font-headline-md text-headline-md w-full border-b border-outline-variant flex justify-between items-center px-lane-margin h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-surface-tint">hub</span>
+<span class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</span>
+</div>
+<div class="hidden md:flex items-center gap-8 text-label-caps font-label-caps">
+<a class="text-primary border-b-2 border-primary py-2 transition-colors" href="#">ACTIVE_LOGIC</a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-colors py-2 px-2" href="#">ANALYTICS</a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-colors py-2 px-2" href="#">REGISTRY</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-low border-r border-outline-variant z-40 overflow-y-auto hidden md:block">
+<div class="p-6">
+<h2 class="font-label-caps text-label-caps text-primary mb-6">MODULE_REGISTRY</h2>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">shield</span>
+<span>Insurance</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span>Shop</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">restaurant</span>
+<span>Eats</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span>Send</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">work</span>
+<span>Gigs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">agriculture</span>
+<span>Agro</span>
+</a>
+<div class="h-px bg-outline-variant my-4"></div>
+<div class="px-3 mb-2 font-label-caps text-[9px] text-outline">TELEMETRY_FEED</div>
+<div class="px-3 py-2 bg-surface-container rounded border border-outline-variant">
+<div class="flex justify-between font-code-xs text-code-xs mb-1">
+<span>CPU_LOAD</span>
+<span class="text-surface-tint">12.4%</span>
+</div>
+<div class="w-full bg-surface-dim h-1">
+<div class="bg-surface-tint h-full" style="width: 12%"></div>
+</div>
+</div>
+</nav>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="pt-24 pb-20 md:pl-72 pr-lane-margin min-h-screen relative">
+<div class="scanline"></div>
+<!-- Header Section -->
+<section class="mb-12">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-outline-variant pb-6">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tight">Business Rules Engine <span class="text-surface-tint">WF-031</span></h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-2">Matrix visualization of decision logic for primary discovery paths.</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-high px-4 py-2 border border-outline-variant flex flex-col">
+<span class="font-label-caps text-[9px] text-outline">SRV_ID</span>
+<span class="font-code-sm text-code-sm text-surface-tint">AURA_CORE_v2.4</span>
+</div>
+<div class="bg-surface-container-high px-4 py-2 border border-outline-variant flex flex-col">
+<span class="font-label-caps text-[9px] text-outline">STATUS</span>
+<span class="font-code-sm text-code-sm text-primary">SYNCHRONIZED</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Rules Matrix Grid -->
+<div class="bg-surface-container-lowest border border-outline-variant overflow-hidden glow-border">
+<!-- Table Header -->
+<div class="matrix-grid bg-surface-container-highest border-b border-outline-variant">
+<div class="p-4 font-label-caps text-label-caps text-primary border-r border-outline-variant">RULE_IDENTIFIER</div>
+<div class="p-4 font-label-caps text-label-caps text-primary border-r border-outline-variant">DECISION</div>
+<div class="p-4 font-label-caps text-label-caps text-primary border-r border-outline-variant">RESPONSIBLE_SERVICE</div>
+<div class="p-4 font-label-caps text-label-caps text-primary border-r border-outline-variant">FAILURE_RESULT</div>
+<div class="p-4 font-label-caps text-label-caps text-primary">RECOVERY_VECTOR</div>
+</div>
+<!-- Table Body -->
+<div class="divide-y divide-outline-variant font-code-sm text-code-sm">
+<!-- Row 1 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-surface-tint rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Authenticated User?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-surface-tint flex items-center">IF TOKEN == VALID</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">AuthSvc_v12</div>
+<div class="p-4 border-r border-outline-variant text-error flex items-center italic">Guest_Context_Fallback</div>
+<div class="p-4 flex items-center">Route_to_OAuth_Handshake</div>
+</div>
+<!-- Row 2 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-surface-tint rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Guest Search?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-on-surface flex items-center">ANONYMOUS_OK</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">SessionProxy_Lambda</div>
+<div class="p-4 border-r border-outline-variant text-error flex items-center italic">Deny_Request</div>
+<div class="p-4 flex items-center">Regenerate_Guest_Token</div>
+</div>
+<!-- Row 3 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-secondary-container rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Natural Language?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-secondary flex items-center">PARSE_INTENT</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">NLP_Aura_Main</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">Keyword_Extraction</div>
+<div class="p-4 flex items-center">Regex_Token_Matcher</div>
+</div>
+<!-- Row 4 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-secondary-container rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Voice Search?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-on-surface flex items-center">STT_STREAM_PIPE</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">Audio_Proc_Shard_04</div>
+<div class="p-4 border-r border-outline-variant text-error flex items-center italic">Silent_Drop</div>
+<div class="p-4 flex items-center">UI_Prompt: "Retry Speak"</div>
+</div>
+<!-- Row 5 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-surface-tint rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Semantic Match?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-surface-tint flex items-center">VECTOR_SIM &gt; 0.82</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">VectorDB_Pinecone</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">Expand_Search_Radius</div>
+<div class="p-4 flex items-center">Loosen_Embedding_Weight</div>
+</div>
+<!-- Row 6 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-surface-tint rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Keyword Match?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-on-surface flex items-center">STRING_INTERSECT</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">ElasticSearch_v8</div>
+<div class="p-4 border-r border-outline-variant text-error flex items-center italic">Zero_Result_State</div>
+<div class="p-4 flex items-center">Trigger_Suggest_Engine</div>
+</div>
+<!-- Row 7 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-error rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Trust Threshold?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-on-surface flex items-center">RANKING_SCORE &gt; 4.5</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">Risk_Analyzer_Node</div>
+<div class="p-4 border-r border-outline-variant text-error flex items-center italic">Apply_Caution_Tag</div>
+<div class="p-4 flex items-center">Secondary_KYC_Verification</div>
+</div>
+<!-- Row 8 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-surface-tint rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Merchant Verified?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-surface-tint flex items-center">STATUS == ACTIVE</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">MerchantDB_Sync</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">Filter_From_UI</div>
+<div class="p-4 flex items-center">Manual_Audit_Queue</div>
+</div>
+<!-- Row 9 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-secondary-container rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Sponsored Result?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-secondary flex items-center">AUCTION_WINNER</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">AdEngine_Bidding</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">Serve_Organic_Only</div>
+<div class="p-4 flex items-center">Recalculate_Bid_Floor</div>
+</div>
+<!-- Row 10 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-surface-tint rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Location Filter?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-on-surface flex items-center">LAT_LONG_RAD &lt; 10KM</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">Geo_Cluster_Edge</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">Global_Search_Wide</div>
+<div class="p-4 flex items-center">Fetch_Last_Known_Loc</div>
+</div>
+<!-- Row 11 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-surface-tint rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Availability Filter?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-surface-tint flex items-center">INV_COUNT &gt; 0</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">Warehouse_Realtime</div>
+<div class="p-4 border-r border-outline-variant text-error flex items-center italic">Hide_Listing</div>
+<div class="p-4 flex items-center">Backorder_Option_Check</div>
+</div>
+<!-- Row 12 -->
+<div class="matrix-grid hover:bg-surface-container-low transition-colors group">
+<div class="p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-secondary-container rounded-full"></span>
+<span class="group-hover:text-primary transition-colors">Personalized Ranking?</span>
+</div>
+<div class="p-4 border-r border-outline-variant font-bold text-secondary flex items-center">USER_VECTOR_DOT</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">ML_Personalization</div>
+<div class="p-4 border-r border-outline-variant text-on-surface-variant flex items-center">General_Popularity</div>
+<div class="p-4 flex items-center">Cold_Start_Strategy</div>
+</div>
+</div>
+</div>
+<!-- Telemetry & Visuals Footer of Main -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-6 border border-outline-variant relative overflow-hidden group">
+
+<div class="relative z-10">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-caps text-label-caps text-primary">NODE_EXECUTION</span>
+<span class="material-symbols-outlined text-surface-tint text-sm">bolt</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant leading-relaxed">
+                        Decision Engine cycle complete. <br/>
+                        Latency: 24ms <br/>
+                        Throughput: 1.2k req/s
+                    </div>
+</div>
+</div>
+<div class="md:col-span-2 bg-surface-container-low p-6 border border-outline-variant">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-caps text-label-caps text-primary">AUDIT_LOG_SNAPSHOT</span>
+<span class="font-code-xs text-code-xs text-outline">UPDATED 0.1s AGO</span>
+</div>
+<div class="space-y-2 font-code-xs text-code-xs">
+<div class="flex gap-4 border-l-2 border-surface-tint pl-2">
+<span class="text-surface-tint">[14:02:31]</span>
+<span>RULE_CHECK: AUTH_USER -&gt; PASS. REASON: SESSION_MATCH_KEY_X9.</span>
+</div>
+<div class="flex gap-4 border-l-2 border-secondary-container pl-2">
+<span class="text-secondary">[14:02:32]</span>
+<span>RULE_CHECK: NAT_LANG -&gt; DETECTED. INTENT: "FIND_NEARBY_DRYCLEANER".</span>
+</div>
+<div class="flex gap-4 border-l-2 border-error pl-2">
+<span class="text-error">[14:02:35]</span>
+<span>RULE_CHECK: TRUST_THRESHOLD -&gt; FAIL. ID: M_0921. ACTION: APPLY_CAUTION_TAG.</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Component -->
+<footer class="fixed bottom-0 w-full bg-surface-container-lowest text-on-surface-variant font-code-xs text-code-xs border-t border-outline-variant flex justify-between items-center px-lane-margin py-stack-gap z-50">
+<div class="flex gap-8">
+<span class="text-surface-tint hover:text-surface-tint cursor-default transition-opacity">SYSTEM_STATUS: OK</span>
+<span class="hover:text-surface-tint cursor-default transition-opacity">LATENCY: 24ms</span>
+<span class="hover:text-surface-tint cursor-default transition-opacity">AURA_CORE: ACTIVE</span>
+</div>
+<div class="font-label-caps text-label-caps text-surface-tint">
+            © 2024 NAIJADEALS_ECOSYSTEM // SRV_ID: WF-031
+        </div>
+</footer>
+<!-- Interactive script for some hover logic/telemetry simulation -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const rows = document.querySelectorAll('.matrix-grid');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    // Small visual feedback for matrix selection
+                    row.style.boxShadow = "inset 4px 0 0 #00e639";
+                });
+                row.addEventListener('mouseleave', () => {
+                    row.style.boxShadow = "none";
+                });
+            });
+
+            // Pulse effect for status indicators
+            setInterval(() => {
+                const dots = document.querySelectorAll('.rounded-full');
+                dots.forEach(dot => {
+                    dot.classList.add('opacity-50');
+                    setTimeout(() => dot.classList.remove('opacity-50'), 500);
+                });
+            }, 3000);
+        });
+    </script>
+</body></html>

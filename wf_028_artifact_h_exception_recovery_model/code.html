@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-028 // Exception &amp; Recovery Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --grid-size: 24px;
+            --dot-color: rgba(132, 150, 126, 0.1);
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: var(--grid-size) var(--grid-size);
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-line {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .node-port {
+            width: 6px;
+            height: 6px;
+            background: #3b4b37;
+            border: 1px solid #84967e;
+        }
+        .glass-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.7);
+        }
+        @keyframes pulse-recovery {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .recovery-path {
+            stroke-dasharray: 4;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#d4e4fa",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container-high": "#1c2b3c",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-primary": "#003907",
+                        "surface": "#051424",
+                        "on-error": "#690005",
+                        "surface-variant": "#273647",
+                        "on-primary-fixed": "#002203",
+                        "surface-container-lowest": "#010f1f",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-bright": "#2c3a4c",
+                        "primary": "#ebffe2",
+                        "surface-dim": "#051424",
+                        "inverse-primary": "#006e16",
+                        "on-secondary": "#002388",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-primary-container": "#007117",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary": "#b8c3ff",
+                        "background": "#051424",
+                        "on-secondary-container": "#c6ceff",
+                        "on-secondary-fixed": "#001356",
+                        "tertiary-container": "#ecd3ff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-tertiary": "#490080",
+                        "error-container": "#93000a",
+                        "outline": "#84967e",
+                        "surface-container-highest": "#273647",
+                        "secondary-container": "#0043eb",
+                        "surface-container": "#122131",
+                        "inverse-on-surface": "#233143",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#0d1c2d",
+                        "primary-container": "#00ff41",
+                        "tertiary": "#fff6ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-tint": "#00e639",
+                        "primary-fixed": "#72ff70",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-tertiary-container": "#862ed4",
+                        "on-surface": "#d4e4fa",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#dde1ff",
+                        "outline-variant": "#3b4b37",
+                        "on-surface-variant": "#b9ccb2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full border-b border-outline-variant bg-surface-dim flex justify-between items-center h-12 px-6 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">hub</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary bg-surface-container-high px-2 py-1 border border-outline-variant">WF-028 // LOGISTICS ENGINE</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6">
+<span class="font-code-sm text-primary transition-colors cursor-pointer">Live Mesh</span>
+<span class="font-code-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">Global Telemetry</span>
+<span class="font-code-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">Audit Logs</span>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">settings_input_component</span>
+</div>
+</header>
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 border-r border-outline-variant bg-surface-container-low flex flex-col gap-1 pt-8 z-40">
+<div class="px-4 mb-4">
+<h2 class="font-label-caps text-label-caps text-primary opacity-50 uppercase tracking-tighter">Core Engine</h2>
+</div>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm" href="#">
+<span class="material-symbols-outlined text-sm">inventory_2</span> Inventory Schema
+            </a>
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container font-bold border-l-2 border-primary-fixed-dim px-4 py-2 font-code-sm" href="#">
+<span class="material-symbols-outlined text-sm">account_tree</span> BPMN Swimlanes
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm" href="#">
+<span class="material-symbols-outlined text-sm">analytics</span> Telemetry Hub
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm" href="#">
+<span class="material-symbols-outlined text-sm">api</span> API Registry
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm" href="#">
+<span class="material-symbols-outlined text-sm">terminal</span> Sequence Logs
+            </a>
+</div>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<span class="font-label-caps text-[10px] text-primary-fixed-dim">SYSTEM NOMINAL</span>
+</div>
+<p class="font-code-xs text-on-surface-variant">Uptime: 142d 04h 12m</p>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 h-[calc(100vh-48px)] overflow-auto relative p-8">
+<!-- Background WebGL/Shader Placeholder -->
+
+<!-- Page Header -->
+<div class="flex flex-col mb-12 relative z-10">
+<h2 class="font-headline-lg text-headline-lg text-on-background tracking-tighter">Exception &amp; Recovery Model</h2>
+<p class="font-body-md text-on-surface-variant max-w-2xl mt-2">Visualization of the WF-028 asynchronous failure states and automated recovery logic. This blueprint ensures continuity during terminal congestion and inventory discrepancies.</p>
+</div>
+<!-- Workflow Container (Grid Layout for Swimlanes) -->
+<div class="grid grid-cols-[160px_1fr] border border-outline-variant bg-surface-container-lowest relative z-10">
+<!-- Swimlane: INTAKE -->
+<div class="border-b border-r border-outline-variant flex items-center justify-center p-4 bg-surface-container-low">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">login</span>
+<span class="font-label-caps text-label-caps uppercase text-primary">Intake</span>
+</div>
+</div>
+<div class="border-b border-outline-variant p-8 flex flex-wrap gap-8 items-center bg-surface-container-lowest/30">
+<!-- Start Node -->
+<div class="w-48 bg-surface-container-high border-l-4 border-primary p-3 shadow-lg relative group">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[9px] text-primary-fixed-dim">NODE_001</span>
+<div class="node-port absolute -right-1 top-1/2 -translate-y-1/2"></div>
+</div>
+<p class="font-code-sm text-on-surface font-bold">ASN RECEPTION</p>
+<p class="font-code-xs text-on-surface-variant mt-1">Status: OK</p>
+</div>
+<span class="material-symbols-outlined text-outline">trending_flat</span>
+<!-- Warehouse Full Exception -->
+<div class="w-56 border border-error bg-surface-container-low p-3 shadow-lg relative group transition-transform hover:scale-105">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[9px] text-error font-bold">EXCEPTION: FULL</span>
+<div class="node-port absolute -right-1 top-1/2 -translate-y-1/2 bg-error border-error"></div>
+</div>
+<p class="font-code-sm text-on-surface">CAPACITY LIMIT REACHED</p>
+<div class="mt-3 pt-2 border-t border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-xs">autorenew</span>
+<span class="font-code-xs text-primary-fixed-dim uppercase">Recovery Triggered</span>
+</div>
+</div>
+</div>
+<!-- Recovery Path Arrow (Hand-drawn style placeholder) -->
+<svg class="w-16 h-8 text-primary-fixed-dim">
+<path class="recovery-path" d="M0 16 Q32 16 32 0 Q32 16 64 16" fill="none" stroke="currentColor" stroke-width="2"></path>
+</svg>
+<!-- Overflow Node -->
+<div class="w-48 bg-surface-container-high border border-primary-fixed-dim p-3 shadow-lg relative border-dashed">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[9px] text-primary-fixed-dim">RECOVERY_B</span>
+</div>
+<p class="font-code-sm text-on-surface font-bold">OVERFLOW WAREHOUSE</p>
+<p class="font-code-xs text-on-surface-variant mt-1">Node: HUB_NORTH_EXT</p>
+</div>
+</div>
+<!-- Swimlane: QUALITY -->
+<div class="border-b border-r border-outline-variant flex items-center justify-center p-4 bg-surface-container-low">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-xl">biotech</span>
+<span class="font-label-caps text-label-caps uppercase text-secondary">Quality</span>
+</div>
+</div>
+<div class="border-b border-outline-variant p-8 flex flex-wrap gap-8 items-center bg-surface-container-lowest/30">
+<!-- Inspection Failed -->
+<div class="w-56 border border-error bg-surface-container-low p-3 shadow-lg relative group">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[9px] text-error font-bold">FAIL: INSPECTION</span>
+</div>
+<p class="font-code-sm text-on-surface">SKU VARIANCE &gt; 5%</p>
+<div class="mt-3 flex gap-1">
+<div class="h-1 w-full bg-error"></div>
+<div class="h-1 w-4 bg-outline-variant"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">trending_flat</span>
+<!-- Quarantine -->
+<div class="w-48 bg-surface-container-high border border-secondary p-3 shadow-lg relative">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[9px] text-secondary">STATE: QUARANTINE</span>
+</div>
+<p class="font-code-sm text-on-surface font-bold">ZONE_Q3_ALPHA</p>
+<p class="font-code-xs text-on-surface-variant mt-1">Awaiting Manual Audit</p>
+</div>
+<span class="material-symbols-outlined text-outline">subdirectory_arrow_right</span>
+<!-- Reinspection -->
+<div class="w-48 bg-surface-container-high border-l-4 border-secondary-fixed-dim p-3 shadow-lg relative">
+<p class="font-code-sm text-on-surface font-bold">REINSPECTION LOGIC</p>
+<p class="font-code-xs text-on-surface-variant mt-1">Trigger: Automated Reflow</p>
+</div>
+</div>
+<!-- Swimlane: INVENTORY -->
+<div class="border-r border-outline-variant flex items-center justify-center p-4 bg-surface-container-low">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-xl">inventory</span>
+<span class="font-label-caps text-label-caps uppercase text-tertiary-fixed-dim">Inventory</span>
+</div>
+</div>
+<div class="p-8 flex flex-wrap gap-8 items-center bg-surface-container-lowest/30">
+<!-- Mismatch -->
+<div class="w-56 border border-on-tertiary-container bg-surface-container-low p-3 shadow-lg relative">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-caps text-[9px] text-tertiary-fixed-dim">MISMATCH_DETECTED</span>
+</div>
+<p class="font-code-sm text-on-surface">GHOST INVENTORY EVENT</p>
+<p class="font-code-xs text-on-surface-variant mt-1">Delta: -42 Units</p>
+</div>
+<span class="material-symbols-outlined text-outline">trending_flat</span>
+<!-- Cycle Count -->
+<div class="w-48 bg-surface-container-high border border-outline p-3 shadow-lg relative">
+<p class="font-code-sm text-on-surface font-bold">CYCLE COUNT CMD</p>
+<p class="font-code-xs text-on-surface-variant mt-1">Assigned to: BOT_774</p>
+</div>
+<span class="material-symbols-outlined text-outline">trending_flat</span>
+<!-- Audit -->
+<div class="w-48 bg-surface-container-high border-l-4 border-primary-fixed-dim p-3 shadow-lg relative">
+<p class="font-code-sm text-on-surface font-bold">LEDGER RECONCILE</p>
+<p class="font-code-xs text-primary-fixed-dim mt-1 font-bold">RECOVERY FINALIZED</p>
+</div>
+</div>
+</div>
+<!-- Metric Overlays (Bento Style) -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
+<div class="bg-surface-container-high p-4 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase block mb-2">Failure Rate</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-error">1.24%</span>
+<span class="font-code-xs text-on-surface-variant">-0.05% vs PW</span>
+</div>
+<div class="w-full h-1 bg-surface-variant mt-3 overflow-hidden">
+<div class="h-full bg-error w-1/4"></div>
+</div>
+</div>
+<div class="bg-surface-container-high p-4 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase block mb-2">Auto-Recovery Success</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary-fixed-dim">98.2%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant mt-3 overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-11/12"></div>
+</div>
+</div>
+<div class="bg-surface-container-high p-4 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase block mb-2">Mean Time to Recover</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-secondary">4.2m</span>
+</div>
+<p class="font-code-xs text-on-surface-variant mt-3">Target: &lt; 5.0m</p>
+</div>
+<div class="bg-surface-container-high p-4 border border-outline-variant flex flex-col justify-center items-center gap-2">
+<button class="w-full bg-primary py-2 font-label-caps text-on-primary hover:opacity-90 transition-opacity">Simulate Failure</button>
+<button class="w-full border border-outline py-2 font-label-caps text-on-surface-variant hover:bg-surface-variant transition-colors">Export Blueprint</button>
+</div>
+</div>
+<!-- Telemetry Data Stream -->
+<div class="mt-8 border border-outline-variant bg-surface-container-lowest p-6 relative z-10">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-label-caps text-label-caps text-primary">AUDIT STREAM // LIVE_FEED</h3>
+<span class="font-code-xs text-on-surface-variant">Real-time recovery monitoring active</span>
+</div>
+<div class="space-y-2 font-code-xs text-on-surface-variant">
+<div class="flex justify-between py-1 border-b border-outline-variant/30">
+<span class="text-primary-fixed-dim">[14:22:01] RECOVERY_B INITIATED: </span>
+<span>REDIRECTING NODE_412 TO HUB_NORTH_EXT</span>
+</div>
+<div class="flex justify-between py-1 border-b border-outline-variant/30">
+<span class="text-tertiary-fixed-dim">[14:21:45] CYCLE_COUNT_START:</span>
+<span>BOT_774 DISPATCHED TO ZONE_C-12</span>
+</div>
+<div class="flex justify-between py-1 border-b border-outline-variant/30">
+<span class="text-error">[14:19:30] EXCEPTION_FULL:</span>
+<span>TERMINAL_44 REACHED CRITICAL THRESHOLD (99.8%)</span>
+</div>
+<div class="flex justify-between py-1 border-b border-outline-variant/30 opacity-50">
+<span class="text-on-surface-variant">[14:18:12] HEARTBEAT_PULSE:</span>
+<span>ALL RECOVERY SUBSYSTEMS NOMINAL</span>
+</div>
+</div>
+</div>
+<!-- Spacer for Bottom Nav -->
+<div class="h-24"></div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="fixed bottom-0 w-full h-14 border-t border-outline-variant bg-surface-container-lowest flex justify-around items-center px-4 md:hidden z-50">
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-code-xs text-code-xs">Monitor</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg px-3 py-1">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-code-xs text-code-xs">Node Map</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined">reorder</span>
+<span class="font-code-xs text-code-xs">Terminal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined">emergency_home</span>
+<span class="font-code-xs text-code-xs">Alerts</span>
+</div>
+</nav>
+<!-- Floating UI Helper -->
+<div class="fixed right-8 bottom-8 z-50">
+<button class="w-14 h-14 bg-primary rounded-full shadow-2xl flex items-center justify-center text-on-primary hover:scale-110 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-2xl">troubleshoot</span>
+</button>
+</div>
+<!-- Node Detail Slide-out (Visual Mockup) -->
+<div class="fixed right-0 top-12 h-[calc(100vh-48px)] w-80 bg-surface-container border-l border-outline-variant z-40 transform translate-x-full transition-transform duration-300 glass-overlay" id="node-detail">
+<div class="p-6">
+<div class="flex justify-between items-center mb-6">
+<span class="font-label-caps text-label-caps text-primary">Node Analysis</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" onclick="document.getElementById('node-detail').classList.add('translate-x-full')">close</span>
+</div>
+<div class="mb-8">
+<div class="w-full h-40 bg-cover bg-center mb-4 border border-outline-variant" data-alt="A detailed blueprint visualization of a logistics warehouse hub using a dark technical aesthetic. The scene features glowing neon green and slate blue outlines of shipping containers and robotic arms. Thin digital lines connect various nodes in a complex network, illuminated by high-contrast white data points. The lighting is low-key, professional, and authoritative." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAdt1ksEnXyhd2zUOk_LR53MalFmdmwdBenrzJNDFJmgiAZ4PiJPaRcGfmXq-465OJJZyVM4eQzKQaXXthvn3NAtS-xhZMnKwnZ3uaixVCJgR7TIqvbZ0-Vkfma-4MJE3r8CwTx-LjxEF5vcWx0FLWH73-N3b91RBHK7bQJQcwam0J9FyayPAiZK84uesKpgbFJS60_XXE4uKA3B9LfX1ydGT7HZHeFVzNNGVWTw4q8VJwUM4Wu7bSPl8zj8qfBdP_QtHF3Ppztwk8')"></div>
+<h4 class="font-headline-md text-headline-md text-on-surface">HUB_NORTH_EXT</h4>
+<p class="font-code-xs text-primary mt-1">Secondary Overflow Channel</p>
+</div>
+<div class="space-y-4">
+<div>
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase block">Latency</span>
+<p class="font-code-sm text-on-surface">12ms <span class="text-primary-fixed-dim">▲ Normal</span></p>
+</div>
+<div>
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase block">Throughput</span>
+<p class="font-code-sm text-on-surface">1,240 pk/hr</p>
+</div>
+<div>
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase block">Fail-Safe State</span>
+<div class="flex items-center gap-2 mt-1">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+<p class="font-code-xs text-on-surface">ACTIVE RECOVERY READY</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+        // Simple Interaction logic
+        document.querySelectorAll('.group').forEach(node => {
+            node.addEventListener('click', () => {
+                const detail = document.getElementById('node-detail');
+                detail.classList.remove('translate-x-full');
+            });
+        });
+
+        // Atmospheric Micro-Interactions
+        const canvas = document.querySelector('main');
+        canvas.addEventListener('scroll', () => {
+           // Shift background grid slightly for parallax effect if desired
+        });
+    </script>
+</body></html>

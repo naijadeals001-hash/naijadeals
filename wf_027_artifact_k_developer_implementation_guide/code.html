@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-027 Implementation Guide | NAIJADEALS_ATLAS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .node-connector {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(15, 15, 15, 0.8);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#1c2b3c",
+                        "surface-bright": "#2c3a4c",
+                        "outline-variant": "#3b4b37",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#00e639",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#84967e",
+                        "on-primary-container": "#007117",
+                        "tertiary": "#fff6ff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary": "#ebffe2",
+                        "surface-container-highest": "#273647",
+                        "on-error": "#690005",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-container": "#c6ceff",
+                        "background": "#051424",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-fixed": "#dde1ff",
+                        "on-surface": "#d4e4fa",
+                        "surface": "#051424",
+                        "surface-container-low": "#0d1c2d",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "surface-tint": "#00e639",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-fixed": "#72ff70",
+                        "inverse-primary": "#006e16",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-fixed": "#002203",
+                        "on-primary": "#003907",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "secondary-container": "#0043eb",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "primary-container": "#00ff41",
+                        "surface-dim": "#051424",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container": "#122131",
+                        "surface-variant": "#273647",
+                        "on-secondary": "#002388",
+                        "tertiary-container": "#ecd3ff",
+                        "on-secondary-fixed": "#001356",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-x-hidden font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant flex justify-between items-center w-full px-grid-unit h-12 z-50 fixed top-0">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-tighter text-primary-container dark:text-primary-container">NAIJADEALS_ATLAS_V2.0</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps" href="#">DOCS</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps" href="#">STATUS</a>
+<a class="text-primary dark:text-primary font-bold font-label-caps text-label-caps" href="#">HANDOFF</a>
+</nav>
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 pb-4 z-40 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant w-64">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">SYSTEM_MODULES</h2>
+</div>
+<nav class="flex-1">
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-6 py-3 bg-primary-container text-on-primary-container font-bold border-l-4 border-surface-tint scale-[0.99] transition-transform" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Logic</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">api</span>
+<span class="font-label-caps text-label-caps">API</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 pt-16 p-8 min-h-screen">
+<!-- Header Section -->
+<section class="mb-12 border-l-4 border-primary px-6 py-4 bg-surface-container-low">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-widest block mb-2">Technical Handoff / WF-027</span>
+<h1 class="font-headline-lg text-headline-lg mb-2">Workflow Implementation Guide: Freight Logistics Orchestration</h1>
+<p class="text-on-surface-variant max-w-2xl">A comprehensive blueprint for engineers managing the microservices layer of the global freight and escrow settlement engine.</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<span class="bg-primary-container text-on-primary-container px-3 py-1 font-label-caps text-code-xs rounded">STATUS: STAGING_READY</span>
+<span class="font-code-xs text-on-surface-variant">ID: ND-ATLAS-WF-027-V2</span>
+</div>
+</div>
+</section>
+<!-- Service Matrix Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+<!-- Owning Microservices List -->
+<div class="lg:col-span-2 border border-outline-variant bg-surface-container p-6">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary-fixed-dim">hub</span>
+<h3 class="font-headline-md text-headline-md">Service Ownership Matrix</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Service Card -->
+<div class="bg-surface-container-low p-4 border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-primary">Freight Service</span>
+<span class="font-code-xs text-on-surface-variant group-hover:text-primary">v1.4.2</span>
+</div>
+<p class="font-code-sm text-code-sm mb-3">Path: <code class="text-on-secondary-container bg-surface-container-high px-1">/services/core/freight</code></p>
+<div class="flex gap-2">
+<span class="text-[10px] bg-outline-variant text-primary px-2 rounded">GRPC</span>
+<span class="text-[10px] bg-outline-variant text-primary px-2 rounded">REDIS_CACHE</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-primary">Container Service</span>
+<span class="font-code-xs text-on-surface-variant group-hover:text-primary">v2.0.1</span>
+</div>
+<p class="font-code-sm text-code-sm mb-3">Path: <code class="text-on-secondary-container bg-surface-container-high px-1">/services/ops/container</code></p>
+<div class="flex gap-2">
+<span class="text-[10px] bg-outline-variant text-primary px-2 rounded">IOT_MQ</span>
+<span class="text-[10px] bg-outline-variant text-primary px-2 rounded">POSTGRES</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-primary">Customs Service</span>
+<span class="font-code-xs text-on-surface-variant group-hover:text-primary">v0.9.8</span>
+</div>
+<p class="font-code-sm text-code-sm mb-3">Path: <code class="text-on-secondary-container bg-surface-container-high px-1">/services/fin/customs</code></p>
+<div class="flex gap-2">
+<span class="text-[10px] bg-outline-variant text-primary px-2 rounded">DOC_SCAN</span>
+<span class="text-[10px] bg-outline-variant text-primary px-2 rounded">OCR_AI</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-primary">Tracking Service</span>
+<span class="font-code-xs text-on-surface-variant group-hover:text-primary">v3.1.0</span>
+</div>
+<p class="font-code-sm text-code-sm mb-3">Path: <code class="text-on-secondary-container bg-surface-container-high px-1">/services/realtime/track</code></p>
+<div class="flex gap-2">
+<span class="text-[10px] bg-outline-variant text-primary px-2 rounded">KAFKA</span>
+<span class="text-[10px] bg-outline-variant text-primary px-2 rounded">AURA_MAP</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Deployment Sidebar -->
+<div class="border border-outline-variant bg-surface-container-high p-6 flex flex-col gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">cloud_done</span>
+<h3 class="font-headline-md text-headline-md">K8s Runtime</h3>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-label-caps text-code-xs text-on-surface-variant">Namespace</span>
+<span class="font-code-sm text-code-sm text-primary">naijadeals-prod-01</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-label-caps text-code-xs text-on-surface-variant">Replicas</span>
+<span class="font-code-sm text-code-sm text-primary">3-12 (Auto-scaled)</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-label-caps text-code-xs text-on-surface-variant">Resource Limit</span>
+<span class="font-code-sm text-code-sm text-primary">CPU: 2.0 / MEM: 4Gi</span>
+</div>
+</div>
+<div class="mt-auto p-4 bg-background border border-outline-variant">
+<span class="font-label-caps text-code-xs text-on-surface-variant block mb-2">Ingress Endpoint</span>
+<code class="text-primary text-code-sm break-all">https://api.nd-atlas.io/v2/wf-027/entry</code>
+</div>
+</div>
+</div>
+<!-- Shared UI Components & Visualization -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+<!-- Shared Component: AuraMapEngine Mockup -->
+<div class="border border-outline-variant bg-surface-container p-6">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">map</span>
+<h3 class="font-headline-md text-headline-md">AuraMapEngine UI Component</h3>
+</div>
+<span class="font-code-xs text-on-surface-variant">npm: @atlas-ui/aura-map@4.5.1</span>
+</div>
+<div class="relative h-64 bg-background overflow-hidden border border-outline-variant">
+<div class="absolute inset-0 opacity-40">
+<div class="w-full h-full bg-cover bg-center" data-alt="A sophisticated technical map visualization with glowing blue and green coordinate lines over a dark navy blue background. The map shows global shipping routes as thin luminous arcs connecting major port cities. Data overlays and UI labels in monospaced font hover over key geographical points. The lighting is low-key with high-tech cyan accents." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBl4p6zJXtiWeBanDt84OjDAQ-sgWArW1DRZVH4ww-o7HZzr5C7iw6PR5cn0D_Ae3ON2en9SKMncNyvfR7GrkumUBftfis6YPijqFDkJNV_CDElwgzcnmX8omCDTEHFwK9Ltely8aUKnElx6t7mLKurHYU8MQ46l7i3YCRcno5H54eWmrb4JMCAM_XsruiwAxjDxfba02wEnQqLvN3ykcqm7aKcwhjgv3btZZkOezYPB5zcRA5Zzz9lm86qBgFWHYR1VR478ZD4dAo')"></div>
+</div>
+<!-- UI Overlays for Mockup -->
+<div class="absolute top-4 left-4 glass-panel border border-primary/20 p-2">
+<div class="flex items-center gap-2 mb-1">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<span class="font-code-xs text-primary">LIVE_TELEMETRY</span>
+</div>
+<span class="font-code-xs text-on-surface-variant block">LAT: 6.4542</span>
+<span class="font-code-xs text-on-surface-variant block">LNG: 3.3958</span>
+</div>
+<div class="absolute bottom-4 right-4 glass-panel border border-outline-variant p-2 flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">zoom_in</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">layers</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">my_location</span>
+</div>
+</div>
+<div class="mt-4">
+<h4 class="font-label-caps text-label-caps mb-2 text-on-surface-variant">Implementation Requirements:</h4>
+<ul class="space-y-1 text-code-sm font-code-sm">
+<li class="flex items-start gap-2">
+<span class="text-primary">•</span> 
+                            Requires <code class="bg-surface-container-high px-1">MAP_TILES_API_KEY</code> passed as prop.
+                        </li>
+<li class="flex items-start gap-2">
+<span class="text-primary">•</span> 
+                            Reactive binding to <code class="bg-surface-container-high px-1">TrackingService.Socket</code>.
+                        </li>
+</ul>
+</div>
+</div>
+<!-- Shared Logic / Env Vars -->
+<div class="border border-outline-variant bg-surface-container p-6 overflow-hidden">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary-fixed-dim">variable_insert</span>
+<h3 class="font-headline-md text-headline-md">Global Environment Variables</h3>
+</div>
+<div class="bg-background rounded border border-outline-variant p-4 font-code-sm h-64 overflow-y-auto custom-scrollbar">
+<table class="w-full border-collapse">
+<thead>
+<tr class="text-left text-on-surface-variant border-b border-outline-variant">
+<th class="pb-2 font-label-caps text-code-xs">KEY</th>
+<th class="pb-2 font-label-caps text-code-xs">SCOPE</th>
+<th class="pb-2 font-label-caps text-code-xs">SECURE</th>
+</tr>
+</thead>
+<tbody class="text-on-surface">
+<tr class="border-b border-outline-variant/30">
+<td class="py-3 text-primary">SERVICE_SECRET_HASH</td>
+<td class="py-3 text-on-surface-variant">Auth/Global</td>
+<td class="py-3"><span class="material-symbols-outlined text-primary-fixed-dim text-sm" style="font-variation-settings: 'FILL' 1;">lock</span></td>
+</tr>
+<tr class="border-b border-outline-variant/30">
+<td class="py-3 text-primary">KAFKA_BROKER_LIST</td>
+<td class="py-3 text-on-surface-variant">Messaging</td>
+<td class="py-3"><span class="material-symbols-outlined text-on-surface-variant text-sm">lock_open</span></td>
+</tr>
+<tr class="border-b border-outline-variant/30">
+<td class="py-3 text-primary">ESCROW_STAKE_LIMIT</td>
+<td class="py-3 text-on-surface-variant">Finance</td>
+<td class="py-3"><span class="material-symbols-outlined text-on-surface-variant text-sm">lock_open</span></td>
+</tr>
+<tr class="border-b border-outline-variant/30">
+<td class="py-3 text-primary">WAREHOUSE_SYNC_ID</td>
+<td class="py-3 text-on-surface-variant">Inventory</td>
+<td class="py-3"><span class="material-symbols-outlined text-on-surface-variant text-sm">lock_open</span></td>
+</tr>
+<tr class="border-b border-outline-variant/30">
+<td class="py-3 text-primary">INSURANCE_NODE_CERT</td>
+<td class="py-3 text-on-surface-variant">Auth/TLS</td>
+<td class="py-3"><span class="material-symbols-outlined text-primary-fixed-dim text-sm" style="font-variation-settings: 'FILL' 1;">lock</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Workflow Logic Diagram (Bento Grid Style) -->
+<div class="mb-12">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary-fixed-dim">schema</span>
+<h3 class="font-headline-md text-headline-md">Implementation Sequence Logic</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="bg-surface-container-high p-4 border border-outline-variant relative">
+<span class="font-label-caps text-code-xs text-primary mb-2 block">STEP_01</span>
+<h5 class="font-headline-md text-headline-md mb-2">Freight Lock</h5>
+<p class="text-code-xs text-on-surface-variant">Freight Service locks route &amp; capacity via Escrow stake.</p>
+</div>
+<div class="bg-surface-container-high p-4 border border-outline-variant relative">
+<span class="font-label-caps text-code-xs text-primary mb-2 block">STEP_02</span>
+<h5 class="font-headline-md text-headline-md mb-2">Unit Sync</h5>
+<p class="text-code-xs text-on-surface-variant">Container Service initializes IoT heartbeats and manifest ID.</p>
+</div>
+<div class="bg-surface-container-high p-4 border border-outline-variant relative">
+<span class="font-label-caps text-code-xs text-primary mb-2 block">STEP_03</span>
+<h5 class="font-headline-md text-headline-md mb-2">Audit Trace</h5>
+<p class="text-code-xs text-on-surface-variant">Tracking Service begins Kafka stream ingestion.</p>
+</div>
+<div class="bg-surface-container-high p-4 border border-outline-variant relative">
+<span class="font-label-caps text-code-xs text-primary mb-2 block">STEP_04</span>
+<h5 class="font-headline-md text-headline-md mb-2">Close-out</h5>
+<p class="text-code-xs text-on-surface-variant">Warehouse Service verifies receipt for Escrow payout.</p>
+</div>
+</div>
+</div>
+<!-- Action Section -->
+<footer class="mt-20 border-t border-outline-variant pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex gap-4">
+<button class="bg-primary-container text-on-primary-container px-6 py-2 font-label-caps text-label-caps hover:brightness-90 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                    DOWNLOAD YAML BUNDLE
+                </button>
+<button class="border border-outline text-on-surface px-6 py-2 font-label-caps text-label-caps hover:bg-surface-variant transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">launch</span>
+                    REPOS: WF-027-CORE
+                </button>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<span class="font-code-xs">Audit Hash: 0x98f2...ae31</span>
+<span class="font-code-xs">Last Verified: 2023-11-24 14:02 UTC</span>
+</div>
+</footer>
+</main>
+<script>
+        // Simple micro-interaction for the service cards
+        document.querySelectorAll('.group').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.boxShadow = '0 10px 15px -3px rgba(0, 230, 57, 0.1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+                card.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body></html>

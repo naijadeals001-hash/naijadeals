@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PIM_ENGINE_V2 | Exception &amp; Recovery Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#00e639",
+                    "on-primary-fixed": "#002203",
+                    "on-secondary-container": "#c6ceff",
+                    "error-container": "#93000a",
+                    "secondary-container": "#0043eb",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-tertiary-container": "#862ed4",
+                    "tertiary-fixed": "#f0dbff",
+                    "inverse-on-surface": "#233143",
+                    "on-tertiary": "#490080",
+                    "outline": "#84967e",
+                    "surface": "#051424",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary": "#fff6ff",
+                    "surface-variant": "#273647",
+                    "surface-container-lowest": "#010f1f",
+                    "on-background": "#d4e4fa",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "error": "#ffb4ab",
+                    "on-surface": "#d4e4fa",
+                    "tertiary-container": "#ecd3ff",
+                    "on-secondary": "#002388",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-low": "#0d1c2d",
+                    "background": "#051424",
+                    "primary-fixed-dim": "#00e639",
+                    "primary-container": "#00ff41",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-error": "#690005",
+                    "on-primary": "#003907",
+                    "secondary-fixed": "#dde1ff",
+                    "primary": "#ebffe2",
+                    "secondary": "#b8c3ff",
+                    "on-primary-container": "#007117",
+                    "surface-bright": "#2c3a4c",
+                    "surface-container": "#122131",
+                    "inverse-primary": "#006e16",
+                    "surface-dim": "#051424",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "surface-container-high": "#1c2b3c",
+                    "primary-fixed": "#72ff70",
+                    "on-primary-fixed-variant": "#00530e",
+                    "surface-container-highest": "#273647",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary-fixed": "#001356"
+            },
+            "borderRadius": {
+                    "DEFAULT": "4px",
+                    "lg": "8px",
+                    "xl": "12px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "stack-gap": "4px",
+                    "node-gutter": "24px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-pulse {
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+        .orthogonal-line {
+            position: absolute;
+            background-color: #3b4b37;
+            z-index: 0;
+        }
+        .orthogonal-line-error {
+            background-image: repeating-linear-gradient(90deg, #ffb4ab, #ffb4ab 4px, transparent 4px, transparent 8px);
+            background-color: transparent;
+        }
+        .orthogonal-line-active {
+            background-color: #00e639;
+            box-shadow: 0 0 8px rgba(0, 230, 57, 0.4);
+        }
+        .node-glow-error {
+            box-shadow: 0 0 15px rgba(255, 180, 171, 0.15);
+        }
+        .swimlane-border {
+            border-right: 1px solid rgba(185, 204, 178, 0.1);
+        }
+        .glass-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(13, 28, 45, 0.8);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md overflow-x-hidden">
+<!-- Top Navigation -->
+<header class="w-full top-0 sticky flex justify-between items-center px-grid-unit h-14 w-full bg-surface border-b border-outline-variant z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">PIM_ENGINE_V2</span>
+</div>
+<div class="hidden md:flex gap-6 items-center">
+<span class="font-label-caps text-label-caps text-primary cursor-pointer">WF-030_DIAGNOSTICS</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 cursor-pointer">NODE_MAP</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 cursor-pointer">METRICS</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end mr-4">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: RECOVERING</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">NODE_ID: WF-030-BETA</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-64px)]">
+<!-- Sidebar -->
+<aside class="h-full w-64 fixed left-0 top-14 bg-surface-container-low border-r border-outline-variant flex flex-col gap-stack-gap pt-node-gutter z-40">
+<div class="px-6 mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface">MODULE_INDEX</h3>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed-dim transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data Schema</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="alt_route">alt_route</span>
+<span class="font-label-caps text-label-caps">Workflow Nodes</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-caps text-label-caps">Asset Mapping</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps">System Logs</span>
+</div>
+</nav>
+<!-- Sidebar Stats Section -->
+<div class="mt-auto p-6 border-t border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">EXCEPTIONS</span>
+<span class="font-code-xs text-code-xs text-error font-bold">14</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 35%"></div>
+</div>
+<div class="flex justify-between items-center mt-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">RECOVERED</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">89.2%</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area (Canvas) -->
+<main class="flex-1 ml-64 p-node-gutter relative overflow-auto pb-12">
+<!-- Page Header / Breadcrumb -->
+<div class="flex justify-between items-end mb-10">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim opacity-70">ARTIFACT_H</span>
+<span class="text-on-surface-variant text-xs">/</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">WF-030</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight">Exception &amp; Recovery Model</h1>
+</div>
+<div class="flex gap-4">
+<button class="bg-surface-container-high px-4 py-2 flex items-center gap-2 border border-outline-variant hover:bg-surface-variant transition-colors rounded">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="play_arrow">play_arrow</span>
+<span class="font-label-caps text-label-caps">SIMULATE_FAILURE</span>
+</button>
+</div>
+</div>
+<!-- Workflow Canvas Container -->
+<div class="relative w-full min-h-[800px] border border-outline-variant/20 rounded-lg overflow-hidden bg-surface-container-lowest">
+<!-- Swimlane Labels -->
+<div class="absolute top-0 left-0 w-full h-12 flex z-10 bg-surface-container-low/80 backdrop-blur-sm border-b border-outline-variant">
+<div class="flex-1 flex items-center justify-center swimlane-border">
+<span class="material-symbols-outlined mr-2 text-sm" data-icon="analytics">analytics</span>
+<span class="font-label-caps text-label-caps">INGESTION &amp; ANALYTICS</span>
+</div>
+<div class="flex-1 flex items-center justify-center swimlane-border">
+<span class="material-symbols-outlined mr-2 text-sm" data-icon="query_stats">query_stats</span>
+<span class="font-label-caps text-label-caps">FORECAST ENGINE</span>
+</div>
+<div class="flex-1 flex items-center justify-center swimlane-border">
+<span class="material-symbols-outlined mr-2 text-sm" data-icon="psychology">psychology</span>
+<span class="font-label-caps text-label-caps">AI MODEL LAYER</span>
+</div>
+<div class="flex-1 flex items-center justify-center">
+<span class="material-symbols-outlined mr-2 text-sm" data-icon="restart_alt">restart_alt</span>
+<span class="font-label-caps text-label-caps">RECOVERY ACTION</span>
+</div>
+</div>
+<!-- Swimlane Dividers (Vertical) -->
+<div class="absolute inset-0 flex pointer-events-none">
+<div class="flex-1 swimlane-border"></div>
+<div class="flex-1 swimlane-border"></div>
+<div class="flex-1 swimlane-border"></div>
+<div class="flex-1"></div>
+</div>
+<!-- Node Connections (Hard-coded Layout for specific mapping) -->
+<!-- Connection 1: Analytics -> Retry -->
+<div class="orthogonal-line orthogonal-line-error" style="top: 150px; left: 180px; width: 630px; height: 1px;"></div>
+<div class="orthogonal-line orthogonal-line-error" style="top: 150px; left: 810px; width: 1px; height: 40px;"></div>
+<!-- Connection 2: Forecast -> Moving Average -->
+<div class="orthogonal-line orthogonal-line-error" style="top: 320px; left: 450px; width: 360px; height: 1px;"></div>
+<!-- Connection 3: AI -> Historical -->
+<div class="orthogonal-line orthogonal-line-error" style="top: 490px; left: 700px; width: 110px; height: 1px;"></div>
+<!-- Workflow Nodes Grid -->
+<div class="relative pt-24 px-12 grid grid-cols-4 gap-y-24 items-start">
+<!-- Lane 1: Analytics Failure -->
+<div class="flex flex-col items-center">
+<div class="w-56 bg-surface-container-low border border-error p-3 rounded node-glow-error relative z-20">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] px-1.5 py-0.5 bg-error/20 text-error rounded">NODE_01_ERR</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="warning">warning</span>
+</div>
+<div class="font-code-sm text-code-sm mb-4">Analytics Failure</div>
+<div class="flex justify-between items-center text-[10px] text-on-surface-variant font-code-xs">
+<span>ID: AF-772</span>
+<span>STATE: CRITICAL</span>
+</div>
+<!-- Output Port -->
+<div class="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-error"></div>
+</div>
+</div>
+<div class="col-span-2"></div> <!-- Spacer -->
+<!-- Lane 4: Recovery (Retry) -->
+<div class="flex flex-col items-center">
+<div class="w-56 bg-surface-container-high border border-primary-fixed-dim p-3 rounded relative z-20">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] px-1.5 py-0.5 bg-primary-fixed-dim/20 text-primary-fixed-dim rounded">REC_ACTION_01</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="cached">cached</span>
+</div>
+<div class="font-code-sm text-code-sm mb-4">Trigger Exponential Retry</div>
+<div class="flex flex-col gap-1 text-[9px] text-on-surface-variant font-code-xs">
+<div class="flex justify-between"><span>ATTEMPTS:</span><span>3/5</span></div>
+<div class="flex justify-between"><span>DELAY:</span><span>450ms</span></div>
+</div>
+</div>
+</div>
+<!-- Lane 1: Data Corruption -->
+<div class="flex flex-col items-center">
+<div class="w-56 bg-surface-container-low border border-error-container p-3 rounded node-glow-error relative z-20">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] px-1.5 py-0.5 bg-error-container/20 text-error rounded">NODE_02_ERR</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="grid_view">grid_view</span>
+</div>
+<div class="font-code-sm text-code-sm mb-4">Data Corruption Detected</div>
+<div class="flex justify-between items-center text-[10px] text-on-surface-variant font-code-xs">
+<span>ID: DC-003</span>
+<span>TYPE: BIT_FLIP</span>
+</div>
+</div>
+</div>
+<!-- Lane 2: Forecast Failure -->
+<div class="flex flex-col items-center">
+<div class="w-56 bg-surface-container-low border border-error p-3 rounded node-glow-error relative z-20">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] px-1.5 py-0.5 bg-error/20 text-error rounded">NODE_03_ERR</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="monitoring">monitoring</span>
+</div>
+<div class="font-code-sm text-code-sm mb-4">Forecast Engine Failure</div>
+<div class="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-error"></div>
+</div>
+</div>
+<div class="col-span-1"></div> <!-- Spacer -->
+<!-- Lane 4: Recovery (Fallback) -->
+<div class="flex flex-col items-center">
+<div class="w-56 bg-surface-container-high border border-primary-fixed-dim p-3 rounded relative z-20">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] px-1.5 py-0.5 bg-primary-fixed-dim/20 text-primary-fixed-dim rounded">REC_ACTION_02</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="timeline">timeline</span>
+</div>
+<div class="font-code-sm text-code-sm mb-4">Fallback: Moving Average</div>
+<div class="text-[9px] text-on-surface-variant font-code-xs mb-2">Engaging historical mean-reversion model.</div>
+<div class="h-6 w-full bg-surface-container flex items-end gap-0.5 px-1">
+<div class="bg-primary-fixed-dim/40 w-full h-2"></div>
+<div class="bg-primary-fixed-dim/60 w-full h-3"></div>
+<div class="bg-primary-fixed-dim/50 w-full h-2"></div>
+<div class="bg-primary-fixed-dim w-full h-4"></div>
+<div class="bg-primary-fixed-dim/70 w-full h-3"></div>
+</div>
+</div>
+</div>
+<div class="col-span-2"></div> <!-- Spacer -->
+<!-- Lane 3: AI Failure -->
+<div class="flex flex-col items-center">
+<div class="w-56 bg-surface-container-low border border-error p-3 rounded node-glow-error relative z-20">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] px-1.5 py-0.5 bg-error/20 text-error rounded">NODE_04_ERR</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="font-code-sm text-code-sm mb-4">AI Model Inference Timeout</div>
+<div class="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-error"></div>
+</div>
+</div>
+<!-- Lane 4: Recovery (Historical) -->
+<div class="flex flex-col items-center">
+<div class="w-56 bg-surface-container-high border border-primary-fixed-dim p-3 rounded relative z-20">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] px-1.5 py-0.5 bg-primary-fixed-dim/20 text-primary-fixed-dim rounded">REC_ACTION_03</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="history">history</span>
+</div>
+<div class="font-code-sm text-code-sm mb-4">Historical Model Inversion</div>
+<div class="flex justify-between items-center text-[10px] text-on-surface-variant font-code-xs">
+<span>MATCH: 92%</span>
+<span>LATENCY: 12ms</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Reprocessing Trigger Indicator (Floating Overlay) -->
+<div class="absolute bottom-8 left-8 p-4 bg-surface-container-low border border-primary-fixed-dim/40 rounded flex flex-col gap-2 z-30 max-w-xs shadow-xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed-dim animate-spin" data-icon="sync" style="animation-duration: 4s;">sync</span>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">RE-PROCESSING ACTIVE</span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Scanning for missing events...</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-[9px]">
+<span class="text-on-surface-variant opacity-60">EVENT_QUEUE_04:</span>
+<span class="text-primary-fixed-dim">POLLING...</span>
+</div>
+<div class="flex justify-between text-[9px]">
+<span class="text-on-surface-variant opacity-60">RECOVERY_PTR:</span>
+<span class="text-on-surface">0x4F92A</span>
+</div>
+</div>
+</div>
+<!-- Cold Storage Recovery Detail (Glass Modal Simulation) -->
+<div class="absolute top-1/2 right-12 -translate-y-1/2 w-72 glass-overlay border border-outline-variant rounded p-4 z-30 shadow-2xl">
+<div class="flex items-center gap-2 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="ac_unit">ac_unit</span>
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">COLD STORAGE RECOVERY</span>
+</div>
+<p class="font-body-md text-[12px] text-on-surface-variant mb-4 leading-relaxed">
+                        Initializing block synchronization from Deep Archival Layer 3. Estimated RTO: 420s.
+                    </p>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-code-xs">PARSING_OBJECTS</span>
+<span class="text-[10px] font-code-xs text-primary-fixed-dim">44%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full">
+<div class="bg-surface-tint h-full" style="width: 44%"></div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/30">
+<button class="w-full py-1.5 font-label-caps text-[10px] border border-outline-variant hover:bg-surface-variant transition-colors text-on-surface">FORCE_SYNC_ACK</button>
+</div>
+</div>
+</div>
+<!-- Footer Telemetry -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="p-4 bg-surface-container-low rounded border border-outline-variant/30">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 bg-error rounded-full animate-pulse"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">ERROR_RATE</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">0.042</span>
+<span class="font-code-xs text-code-xs text-error">▲ 2.1%</span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low rounded border border-outline-variant/30">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 bg-primary-fixed-dim rounded-full"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">AUTO_HEAL_SUCCESS</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">94.8%</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">▼ 0.4%</span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low rounded border border-outline-variant/30">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 bg-secondary rounded-full"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">REPROCESS_QUEUE</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">1,024</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">EVENTS</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Telemetry Status Bar -->
+<footer class="w-full fixed bottom-0 z-50 bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-node-gutter py-1 h-8">
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CORE_ENGINE_STABLE</span>
+<div class="h-3 w-px bg-outline-variant"></div>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">LATENCY: 12ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">UPTIME: 99.99%</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim transition-opacity duration-200 cursor-pointer">THROUGHPUT: 4.2k/s</span>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></span>
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Cluster_Sync: Active</span>
+</div>
+</div>
+</footer>
+<!-- Interactive Elements (Vanilla JS) -->
+<script>
+        // Micro-interaction for simulating node scanning
+        document.querySelectorAll('.orthogonal-line-error').forEach(line => {
+            line.addEventListener('mouseenter', () => {
+                line.classList.add('orthogonal-line-active');
+            });
+            line.addEventListener('mouseleave', () => {
+                line.classList.remove('orthogonal-line-active');
+            });
+        });
+
+        // Simple pulsing telemetry
+        setInterval(() => {
+            const throughput = (4.1 + Math.random() * 0.2).toFixed(1);
+            const latency = (10 + Math.floor(Math.random() * 5));
+            document.querySelector('.font-code-xs:nth-child(3)').innerText = `LATENCY: ${latency}ms`;
+            document.querySelector('.hover\\:text-primary-fixed-dim').innerText = `THROUGHPUT: ${throughput}k/s`;
+        }, 3000);
+    </script>
+</body></html>

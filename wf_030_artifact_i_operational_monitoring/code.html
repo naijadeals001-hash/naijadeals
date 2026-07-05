@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PIM_ENGINE_V2 | Operational Monitoring WF-030</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --grid-opacity: 0.05;
+        }
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(255,255,255,var(--grid-opacity)) 1px, transparent 0);
+            background-size: 24px 24px;
+            overflow-x: hidden;
+        }
+        .node-connector-line {
+            background: linear-gradient(90deg, transparent, #00e639, transparent);
+            height: 1px;
+            width: 100%;
+        }
+        .glow-border {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanline-effect::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 230, 57, 0.05) 50%, transparent 100%);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#00e639",
+                      "on-primary-fixed": "#002203",
+                      "on-secondary-container": "#c6ceff",
+                      "error-container": "#93000a",
+                      "secondary-container": "#0043eb",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-tertiary-container": "#862ed4",
+                      "tertiary-fixed": "#f0dbff",
+                      "inverse-on-surface": "#233143",
+                      "on-tertiary": "#490080",
+                      "outline": "#84967e",
+                      "surface": "#051424",
+                      "inverse-surface": "#d4e4fa",
+                      "tertiary": "#fff6ff",
+                      "surface-variant": "#273647",
+                      "surface-container-lowest": "#010f1f",
+                      "on-background": "#d4e4fa",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "error": "#ffb4ab",
+                      "on-surface": "#d4e4fa",
+                      "tertiary-container": "#ecd3ff",
+                      "on-secondary": "#002388",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-low": "#0d1c2d",
+                      "background": "#051424",
+                      "primary-fixed-dim": "#00e639",
+                      "primary-container": "#00ff41",
+                      "on-tertiary-fixed": "#2c0051",
+                      "on-error": "#690005",
+                      "on-primary": "#003907",
+                      "secondary-fixed": "#dde1ff",
+                      "primary": "#ebffe2",
+                      "secondary": "#b8c3ff",
+                      "on-primary-container": "#007117",
+                      "surface-bright": "#2c3a4c",
+                      "surface-container": "#122131",
+                      "inverse-primary": "#006e16",
+                      "surface-dim": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "surface-container-high": "#1c2b3c",
+                      "primary-fixed": "#72ff70",
+                      "on-primary-fixed-variant": "#00530e",
+                      "surface-container-highest": "#273647",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary-fixed": "#001356"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lane-margin": "32px",
+                      "grid-unit": "8px",
+                      "stack-gap": "4px",
+                      "node-gutter": "24px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface select-none">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-50 bg-surface dark:bg-surface border-b border-outline-variant flex justify-between items-center px-grid-unit h-14 w-full">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">PIM_ENGINE_V2</span>
+</div>
+<div class="h-4 w-px bg-outline-variant mx-2"></div>
+<div class="font-headline-md text-headline-md text-primary-fixed-dim">OPERATIONAL_MONITORING: WF-030</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4 font-label-caps text-label-caps text-on-surface-variant">
+<span class="hover:bg-surface-container-highest transition-colors px-2 py-1 cursor-pointer">SYS_STATUS: OPTIMAL</span>
+<span class="hover:bg-surface-container-highest transition-colors px-2 py-1 cursor-pointer">BUFFER_LVL: 14%</span>
+</div>
+<div class="flex items-center gap-2 cursor-pointer active:opacity-80 hover:bg-surface-container-highest transition-colors p-2 rounded">
+<span class="material-symbols-outlined text-on-surface-variant">settings_input_component</span>
+</div>
+</div>
+</header>
+<!-- Sidebar Navigation -->
+<nav class="h-full w-64 fixed left-0 top-0 pt-16 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant flex flex-col gap-stack-gap pt-node-gutter z-40 hidden md:flex">
+<div class="px-6 py-4">
+<span class="font-headline-md text-headline-md text-on-surface block mb-2">MODULE_INDEX</span>
+<div class="h-1 w-8 bg-primary-fixed-dim"></div>
+</div>
+<div class="flex flex-col mt-4">
+<a class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed-dim transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">database</span>
+<span class="font-label-caps text-label-caps">Data Schema</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">alt_route</span>
+<span class="font-label-caps text-label-caps">Workflow Nodes</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-label-caps text-label-caps">Asset Mapping</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+<span class="font-label-caps text-label-caps">System Logs</span>
+</a>
+</div>
+<div class="mt-auto p-6">
+<div class="border border-outline-variant p-4 bg-surface-container-lowest">
+<div class="font-label-caps text-[9px] text-on-surface-variant mb-2">TELEMETRY_ENGINE</div>
+<div class="flex items-center justify-between">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">NODE_V3.4</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 p-node-gutter pb-20 scanline-effect">
+<!-- Header Section -->
+<div class="mb-node-gutter flex flex-col md:flex-row justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">OPERATIONAL_BLUEPRINT // FLEET_MANAGEMENT</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight">System Performance Monitor</h1>
+</div>
+<div class="mt-4 md:mt-0 flex gap-2">
+<div class="bg-surface-container-high px-3 py-1 border border-outline-variant flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+<span class="font-code-xs text-code-xs uppercase">Cluster_A: Active</span>
+</div>
+<div class="bg-surface-container-high px-3 py-1 border border-outline-variant flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="font-code-xs text-code-xs uppercase">Sync_Stream: 12ms</span>
+</div>
+</div>
+</div>
+<!-- Dashboard Grid (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-stack-gap md:gap-4 h-auto">
+<!-- Executive KPIs -->
+<div class="md:col-span-4 bg-surface-container-low border border-outline-variant p-4 hover:border-primary-fixed-dim transition-colors group">
+<div class="flex justify-between items-start mb-6">
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">EXECUTIVE_KPI</div>
+<div class="font-headline-md text-headline-md text-on-surface">Revenue per Mile</div>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim">trending_up</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-[42px] leading-none font-bold text-primary-fixed-dim">$4.82</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">+0.12 (2.4%)</span>
+</div>
+<div class="mt-6 flex gap-1 h-8 items-end">
+<div class="w-full bg-outline-variant h-2 hover:bg-primary-fixed-dim transition-all"></div>
+<div class="w-full bg-outline-variant h-4 hover:bg-primary-fixed-dim transition-all"></div>
+<div class="w-full bg-outline-variant h-3 hover:bg-primary-fixed-dim transition-all"></div>
+<div class="w-full bg-outline-variant h-6 hover:bg-primary-fixed-dim transition-all"></div>
+<div class="w-full bg-primary-fixed-dim h-8 transition-all"></div>
+</div>
+<div class="mt-2 font-code-xs text-code-xs text-on-surface-variant text-right">L7D_TREND_STABLE</div>
+</div>
+<!-- Fleet Utilization -->
+<div class="md:col-span-4 bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">FLEET_UTILIZATION</div>
+<div class="mt-2 flex items-center justify-between">
+<span class="font-headline-lg text-headline-lg">94.2%</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim bg-on-primary-fixed px-2 py-0.5">CAPACITY_HIGH</span>
+</div>
+</div>
+<div class="relative h-2 w-full bg-surface-container-highest mt-4 overflow-hidden">
+<div class="absolute left-0 top-0 h-full bg-primary-fixed-dim" style="width: 94.2%"></div>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-4">
+<div class="border-l border-outline-variant pl-2">
+<div class="font-code-xs text-code-xs text-on-surface-variant">Active Units</div>
+<div class="font-code-sm text-code-sm">1,204</div>
+</div>
+<div class="border-l border-outline-variant pl-2">
+<div class="font-code-xs text-code-xs text-on-surface-variant">In Maintenance</div>
+<div class="font-code-sm text-code-sm">58</div>
+</div>
+</div>
+</div>
+<!-- Operational KPI: Throughput -->
+<div class="md:col-span-4 bg-surface-container-low border border-outline-variant p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-4">OPERATIONAL_KPI // THROUGHPUT</div>
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-full border-4 border-outline-variant border-t-primary-fixed-dim flex items-center justify-center animate-[spin_4s_linear_infinite]">
+<span class="font-code-xs text-code-xs text-on-surface">4.2k</span>
+</div>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Shipments/hr</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Target: 4.0k</div>
+</div>
+</div>
+<div class="mt-4 p-2 bg-surface-container-lowest border border-outline-variant">
+<div class="flex justify-between font-code-xs text-code-xs text-on-surface-variant">
+<span>LATENCY_SYNC</span>
+<span class="text-primary-fixed-dim">ACTIVE</span>
+</div>
+</div>
+</div>
+<!-- Shipment Success & ETA Accuracy -->
+<div class="md:col-span-8 bg-surface-container-low border border-outline-variant p-0 overflow-hidden flex flex-col">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container">
+<div class="font-label-caps text-label-caps">SHIPMENT_INTEGRITY_LOG</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">REAL_TIME_STREAM_v4</div>
+</div>
+<div class="flex-grow grid grid-cols-1 md:grid-cols-2">
+<div class="p-4 border-r border-outline-variant">
+<div class="flex justify-between items-end mb-2">
+<span class="font-code-sm text-code-sm">ETA Accuracy</span>
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">99%</span>
+</div>
+<div class="h-24 w-full flex items-end gap-1">
+<!-- Bar Chart Placeholder -->
+<div class="w-full bg-primary-fixed-dim/20 h-[98%]"></div>
+<div class="w-full bg-primary-fixed-dim/20 h-[99%]"></div>
+<div class="w-full bg-primary-fixed-dim/20 h-[97%]"></div>
+<div class="w-full bg-primary-fixed-dim/20 h-[99%]"></div>
+<div class="w-full bg-primary-fixed-dim/20 h-[98%]"></div>
+<div class="w-full bg-primary-fixed-dim h-[99%]"></div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-end mb-2">
+<span class="font-code-sm text-code-sm">Shipment Success</span>
+<span class="font-headline-md text-headline-md">99.98%</span>
+</div>
+<div class="space-y-2 mt-4">
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-1">
+<span class="font-code-xs text-code-xs text-on-surface-variant">L7203: San Jose -&gt; Austin</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SUCCESS</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-1">
+<span class="font-code-xs text-code-xs text-on-surface-variant">R9411: Berlin -&gt; Warsaw</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SUCCESS</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-1">
+<span class="font-code-xs text-code-xs text-on-surface-variant">T1102: Tokyo -&gt; Osaka</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SUCCESS</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Driver Performance -->
+<div class="md:col-span-4 bg-surface-container-low border border-outline-variant p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-4">DRIVER_PERFORMANCE</div>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-highest border border-outline-variant flex items-center justify-center font-code-xs text-code-xs">D1</div>
+<div class="flex-grow">
+<div class="flex justify-between font-code-sm text-code-sm mb-1">
+<span>A. Vance</span>
+<span>9.8/10</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full"><div class="h-full bg-primary-fixed-dim w-[98%]"></div></div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-highest border border-outline-variant flex items-center justify-center font-code-xs text-code-xs">D2</div>
+<div class="flex-grow">
+<div class="flex justify-between font-code-sm text-code-sm mb-1">
+<span>K. Miller</span>
+<span>9.4/10</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full"><div class="h-full bg-primary-fixed-dim w-[94%]"></div></div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-highest border border-outline-variant flex items-center justify-center font-code-xs text-code-xs">D3</div>
+<div class="flex-grow">
+<div class="flex justify-between font-code-sm text-code-sm mb-1">
+<span>M. Chen</span>
+<span>8.2/10</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full"><div class="h-full bg-primary-fixed-dim w-[82%]"></div></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Cross-Border Latency -->
+<div class="md:col-span-6 bg-surface-container-low border border-outline-variant p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">CROSS-BORDER_LATENCY (AVG)</div>
+<div class="flex items-end gap-4 h-32 mt-4 relative">
+<!-- Graph Plot -->
+<div class="absolute inset-0 border-b border-l border-outline-variant"></div>
+<div class="flex-grow h-full flex items-end justify-between px-4 z-10">
+<div class="w-4 bg-primary-fixed-dim h-[20%] group relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-code-xs text-code-xs hidden group-hover:block">12ms</div>
+</div>
+<div class="w-4 bg-primary-fixed-dim h-[45%] group relative"></div>
+<div class="w-4 bg-primary-fixed-dim h-[30%] group relative"></div>
+<div class="w-4 bg-primary-fixed-dim h-[60%] group relative"></div>
+<div class="w-4 bg-secondary-container h-[85%] group relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-code-xs text-code-xs text-secondary whitespace-nowrap">MAX: 42ms</div>
+</div>
+<div class="w-4 bg-primary-fixed-dim h-[50%] group relative"></div>
+<div class="w-4 bg-primary-fixed-dim h-[40%] group relative"></div>
+</div>
+</div>
+<div class="flex justify-between mt-2 font-code-xs text-code-xs text-on-surface-variant">
+<span>00:00</span>
+<span>06:00</span>
+<span>12:00</span>
+<span>18:00</span>
+<span>23:59</span>
+</div>
+</div>
+<!-- Fuel Consumption (Trend) -->
+<div class="md:col-span-6 bg-surface-container-low border border-outline-variant p-4 relative overflow-hidden">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">FUEL_CONSUMPTION_INDEX</div>
+<div class="flex justify-between items-baseline">
+<div class="font-headline-md text-headline-md">7.2 L/100km</div>
+<div class="text-error font-code-sm text-code-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+2.1% (MAQ)</span>
+</div>
+</div>
+<div class="mt-4 grid grid-cols-4 gap-2">
+<div class="bg-surface-container-lowest p-2 border border-outline-variant">
+<div class="font-code-xs text-code-xs text-on-surface-variant">Electric</div>
+<div class="font-code-sm text-code-sm text-primary-fixed-dim">12.4%</div>
+</div>
+<div class="bg-surface-container-lowest p-2 border border-outline-variant">
+<div class="font-code-xs text-code-xs text-on-surface-variant">Hybrid</div>
+<div class="font-code-sm text-code-sm">24.1%</div>
+</div>
+<div class="bg-surface-container-lowest p-2 border border-outline-variant">
+<div class="font-code-xs text-code-xs text-on-surface-variant">Diesel</div>
+<div class="font-code-sm text-code-sm text-error">63.5%</div>
+</div>
+<div class="bg-surface-container-lowest p-2 border border-outline-variant">
+<div class="font-code-xs text-code-xs text-on-surface-variant">Biofuel</div>
+<div class="font-code-sm text-code-sm">0.0%</div>
+</div>
+</div>
+<!-- Mini Schematic -->
+<div class="absolute bottom-[-10px] right-[-10px] opacity-10 rotate-12">
+<span class="material-symbols-outlined text-[120px]">oil_barrel</span>
+</div>
+</div>
+</div>
+<!-- System Visualizer (Blueprints) -->
+<div class="mt-8 border border-outline-variant bg-surface-container-lowest p-4 relative h-64 overflow-hidden">
+<div class="absolute top-4 left-4 z-10">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim">NETWORK_TOPOLOGY_MAP</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">SYNC_MODE: ASYNCHRONOUS</div>
+</div>
+<!-- Blueprint Nodes Simulation -->
+<div class="absolute inset-0 flex items-center justify-center gap-24 opacity-40">
+<div class="w-32 h-20 border border-primary-fixed-dim bg-surface flex flex-col p-2 relative">
+<div class="font-label-caps text-[9px] border-b border-primary-fixed-dim/30 pb-1 mb-1">NODE_US_WEST</div>
+<div class="font-code-xs text-[10px]">Pings: 242/s</div>
+<div class="absolute -right-12 top-1/2 border-t border-primary-fixed-dim/50 w-12"></div>
+</div>
+<div class="w-32 h-20 border border-primary-fixed-dim bg-surface flex flex-col p-2 relative">
+<div class="font-label-caps text-[9px] border-b border-primary-fixed-dim/30 pb-1 mb-1">CORE_ROUTER</div>
+<div class="font-code-xs text-[10px]">Load: 42.1%</div>
+<div class="absolute -right-12 top-1/2 border-t border-primary-fixed-dim/50 w-12"></div>
+</div>
+<div class="w-32 h-20 border border-primary-fixed-dim bg-surface flex flex-col p-2 relative">
+<div class="font-label-caps text-[9px] border-b border-primary-fixed-dim/30 pb-1 mb-1">NODE_EU_CENTRAL</div>
+<div class="font-code-xs text-[10px]">Pings: 198/s</div>
+</div>
+</div>
+<!-- Telemetry Overlays -->
+<div class="absolute bottom-4 right-4 text-right">
+<div class="font-code-xs text-code-xs text-on-surface-variant">LAST_SCAN: 2023-10-27T14:42:01.002Z</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">ENCRYPTION: AES-256-ACTIVE</div>
+</div>
+</div>
+</main>
+<!-- Global Footer Bar -->
+<footer class="w-full fixed bottom-0 z-50 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-node-gutter py-1 h-8 w-full">
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CORE_ENGINE_STABLE</span>
+<div class="h-3 w-px bg-outline-variant"></div>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim cursor-pointer transition-opacity duration-200">LATENCY: 12ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim cursor-pointer transition-opacity duration-200">UPTIME: 99.99%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim cursor-pointer transition-opacity duration-200">THROUGHPUT: 4.2k/s</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SYSTEM_OK</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+</div>
+</footer>
+<!-- FAB (Suppressed on this task-focused monitor screen as per guidelines) -->
+<script>
+        // Micro-interaction for hover states
+        document.querySelectorAll('.bg-surface-container-low').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('glow-border');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('glow-border');
+            });
+        });
+
+        // Simple telemetry value fluctuation simulation
+        setInterval(() => {
+            const throughput = document.querySelector('.animate-\\[spin_4s_linear_infinite\\] span');
+            if(throughput) {
+                const val = (4.1 + Math.random() * 0.2).toFixed(1);
+                throughput.innerText = val + 'k';
+            }
+        }, 3000);
+    </script>
+</body></html>

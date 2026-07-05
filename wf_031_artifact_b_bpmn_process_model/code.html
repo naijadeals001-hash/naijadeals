@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SYSTEM_CORE::DISCOVERY_ENGINE // WF-031</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#fff6ff",
+                    "error": "#ffb4ab",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary": "#b8c3ff",
+                    "surface-tint": "#00e639",
+                    "on-error": "#690005",
+                    "surface-variant": "#273647",
+                    "on-surface-variant": "#b9ccb2",
+                    "primary": "#ebffe2",
+                    "inverse-on-surface": "#233143",
+                    "secondary-container": "#0043eb",
+                    "primary-fixed-dim": "#00e639",
+                    "secondary-fixed": "#dde1ff",
+                    "on-secondary": "#002388",
+                    "tertiary-fixed": "#f0dbff",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-dim": "#051424",
+                    "on-primary-container": "#007117",
+                    "inverse-surface": "#d4e4fa",
+                    "inverse-primary": "#006e16",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-tertiary-container": "#862ed4",
+                    "error-container": "#93000a",
+                    "surface-container-low": "#0d1c2d",
+                    "surface": "#051424",
+                    "surface-container-highest": "#273647",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary-fixed": "#001356",
+                    "primary-fixed": "#72ff70",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-container": "#122131",
+                    "surface-bright": "#2c3a4c",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-primary": "#003907",
+                    "on-background": "#d4e4fa",
+                    "on-primary-fixed": "#002203",
+                    "on-tertiary": "#490080",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary-fixed": "#2c0051",
+                    "primary-container": "#00ff41",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "outline": "#84967e",
+                    "on-error-container": "#ffdad6",
+                    "on-surface": "#d4e4fa",
+                    "background": "#051424",
+                    "surface-container-high": "#1c2b3c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "grid-unit": "8px",
+                    "lane-margin": "32px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle at 1px 1px, #1a222c 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-port {
+            width: 8px;
+            height: 8px;
+            background: #00e639;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .connector-line {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .swimlane-border {
+            border-right: 1px solid #3b4b37;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #010f1f; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00e639; }
+        
+        .glow-node:hover {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.2);
+            border-color: #00e639 !important;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 w-full bg-surface text-primary border-b border-outline-variant flex justify-between items-center px-lane-margin h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-surface-tint">hub</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</h1>
+</div>
+<div class="flex items-center gap-6 h-full">
+<nav class="hidden md:flex gap-8 h-full items-center">
+<a class="font-code-sm text-code-sm text-primary border-b-2 border-primary h-full flex items-center px-2" href="#">BPMN_FLOW</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors h-full flex items-center px-2" href="#">METRICS</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors h-full flex items-center px-2" href="#">REGISTRY</a>
+</nav>
+<span class="material-symbols-outlined cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-low border-r border-outline-variant z-40 overflow-y-auto hidden xl:block">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary">MODULE_REGISTRY</h2>
+</div>
+<nav class="flex flex-col">
+<!-- Active Item -->
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint cursor-pointer">
+<span class="material-symbols-outlined">work</span>
+<span class="font-code-sm text-code-sm">Gigs</span>
+</div>
+<!-- Inactive Items -->
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-code-sm text-code-sm">Shop</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-code-sm text-code-sm">Eats</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-code-sm text-code-sm">Send</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">directions_car</span>
+<span class="font-code-sm text-code-sm">Drive</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">bed</span>
+<span class="font-code-sm text-code-sm">Stay</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">agriculture</span>
+<span class="font-code-sm text-code-sm">Agro</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">medical_services</span>
+<span class="font-code-sm text-code-sm">Health</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="xl:ml-64 mt-16 mb-12 min-h-screen overflow-x-auto relative">
+<!-- Grid Background Overlay (Local) -->
+<div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: linear-gradient(#3b4b37 1px, transparent 1px), linear-gradient(90deg, #3b4b37 1px, transparent 1px); background-size: 80px 80px;"></div>
+<!-- BPMN Canvas Container -->
+<div class="inline-flex min-w-full relative py-8 px-8">
+<!-- Swimlanes Column -->
+<div class="flex flex-col">
+<!-- ROW 1: USER ACTORS (Merged for Density) -->
+<div class="flex border-b border-outline-variant h-[320px]">
+<!-- Lane Header -->
+<div class="w-16 flex items-center justify-center border-r border-outline-variant bg-surface-container-low shrink-0">
+<span class="font-label-caps text-label-caps -rotate-90 whitespace-nowrap text-on-surface-variant uppercase">User_Ecosystem</span>
+</div>
+<!-- Lane Canvas -->
+<div class="relative w-[1800px] p-lane-margin flex items-center gap-node-gutter">
+<!-- Node: Search Initialization -->
+<div class="glow-node w-48 bg-[#0F0F0F] border border-primary p-grid-unit relative z-10">
+<div class="font-label-caps text-label-caps text-surface-tint mb-1">STRT_001</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Initialize Global Search</div>
+<div class="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rounded-full"></div>
+</div>
+<!-- Connector -->
+<div class="w-24 h-px bg-outline-variant relative">
+<div class="absolute right-0 -top-1 w-2 h-2 border-t border-r border-outline-variant rotate-45"></div>
+</div>
+<!-- Diamond: Intent Classifier -->
+<div class="w-24 h-24 border border-secondary rotate-45 bg-[#0F0F0F] flex items-center justify-center relative z-10 glow-node">
+<div class="-rotate-45 text-center px-1">
+<div class="font-label-caps text-label-caps text-secondary">DEC_01</div>
+<div class="font-code-xs text-code-xs">INTENT?</div>
+</div>
+<!-- Ports -->
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-secondary rounded-full -rotate-45"></div>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-secondary rounded-full -rotate-45"></div>
+</div>
+<!-- Telemetry -->
+<div class="absolute top-1/2 right-[1200px] font-code-xs text-code-xs text-on-surface-variant">
+                            Latency: 12ms<br/>
+                            Thread: UI_02
+                        </div>
+</div>
+</div>
+<!-- ROW 2: PROCESSING ENGINES -->
+<div class="flex border-b border-outline-variant h-[400px]">
+<div class="w-16 flex items-center justify-center border-r border-outline-variant bg-surface-container-low shrink-0">
+<span class="font-label-caps text-label-caps -rotate-90 whitespace-nowrap text-on-surface-variant uppercase">Processing_Layer</span>
+</div>
+<div class="relative w-[1800px] p-lane-margin flex items-start gap-node-gutter pt-24">
+<!-- Parallel Block -->
+<div class="flex flex-col gap-8">
+<!-- Node: Aura AI Analysis -->
+<div class="glow-node w-56 bg-[#0F0F0F] border border-surface-tint p-grid-unit relative z-10">
+<div class="font-label-caps text-label-caps text-surface-tint mb-1">AI_CORE_X</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Vector Semantic Mapping</div>
+<div class="mt-2 h-1 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-surface-tint w-3/4"></div>
+</div>
+</div>
+<!-- Node: Search Ranking -->
+<div class="glow-node w-56 bg-[#0F0F0F] border border-outline p-grid-unit relative z-10">
+<div class="font-label-caps text-label-caps text-outline mb-1">RNK_ENG</div>
+<div class="font-code-sm text-code-sm text-on-surface uppercase">Heuristic Priority Sorting</div>
+</div>
+</div>
+<!-- Connector: Complex Flow -->
+<svg class="absolute top-0 left-0 w-full h-full pointer-events-none opacity-40">
+<path d="M 640 120 L 700 120 L 700 300 L 800 300" fill="none" stroke="#00e639" stroke-dasharray="4,4" stroke-width="1"></path>
+<path d="M 640 220 L 700 220 L 700 300 L 800 300" fill="none" stroke="#b8c3ff" stroke-width="1"></path>
+</svg>
+<!-- Node: Batch Indexing (Deferred) -->
+<div class="glow-node w-48 bg-[#0F0F0F] border border-on-surface-variant border-dashed p-grid-unit relative z-10 ml-64 mt-20">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">IDX_ASYNC</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant uppercase">Background Cache Warmup</div>
+</div>
+</div>
+</div>
+<!-- ROW 3: TRUST & COMPLIANCE -->
+<div class="flex border-b border-outline-variant h-[320px]">
+<div class="w-16 flex items-center justify-center border-r border-outline-variant bg-surface-container-low shrink-0">
+<span class="font-label-caps text-label-caps -rotate-90 whitespace-nowrap text-on-surface-variant uppercase">Trust_Audit_Chain</span>
+</div>
+<div class="relative w-[1800px] p-lane-margin flex items-center justify-around">
+<!-- Node: Audit Trail -->
+<div class="glow-node w-64 bg-[#051424] border border-error p-grid-unit relative z-10">
+<div class="flex justify-between items-start mb-2">
+<div class="font-label-caps text-label-caps text-error">AUDIT_LOG</div>
+<span class="material-symbols-outlined text-error text-[14px]">shield</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-background uppercase mb-2">Immutable Trace: WF-031</div>
+<div class="bg-surface-container-lowest p-2 border border-outline-variant">
+<code class="text-[9px] block text-on-surface-variant">TIMESTAMP: 1715629381<br/>ACTOR: SYS_DAEMON<br/>STATUS: COMPLIANT</code>
+</div>
+</div>
+<!-- Realtime Search Node -->
+<div class="glow-node w-52 bg-surface-container border border-primary-fixed-dim p-grid-unit relative z-10">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">LIVE_STRM</div>
+<div class="font-code-sm text-code-sm text-primary uppercase">Realtime Search Sync</div>
+<div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary-fixed-dim rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Button (Contextual) -->
+<button class="fixed bottom-24 right-8 w-14 h-14 bg-surface-tint text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined">add</span>
+</button>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full bg-surface-container-lowest text-on-surface-variant border-t border-outline-variant flex justify-between items-center px-lane-margin py-stack-gap z-50 h-10">
+<div class="font-code-xs text-code-xs">
+            © 2024 NAIJADEALS_ECOSYSTEM // SRV_ID: WF-031
+        </div>
+<div class="flex gap-6">
+<span class="font-code-xs text-code-xs text-primary">SYSTEM_STATUS: OK</span>
+<span class="font-code-xs text-code-xs">LATENCY: 24ms</span>
+<span class="font-code-xs text-code-xs flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-surface-tint rounded-full animate-pulse"></span>
+                AURA_CORE: ACTIVE
+            </span>
+</div>
+</footer>
+<!-- Overlay Panel (Audit Logs - Right Side) -->
+<aside class="fixed right-0 top-16 h-[calc(100vh-64px)] w-80 bg-surface-dim border-l border-outline-variant z-[60] transform translate-x-full transition-transform duration-300" id="audit-drawer">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-label-caps text-label-caps text-primary">AUDIT_TELEMETRY</h3>
+<button class="text-on-surface-variant hover:text-primary" onclick="toggleDrawer()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-4 space-y-4">
+<div class="p-3 bg-surface-container border-l-2 border-surface-tint">
+<div class="text-[10px] font-bold text-surface-tint mb-1">09:12:01.45</div>
+<div class="font-code-xs text-code-xs">EXEC_START: RecommendationEngine::CalculateWeight</div>
+<div class="text-[9px] text-on-surface-variant mt-1">Status: Success (2ms)</div>
+</div>
+<div class="p-3 bg-surface-container border-l-2 border-secondary">
+<div class="text-[10px] font-bold text-secondary mb-1">09:12:02.10</div>
+<div class="font-code-xs text-code-xs">INTENT_MATCH: Merchant::OfferDiscovery</div>
+<div class="text-[9px] text-on-surface-variant mt-1">Source: UI_GATEWAY_V3</div>
+</div>
+<div class="p-3 bg-surface-container border-l-2 border-error">
+<div class="text-[10px] font-bold text-error mb-1">09:12:05.88</div>
+<div class="font-code-xs text-code-xs">RATE_LIMIT: NotificationEngine (Warn)</div>
+<div class="text-[9px] text-on-surface-variant mt-1">Action: Queued for retry</div>
+</div>
+</div>
+</aside>
+<script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('audit-drawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        // Trigger drawer on certain node clicks
+        document.querySelectorAll('.glow-node').forEach(node => {
+            node.addEventListener('click', () => {
+                const drawer = document.getElementById('audit-drawer');
+                drawer.classList.remove('translate-x-full');
+            });
+        });
+
+        // Simple mouse tracking for background grid glow (subtle)
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            // logic for subtle glow follow could go here
+        });
+    </script>
+</body></html>

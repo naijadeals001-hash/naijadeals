@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-028 // LOGISTICS ENGINE - Business Rules</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+            border-radius: 2px;
+        }
+        .glass-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-background": "#d4e4fa",
+                      "tertiary-fixed": "#f0dbff",
+                      "surface-container-high": "#1c2b3c",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-primary": "#003907",
+                      "surface": "#051424",
+                      "on-error": "#690005",
+                      "surface-variant": "#273647",
+                      "on-primary-fixed": "#002203",
+                      "surface-container-lowest": "#010f1f",
+                      "primary-fixed-dim": "#00e639",
+                      "surface-bright": "#2c3a4c",
+                      "primary": "#ebffe2",
+                      "surface-dim": "#051424",
+                      "inverse-primary": "#006e16",
+                      "on-secondary": "#002388",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-primary-container": "#007117",
+                      "inverse-surface": "#d4e4fa",
+                      "secondary": "#b8c3ff",
+                      "background": "#051424",
+                      "on-secondary-container": "#c6ceff",
+                      "on-secondary-fixed": "#001356",
+                      "tertiary-container": "#ecd3ff",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-tertiary": "#490080",
+                      "error-container": "#93000a",
+                      "outline": "#84967e",
+                      "surface-container-highest": "#273647",
+                      "secondary-container": "#0043eb",
+                      "surface-container": "#122131",
+                      "inverse-on-surface": "#233143",
+                      "error": "#ffb4ab",
+                      "surface-container-low": "#0d1c2d",
+                      "primary-container": "#00ff41",
+                      "tertiary": "#fff6ff",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "surface-tint": "#00e639",
+                      "primary-fixed": "#72ff70",
+                      "on-tertiary-fixed": "#2c0051",
+                      "on-tertiary-container": "#862ed4",
+                      "on-surface": "#d4e4fa",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed": "#dde1ff",
+                      "outline-variant": "#3b4b37",
+                      "on-surface-variant": "#b9ccb2"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full border-b border-outline-variant bg-surface-dim flex justify-between items-center h-12 px-6 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">hub</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary bg-surface-container-high px-2 py-1 border border-outline-variant">WF-028 // LOGISTICS ENGINE</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<span class="font-code-xs text-on-surface-variant uppercase">Engine Online</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-variant/50 transition-colors p-1">settings_input_component</span>
+</div>
+</header>
+<!-- SideNav (NavigationDrawer) -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 border-r border-outline-variant bg-surface-container-low hidden md:flex flex-col gap-1 pt-8">
+<div class="px-6 mb-4">
+<span class="font-label-caps text-label-caps text-primary opacity-50">CORE ENGINE</span>
+</div>
+<nav class="flex flex-col">
+<a class="text-on-surface-variant hover:text-on-surface px-6 py-3 font-code-sm hover:bg-surface-container-high transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">inventory_2</span> Inventory Schema
+            </a>
+<a class="bg-primary-container text-on-primary-container font-bold border-l-2 border-primary-fixed-dim px-6 py-3 font-code-sm flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">account_tree</span> BPMN Swimlanes
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface px-6 py-3 font-code-sm hover:bg-surface-container-high transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">analytics</span> Telemetry Hub
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface px-6 py-3 font-code-sm hover:bg-surface-container-high transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">api</span> API Registry
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface px-6 py-3 font-code-sm hover:bg-surface-container-high transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">terminal</span> Sequence Logs
+            </a>
+</nav>
+<div class="mt-auto p-6 border-t border-outline-variant">
+<div class="bg-surface-container rounded p-3">
+<p class="font-label-caps text-[9px] text-on-surface-variant mb-2">SYSTEM LOAD</p>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full w-[42%]"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 mt-12 h-[calc(100vh-48px)] overflow-auto custom-scrollbar p-8 relative">
+<!-- Header & Breadcrumbs -->
+<div class="flex flex-col gap-2 mb-8">
+<div class="flex items-center gap-2 font-code-xs text-on-surface-variant">
+<span>ROOT</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span>ENGINE_v2.0</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span class="text-primary-fixed-dim">DECISION_MATRIX</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-background tracking-tight">Logic Flow: High-Density Business Rules</h2>
+</div>
+<!-- Matrix Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+<!-- Swimlane: Rule Definition -->
+<div class="xl:col-span-1 space-y-4">
+<div class="flex items-center gap-2 py-2 border-b border-outline-variant mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">account_tree</span>
+<h3 class="font-headline-md text-headline-md">TRIGGER NODES</h3>
+</div>
+<!-- Rule Nodes -->
+<div class="space-y-6">
+<!-- Rule 1 -->
+<div class="bg-[#0F0F0F] border border-primary-fixed-dim/30 p-4 rounded-sm relative group cursor-pointer hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-primary-fixed-dim bg-primary-fixed-dim/10 px-2 py-0.5">R-001</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">info</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface uppercase">Warehouse Capacity Available?</h4>
+<div class="mt-3 flex gap-1">
+<div class="w-1 h-1 bg-primary-fixed-dim"></div>
+<div class="w-1 h-1 bg-primary-fixed-dim opacity-30"></div>
+</div>
+</div>
+<!-- Rule 2 -->
+<div class="bg-[#0F0F0F] border border-secondary-fixed-dim/30 p-4 rounded-sm relative group cursor-pointer hover:border-secondary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-secondary-fixed-dim bg-secondary-fixed-dim/10 px-2 py-0.5">R-002</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">sync</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface uppercase">Cross-Dock Eligible?</h4>
+<div class="mt-3 flex gap-1">
+<div class="w-1 h-1 bg-secondary-fixed-dim"></div>
+<div class="w-1 h-1 bg-secondary-fixed-dim opacity-30"></div>
+</div>
+</div>
+<!-- Rule 3 -->
+<div class="bg-[#0F0F0F] border border-tertiary-fixed-dim/30 p-4 rounded-sm relative group cursor-pointer hover:border-tertiary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-tertiary-fixed-dim bg-tertiary-fixed-dim/10 px-2 py-0.5">R-003</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface uppercase">Storage Required?</h4>
+<div class="mt-3 flex gap-1">
+<div class="w-1 h-1 bg-tertiary-fixed-dim"></div>
+</div>
+</div>
+<!-- Rule 4 -->
+<div class="bg-[#0F0F0F] border border-blue-400/30 p-4 rounded-sm relative group cursor-pointer hover:border-blue-400 transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-blue-400 bg-blue-400/10 px-2 py-0.5">R-004</span>
+<span class="material-symbols-outlined text-[14px] text-blue-400">ac_unit</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface uppercase">Temperature Controlled?</h4>
+</div>
+<!-- Rule 5 -->
+<div class="bg-[#0F0F0F] border border-error/30 p-4 rounded-sm relative group cursor-pointer hover:border-error transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-error bg-error/10 px-2 py-0.5">R-005</span>
+<span class="material-symbols-outlined text-[14px] text-error">warning</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface uppercase">Hazardous Goods?</h4>
+</div>
+</div>
+</div>
+<!-- Swimlane: Decision Matrix & Pathing -->
+<div class="xl:col-span-3 space-y-4">
+<div class="flex items-center justify-between py-2 border-b border-outline-variant mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">data_thresholding</span>
+<h3 class="font-headline-md text-headline-md uppercase tracking-wide">Logic Evaluation Matrix</h3>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high px-3 py-1 font-label-caps text-[10px] border border-outline-variant hover:bg-primary-container hover:text-on-primary-container transition-all">EXPORT JSON</button>
+<button class="bg-surface-container-high px-3 py-1 font-label-caps text-[10px] border border-outline-variant hover:bg-primary-container hover:text-on-primary-container transition-all">DEPLOY SCHEMA</button>
+</div>
+</div>
+<!-- Bento Grid for Detailed Rule Data -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Rule Card: Capacity -->
+<div class="bg-surface-container-lowest border border-outline-variant p-5 flex flex-col gap-4">
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-primary">WAREHOUSE CAPACITY AVAILABLE?</span>
+<span class="font-code-xs text-on-surface-variant">SVC: WMS_CORE_V2</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<p class="font-label-caps text-[9px] text-on-surface-variant">DECISION LOGIC</p>
+<p class="font-code-sm text-code-sm text-on-surface">IF (node.utilization &lt; 0.85) THEN Route:Standard</p>
+</div>
+<div class="space-y-1">
+<p class="font-label-caps text-[9px] text-on-surface-variant">FAILURE RESULT</p>
+<p class="font-code-sm text-code-sm text-error">ERROR: NODE_SATURATION_EXCEEDED</p>
+</div>
+</div>
+<div class="bg-surface p-3 border-l-2 border-primary-fixed-dim">
+<p class="font-label-caps text-[9px] text-primary-fixed-dim mb-1">RECOVERY PATH</p>
+<p class="font-code-xs text-on-surface-variant">Redirect to Overflow/Regional Hub clusters. Trigger Rule R-006 (Overflow Required).</p>
+</div>
+</div>
+<!-- Rule Card: Cross-Dock -->
+<div class="bg-surface-container-lowest border border-outline-variant p-5 flex flex-col gap-4">
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-secondary-fixed-dim">CROSS-DOCK ELIGIBLE?</span>
+<span class="font-code-xs text-on-surface-variant">SVC: TRANSIT_EXEC</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<p class="font-label-caps text-[9px] text-on-surface-variant">DECISION LOGIC</p>
+<p class="font-code-sm text-code-sm text-on-surface">IF (dwell_time &lt; 2h) AND (bay_avail == TRUE)</p>
+</div>
+<div class="space-y-1">
+<p class="font-label-caps text-[9px] text-on-surface-variant">FAILURE RESULT</p>
+<p class="font-code-sm text-code-sm text-on-surface">QUEUE: STAGING_AREA_A1</p>
+</div>
+</div>
+<div class="bg-surface p-3 border-l-2 border-secondary-fixed-dim">
+<p class="font-label-caps text-[9px] text-secondary-fixed-dim mb-1">RECOVERY PATH</p>
+<p class="font-code-xs text-on-surface-variant">Assign short-term buffer zone. Force Rule R-003 (Storage Required).</p>
+</div>
+</div>
+<!-- Rule Card: Regional Transfer -->
+<div class="bg-surface-container-lowest border border-outline-variant p-5 flex flex-col gap-4">
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">REGIONAL TRANSFER?</span>
+<span class="font-code-xs text-on-surface-variant">SVC: LOGO_GLOBAL</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<p class="font-label-caps text-[9px] text-on-surface-variant">DECISION LOGIC</p>
+<p class="font-code-sm text-code-sm text-on-surface">IF (destination_zone != origin_zone)</p>
+</div>
+<div class="space-y-1">
+<p class="font-label-caps text-[9px] text-on-surface-variant">FAILURE RESULT</p>
+<p class="font-code-sm text-code-sm text-on-surface">STATUS: LOCAL_ONLY</p>
+</div>
+</div>
+<div class="bg-surface p-3 border-l-2 border-tertiary-fixed-dim">
+<p class="font-label-caps text-[9px] text-tertiary-fixed-dim mb-1">RECOVERY PATH</p>
+<p class="font-code-xs text-on-surface-variant">Escalate to Tier-2 Last Mile partners. Check Rule R-008 (Inventory Available).</p>
+</div>
+</div>
+<!-- Rule Card: Hazardous Goods -->
+<div class="bg-surface-container-lowest border border-outline-variant p-5 flex flex-col gap-4">
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-error">HAZARDOUS GOODS?</span>
+<span class="font-code-xs text-on-surface-variant">SVC: COMPLIANCE_SHIELD</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<p class="font-label-caps text-[9px] text-on-surface-variant">DECISION LOGIC</p>
+<p class="font-code-sm text-code-sm text-on-surface">IF (sku_attr.class == "HAZMAT")</p>
+</div>
+<div class="space-y-1">
+<p class="font-label-caps text-[9px] text-on-surface-variant">FAILURE RESULT</p>
+<p class="font-code-sm text-code-sm text-error">HOLD: INSPECTION_REQD</p>
+</div>
+</div>
+<div class="bg-surface p-3 border-l-2 border-error">
+<p class="font-label-caps text-[9px] text-error mb-1">RECOVERY PATH</p>
+<p class="font-code-xs text-on-surface-variant">Notify HSE specialized handling unit. Route to Secure Bunker B-04.</p>
+</div>
+</div>
+</div>
+<!-- Bottom Metrics / Telemetry -->
+<div class="mt-6 bg-[#0F0F0F] border border-outline-variant rounded-sm overflow-hidden">
+<div class="bg-surface-container-high px-4 py-2 border-b border-outline-variant flex justify-between items-center">
+<span class="font-label-caps text-[10px]">REAL-TIME EXECUTION TELEMETRY</span>
+<div class="flex gap-4">
+<span class="font-code-xs text-primary-fixed-dim">Lat: 12ms</span>
+<span class="font-code-xs text-secondary-fixed-dim">TPS: 840</span>
+</div>
+</div>
+<div class="p-4 grid grid-cols-4 gap-8">
+<div class="text-center">
+<p class="font-code-sm text-headline-md text-on-background">99.8%</p>
+<p class="font-label-caps text-[9px] text-on-surface-variant">ACCURACY</p>
+</div>
+<div class="text-center">
+<p class="font-code-sm text-headline-md text-primary-fixed-dim">4.2k</p>
+<p class="font-label-caps text-[9px] text-on-surface-variant">RULES/SEC</p>
+</div>
+<div class="text-center">
+<p class="font-code-sm text-headline-md text-error">12</p>
+<p class="font-label-caps text-[9px] text-on-surface-variant">RECOVERIES</p>
+</div>
+<div class="text-center">
+<p class="font-code-sm text-headline-md text-on-background">0.02s</p>
+<p class="font-label-caps text-[9px] text-on-surface-variant">LATENCY AVG</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Float Info Panel (Mini-Telemetry) -->
+<div class="fixed bottom-20 right-8 w-64 bg-surface-container-highest border border-outline p-4 shadow-2xl space-y-4 opacity-90 backdrop-blur">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-label-caps text-[10px] text-primary">AUDIT LOG STUB</span>
+<span class="material-symbols-outlined text-[14px]">history</span>
+</div>
+<div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+<div class="flex flex-col border-b border-outline-variant/30 pb-2">
+<span class="font-code-xs text-primary-fixed-dim">14:02:33.401</span>
+<span class="font-code-sm text-[11px]">R-001 EVAL: [TRUE]</span>
+</div>
+<div class="flex flex-col border-b border-outline-variant/30 pb-2">
+<span class="font-code-xs text-primary-fixed-dim">14:02:33.512</span>
+<span class="font-code-sm text-[11px]">R-004 EVAL: [TEMP_AMB]</span>
+</div>
+<div class="flex flex-col border-b border-outline-variant/30 pb-2">
+<span class="font-code-xs text-error">14:02:33.688</span>
+<span class="font-code-sm text-[11px]">R-005 FAIL: [INSPECT]</span>
+</div>
+<div class="flex flex-col border-b border-outline-variant/30 pb-2">
+<span class="font-code-xs text-primary-fixed-dim">14:02:33.721</span>
+<span class="font-code-sm text-[11px]">R-006 TRIGGERED: [RECOV]</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full h-14 border-t border-outline-variant bg-surface-container-lowest z-50 flex justify-around items-center px-4 md:hidden">
+<div class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg px-3 py-1 scale-95 active:scale-90 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-code-xs text-code-xs">Monitor</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:opacity-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-code-xs text-code-xs">Node Map</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:opacity-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined">reorder</span>
+<span class="font-code-xs text-code-xs">Terminal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:opacity-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined">emergency_home</span>
+<span class="font-code-xs text-code-xs">Alerts</span>
+</div>
+</nav>
+<!-- Visual Noise / Atmosphere -->
+<div class="fixed inset-0 pointer-events-none opacity-5 mix-blend-overlay">
+
+</div>
+<script>
+        // Micro-interactions for Node Selection
+        document.querySelectorAll('.cursor-pointer').forEach(node => {
+            node.addEventListener('click', () => {
+                // Flash effect
+                node.classList.add('ring-2', 'ring-primary-fixed-dim');
+                setTimeout(() => {
+                    node.classList.remove('ring-2', 'ring-primary-fixed-dim');
+                }, 400);
+                
+                // Audio cue (visualized simulation)
+                console.log("Kernel: Node Context Locked");
+            });
+        });
+
+        // Dynamic timestamp updates for audit log
+        setInterval(() => {
+            const logs = document.querySelector('.max-h-48');
+            const now = new Date();
+            const timeStr = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() + "." + Math.floor(Math.random()*999);
+            const codes = ["R-001 EVAL: OK", "R-008 SYNC: 100%", "BPMN_TRANSIT: TRUE", "MEM_CACHE: CLEAN"];
+            const randomCode = codes[Math.floor(Math.random() * codes.length)];
+            
+            const newLog = document.createElement('div');
+            newLog.className = 'flex flex-col border-b border-outline-variant/30 pb-2 animate-pulse';
+            newLog.innerHTML = `
+                <span class="font-code-xs text-primary-fixed-dim">${timeStr}</span>
+                <span class="font-code-sm text-[11px]">${randomCode}</span>
+            `;
+            
+            logs.prepend(newLog);
+            if(logs.children.length > 10) logs.lastElementChild.remove();
+        }, 3000);
+    </script>
+</body></html>

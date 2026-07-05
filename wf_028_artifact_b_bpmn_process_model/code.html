@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-028 // LOGISTICS ENGINE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#d4e4fa",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface-container-high": "#1c2b3c",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-primary": "#003907",
+                    "surface": "#051424",
+                    "on-error": "#690005",
+                    "surface-variant": "#273647",
+                    "on-primary-fixed": "#002203",
+                    "surface-container-lowest": "#010f1f",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-bright": "#2c3a4c",
+                    "primary": "#ebffe2",
+                    "surface-dim": "#051424",
+                    "inverse-primary": "#006e16",
+                    "on-secondary": "#002388",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-primary-container": "#007117",
+                    "inverse-surface": "#d4e4fa",
+                    "secondary": "#b8c3ff",
+                    "background": "#051424",
+                    "on-secondary-container": "#c6ceff",
+                    "on-secondary-fixed": "#001356",
+                    "tertiary-container": "#ecd3ff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-tertiary": "#490080",
+                    "error-container": "#93000a",
+                    "outline": "#84967e",
+                    "surface-container-highest": "#273647",
+                    "secondary-container": "#0043eb",
+                    "surface-container": "#122131",
+                    "inverse-on-surface": "#233143",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#0d1c2d",
+                    "primary-container": "#00ff41",
+                    "tertiary": "#fff6ff",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface-tint": "#00e639",
+                    "primary-fixed": "#72ff70",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-tertiary-container": "#862ed4",
+                    "on-surface": "#d4e4fa",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed": "#dde1ff",
+                    "outline-variant": "#3b4b37",
+                    "on-surface-variant": "#b9ccb2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .swimlane-container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+        }
+        .bpmn-connector {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .node-diamond {
+            width: 48px;
+            height: 48px;
+            transform: rotate(45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .node-diamond > * {
+            transform: rotate(-45deg);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .node-port {
+            width: 6px;
+            height: 6px;
+            background: #00e639;
+            border-radius: 50%;
+            position: absolute;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full border-b border-outline-variant bg-surface-dim z-50 flex justify-between items-center h-12 px-node-gutter">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+<h1 class="font-headline-md text-headline-md tracking-tight text-primary">WF-028 // LOGISTICS ENGINE</h1>
+<div class="font-label-caps text-label-caps tracking-widest text-primary bg-surface-container-high px-2 py-1 border border-outline-variant uppercase">
+                Core Process Map
+            </div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 font-code-sm text-code-sm text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+                LIVE_TELEMETRY: ACTIVE
+            </div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex flex-1 pt-12 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col gap-stack-gap pt-lane-margin fixed left-0 top-12 h-[calc(100vh-48px)] w-64 border-r border-outline-variant bg-surface-container-low z-40">
+<div class="px-4 py-2 border-b border-outline-variant/30 mb-2">
+<span class="font-label-caps text-label-caps text-primary uppercase">Core Engine</span>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="text-on-surface-variant hover:text-on-surface px-4 py-2 flex items-center gap-3 cursor-pointer transition-all hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[18px]" data-icon="inventory_2">inventory_2</span>
+<span class="font-code-sm text-code-sm uppercase">Inventory Schema</span>
+</div>
+<div class="bg-primary-container text-on-primary-container font-bold border-l-2 border-primary-fixed-dim px-4 py-2 flex items-center gap-3 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]" data-icon="account_tree">account_tree</span>
+<span class="font-code-sm text-code-sm uppercase">BPMN Swimlanes</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface px-4 py-2 flex items-center gap-3 cursor-pointer transition-all hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[18px]" data-icon="analytics">analytics</span>
+<span class="font-code-sm text-code-sm uppercase">Telemetry Hub</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface px-4 py-2 flex items-center gap-3 cursor-pointer transition-all hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[18px]" data-icon="api">api</span>
+<span class="font-code-sm text-code-sm uppercase">API Registry</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface px-4 py-2 flex items-center gap-3 cursor-pointer transition-all hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[18px]" data-icon="terminal">terminal</span>
+<span class="font-code-sm text-code-sm uppercase">Sequence Logs</span>
+</div>
+</nav>
+<!-- Mini Map Preview Area -->
+<div class="mt-auto p-4">
+<div class="w-full aspect-video border border-outline-variant bg-black/40 relative overflow-hidden">
+<div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+<div class="absolute top-2 left-2 font-code-xs text-code-xs text-primary/40 uppercase">Viewport Sync</div>
+<div class="absolute top-1/4 left-4 w-12 h-1 bg-primary/20"></div>
+<div class="absolute top-1/2 left-8 w-16 h-1 bg-primary/40"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 relative overflow-auto custom-scrollbar bg-surface-dim" id="process-canvas">
+<!-- BPMN Legend Floating -->
+<div class="fixed bottom-20 right-8 z-50 bg-surface-container-high border border-outline-variant p-4 backdrop-blur-md hidden lg:block">
+<h4 class="font-label-caps text-label-caps text-primary mb-3">BLUEPRINT LEGEND</h4>
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 rounded-full border-2 border-primary"></div>
+<span class="font-code-xs text-code-xs">Start Node</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 border border-outline-variant bg-surface-container"></div>
+<span class="font-code-xs text-code-xs">Process Task</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 border border-primary rotate-45"></div>
+<span class="font-code-xs text-code-xs">Decision Diamond</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-4 h-0.5 bg-primary"></div>
+<span class="font-code-xs text-code-xs">Primary Flow</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-4 h-0.5 border-t border-dashed border-error"></div>
+<span class="font-code-xs text-code-xs">Error Path</span>
+</div>
+</div>
+</div>
+<!-- Swimlanes Container -->
+<div class="min-w-[2400px] flex flex-col">
+<!-- Each Lane -->
+<script>
+                    const lanes = [
+                        { id: 'merchant', label: 'Merchant', icon: 'storefront' },
+                        { id: 'warehouse', label: 'Warehouse', icon: 'warehouse' },
+                        { id: 'receiving', label: 'Receiving Team', icon: 'input' },
+                        { id: 'quality', label: 'Quality Inspection', icon: 'fact_check' },
+                        { id: 'inventory', label: 'Inventory Service', icon: 'database' },
+                        { id: 'crossdock', label: 'Cross-Dock Service', icon: 'sync_alt' },
+                        { id: 'dist_hub', label: 'Distribution Hub', icon: 'alt_route' },
+                        { id: 'fleet', label: 'Fleet', icon: 'local_shipping' },
+                        { id: 'naijasend', label: 'NaijaSend', icon: 'send_and_archive' },
+                        { id: 'aura_ai', label: 'Aura AI', icon: 'psychology' },
+                        { id: 'notification', label: 'Notification', icon: 'notifications' },
+                        { id: 'audit', label: 'Audit', icon: 'history_edu' },
+                        { id: 'admin', label: 'Admin', icon: 'admin_panel_settings' },
+                        { id: 'super_admin', label: 'Super Admin', icon: 'security' }
+                    ];
+
+                    document.write(lanes.map(lane => `
+                        <div class="flex border-b border-outline-variant/30 min-h-[140px] group relative" id="lane-${lane.id}">
+                            <div class="w-60 flex-shrink-0 bg-surface-container-low border-r border-outline-variant sticky left-0 z-20 flex items-center px-4 py-2 gap-4">
+                                <span class="material-symbols-outlined text-primary-fixed-dim/70" data-icon="${lane.icon}">${lane.icon}</span>
+                                <div class="flex flex-col">
+                                    <span class="font-headline-md text-headline-md tracking-tight uppercase">${lane.label}</span>
+                                    <span class="font-code-xs text-code-xs text-on-surface-variant/50">LANE_ID: ${lane.id.toUpperCase()}</span>
+                                </div>
+                            </div>
+                            <div class="flex-1 relative flex items-center p-8 bg-black/10">
+                                <!-- Grid Lines -->
+                                <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: linear-gradient(to right, #84967e 1px, transparent 1px); background-size: 80px 100%;"></div>
+                            </div>
+                        </div>
+                    `).join(''));
+                </script>
+<!-- Process Nodes Overlay (Absolute Positioned) -->
+<div class="absolute top-0 left-60 w-full h-full pointer-events-none" id="node-overlay">
+<!-- Start Point -->
+<div class="absolute left-[40px] top-[45px] pointer-events-auto">
+<div class="w-10 h-10 rounded-full border-2 border-primary flex items-center justify-center bg-surface-dim shadow-[0_0_15px_rgba(0,230,57,0.2)]">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="play_arrow">play_arrow</span>
+</div>
+<div class="mt-2 font-label-caps text-code-xs text-center text-primary-fixed-dim">INBOUND_INIT</div>
+</div>
+<!-- Flow Connectors (Static Simulation) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+<!-- Connector: Start to Merchant Action -->
+<path d="M 80 65 L 140 65" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Connector: Merchant to Warehouse Entry -->
+<path d="M 320 65 L 360 65 L 360 205 L 400 205" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Connector: Quality Decision -->
+<path d="M 640 485 L 720 485" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Error Path -->
+<path d="M 744 461 L 744 380 L 1400 380" fill="none" marker-end="url(#arrowhead-error)" stroke="#ffb4ab" stroke-dasharray="4" stroke-width="1.5"></path>
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#00e639" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead-error" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#ffb4ab" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg>
+<!-- MERCHANT: Create Manifest -->
+<div class="absolute left-[140px] top-[40px] w-48 bg-surface-container border border-primary/40 p-3 pointer-events-auto shadow-xl hover:border-primary transition-all">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1 opacity-60">TXN_001</div>
+<div class="font-code-sm text-code-sm uppercase">Create Manifest &amp; SKU List</div>
+<div class="flex justify-between mt-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Merchant Portal</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="edit_note">edit_note</span>
+</div>
+</div>
+<!-- WAREHOUSE: Schedule Slot -->
+<div class="absolute left-[400px] top-[180px] w-48 bg-surface-container border border-outline-variant p-3 pointer-events-auto">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1 opacity-60">SCHED_08</div>
+<div class="font-code-sm text-code-sm uppercase">Allocate Docking Bay</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-tertiary-fixed" data-icon="schedule">schedule</span>
+<span class="font-code-xs text-code-xs text-tertiary-fixed">T-Minus 4h</span>
+</div>
+</div>
+<!-- RECEIVING: Unload and Scan -->
+<div class="absolute left-[400px] top-[320px] w-48 bg-surface-container border border-outline-variant p-3 pointer-events-auto">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1 opacity-60">PROC_22</div>
+<div class="font-code-sm text-code-sm uppercase">Unload &amp; Scan Barcodes</div>
+</div>
+<!-- QUALITY: Inspection -->
+<div class="absolute left-[400px] top-[460px] w-48 bg-surface-container border border-outline-variant p-3 pointer-events-auto">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1 opacity-60">QC_VAL</div>
+<div class="font-code-sm text-code-sm uppercase">Verify Unit Integrity</div>
+</div>
+<!-- QUALITY: Decision Diamond -->
+<div class="absolute left-[720px] top-[461px] pointer-events-auto">
+<div class="node-diamond bg-surface-container border-2 border-primary shadow-[0_0_20px_rgba(0,230,57,0.1)]">
+<span class="material-symbols-outlined text-primary text-[24px]" data-icon="question_mark">question_mark</span>
+</div>
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-label-caps text-code-xs text-on-surface whitespace-nowrap">PASSED?</div>
+</div>
+<!-- AURA AI: Decision Engine (Optimizing Flow) -->
+<div class="absolute left-[1000px] top-[1300px] w-64 bg-surface-container-high border border-primary/20 p-4 pointer-events-auto">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed-dim animate-pulse" data-icon="bolt">bolt</span>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">AURA_OPTIMIZER_v4</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface mb-3 italic">"Calculating optimal route: Cross-dock vs Long-term Storage..."</div>
+<div class="w-full bg-surface-dim h-1">
+<div class="bg-primary h-full w-2/3"></div>
+</div>
+</div>
+<!-- INVENTORY: Update Registry -->
+<div class="absolute left-[950px] top-[600px] w-48 bg-surface-container border border-outline-variant p-3 pointer-events-auto">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1 opacity-60">API_PULL</div>
+<div class="font-code-sm text-code-sm uppercase">Update Global Stock Registry</div>
+</div>
+<!-- CROSS-DOCK: Sorting -->
+<div class="absolute left-[1200px] top-[740px] w-48 bg-surface-container border border-outline-variant p-3 pointer-events-auto">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1 opacity-60">X_SORT</div>
+<div class="font-code-sm text-code-sm uppercase">Parallel Sort to Hub-Out</div>
+<div class="mt-2 text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="double_arrow">double_arrow</span>
+<span class="font-code-xs text-code-xs uppercase">Priority</span>
+</div>
+</div>
+<!-- NOTIFICATION: Alert Merchant -->
+<div class="absolute left-[1500px] top-[1440px] w-48 bg-surface-container border border-tertiary-fixed/30 p-3 pointer-events-auto">
+<div class="font-label-caps text-label-caps text-tertiary-fixed mb-1">EVENT_PUSH</div>
+<div class="font-code-sm text-code-sm uppercase">Notify Merchant: Item Dispatched</div>
+</div>
+<!-- AUDIT: Immutable Log Entry -->
+<div class="absolute left-[1800px] top-[1580px] w-64 bg-surface-container-lowest border border-outline-variant p-2 pointer-events-auto">
+<div class="flex items-center gap-2 border-b border-outline-variant pb-1 mb-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[14px]" data-icon="lock">lock</span>
+<span class="font-label-caps text-[9px] uppercase tracking-tighter">Chain Signature Verified</span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant leading-tight">
+                            0x7f...e32: TRNSFER_HUB_A_TO_B<br/>
+                            TS: 2023-10-24 14:22:11 UTC<br/>
+                            ACTOR: SVC_LOGISTICS_WF028
+                        </div>
+</div>
+<!-- FLEET: Dispatch -->
+<div class="absolute left-[2000px] top-[1020px] w-56 bg-surface-container border-2 border-primary p-3 pointer-events-auto">
+<div class="font-label-caps text-label-caps text-primary uppercase mb-2">Final Dispatch</div>
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/10 rounded">
+<span class="material-symbols-outlined text-primary" data-icon="local_shipping">local_shipping</span>
+</div>
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm">Route ID: LG-992</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Fleet-Assigned</span>
+</div>
+</div>
+</div>
+<!-- End Node -->
+<div class="absolute left-[2300px] top-[1025px] pointer-events-auto">
+<div class="w-12 h-12 rounded-full border-4 border-error/50 flex items-center justify-center bg-surface-dim">
+<div class="w-6 h-6 bg-error rounded-sm"></div>
+</div>
+<div class="mt-2 font-label-caps text-code-xs text-center text-error">FLOW_TERM</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 w-full h-14 border-t border-outline-variant bg-surface-container-lowest z-50 flex justify-around items-center px-4 md:hidden">
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:opacity-100 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-code-xs text-code-xs uppercase">Monitor</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg px-3 py-1">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-code-xs text-code-xs uppercase">Node Map</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:opacity-100 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="reorder">reorder</span>
+<span class="font-code-xs text-code-xs uppercase">Terminal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:opacity-100 cursor-pointer relative">
+<span class="material-symbols-outlined" data-icon="emergency_home">emergency_home</span>
+<span class="font-code-xs text-code-xs uppercase">Alerts</span>
+<span class="absolute top-0 right-1 w-2 h-2 bg-error rounded-full"></span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for the canvas
+        const canvas = document.getElementById('process-canvas');
+        let isDown = false;
+        let startX;
+        let startY;
+        let scrollLeft;
+        let scrollTop;
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.pointer-events-auto')) return;
+            isDown = true;
+            canvas.style.cursor = 'grabbing';
+            startX = e.pageX - canvas.offsetLeft;
+            startY = e.pageY - canvas.offsetTop;
+            scrollLeft = canvas.scrollLeft;
+            scrollTop = canvas.scrollTop;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDown = false;
+            canvas.style.cursor = 'default';
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDown = false;
+            canvas.style.cursor = 'default';
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - canvas.offsetLeft;
+            const y = e.pageY - canvas.offsetTop;
+            const walkX = (x - startX) * 1.5; 
+            const walkY = (y - startY) * 1.5;
+            canvas.scrollLeft = scrollLeft - walkX;
+            canvas.scrollTop = scrollTop - walkY;
+        });
+
+        // Telemetry Update Simulation
+        setInterval(() => {
+            const telemetryNode = document.querySelector('.animate-pulse');
+            if (telemetryNode) {
+                // Subtle random flicker simulation
+                telemetryNode.style.opacity = Math.random() > 0.5 ? '1' : '0.6';
+            }
+        }, 800);
+    </script>
+</body></html>

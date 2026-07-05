@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CORE-LOGISTICS.OS // EXCEPTION_MODEL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: absolute;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.1);
+            position: absolute;
+            top: 0;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#010f1f",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-primary-container": "#007117",
+                        "surface-variant": "#273647",
+                        "outline": "#84967e",
+                        "inverse-primary": "#006e16",
+                        "surface": "#051424",
+                        "outline-variant": "#3b4b37",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#1c2b3c",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary": "#fff6ff",
+                        "on-secondary": "#002388",
+                        "on-secondary-container": "#c6ceff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "error-container": "#93000a",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "surface-tint": "#00e639",
+                        "on-surface": "#d4e4fa",
+                        "on-tertiary-container": "#862ed4",
+                        "secondary-fixed": "#dde1ff",
+                        "on-error": "#690005",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed-dim": "#00e639",
+                        "on-tertiary": "#490080",
+                        "surface-container": "#122131",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-highest": "#273647",
+                        "on-primary-fixed-variant": "#00530e",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-dim": "#051424",
+                        "surface-container-low": "#0d1c2d",
+                        "on-background": "#d4e4fa",
+                        "inverse-on-surface": "#233143",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "on-secondary-fixed": "#001356",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "primary": "#ebffe2",
+                        "on-primary-fixed": "#002203",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "tertiary-fixed": "#f0dbff",
+                        "background": "#051424",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary": "#003907"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px",
+                        "node-gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TOP APP BAR -->
+<header class="flex justify-between items-center px-lane-margin h-16 w-full bg-surface-container-lowest border-b border-outline-variant fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-tighter text-on-surface">CORE-LOGISTICS.OS</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<span class="text-primary font-bold font-code-sm text-code-sm cursor-pointer hover:bg-surface-variant transition-colors px-2 py-1">MODEL_EXPLORER</span>
+<span class="text-on-surface-variant font-code-sm text-code-sm cursor-pointer hover:bg-surface-variant transition-colors px-2 py-1">DEPLOY_MAPS</span>
+<span class="text-on-surface-variant font-code-sm text-code-sm cursor-pointer hover:bg-surface-variant transition-colors px-2 py-1">SIMULATOR</span>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-variant transition-colors p-2 rounded" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- SIDE NAVIGATION -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col bg-surface-container-low border-r border-outline-variant pt-20 w-64 hidden lg:flex">
+<div class="px-6 py-4">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant opacity-50">MODULE_INDEX</h2>
+</div>
+<nav class="flex flex-col">
+<a class="bg-secondary-container text-on-secondary-container border-r-4 border-surface-tint flex items-center gap-2 px-6 py-3 transition-all duration-150 ease-linear font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+                INCIDENT_QUEUE
+            </a>
+<a class="text-on-surface-variant flex items-center gap-2 px-6 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings_backup_restore">settings_backup_restore</span>
+                REVERSE_LOGS
+            </a>
+<a class="text-on-surface-variant flex items-center gap-2 px-6 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+                SYSTEM_HEALTH
+            </a>
+<a class="text-on-surface-variant flex items-center gap-2 px-6 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+                ACTOR_MAP
+            </a>
+<a class="text-on-surface-variant flex items-center gap-2 px-6 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+                NODE_EDITOR
+            </a>
+<a class="text-on-surface-variant flex items-center gap-2 px-6 py-3 hover:bg-surface-container-highest hover:text-on-surface transition-all duration-150 ease-linear font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+                ARCHIVE_DB
+            </a>
+</nav>
+</aside>
+<!-- MAIN CONTENT AREA -->
+<main class="lg:ml-64 pt-20 pb-12 px-lane-margin min-h-screen relative overflow-hidden">
+<div class="scanline"></div>
+<!-- HEADER SECTION -->
+<section class="mb-12">
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-surface-tint w-2 h-2 rounded-full animate-pulse"></span>
+<span class="font-code-xs text-code-xs text-surface-tint tracking-[0.2em]">ARTIFACT H: LIVE_PROCESS_MAP</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Exception &amp; Recovery Model</h2>
+<p class="font-body-md text-on-surface-variant max-w-2xl mt-2">Comprehensive resolution logic for logistics failures. This model visualizes automated rollback procedures and multi-path branching for service recovery.</p>
+</section>
+<!-- WORKFLOW VISUALIZER -->
+<div class="relative grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
+<!-- COLUMN 1: ENTRY & FAULT DETECTION -->
+<div class="flex flex-col gap-6">
+<div class="font-label-caps text-label-caps text-on-primary-fixed bg-surface-container-high px-3 py-1 border-l-2 border-primary-fixed mb-2">FAULT_ENTRY</div>
+<!-- NODE: PACKAGE LOST -->
+<div class="bg-surface-container p-4 border border-outline-variant relative group hover:border-surface-tint transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-on-surface-variant">NODE_01</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="report">report</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-2">Package Lost</h3>
+<div class="font-code-xs text-code-xs text-on-surface-variant bg-surface-container-lowest p-2 rounded">
+                        ID: FL-99-A1<br/>STATUS: UNRESOLVED
+                    </div>
+<!-- Connector Line Output -->
+<div class="absolute -right-6 top-1/2 w-6 h-px bg-outline-variant"></div>
+</div>
+<!-- NODE: PACKAGE DAMAGED -->
+<div class="bg-surface-container p-4 border border-outline-variant relative group hover:border-surface-tint transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-on-surface-variant">NODE_02</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="broken_image">broken_image</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-2">Package Damaged</h3>
+<div class="font-code-xs text-code-xs text-on-surface-variant bg-surface-container-lowest p-2 rounded">
+                        ID: FL-99-B2<br/>STATUS: PENDING_SCAN
+                    </div>
+<div class="absolute -right-6 top-1/2 w-6 h-px bg-outline-variant"></div>
+</div>
+<!-- NODE: WRONG ADDRESS -->
+<div class="bg-surface-container p-4 border border-outline-variant relative group hover:border-surface-tint transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-on-surface-variant">NODE_03</span>
+<span class="material-symbols-outlined text-warning text-sm" data-icon="location_off">location_off</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-2">Wrong Address</h3>
+<div class="font-code-xs text-code-xs text-on-surface-variant bg-surface-container-lowest p-2 rounded">
+                        ID: FL-99-C3<br/>GEO_VALIDATION: FAIL
+                    </div>
+<div class="absolute -right-6 top-1/2 w-6 h-px bg-outline-variant"></div>
+</div>
+</div>
+<!-- COLUMN 2: INVESTIGATION & LOGIC -->
+<div class="flex flex-col gap-6 pt-12">
+<div class="font-label-caps text-label-caps text-on-surface-variant px-3 py-1 mb-2">ANALYSIS_GATE</div>
+<!-- NODE: INVESTIGATION -->
+<div class="bg-surface-container p-4 border border-outline relative group hover:border-surface-tint transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-on-surface-variant">PROC_01</span>
+<span class="material-symbols-outlined text-primary-fixed text-sm" data-icon="search">search</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-1">Investigation</h3>
+<p class="text-xs text-on-surface-variant mb-3">Audit-trail verification and last-mile ping analysis.</p>
+<div class="flex gap-1">
+<span class="w-full h-1 bg-primary-fixed"></span>
+<span class="w-1/2 h-1 bg-outline-variant"></span>
+</div>
+<div class="absolute -right-6 top-1/2 w-6 h-px bg-outline"></div>
+</div>
+<!-- NODE: INSPECTION -->
+<div class="bg-surface-container p-4 border border-outline relative group hover:border-surface-tint transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-on-surface-variant">PROC_02</span>
+<span class="material-symbols-outlined text-primary-fixed text-sm" data-icon="fact_check">fact_check</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-1">Inspection</h3>
+<p class="text-xs text-on-surface-variant mb-3">Visual damage assessment via AI-vision or manual photo log.</p>
+<div class="absolute -right-6 top-1/2 w-6 h-px bg-outline"></div>
+</div>
+<!-- NODE: CORRECTION -->
+<div class="bg-surface-container p-4 border border-outline relative group hover:border-surface-tint transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-on-surface-variant">PROC_03</span>
+<span class="material-symbols-outlined text-primary-fixed text-sm" data-icon="edit_location">edit_location</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-1">Correction</h3>
+<p class="text-xs text-on-surface-variant mb-3">Address parsing and verification with customer portal.</p>
+<div class="absolute -right-6 top-1/2 w-6 h-px bg-outline"></div>
+</div>
+</div>
+<!-- COLUMN 3: RESOLUTION OPTIONS -->
+<div class="flex flex-col gap-6 pt-24">
+<div class="font-label-caps text-label-caps text-on-surface-variant px-3 py-1 mb-2">RECOVERY_ACTION</div>
+<!-- NODE: INSURANCE -->
+<div class="bg-surface-container-lowest p-4 border border-primary relative group hover:border-surface-tint transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-on-surface-variant">ACT_01</span>
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="security">security</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-1">Insurance Claim</h3>
+<div class="font-code-xs text-code-xs text-on-primary-container bg-primary-container/20 p-2 rounded mb-2">
+                        AUTH: GRANTED
+                    </div>
+<div class="absolute -right-6 top-1/2 w-6 h-px bg-primary"></div>
+</div>
+<!-- NODE: REPLACEMENT -->
+<div class="bg-surface-container-lowest p-4 border border-primary relative group hover:border-surface-tint transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-on-surface-variant">ACT_02</span>
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="autorenew">autorenew</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-1">Replacement</h3>
+<div class="font-code-xs text-code-xs text-on-surface-variant">SKU_SYNC: ACTIVE</div>
+<div class="absolute -right-6 top-1/2 w-6 h-px bg-primary"></div>
+</div>
+<!-- NODE: REDELIVERY -->
+<div class="bg-surface-container-lowest p-4 border border-primary relative group hover:border-surface-tint transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-on-surface-variant">ACT_03</span>
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="local_shipping">local_shipping</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-1">Redelivery</h3>
+<div class="font-code-xs text-code-xs text-on-surface-variant">REROUTE: QUEUED</div>
+<div class="absolute -right-6 top-1/2 w-6 h-px bg-primary"></div>
+</div>
+</div>
+<!-- COLUMN 4: FINAL RESOLUTION -->
+<div class="flex flex-col gap-6 pt-36">
+<div class="font-label-caps text-label-caps text-on-primary-fixed-variant bg-primary-fixed/20 px-3 py-1 mb-2">TERMINAL_STATE</div>
+<!-- NODE: REFUND -->
+<div class="bg-surface-container-highest p-4 border-2 border-surface-tint relative group transition-all shadow-[0_0_20px_rgba(0,230,57,0.15)]">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-surface-tint">RESOLVED_01</span>
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="payments">payments</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-1">Refund Issued</h3>
+<div class="font-code-xs text-code-xs text-surface-tint">TXN: 0xFD22934</div>
+</div>
+<!-- NODE: SUCCESS -->
+<div class="bg-surface-container-highest p-4 border-2 border-surface-tint relative group transition-all shadow-[0_0_20px_rgba(0,230,57,0.15)]">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-code-xs text-surface-tint">RESOLVED_02</span>
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="check_circle">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-1">Delivery Complete</h3>
+<div class="font-code-xs text-code-xs text-surface-tint">POD: VERIFIED</div>
+</div>
+</div>
+</div>
+<!-- TELEMETRY OVERLAY -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="font-label-caps text-code-xs text-on-surface-variant mb-2">SYSTEM_LATENCY</div>
+<div class="font-code-sm text-headline-md text-primary-fixed">14ms</div>
+<div class="mt-2 h-1 bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-surface-tint w-3/4"></div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="font-label-caps text-code-xs text-on-surface-variant mb-2">BRANCH_RECOVERY_RATE</div>
+<div class="font-code-sm text-headline-md text-primary-fixed">99.2%</div>
+<div class="mt-2 h-1 bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-surface-tint w-[99%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="font-label-caps text-code-xs text-on-surface-variant mb-2">ACTIVE_EXCEPTIONS</div>
+<div class="font-code-sm text-headline-md text-error">42</div>
+<div class="mt-2 h-1 bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-error w-1/4"></div>
+</div>
+</div>
+</div>
+<!-- SPECIAL CASE: VEHICLE BREAKDOWN MODAL/DRAWER STYLE -->
+<div class="mt-12 border-t border-outline-variant pt-12">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h3 class="font-headline-md text-headline-md">High-Priority Exception: Vehicle Breakdown</h3>
+<p class="text-on-surface-variant text-sm">Automated logic for field resource failure.</p>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 font-code-sm text-code-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="bolt">bolt</span>
+                    TRIGGER_RECOVERY
+                </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="p-4 border border-error bg-error/5 relative overflow-hidden">
+<div class="font-code-xs text-error mb-2 tracking-tighter">PHASE_01: DETECTION</div>
+<div class="font-body-md">Engine Telemetry Failure</div>
+<span class="absolute right-[-10px] bottom-[-10px] material-symbols-outlined text-6xl text-error opacity-10" data-icon="car_repair">car_repair</span>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container relative">
+<div class="font-code-xs text-on-surface-variant mb-2 tracking-tighter">PHASE_02: TRIAGE</div>
+<div class="font-body-md">Replacement Vehicle Dispatched</div>
+<span class="absolute right-2 bottom-2 text-[8px] font-code-xs opacity-30">ETA: 14m</span>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container relative">
+<div class="font-code-xs text-on-surface-variant mb-2 tracking-tighter">PHASE_03: TRANSFER</div>
+<div class="font-body-md">Inventory Handover (RFID)</div>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container relative">
+<div class="font-code-xs text-on-surface-variant mb-2 tracking-tighter">PHASE_04: RE-ENTRY</div>
+<div class="font-body-md">Route Resume: Hub B-02</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FOOTER -->
+<footer class="flex justify-between items-center px-4 py-1 h-8 w-full z-50 fixed bottom-0 left-0 bg-surface-container-high border-t border-outline-variant">
+<div class="font-code-xs text-code-xs text-surface-tint tracking-widest">
+            SYS_REF: 0x2A94F // LATENCY: 14ms // STATUS: NOMINAL
+        </div>
+<div class="flex gap-4">
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-crosshair" href="#">LOGS</a>
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-crosshair" href="#">METRICS</a>
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-crosshair" href="#">ALERTS</a>
+</div>
+</footer>
+<!-- INTERACTION SCRIPTS -->
+<script>
+        // Simple micro-interaction for node highlighting
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.boxShadow = '0 0 15px rgba(0, 230, 57, 0.1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.boxShadow = 'none';
+            });
+        });
+
+        // Dynamic timestamp update
+        const statusText = document.querySelector('footer div:first-child');
+        setInterval(() => {
+            const latency = Math.floor(Math.random() * (18 - 12 + 1)) + 12;
+            statusText.innerHTML = `SYS_REF: 0x2A94F // LATENCY: ${latency}ms // STATUS: NOMINAL`;
+        }, 3000);
+    </script>
+</body></html>

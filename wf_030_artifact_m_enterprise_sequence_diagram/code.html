@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --grid-color: rgba(59, 75, 55, 0.2);
+            --dot-color: rgba(0, 230, 57, 0.1);
+        }
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(var(--dot-color) 1px, transparent 1px),
+                linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 24px 24px, 120px 120px, 120px 120px;
+            background-position: center center;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-line {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .node-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.05);
+        }
+        .swimlane-header {
+            writing-mode: vertical-lr;
+            transform: rotate(180deg);
+        }
+        @keyframes flow-dash {
+            to { stroke-dashoffset: -20; }
+        }
+        .flow-path {
+            stroke-dasharray: 5, 5;
+            animation: flow-dash 1s linear infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#00e639",
+                      "on-primary-fixed": "#002203",
+                      "on-secondary-container": "#c6ceff",
+                      "error-container": "#93000a",
+                      "secondary-container": "#0043eb",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-tertiary-container": "#862ed4",
+                      "tertiary-fixed": "#f0dbff",
+                      "inverse-on-surface": "#233143",
+                      "on-tertiary": "#490080",
+                      "outline": "#84967e",
+                      "surface": "#051424",
+                      "inverse-surface": "#d4e4fa",
+                      "tertiary": "#fff6ff",
+                      "surface-variant": "#273647",
+                      "surface-container-lowest": "#010f1f",
+                      "on-background": "#d4e4fa",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "error": "#ffb4ab",
+                      "on-surface": "#d4e4fa",
+                      "tertiary-container": "#ecd3ff",
+                      "on-secondary": "#002388",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-low": "#0d1c2d",
+                      "background": "#051424",
+                      "primary-fixed-dim": "#00e639",
+                      "primary-container": "#00ff41",
+                      "on-tertiary-fixed": "#2c0051",
+                      "on-error": "#690005",
+                      "on-primary": "#003907",
+                      "secondary-fixed": "#dde1ff",
+                      "primary": "#ebffe2",
+                      "secondary": "#b8c3ff",
+                      "on-primary-container": "#007117",
+                      "surface-bright": "#2c3a4c",
+                      "surface-container": "#122131",
+                      "inverse-primary": "#006e16",
+                      "surface-dim": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "surface-container-high": "#1c2b3c",
+                      "primary-fixed": "#72ff70",
+                      "on-primary-fixed-variant": "#00530e",
+                      "surface-container-highest": "#273647",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary-fixed": "#001356"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lane-margin": "32px",
+                      "grid-unit": "8px",
+                      "stack-gap": "4px",
+                      "node-gutter": "24px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md min-h-screen pb-20">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-grid-unit h-14">
+<div class="flex items-center gap-stack-gap">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">PIM_ENGINE_V2</span>
+</div>
+<div class="hidden md:flex gap-8 items-center h-full">
+<nav class="flex h-full">
+<a class="px-4 flex items-center h-full text-primary font-label-caps text-label-caps hover:bg-surface-container-highest transition-colors" href="#">DIAGRAM_VIEW</a>
+<a class="px-4 flex items-center h-full text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-highest transition-colors" href="#">TRACER_TOOL</a>
+<a class="px-4 flex items-center h-full text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-highest transition-colors" href="#">SCHEMA_MAP</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: STABLE</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">NODE: 14.2.0-LTS</span>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="h-full w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col gap-stack-gap pt-20 z-40 hidden lg:flex">
+<div class="px-6 mb-6">
+<h2 class="font-headline-md text-headline-md text-on-surface">MODULE_INDEX</h2>
+</div>
+<nav class="flex flex-col">
+<div class="px-6 py-3 flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data Schema</span>
+</div>
+<div class="px-6 py-3 flex items-center gap-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed-dim transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="alt_route">alt_route</span>
+<span class="font-label-caps text-label-caps">Workflow Nodes</span>
+</div>
+<div class="px-6 py-3 flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-caps text-label-caps">Asset Mapping</span>
+</div>
+<div class="px-6 py-3 flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps">System Logs</span>
+</div>
+</nav>
+<!-- Telemetry Snippet -->
+<div class="mt-auto p-6 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">IO_THROUGHPUT</span>
+<span class="text-primary-fixed-dim font-code-xs text-code-xs">LIVE</span>
+</div>
+<div class="h-12 w-full bg-surface-container-high relative overflow-hidden rounded-sm">
+<div class="absolute bottom-0 left-0 h-4 w-1/4 bg-primary-fixed-dim opacity-50"></div>
+<div class="absolute bottom-0 left-1/4 h-8 w-1/4 bg-primary-fixed-dim opacity-70"></div>
+<div class="absolute bottom-0 left-2/4 h-6 w-1/4 bg-primary-fixed-dim opacity-40"></div>
+<div class="absolute bottom-0 left-3/4 h-10 w-1/4 bg-primary-fixed-dim opacity-60"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 p-node-gutter">
+<!-- Header Controls -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-0.5 bg-primary-container text-on-primary-container font-label-caps text-code-xs rounded">TRACE_ID: WF-030</span>
+<span class="text-on-surface-variant font-code-xs text-code-xs">/ system / core / sequence / trace.030</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight">Sequence execution trace</h1>
+</div>
+<div class="flex gap-stack-gap">
+<button class="bg-surface-container-high hover:bg-surface-container-highest text-on-surface px-4 py-2 flex items-center gap-2 border border-outline-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="download">download</span>
+<span class="font-label-caps text-label-caps">EXPORT_JSON</span>
+</button>
+<button class="bg-primary-fixed-dim hover:bg-primary-fixed text-on-primary-fixed px-4 py-2 flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="play_arrow">play_arrow</span>
+<span class="font-label-caps text-label-caps">RUN_REPLAY</span>
+</button>
+</div>
+</div>
+<!-- Sequence Diagram Blueprint Area -->
+<div class="relative overflow-x-auto min-h-[800px] border border-outline-variant bg-surface-container-lowest p-8 node-glow">
+<!-- Actor Columns Headers -->
+<div class="flex min-w-[1200px] gap-0 relative">
+<!-- SVG Connectors Overlay (Hidden but for concept, will use lines) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="min-width: 1200px; height: 1000px;">
+<!-- Logistics -> Gateway -->
+<path d="M 60 120 L 180 120" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Gateway -> Analytics -->
+<path d="M 180 160 L 300 160" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Analytics -> Warehouse -->
+<path d="M 300 200 L 420 200" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Warehouse -> AI -->
+<path d="M 420 240 L 540 240" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- AI -> Forecast -->
+<path d="M 540 280 L 660 280" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Forecast -> Opti -->
+<path d="M 660 320 L 780 320" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Opti -> Reporting -->
+<path d="M 780 360 L 900 360" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Reporting -> Notification -->
+<path d="M 900 400 L 1020 400" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Notification -> Audit -->
+<path d="M 1020 440 L 1140 440" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Loop Back / Sync Calls -->
+<path d="M 1140 480 L 60 480" fill="none" marker-end="url(#arrowhead)" stroke="#84967e" stroke-dasharray="4,2" stroke-width="1"></path>
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="10" refy="3.5">
+<polygon fill="context-stroke" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg>
+<!-- Actor Lane 1: Logistics -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-primary-fixed-dim bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-primary-fixed-dim text-xl" data-icon="local_shipping">local_shipping</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:01</span>
+<span class="font-code-sm text-code-sm text-on-surface">Logistics</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[110px] left-[-4px] w-[9px] h-20 bg-primary-fixed-dim opacity-40"></div>
+<div class="absolute top-[470px] left-[-4px] w-[9px] h-10 bg-surface-variant"></div>
+</div>
+</div>
+<!-- Actor Lane 2: Gateway -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-outline bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-outline text-xl" data-icon="hub">hub</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:02</span>
+<span class="font-code-sm text-code-sm text-on-surface">API Gateway</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[120px] left-[-4px] w-[9px] h-40 bg-surface-variant border border-outline-variant"></div>
+</div>
+</div>
+<!-- Actor Lane 3: Analytics -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-outline bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-outline text-xl" data-icon="analytics">analytics</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:03</span>
+<span class="font-code-sm text-code-sm text-on-surface">Analytics</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[160px] left-[-4px] w-[9px] h-40 bg-surface-variant border border-outline-variant"></div>
+</div>
+</div>
+<!-- Actor Lane 4: Warehouse -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-outline bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-outline text-xl" data-icon="storage">storage</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:04</span>
+<span class="font-code-sm text-code-sm text-on-surface">Warehouse</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[200px] left-[-4px] w-[9px] h-40 bg-surface-variant border border-outline-variant"></div>
+</div>
+</div>
+<!-- Actor Lane 5: Aura AI -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-primary-fixed-dim bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-primary-fixed-dim text-xl" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:05</span>
+<span class="font-code-sm text-code-sm text-on-surface">Aura AI</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[240px] left-[-4px] w-[9px] h-40 bg-primary-container opacity-20"></div>
+</div>
+</div>
+<!-- Actor Lane 6: Forecast Engine -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-outline bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-outline text-xl" data-icon="timeline">timeline</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:06</span>
+<span class="font-code-sm text-code-sm text-on-surface">Forecast</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[280px] left-[-4px] w-[9px] h-40 bg-surface-variant border border-outline-variant"></div>
+</div>
+</div>
+<!-- Actor Lane 7: Optimization -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-outline bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-outline text-xl" data-icon="rebase_edit">rebase_edit</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:07</span>
+<span class="font-code-sm text-code-sm text-on-surface">Optimization</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[320px] left-[-4px] w-[9px] h-40 bg-surface-variant border border-outline-variant"></div>
+</div>
+</div>
+<!-- Actor Lane 8: Reporting -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-outline bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-outline text-xl" data-icon="description">description</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:08</span>
+<span class="font-code-sm text-code-sm text-on-surface">Reporting</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[360px] left-[-4px] w-[9px] h-40 bg-surface-variant border border-outline-variant"></div>
+</div>
+</div>
+<!-- Actor Lane 9: Notification -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-outline bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-outline text-xl" data-icon="notifications_active">notifications_active</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:09</span>
+<span class="font-code-sm text-code-sm text-on-surface">Notification</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[400px] left-[-4px] w-[9px] h-40 bg-surface-variant border border-outline-variant"></div>
+</div>
+</div>
+<!-- Actor Lane 10: Audit -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-32 h-16 border border-secondary bg-surface flex flex-col items-center justify-center relative z-10">
+<span class="material-symbols-outlined text-secondary text-xl" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">ACTOR:10</span>
+<span class="font-code-sm text-code-sm text-on-surface">Audit</span>
+</div>
+<div class="w-px h-[800px] bg-outline-variant relative">
+<div class="absolute top-[440px] left-[-4px] w-[9px] h-40 bg-secondary opacity-20"></div>
+</div>
+</div>
+</div>
+<!-- Annotation Tooltips -->
+<div class="absolute top-[130px] left-[70px] bg-surface-container border border-primary-fixed-dim p-2 z-20 w-48 node-glow">
+<div class="flex items-center gap-1 mb-1">
+<span class="font-label-caps text-[9px] text-primary-fixed-dim">METRIC</span>
+<span class="font-code-xs text-[10px] text-on-surface-variant">LATENCY: 12ms</span>
+</div>
+<p class="font-code-sm text-[10px] text-on-surface leading-tight">POST /v2/telemetry/buffer -> Start Async Processing</p>
+</div>
+<div class="absolute top-[290px] left-[550px] bg-surface-container border border-primary-fixed-dim p-2 z-20 w-48 node-glow">
+<div class="flex items-center gap-1 mb-1">
+<span class="font-label-caps text-[9px] text-primary-fixed-dim">AI_LOGIC</span>
+<span class="font-code-xs text-[10px] text-on-surface-variant">CONF: 0.984</span>
+</div>
+<p class="font-code-sm text-[10px] text-on-surface leading-tight">Aura AI determining optimal route via Forecast Engine</p>
+</div>
+<!-- Execution Timeline Marker -->
+<div class="absolute left-0 right-0 h-px bg-primary-fixed-dim opacity-20 flex items-center justify-start px-2" style="top: 340px;">
+<span class="font-code-xs text-[10px] text-primary-fixed-dim bg-surface px-1">T+450MS - CRITICAL_PHASE</span>
+</div>
+</div>
+<!-- System Intelligence Feed (Bottom Section) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-node-gutter mt-node-gutter">
+<!-- Telemetry Card -->
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant">LATENCY_HEATMAP</h3>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="speed">speed</span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="font-code-sm text-code-sm">Logistics Inbound</span>
+<span class="text-primary-fixed-dim font-code-sm">12ms</span>
+</div>
+<div class="w-full bg-surface-container-high h-1">
+<div class="bg-primary-fixed-dim h-1 w-[12%]"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-sm text-code-sm">Aura AI Inference</span>
+<span class="text-primary-fixed-dim font-code-sm">184ms</span>
+</div>
+<div class="w-full bg-surface-container-high h-1">
+<div class="bg-primary-fixed-dim h-1 w-[84%]"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-sm text-code-sm">Audit Persistence</span>
+<span class="text-primary-fixed-dim font-code-sm">45ms</span>
+</div>
+<div class="w-full bg-surface-container-high h-1">
+<div class="bg-primary-fixed-dim h-1 w-[45%]"></div>
+</div>
+</div>
+</div>
+<!-- Active Nodes Bento -->
+<div class="bg-surface-container-low border border-outline-variant p-4 md:col-span-2">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant">ACTIVE_NODE_RESOURCES</h3>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="memory">memory</span>
+</div>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-stack-gap">
+<div class="p-3 border border-outline-variant bg-surface-container-lowest">
+<span class="block font-label-caps text-[9px] text-on-surface-variant mb-1">NODE_CPU</span>
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">42%</span>
+</div>
+<div class="p-3 border border-outline-variant bg-surface-container-lowest">
+<span class="block font-label-caps text-[9px] text-on-surface-variant mb-1">MEM_ALLOC</span>
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">2.4GB</span>
+</div>
+<div class="p-3 border border-outline-variant bg-surface-container-lowest">
+<span class="block font-label-caps text-[9px] text-on-surface-variant mb-1">ACTIVE_CONN</span>
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">1.2k</span>
+</div>
+<div class="p-3 border border-outline-variant bg-surface-container-lowest">
+<span class="block font-label-caps text-[9px] text-on-surface-variant mb-1">ERR_RATE</span>
+<span class="font-headline-md text-headline-md text-error">0.02%</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Global Footer Bar -->
+<footer class="w-full fixed bottom-0 z-50 bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-node-gutter py-1 h-8">
+<div class="flex gap-4 items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CORE_ENGINE_STABLE</span>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim cursor-pointer transition-opacity">LATENCY: 12ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim cursor-pointer transition-opacity">UPTIME: 99.99%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim cursor-pointer transition-opacity">THROUGHPUT: 4.2k/s</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SYNC_ACTIVE</span>
+</div>
+</footer>
+<!-- FAB (Contextual) -->
+<button class="fixed bottom-12 right-6 w-14 h-14 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-xl hover:scale-105 transition-transform z-50">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+<script>
+        // Micro-interaction for drawing connecting lines or adding trace particles
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.querySelector('main');
+            
+            // Random telemetry noise simulation
+            setInterval(() => {
+                const logs = ['AUTH_SUCCESS', 'PIPE_FLUSH', 'TRC_RECV', 'MEM_CLEAN'];
+                const randomLog = logs[Math.floor(Math.random() * logs.length)];
+                // Console only for tech aesthetic effect if dev tools open
+                console.log(`[PIM_KERNEL] ${Date.now()}: ${randomLog}`);
+            }, 3000);
+        });
+    </script>
+</body></html>
