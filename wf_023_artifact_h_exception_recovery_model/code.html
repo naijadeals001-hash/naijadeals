@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAIJADEALS ATLAS - Exception &amp; Recovery Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#0035be",
+                        "error-container": "#93000a",
+                        "surface-tint": "#00e639",
+                        "on-background": "#d4e4fa",
+                        "on-primary-container": "#007117",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "inverse-primary": "#006e16",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface": "#051424",
+                        "primary-container": "#00ff41",
+                        "inverse-surface": "#d4e4fa",
+                        "inverse-on-surface": "#233143",
+                        "secondary": "#b8c3ff",
+                        "surface-container": "#122131",
+                        "primary-container-low": "#002b05",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-bright": "#2c3a4c",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary": "#003907",
+                        "secondary-fixed": "#dde1ff",
+                        "on-secondary": "#002388",
+                        "on-tertiary": "#490080",
+                        "surface-container-high": "#1c2b3c",
+                        "secondary-container": "#0043eb",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#002203",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-container": "#c6ceff",
+                        "on-secondary-fixed": "#001356",
+                        "surface-container-low": "#0d1c2d",
+                        "background": "#051424",
+                        "primary": "#ebffe2",
+                        "on-tertiary-fixed": "#2c0051",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-lowest": "#010f1f",
+                        "outline-variant": "#3b4b37",
+                        "surface-container-highest": "#273647",
+                        "outline": "#84967e",
+                        "primary-fixed": "#72ff70",
+                        "surface-dim": "#051424",
+                        "surface-variant": "#273647",
+                        "on-surface": "#d4e4fa",
+                        "tertiary": "#fff6ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background-color: #3b4b37;
+            z-index: 0;
+        }
+        .connector-h::after {
+            height: 2px;
+            width: 32px;
+            top: 50%;
+            right: -32px;
+        }
+        .connector-v::after {
+            width: 2px;
+            height: 24px;
+            left: 50%;
+            bottom: -24px;
+        }
+        .error-path {
+            border-style: dashed !important;
+            border-color: #93000a !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #273647;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-node-gutter h-14 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<div class="font-label-caps text-label-caps text-primary-fixed border border-primary-fixed px-2 py-1">NAIJADEALS_ENGINEERING_ATLAS</div>
+<div class="flex items-center gap-2 text-primary-fixed">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-headline-md text-headline-md tracking-tight uppercase">Exception &amp; Recovery Model</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<span class="text-on-surface-variant font-code-sm text-code-sm hover:bg-surface-container-high transition-colors cursor-pointer px-2 py-1">v4.2.1-STABLE</span>
+</div>
+<button class="bg-primary-container text-on-primary-container px-3 py-1 font-label-caps text-label-caps hover:opacity-90 transition-opacity">FORCE_RESCAN</button>
+</div>
+</header>
+<!-- Side Navigation Drawer -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant z-40 flex flex-col pt-16">
+<div class="px-6 py-4">
+<span class="font-label-caps text-label-caps text-primary-fixed opacity-50">SYSTEM_INDEX</span>
+</div>
+<nav class="flex flex-col gap-stack-gap">
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span> CORE_ENGINE
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance">account_balance</span> MARKET_LOGIC
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span> DEALS_ROUTING
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span> USER_GRAPH
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="shield_lock">shield_lock</span> AUTH_SERVICE
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span> TELEMETRY
+            </a>
+</nav>
+<div class="mt-auto p-6 border-t border-outline-variant">
+<div class="p-3 bg-surface-container-lowest border border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error">ERR_LOAD</span>
+<span class="text-error font-code-xs text-code-xs">14%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1">
+<div class="bg-error w-[14%] h-full"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-14 mb-8 p-node-gutter">
+<!-- Workflow Controls & Status -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<h1 class="font-headline-lg text-headline-lg mb-1">EXCEPTION_FLOW_MAP_H</h1>
+<p class="text-on-surface-variant opacity-60 font-code-sm text-code-sm">Mapping asynchronous failure states and automated recovery logic.</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2 px-3 py-1 border border-outline-variant bg-surface-container-low">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+<span class="font-code-xs text-code-xs">LIVE_RECOVERY: ACTIVE</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 border border-outline-variant bg-surface-container-low">
+<span class="material-symbols-outlined text-[14px]" data-icon="history">history</span>
+<span class="font-code-xs text-code-xs">RETENTION: 30D</span>
+</div>
+</div>
+</div>
+<!-- The "Unhappy Path" Matrix -->
+<div class="grid grid-cols-1 gap-lane-margin">
+<!-- Lane 1: Compliance & Licensing -->
+<section class="relative">
+<div class="flex items-center gap-3 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="verified_user">verified_user</span>
+<h2 class="font-headline-md text-headline-md uppercase">LANE_01: COMPLIANCE_EXCEPTIONS</h2>
+</div>
+<div class="flex gap-12 overflow-x-auto pb-8 custom-scrollbar">
+<!-- Exception 1.1 -->
+<div class="flex-shrink-0 w-64 border border-error-container bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-error mb-2">TRIGGER: EXPIRED</div>
+<div class="font-code-sm text-code-sm mb-4">LICENSE_STATE == EXPIRED</div>
+<div class="flex justify-between items-center bg-error-container/20 p-2 border border-error-container/40">
+<span class="font-code-xs text-code-xs">STATE: BLOCKED</span>
+<span class="material-symbols-outlined text-[16px] text-error" data-icon="block">block</span>
+</div>
+</div>
+<!-- Recovery 1.1 -->
+<div class="flex-shrink-0 w-64 border border-primary-fixed/50 bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-primary-fixed mb-2">ACTION: RENEWAL</div>
+<div class="font-code-sm text-code-sm mb-4">INIT_RENEWAL_V2(USER_ID)</div>
+<div class="space-y-1">
+<div class="text-[9px] text-on-surface-variant font-code-xs">LATENCY: 1.2s</div>
+<div class="h-1 bg-surface-container-highest w-full"><div class="h-full bg-primary-fixed w-[80%]"></div></div>
+</div>
+</div>
+<!-- Result 1.1 -->
+<div class="flex-shrink-0 w-64 border border-outline bg-surface-container-highest p-3">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">RECOVERY: COMPLETE</div>
+<div class="font-code-sm text-code-sm mb-4">REVALIDATE_CREDENTIALS()</div>
+<div class="flex gap-2">
+<span class="px-1 bg-surface-container-low border border-outline text-[10px] font-code-xs">ACK_SUCCESS</span>
+<span class="px-1 bg-surface-container-low border border-outline text-[10px] font-code-xs">RELOAD_UI</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Lane 2: Asset Integrity -->
+<section class="relative">
+<div class="flex items-center gap-3 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="minor_crash">minor_crash</span>
+<h2 class="font-headline-md text-headline-md uppercase">LANE_02: ASSET_INTEGRITY_FAILURE</h2>
+</div>
+<div class="flex gap-12 overflow-x-auto pb-8 custom-scrollbar">
+<!-- Exception 2.1 -->
+<div class="flex-shrink-0 w-64 border border-error-container bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-error mb-2">TRIGGER: FAIL_INSPECT</div>
+<div class="font-code-sm text-code-sm mb-4">VEHICLE_QA_STATUS == FAIL</div>
+<div class="p-2 border border-error-container/20 text-error font-code-xs">REASON: BRAKE_WEAR &gt; 0.8</div>
+</div>
+<!-- Recovery 2.1a -->
+<div class="flex-shrink-0 w-64 border border-secondary-fixed/50 bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-secondary-fixed mb-2">MANUAL: REPAIR</div>
+<div class="font-code-sm text-code-sm mb-4">GENERATE_WORK_ORDER(EXT)</div>
+<div class="text-[10px] font-code-xs text-on-surface-variant opacity-50 uppercase tracking-widest">Awaiting Technician Signal...</div>
+</div>
+<!-- Recovery 2.1b -->
+<div class="flex-shrink-0 w-64 border border-primary-fixed/50 bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-primary-fixed mb-2">SYSTEM: REINSPECT</div>
+<div class="font-code-sm text-code-sm mb-4">TRIGGER_RESCHEDULE(NOW)</div>
+<div class="flex items-center gap-1 text-[10px] text-primary-fixed">
+<span class="material-symbols-outlined text-[14px]" data-icon="sync">sync</span>
+                            AUTO_RETRY_ENABLED
+                        </div>
+</div>
+<!-- Result 2.1 -->
+<div class="flex-shrink-0 w-64 border border-outline bg-surface-container-highest p-3">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">RECOVERY: PENDING</div>
+<div class="font-code-sm text-code-sm mb-4">QUEUE_DEPTH: 48h</div>
+<div class="grid grid-cols-4 gap-1">
+<div class="h-4 bg-primary-fixed"></div>
+<div class="h-4 bg-primary-fixed"></div>
+<div class="h-4 bg-surface-container-high"></div>
+<div class="h-4 bg-surface-container-high"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Lane 3: Financial Risk -->
+<section class="relative">
+<div class="flex items-center gap-3 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="account_balance_wallet">account_balance_wallet</span>
+<h2 class="font-headline-md text-headline-md uppercase">LANE_03: RISK_MITIGATION</h2>
+</div>
+<div class="flex gap-12 overflow-x-auto pb-8 custom-scrollbar">
+<div class="flex-shrink-0 w-64 border border-error-container bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-error mb-2">TRIGGER: INS_EXPIRED</div>
+<div class="font-code-sm text-code-sm mb-4">INS_POLICY_DATE &lt; TODAY</div>
+</div>
+<div class="flex-shrink-0 w-64 border border-primary-fixed/50 bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-primary-fixed mb-2">ACTION: RENEWAL</div>
+<div class="font-code-sm text-code-sm mb-4">CONNECT_API(PROVIDER_H)</div>
+<div class="text-[9px] font-code-xs text-on-primary-fixed-variant bg-primary-fixed/20 px-2 py-1 inline-block">SECURE_LINK_SENT</div>
+</div>
+<div class="flex-shrink-0 w-64 border border-outline bg-surface-container-highest p-3">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">SUCCESS: ACTIVE</div>
+<div class="font-code-sm text-code-sm mb-4">POLICY_REF: #9902-XK</div>
+</div>
+</div>
+</section>
+<!-- Lane 4: Personal Verification -->
+<section class="relative">
+<div class="flex items-center gap-3 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="fingerprint">fingerprint</span>
+<h2 class="font-headline-md text-headline-md uppercase">LANE_04: IDENTITY_INTEGRITY</h2>
+</div>
+<div class="flex gap-12 overflow-x-auto pb-8 custom-scrollbar">
+<!-- Exception 4.1 -->
+<div class="flex-shrink-0 w-64 border border-error-container bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-error mb-2">TRIGGER: BGC_FAIL</div>
+<div class="font-code-sm text-code-sm mb-4">BG_CHECK_RESULT == DENIED</div>
+<div class="text-[9px] font-code-xs text-on-error uppercase mt-2">Critical Flag: Fraud Suspected</div>
+</div>
+<!-- Recovery 4.1a -->
+<div class="flex-shrink-0 w-64 border border-secondary-fixed/50 bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-secondary-fixed mb-2">MANUAL: APPEAL</div>
+<div class="font-code-sm text-code-sm mb-4">OPEN_TICKET(LEGAL_DEPT)</div>
+</div>
+<!-- Recovery 4.1b -->
+<div class="flex-shrink-0 w-64 border border-secondary-fixed/50 bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-secondary-fixed mb-2">HUMAN: ADMIN_REVIEW</div>
+<div class="font-code-sm text-code-sm mb-4">ESCALATE_TO(SYS_SUPER)</div>
+<div class="mt-2 flex -space-x-2">
+<div class="w-6 h-6 rounded-full border border-surface-container bg-surface-bright flex items-center justify-center text-[10px] font-bold">JD</div>
+<div class="w-6 h-6 rounded-full border border-surface-container bg-surface-bright flex items-center justify-center text-[10px] font-bold">AK</div>
+</div>
+</div>
+<!-- Result 4.1 -->
+<div class="flex-shrink-0 w-64 border border-outline bg-surface-container-highest p-3">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">RECOVERY: IN_PROGRESS</div>
+<div class="font-code-sm text-code-sm mb-4">WAITING_ON_DISCO</div>
+<div class="animate-pulse text-primary-fixed text-[10px] font-code-xs">SCANNING_DOCS...</div>
+</div>
+</div>
+</section>
+<!-- Lane 5: Behavioral Discipline -->
+<section class="relative">
+<div class="flex items-center gap-3 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="gavel">gavel</span>
+<h2 class="font-headline-md text-headline-md uppercase">LANE_05: CONDUCT_ENFORCEMENT</h2>
+</div>
+<div class="flex gap-12 overflow-x-auto pb-8 custom-scrollbar">
+<div class="flex-shrink-0 w-64 border border-error-container bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-error mb-2">TRIGGER: SUSPENDED</div>
+<div class="font-code-sm text-code-sm mb-4">DRV_STATE == LOCKOUT</div>
+<div class="bg-error/10 p-2 text-error text-[10px] font-code-xs mt-2 border border-error/20">REASON: CONDUCT_VIO_3</div>
+</div>
+<div class="flex-shrink-0 w-64 border border-secondary-fixed/50 bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-secondary-fixed mb-2">MANUAL: INVESTIGATION</div>
+<div class="font-code-sm text-code-sm mb-4">REVIEW_INCIDENT_LOGS()</div>
+<div class="mt-2 text-on-surface-variant text-[10px] font-code-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="search">search</span>
+                            AUDITING_SENSORS
+                        </div>
+</div>
+<div class="flex-shrink-0 w-64 border border-primary-fixed/50 bg-surface-container-low p-3 relative node-connector connector-h">
+<div class="font-label-caps text-label-caps text-primary-fixed mb-2">ACTION: REINSTATE</div>
+<div class="font-code-sm text-code-sm mb-4">RESTORE_AUTH_PROFILES()</div>
+<div class="mt-2 h-1.5 w-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-primary-fixed animate-[loading_2s_ease-in-out_infinite]" style="width: 30%"></div>
+</div>
+</div>
+<div class="flex-shrink-0 w-64 border border-outline bg-surface-container-highest p-3">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">FINAL: RESTORED</div>
+<div class="font-code-sm text-code-sm mb-4">NOTIFY_DRIVER(APP_PUSH)</div>
+</div>
+</div>
+</section>
+</div>
+<!-- System Audit Log Panel (Overlay Style) -->
+<div class="mt-lane-margin grid grid-cols-3 gap-node-gutter">
+<div class="col-span-2 border border-outline-variant bg-surface-container-lowest p-6">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-label-caps text-label-caps text-primary-fixed">REAL_TIME_EXCEPTION_LOG</h3>
+<div class="flex gap-2">
+<span class="px-2 py-0.5 bg-error/10 text-error text-[10px] font-code-xs border border-error/30">ERROR: 24</span>
+<span class="px-2 py-0.5 bg-primary-fixed/10 text-primary-fixed text-[10px] font-code-xs border border-primary-fixed/30">RECOVERED: 18</span>
+</div>
+</div>
+<div class="space-y-2 font-code-xs text-code-xs overflow-y-auto max-h-64 custom-scrollbar">
+<div class="flex items-start gap-4 p-2 border-b border-outline-variant/30 opacity-70">
+<span class="text-on-surface-variant">[14:22:01.044]</span>
+<span class="text-error">EXC_092</span>
+<span class="text-on-surface">Vehicle ID #TRK-9908 failed Brake Inspection. Redirecting to Repair Lane.</span>
+</div>
+<div class="flex items-start gap-4 p-2 border-b border-outline-variant/30">
+<span class="text-on-surface-variant">[14:21:58.121]</span>
+<span class="text-primary-fixed">REC_441</span>
+<span class="text-on-surface">Insurance Policy for Driver #8822 re-validated successfully via Provider_H API.</span>
+</div>
+<div class="flex items-start gap-4 p-2 border-b border-outline-variant/30 opacity-70">
+<span class="text-on-surface-variant">[14:21:45.980]</span>
+<span class="text-error">EXC_105</span>
+<span class="text-on-surface">License #L-882009 reported as EXPIRED. User access token revoked.</span>
+</div>
+<div class="flex items-start gap-4 p-2 border-b border-outline-variant/30 opacity-70">
+<span class="text-on-surface-variant">[14:21:30.002]</span>
+<span class="text-secondary-fixed">SYS_MSG</span>
+<span class="text-on-surface">Manual Appeal initiated for Background Check ID #BGC-7711-X. Escalated to legal.</span>
+</div>
+</div>
+</div>
+<!-- Telemetry Stats -->
+<div class="space-y-stack-gap">
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="text-[10px] font-label-caps text-on-surface-variant mb-1">MTTR (MEAN_TIME_TO_RECOVER)</div>
+<div class="text-2xl font-bold text-primary-fixed">14.2m <span class="text-[10px] font-normal text-on-surface-variant">▲ 1.2%</span></div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="text-[10px] font-label-caps text-on-surface-variant mb-1">FAILURE_RATE (L30D)</div>
+<div class="text-2xl font-bold text-error">4.82% <span class="text-[10px] font-normal text-on-surface-variant">▼ 0.5%</span></div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="text-[10px] font-label-caps text-on-surface-variant mb-1">AUTO_RECOVERY_EFFICIENCY</div>
+<div class="text-2xl font-bold text-secondary-fixed">88.4%</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Status Bar -->
+<footer class="fixed bottom-0 w-full z-50 flex justify-between items-center px-node-gutter h-8 bg-surface-container-lowest border-t border-outline-variant font-code-xs text-code-xs text-primary-fixed-dim">
+<div class="flex gap-6">
+<span class="font-label-caps text-label-caps">© 2024 NAIJADEALS_SYS_OPS</span>
+<span class="hover:text-primary-fixed transition-colors cursor-help">LATENCY: 42ms</span>
+<span class="hover:text-primary-fixed transition-colors cursor-help">UPTIME: 99.98%</span>
+</div>
+<div class="flex gap-4">
+<span class="text-primary-fixed font-bold">THREADS: ACTIVE</span>
+<span class="text-on-surface-variant opacity-40">NODE_H_RUNNING</span>
+</div>
+</footer>
+<style>
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+        }
+    </style>
+<script>
+        // Simple micro-interaction for node hover effects
+        document.querySelectorAll('.border-primary-fixed\\/50, .border-error-container').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.boxShadow = '0 0 10px rgba(114, 255, 112, 0.1)';
+                node.style.borderColor = '#72ff70';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.boxShadow = 'none';
+                node.style.borderColor = '';
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-021: Artifact K — Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector-h {
+            height: 2px;
+            background: #00e639;
+            position: relative;
+        }
+        .node-connector-h::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -4px;
+            border-left: 8px solid #00e639;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(18, 33, 49, 0.8);
+        }
+        .dashed-line {
+            background-image: linear-gradient(to right, #84967e 50%, transparent 50%);
+            background-size: 8px 1px;
+            background-repeat: repeat-x;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #051424; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; }
+        ::-webkit-scrollbar-thumb:hover { background: #84967e; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#122131",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-bright": "#2c3a4c",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary": "#003907",
+                        "secondary-fixed": "#dde1ff",
+                        "on-secondary": "#002388",
+                        "surface-container-high": "#1c2b3c",
+                        "on-tertiary": "#490080",
+                        "primary-container": "#00ff41",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary": "#b8c3ff",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-container": "#007117",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "inverse-primary": "#006e16",
+                        "error": "#ffb4ab",
+                        "surface": "#051424",
+                        "tertiary-fixed": "#f0dbff",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "surface-tint": "#00e639",
+                        "on-background": "#d4e4fa",
+                        "surface-dim": "#051424",
+                        "primary-fixed": "#72ff70",
+                        "surface-variant": "#273647",
+                        "on-surface": "#d4e4fa",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-error": "#690005",
+                        "tertiary": "#fff6ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-lowest": "#010f1f",
+                        "outline-variant": "#3b4b37",
+                        "surface-container-highest": "#273647",
+                        "outline": "#84967e",
+                        "on-secondary-fixed": "#001356",
+                        "surface-container-low": "#0d1c2d",
+                        "background": "#051424",
+                        "primary": "#ebffe2",
+                        "on-tertiary-fixed": "#2c0051",
+                        "secondary-container": "#0043eb",
+                        "on-primary-fixed": "#002203",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-secondary-container": "#c6ceff",
+                        "on-tertiary-container": "#862ed4"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-hidden flex flex-col h-screen">
+<!-- TopAppBar Component -->
+<header class="bg-surface dark:bg-surface text-primary dark:text-primary w-full top-0 border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 w-full z-50">
+<div class="flex items-center gap-4 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-primary-fixed-dim">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed uppercase">REVERSE_LOGISTICS_v4.2</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-8 items-center h-full">
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer px-2 py-1 rounded">DOCS_MODE: IMPLEMENTATION</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer px-2 py-1 rounded">VERSION: K-BETA</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim bg-surface-container-highest px-2 py-1 rounded border border-primary-fixed-dim/30">STATUS: STABLE</span>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer">settings_input_component</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer Component -->
+<aside class="bg-surface-container-low dark:bg-surface-container-low h-screen w-64 border-r border-outline-variant flex flex-col h-full py-node-gutter shrink-0 hidden md:flex">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary">CORE_ENGINE</h2>
+<div class="h-1 w-12 bg-primary-fixed-dim mt-2"></div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-6 py-3 text-primary-fixed bg-surface-container-highest border-l-4 border-primary-fixed transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">System Map</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">api</span>
+<span class="font-label-caps text-label-caps">API Contracts</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings_ethernet</span>
+<span class="font-label-caps text-label-caps">Logic Gates</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</a>
+</nav>
+<div class="px-6 py-4 border-t border-outline-variant">
+<div class="p-3 bg-surface-container rounded-sm border border-outline-variant">
+<p class="font-code-xs text-code-xs text-primary-fixed-dim mb-1">NODE_UPTIME</p>
+<p class="font-code-sm text-code-sm text-on-surface">341:12:04:11</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto relative p-lane-margin custom-scrollbar">
+<!-- Hero Specification -->
+<div class="mb-12 border-l-4 border-primary-fixed-dim pl-6">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim block mb-2">TECHNICAL HANDOFF SPECIFICATION</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-4">Artifact K: Implementation Guide</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+                    High-density engineering documentation for the Reverse Logistics v4.2 ecosystem. This spec outlines microservice ownership, topology requirements, and completion criteria for the Q4 deployment window.
+                </p>
+</div>
+<!-- Bento Grid of Services -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- Service Node: Shipment -->
+<div class="bg-surface-container-high border border-outline-variant p-grid-unit flex flex-col gap-4 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 bg-primary-container/10 border-b border-l border-outline-variant">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim">database</span>
+</div>
+<div>
+<div class="font-label-caps text-[10px] text-primary-fixed-dim tracking-tighter mb-1">SVC_OWNER: LOGISTICS_CORE</div>
+<h3 class="font-headline-md text-headline-md text-on-primary-container">Shipment Microservice</h3>
+</div>
+<div class="space-y-2 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>Protocol</span>
+<span class="text-on-surface">gRPC / Protobuf</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>n8n Hook</span>
+<span class="text-on-surface">WF_SHP_772</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>DB Cluster</span>
+<span class="text-on-surface">PostgreSQL v15</span>
+</div>
+</div>
+</div>
+<!-- Service Node: Pricing -->
+<div class="bg-surface-container-high border border-outline-variant p-grid-unit flex flex-col gap-4 relative">
+<div class="absolute top-0 right-0 p-2 bg-secondary-container/10 border-b border-l border-outline-variant">
+<span class="material-symbols-outlined text-[16px] text-secondary">payments</span>
+</div>
+<div>
+<div class="font-label-caps text-[10px] text-secondary tracking-tighter mb-1">SVC_OWNER: FINANCE_OPS</div>
+<h3 class="font-headline-md text-headline-md text-secondary">Pricing Engine</h3>
+</div>
+<div class="space-y-2 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>Protocol</span>
+<span class="text-on-surface">REST / JSON</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>n8n Hook</span>
+<span class="text-on-surface">WF_PRC_910</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>Cache</span>
+<span class="text-on-surface">Redis Cluster</span>
+</div>
+</div>
+</div>
+<!-- Service Node: Tracking -->
+<div class="bg-surface-container-high border border-outline-variant p-grid-unit flex flex-col gap-4 relative">
+<div class="absolute top-0 right-0 p-2 bg-tertiary-container/10 border-b border-l border-outline-variant">
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">location_on</span>
+</div>
+<div>
+<div class="font-label-caps text-[10px] text-tertiary-fixed-dim tracking-tighter mb-1">SVC_OWNER: DATA_ENGINEERING</div>
+<h3 class="font-headline-md text-headline-md text-tertiary-fixed-dim">Tracking Hub</h3>
+</div>
+<div class="space-y-2 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>Protocol</span>
+<span class="text-on-surface">WebSockets</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>n8n Hook</span>
+<span class="text-on-surface">WF_TRK_005</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>Stream</span>
+<span class="text-on-surface">Kafka / Redpanda</span>
+</div>
+</div>
+</div>
+</div>
+<!-- System Topology Map -->
+<div class="mb-12">
+<h3 class="font-label-caps text-label-caps text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+                    SYSTEM_TOPOLOGY_VISUALIZER
+                </h3>
+<div class="w-full bg-surface-container-lowest border border-outline-variant h-80 rounded-sm relative overflow-hidden flex items-center justify-center">
+<!-- Grid Lines Layer -->
+<div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(#84967e 1px, transparent 1px), linear-gradient(90deg, #84967e 1px, transparent 1px); background-size: 40px 40px;"></div>
+<div class="flex items-center gap-16 relative z-10">
+<!-- Origin Node -->
+<div class="p-4 bg-surface-container border border-primary-fixed-dim flex flex-col items-center">
+<span class="material-symbols-outlined text-primary-fixed-dim mb-2">dns</span>
+<span class="font-code-xs text-code-xs text-on-surface uppercase">API Gateway</span>
+</div>
+<!-- Connector -->
+<div class="w-24 node-connector-h">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 font-code-xs text-code-xs text-primary-fixed-dim">TLS 1.3</span>
+</div>
+<!-- Central Mesh -->
+<div class="p-6 bg-surface-container-high border border-outline border-dashed rounded-full flex flex-col items-center">
+<span class="material-symbols-outlined text-outline mb-2">cloud_done</span>
+<span class="font-code-xs text-code-xs text-on-surface uppercase text-center">K8s Mesh<br/>Istio Control</span>
+</div>
+<!-- Connector -->
+<div class="w-24 node-connector-h"></div>
+<!-- Wallet/Escrow Cluster -->
+<div class="grid grid-cols-1 gap-2">
+<div class="px-4 py-2 bg-surface-container border border-on-secondary-fixed-variant">
+<span class="font-code-xs text-code-xs text-secondary-fixed">WALLET_SVC</span>
+</div>
+<div class="px-4 py-2 bg-surface-container border border-on-secondary-fixed-variant">
+<span class="font-code-xs text-code-xs text-secondary-fixed">ESCROW_SVC</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Shared UI Lib Registry & Requirements -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+<!-- UI Registry -->
+<div class="glass-panel border border-outline-variant p-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-4">SHARED_UI_LIB_REGISTRY</h3>
+<div class="space-y-4">
+<div class="flex items-start gap-4 border-b border-outline-variant pb-3">
+<div class="w-10 h-10 bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">grid_view</span>
+</div>
+<div>
+<h4 class="font-code-sm text-code-sm text-on-surface">@rl/component-core</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Base atomics: Buttons, Inputs, Layout primitives. Atomic design structure.</p>
+</div>
+<span class="ml-auto font-code-xs text-code-xs text-primary-fixed-dim">v2.4.1</span>
+</div>
+<div class="flex items-start gap-4 border-b border-outline-variant pb-3">
+<div class="w-10 h-10 bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">timeline</span>
+</div>
+<div>
+<h4 class="font-code-sm text-code-sm text-on-surface">@rl/visualizer-nodes</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Workflow graphing, node connectors, and swimlane rendering engines.</p>
+</div>
+<span class="ml-auto font-code-xs text-code-xs text-primary-fixed-dim">v1.8.0</span>
+</div>
+<div class="flex items-start gap-4 pb-1">
+<div class="w-10 h-10 bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">security</span>
+</div>
+<div>
+<h4 class="font-code-sm text-code-sm text-on-surface">@rl/auth-provider</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">OIDC wrappers and permission hook integration for the frontend shells.</p>
+</div>
+<span class="ml-auto font-code-xs text-code-xs text-primary-fixed-dim">v3.0.2</span>
+</div>
+</div>
+</div>
+<!-- Deployment & Completion -->
+<div class="bg-surface-container-low border border-outline-variant p-6">
+<h3 class="font-label-caps text-label-caps text-on-surface mb-4">DEPLOYMENT_GATEKEEPERS</h3>
+<ul class="space-y-4">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-code-sm text-code-sm">K8s Deployment (Helm v3) manifests verified</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-code-sm text-code-sm">TLS 1.3 enforced across all ingress points</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline text-[20px]">radio_button_unchecked</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Circuit breaker threshold testing (&gt;99.9% success)</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline text-[20px]">radio_button_unchecked</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Audit log stream connectivity to ELK/Splunk</span>
+</li>
+</ul>
+<div class="mt-8 p-4 bg-error-container/20 border border-error/30 rounded-sm">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-error text-[18px]">warning</span>
+<span class="font-label-caps text-label-caps text-error">CRITICAL_FAIL_CRITERIA</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-error-container">Any latency exceeding 120ms on the Pricing Engine will trigger an automatic rollback to Artifact J.</p>
+</div>
+</div>
+</div>
+<!-- Aesthetic Documentation Element -->
+<div class="flex justify-between items-end border-t border-outline-variant pt-8 mb-12">
+<div class="max-w-md">
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-4">
+                        // END_OF_SPECIFICATION<br/>
+                        // DIGITAL_SIGNATURE: 0x8823FB01AA92
+                    </p>
+<button class="bg-primary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 hover:opacity-90 active:scale-95 transition-all">
+                        INITIATE HANDOFF SYNC
+                    </button>
+</div>
+<div class="text-right">
+<p class="font-code-sm text-code-sm text-on-surface">GENERATED_BY_CORE_v4</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">ISO-8601: 2023-11-24T14:42:00Z</p>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar Component -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-grid-unit bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined">memory</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Runtime</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-sm p-1 cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schema</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Schema</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined">dns</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Gateway</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-code-xs text-code-xs font-label-caps text-label-caps">Metrics</span>
+</div>
+</nav>
+<script>
+        // Micro-interaction for hover states and simulated terminal logging
+        document.querySelectorAll('a, button, [role="button"]').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                console.log(`[UI_SYSTEM] Hover detected on: ${el.innerText || 'Element'}`);
+            });
+        });
+
+        // Simple animation to simulate live data
+        setInterval(() => {
+            const uptime = document.querySelector('.px-6.py-4 p:nth-child(2)');
+            if (uptime) {
+                const parts = uptime.innerText.split(':');
+                let secs = parseInt(parts[3]);
+                secs++;
+                if (secs > 59) secs = 0;
+                parts[3] = secs.toString().padStart(2, '0');
+                uptime.innerText = parts.join(':');
+            }
+        }, 1000);
+    </script>
+</body></html>

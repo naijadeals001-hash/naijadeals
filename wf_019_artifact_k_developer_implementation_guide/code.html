@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-019 | Developer Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#c6ceff",
+                    "tertiary": "#fff6ff",
+                    "on-secondary": "#002388",
+                    "inverse-surface": "#d4e4fa",
+                    "on-surface": "#d4e4fa",
+                    "surface-tint": "#00e639",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "error-container": "#93000a",
+                    "error": "#ffb4ab",
+                    "surface": "#051424",
+                    "outline-variant": "#3b4b37",
+                    "inverse-primary": "#006e16",
+                    "surface-variant": "#273647",
+                    "outline": "#84967e",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-primary-container": "#007117",
+                    "surface-container-lowest": "#010f1f",
+                    "surface-container-high": "#1c2b3c",
+                    "on-primary-fixed": "#002203",
+                    "primary": "#ebffe2",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-secondary-fixed": "#001356",
+                    "primary-fixed": "#72ff70",
+                    "primary-container": "#00ff41",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary": "#003907",
+                    "tertiary-fixed": "#f0dbff",
+                    "background": "#051424",
+                    "on-tertiary-fixed": "#2c0051",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary": "#490080",
+                    "secondary-container": "#0043eb",
+                    "primary-fixed-dim": "#00e639",
+                    "on-error": "#690005",
+                    "secondary-fixed": "#dde1ff",
+                    "on-tertiary-container": "#862ed4",
+                    "on-background": "#d4e4fa",
+                    "inverse-on-surface": "#233143",
+                    "surface-dim": "#051424",
+                    "surface-container-low": "#0d1c2d",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-container-highest": "#273647",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-error-container": "#ffdad6",
+                    "surface-container": "#122131"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+        }
+        .connector-h::after { height: 1px; width: 24px; top: 50%; right: -24px; }
+        .connector-v::after { width: 1px; height: 24px; left: 50%; bottom: -24px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+<!-- TopAppBar Component -->
+<header class="bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant flex justify-between items-center w-full px-8 h-12 z-50 fixed top-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps tracking-tighter text-primary-container dark:text-primary-container">NAIJADEALS_ATLAS_V2.0</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<a class="text-primary dark:text-primary font-bold font-label-caps text-label-caps opacity-80" href="#">DOCUMENTATION</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps px-2 py-1" href="#">MONITORING</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps px-2 py-1" href="#">DEPLOY</a>
+</nav>
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer Component -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 pb-4 z-40 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant w-64 hidden lg:flex">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">SYSTEM_MODULES</h2>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Data is the active section for this topology view -->
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Logic</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 bg-primary-container text-on-primary-container font-bold border-l-4 border-surface-tint scale-[0.99] transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+<span class="font-label-caps text-label-caps">API</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<div class="bg-surface-container-low p-3 border border-outline-variant">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-[9px] text-on-surface-variant">NODE_STATUS</span>
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+</div>
+<div class="font-code-xs text-primary">v4.2.0-STABLE</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-20 px-8 pb-12 min-h-screen">
+<!-- Header Section -->
+<section class="mb-12 border-l-4 border-primary-container pl-6">
+<div class="flex items-center gap-4 mb-2">
+<span class="font-label-caps text-label-caps bg-primary-container text-on-primary-container px-2 py-0.5">TOPOLOGY_MAP</span>
+<span class="font-code-sm text-on-surface-variant opacity-60">REF: WF-019-STL</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight">Technical Implementation Guide: Workflow-019</h1>
+<p class="font-body-md text-on-surface-variant mt-2 max-w-2xl">High-fidelity architectural blueprint for system operators. This document covers the interconnected microservices, dependency chains, and compliance requirements for the global settlement engine.</p>
+</section>
+<!-- Bento Grid Topology -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+<!-- OWNING MICROSERVICES (Swimlane concept) -->
+<div class="md:col-span-8 bg-surface-container p-6 border border-outline-variant relative overflow-hidden">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="hub">hub</span>
+<h3 class="font-headline-md text-headline-md">Owning Microservices</h3>
+</div>
+<span class="font-code-xs text-on-surface-variant">TOTAL_NODES: 06</span>
+</div>
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- Service Node -->
+<div class="bg-surface p-3 border-l-2 border-primary-container hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-primary transition-colors">SRV_CORE</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="font-code-sm text-on-surface mb-1">Settlement</div>
+<div class="font-code-xs text-on-surface-variant opacity-50">v2.4.1 | GoLang</div>
+</div>
+<div class="bg-surface p-3 border-l-2 border-secondary-container hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-secondary transition-colors">SRV_FIN</span>
+<span class="material-symbols-outlined text-[14px] text-secondary" data-icon="account_balance_wallet" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+</div>
+<div class="font-code-sm text-on-surface mb-1">Wallet</div>
+<div class="font-code-xs text-on-surface-variant opacity-50">v1.9.0 | Rust</div>
+</div>
+<div class="bg-surface p-3 border-l-2 border-primary-container hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-primary transition-colors">SRV_BOOK</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="menu_book" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</div>
+<div class="font-code-sm text-on-surface mb-1">Ledger</div>
+<div class="font-code-xs text-on-surface-variant opacity-50">v4.0.2 | GoLang</div>
+</div>
+<div class="bg-surface p-3 border-l-2 border-outline hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-primary transition-colors">SRV_GOV</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="policy">policy</span>
+</div>
+<div class="font-code-sm text-on-surface mb-1">Tax</div>
+<div class="font-code-xs text-on-surface-variant opacity-50">v0.8.5 | Python</div>
+</div>
+<div class="bg-surface p-3 border-l-2 border-primary-container hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-primary transition-colors">SRV_OUT</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="payments">payments</span>
+</div>
+<div class="font-code-sm text-on-surface mb-1">Payout</div>
+<div class="font-code-xs text-on-surface-variant opacity-50">v2.1.0 | GoLang</div>
+</div>
+<div class="bg-surface p-3 border-l-2 border-error border-dashed hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-error transition-colors">EXT_GATEWAY</span>
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="warning">warning</span>
+</div>
+<div class="font-code-sm text-on-surface mb-1">Bank_Gateway</div>
+<div class="font-code-xs text-on-surface-variant opacity-50">LATENCY: 450ms</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/30">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="link">link</span>
+<span class="font-label-caps text-label-caps">System Dependencies &amp; Orchestration</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-sm font-code-sm text-on-surface-variant border border-outline-variant/10">
+<div class="flex items-center justify-between py-1 border-b border-outline-variant/10">
+<span>Ingress Controller</span>
+<span class="text-primary">Nginx-v1.22</span>
+</div>
+<div class="flex items-center justify-between py-1 border-b border-outline-variant/10">
+<span>Message Broker</span>
+<span class="text-primary">RabbitMQ (Cluster)</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<span>Workflow Engine</span>
+<span class="text-primary">n8n Workflow IDs: WF-019-STL</span>
+</div>
+</div>
+</div>
+</div>
+<!-- COMPLIANCE & REQS (Side Stack) -->
+<div class="md:col-span-4 space-y-6">
+<!-- Testing Req -->
+<div class="bg-surface-container p-6 border border-outline-variant">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="biotech">biotech</span>
+<h4 class="font-headline-md text-headline-md">Validation Metrics</h4>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-[10px]">Unit Coverage</span>
+<span class="font-code-xs text-primary">92% REQUIRED</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest">
+<div class="h-full bg-primary-container" style="width: 94%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-[10px]">Integration Tests</span>
+<span class="font-code-xs text-secondary">PASSING</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest">
+<div class="h-full bg-secondary-container" style="width: 100%"></div>
+</div>
+</div>
+</div>
+<div class="mt-6 flex flex-wrap gap-2">
+<span class="font-code-xs border border-outline-variant px-2 py-0.5 bg-surface">PROMETHEUS_READY</span>
+<span class="font-code-xs border border-outline-variant px-2 py-0.5 bg-surface">ELK_STREAMS_OK</span>
+</div>
+</div>
+<!-- Persistence -->
+<div class="bg-surface-container p-6 border border-outline-variant">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="storage">storage</span>
+<h4 class="font-headline-md text-headline-md">Data Persistence</h4>
+</div>
+<div class="flex items-center gap-4 mb-4">
+<div class="flex-1 p-3 bg-surface border border-outline-variant">
+<span class="font-label-caps text-[10px] block mb-1">RELATIONAL</span>
+<span class="font-code-sm text-primary">Postgres 15.x</span>
+</div>
+<div class="flex-1 p-3 bg-surface border border-outline-variant">
+<span class="font-label-caps text-[10px] block mb-1">CACHING</span>
+<span class="font-code-sm text-secondary">Redis 7.2</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-3 font-code-xs text-on-surface-variant border border-dashed border-outline">
+<span class="text-on-surface font-bold">Migration Notice:</span> DB_CLUSTER_AUTO_SCALE enabled for Ledger shards.
+                    </div>
+</div>
+</div>
+<!-- APIS & INTERFACES (Full width node) -->
+<div class="md:col-span-12 bg-surface-container p-6 border border-outline-variant">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="electrical_services">electrical_services</span>
+<h3 class="font-headline-md text-headline-md">Required API Interfaces</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-lowest p-4 border border-outline-variant">
+<div class="font-label-caps text-label-caps text-on-primary-container mb-3 flex items-center gap-2">
+<span class="w-2 h-2 bg-primary-container rounded-full"></span>
+                            REST_GATEWAY
+                        </div>
+<ul class="font-code-sm space-y-2 text-on-surface-variant">
+<li class="flex justify-between"><span>POST /v2/settle</span> <span class="text-primary">202</span></li>
+<li class="flex justify-between"><span>GET /v2/status/{id}</span> <span class="text-primary">200</span></li>
+<li class="flex justify-between"><span>PATCH /v2/ledger</span> <span class="text-primary">204</span></li>
+</ul>
+</div>
+<div class="bg-surface-container-lowest p-4 border border-outline-variant">
+<div class="font-label-caps text-label-caps text-on-secondary-container mb-3 flex items-center gap-2">
+<span class="w-2 h-2 bg-secondary-container rounded-full"></span>
+                            gRPC_INTERNAL
+                        </div>
+<ul class="font-code-sm space-y-2 text-on-surface-variant">
+<li>FinanceService.WalletSync</li>
+<li>IdentityService.VerifyActor</li>
+<li>LogService.AuditWrite</li>
+</ul>
+</div>
+<div class="bg-surface-container-lowest p-4 border border-outline-variant">
+<div class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-3 flex items-center gap-2">
+<span class="w-2 h-2 bg-tertiary-fixed-dim rounded-full"></span>
+                            WEBHOOK_IN
+                        </div>
+<ul class="font-code-sm space-y-2 text-on-surface-variant">
+<li class="flex justify-between"><span>Bank_Response</span> <span class="text-secondary">AUTO</span></li>
+<li class="flex justify-between"><span>Tax_Verification</span> <span class="text-secondary">ASYNC</span></li>
+<li class="flex justify-between"><span>Fraud_Alerts</span> <span class="text-error">CRIT</span></li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Deployment & Completion -->
+<div class="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Deployment -->
+<div class="bg-surface-container p-6 border border-outline-variant flex flex-col">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="cloud_done">cloud_done</span>
+<h3 class="font-headline-md text-headline-md">Deployment Requirements</h3>
+</div>
+<div class="flex-1 space-y-4">
+<div class="flex items-center gap-4">
+<div class="bg-surface p-3 border border-outline-variant flex-1 text-center">
+<span class="material-symbols-outlined block mb-1 text-primary" data-icon="kubernetes">add_notes</span>
+<span class="font-label-caps text-[10px]">K8s Ready</span>
+</div>
+<div class="bg-surface p-3 border border-outline-variant flex-1 text-center">
+<span class="material-symbols-outlined block mb-1 text-primary" data-icon="container">contacts</span>
+<span class="font-label-caps text-[10px]">Docker Image</span>
+</div>
+<div class="bg-surface p-3 border border-outline-variant flex-1 text-center">
+<span class="material-symbols-outlined block mb-1 text-primary" data-icon="security">security</span>
+<span class="font-label-caps text-[10px]">TLS 1.3</span>
+</div>
+</div>
+<div class="bg-surface-container-high p-4">
+<div class="font-code-xs text-on-surface-variant mb-2">HELM_VALUES_SNIPPET:</div>
+<code class="font-code-xs text-primary block leading-relaxed">
+                                replicaCount: 3<br/>
+                                strategy: RollingUpdate<br/>
+                                autoscaling: enabled: true
+                            </code>
+</div>
+</div>
+</div>
+<!-- Completion Criteria -->
+<div class="bg-surface-container p-6 border border-outline-variant border-l-4 border-l-primary-container">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="fact_check">fact_check</span>
+<h3 class="font-headline-md text-headline-md">Completion Criteria</h3>
+</div>
+<ul class="space-y-3">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check_box" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<div>
+<span class="font-code-sm text-on-surface block">Idempotency Validation</span>
+<span class="font-code-xs text-on-surface-variant">All settlement calls must survive double-execution triggers.</span>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check_box" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<div>
+<span class="font-code-sm text-on-surface block">Reconciliation Logic</span>
+<span class="font-code-xs text-on-surface-variant">Ledger must match Wallet balance within +/- 0.0001 precision.</span>
+</div>
+</li>
+<li class="flex items-start gap-3 opacity-50">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]" data-icon="check_box_outline_blank">check_box_outline_blank</span>
+<div>
+<span class="font-code-sm text-on-surface block">DR Site Replication</span>
+<span class="font-code-xs text-on-surface-variant">Active-Passive sync configured across EU-Central and US-East.</span>
+</div>
+</li>
+<li class="flex items-start gap-3 opacity-50">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]" data-icon="check_box_outline_blank">check_box_outline_blank</span>
+<div>
+<span class="font-code-sm text-on-surface block">Security Audit (Pen-Test)</span>
+<span class="font-code-xs text-on-surface-variant">Completion of OWASP Top 10 hardening on all gRPC endpoints.</span>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Footer Audit Stub -->
+<footer class="mt-12 flex flex-col md:flex-row items-center justify-between border-t border-outline-variant pt-6 gap-4">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">AUTHOR:</span>
+<span class="font-code-sm text-primary">SYSTEM_ARCHITECT_04</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">TIMESTAMP:</span>
+<span class="font-code-sm text-on-surface">2023-11-24T14:22:01Z</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-surface-variant text-on-surface-variant hover:bg-surface-container-highest px-4 py-1 font-label-caps text-label-caps transition-colors border border-outline-variant">
+                    EXPORT_SPEC.YAML
+                </button>
+<button class="bg-primary-container text-on-primary-container hover:opacity-80 px-4 py-1 font-label-caps text-label-caps transition-all transform active:scale-95 border border-primary">
+                    PUSH_TO_PROD
+                </button>
+</div>
+</footer>
+</main>
+<!-- Micro-Telemetry Hover Panel (Simulated interactions) -->
+<div class="fixed bottom-8 right-8 bg-surface border border-primary-container p-3 z-50 pointer-events-none opacity-0 transition-opacity" id="telemetry-stub">
+<div class="font-label-caps text-[9px] text-primary mb-1">REAL_TIME_METRICS</div>
+<div class="flex gap-4">
+<div>
+<span class="font-code-xs text-on-surface-variant block">CPU</span>
+<span class="font-code-sm text-on-surface">12.4%</span>
+</div>
+<div>
+<span class="font-code-xs text-on-surface-variant block">MEM</span>
+<span class="font-code-sm text-on-surface">4.2GB</span>
+</div>
+<div>
+<span class="font-code-xs text-on-surface-variant block">REQ/S</span>
+<span class="font-code-sm text-on-surface">1.2k</span>
+</div>
+</div>
+</div>
+<script>
+        // Micro-interaction for telemetry stub appearance
+        document.addEventListener('mousemove', (e) => {
+            const stub = document.getElementById('telemetry-stub');
+            if (e.clientY > window.innerHeight - 100 && e.clientX > window.innerWidth - 100) {
+                stub.style.opacity = '1';
+            } else {
+                stub.style.opacity = '0';
+            }
+        });
+
+        // Toggle service node active state
+        document.querySelectorAll('.bg-surface').forEach(node => {
+            node.addEventListener('click', function() {
+                this.classList.toggle('bg-surface-container-highest');
+                this.classList.toggle('border-primary');
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-022: Technical Execution Sequence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .lifeline-path {
+            background: linear-gradient(to bottom, #84967e 50%, transparent 50%);
+            background-size: 1px 8px;
+            width: 1px;
+        }
+        .message-arrow::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 8px solid currentColor;
+        }
+        .async-arrow {
+            border-top: 1px dashed currentColor;
+        }
+        .sync-arrow {
+            border-top: 2px solid currentColor;
+        }
+        .db-commit {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #00e639;
+            background: #051424;
+            transform: rotate(45deg);
+        }
+        .activation-bar {
+            width: 8px;
+            background: #273647;
+            border: 1px solid #3b4b37;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#273647",
+                        "on-error": "#690005",
+                        "surface-container-low": "#0d1c2d",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary": "#002388",
+                        "surface-container-high": "#1c2b3c",
+                        "surface-dim": "#051424",
+                        "inverse-primary": "#006e16",
+                        "primary-fixed": "#72ff70",
+                        "on-secondary-fixed": "#001356",
+                        "on-secondary-container": "#c6ceff",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "primary": "#ebffe2",
+                        "surface-container": "#122131",
+                        "surface-bright": "#2c3a4c",
+                        "on-primary-fixed": "#002203",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-background": "#d4e4fa",
+                        "error-container": "#93000a",
+                        "secondary": "#b8c3ff",
+                        "on-primary": "#003907",
+                        "primary-fixed-dim": "#00e639",
+                        "on-primary-fixed-variant": "#00530e",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "inverse-on-surface": "#233143",
+                        "surface-container-lowest": "#010f1f",
+                        "on-tertiary-fixed": "#2c0051",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary-fixed": "#dde1ff",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#0043eb",
+                        "surface": "#051424",
+                        "background": "#051424",
+                        "tertiary-container": "#ecd3ff",
+                        "on-tertiary": "#490080",
+                        "outline-variant": "#3b4b37",
+                        "on-primary-container": "#007117",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "primary-container": "#00ff41",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-surface": "#d4e4fa",
+                        "surface-tint": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "on-error-container": "#ffdad6",
+                        "tertiary": "#fff6ff",
+                        "outline": "#84967e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface">
+<!-- TopAppBar from JSON -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-lane-margin h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-size: 24px;">account_tree</span>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary-fixed-dim uppercase tracking-widest">AURA_CORE_V2</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-8">
+<span class="text-primary-fixed-dim font-bold cursor-pointer font-label-caps text-label-caps tracking-widest">ARCHITECTURE</span>
+<span class="text-on-surface-variant hover:bg-surface-variant transition-colors cursor-pointer font-label-caps text-label-caps tracking-widest px-2 py-1">LOGIC</span>
+<span class="text-on-surface-variant hover:bg-surface-variant transition-colors cursor-pointer font-label-caps text-label-caps tracking-widest px-2 py-1">DATA</span>
+</nav>
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer from JSON -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] z-40 flex flex-col w-64 bg-surface-container-low border-r border-outline-variant hidden lg:flex">
+<div class="p-4 border-b border-outline-variant">
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-60">SYSTEM_MODULES</p>
+</div>
+<div class="flex flex-col flex-1 py-4">
+<div class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container border-l-2 border-primary-fixed-dim transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-label-caps text-label-caps">Architecture</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-label-caps text-label-caps">Logic</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">api</span>
+<span class="font-label-caps text-label-caps">API</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant">
+<span class="font-code-sm text-code-sm text-secondary-fixed">NODE_V.2.44.0</span>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-16 px-4 lg:pl-72 lg:pr-8 min-h-screen">
+<div class="max-w-7xl mx-auto">
+<!-- Diagram Header -->
+<div class="mb-8 border-b border-outline-variant pb-4 flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight">WF-022: Technical Execution Sequence</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1 uppercase">Process ID: B8-EXEC-2024-ALPHA</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-[2px] bg-primary-fixed-dim"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Sync</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-[2px] border-t border-dashed border-primary-fixed-dim"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Async</span>
+</div>
+</div>
+</div>
+<!-- Sequence Diagram Container -->
+<div class="relative overflow-x-auto bg-surface-container-lowest p-8 border border-outline-variant rounded-lg">
+<div class="min-w-[1400px] flex flex-col">
+<!-- Lifeline Headers -->
+<div class="flex justify-between relative mb-12">
+<!-- Individual Lifelines -->
+<div class="flex flex-col items-center w-32">
+<div class="bg-surface-container-high border border-outline px-3 py-2 rounded-sm text-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">SHIPMENT_SRV</span>
+</div>
+<div class="lifeline-path h-[800px]"></div>
+</div>
+<div class="flex flex-col items-center w-32">
+<div class="bg-surface-container-high border border-outline px-3 py-2 rounded-sm text-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">DISPATCH_ENG</span>
+</div>
+<div class="lifeline-path h-[800px]"></div>
+</div>
+<div class="flex flex-col items-center w-32">
+<div class="bg-surface-container-high border border-outline px-3 py-2 rounded-sm text-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">AURA_AI</span>
+</div>
+<div class="lifeline-path h-[800px]"></div>
+</div>
+<div class="flex flex-col items-center w-32">
+<div class="bg-surface-container-high border border-outline px-3 py-2 rounded-sm text-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">DRIVER_SRV</span>
+</div>
+<div class="lifeline-path h-[800px]"></div>
+</div>
+<div class="flex flex-col items-center w-32">
+<div class="bg-surface-container-high border border-outline px-3 py-2 rounded-sm text-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">FLEET_SRV</span>
+</div>
+<div class="lifeline-path h-[800px]"></div>
+</div>
+<div class="flex flex-col items-center w-32">
+<div class="bg-surface-container-high border border-outline px-3 py-2 rounded-sm text-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">GPS_HUB</span>
+</div>
+<div class="lifeline-path h-[800px]"></div>
+</div>
+<div class="flex flex-col items-center w-32">
+<div class="bg-surface-container-high border border-outline px-3 py-2 rounded-sm text-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">NOTIF_SRV</span>
+</div>
+<div class="lifeline-path h-[800px]"></div>
+</div>
+<div class="flex flex-col items-center w-32">
+<div class="bg-surface-container-high border border-outline px-3 py-2 rounded-sm text-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">AUDIT_LOG</span>
+</div>
+<div class="lifeline-path h-[800px]"></div>
+</div>
+<div class="flex flex-col items-center w-32">
+<div class="bg-surface-container-high border border-outline px-3 py-2 rounded-sm text-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">DRIVER_APP</span>
+</div>
+<div class="lifeline-path h-[800px]"></div>
+</div>
+</div>
+<!-- Messages Overlay -->
+<div class="absolute top-[108px] left-8 right-8 pointer-events-none">
+<!-- Step 1 -->
+<div class="relative h-16 flex items-center">
+<div class="absolute left-16 w-[128px] sync-arrow message-arrow text-primary-fixed-dim"></div>
+<span class="absolute left-20 -top-1 font-code-xs text-code-xs text-primary bg-surface-container-lowest px-1">INIT_DISPATCH(ship_id)</span>
+<div class="absolute left-[186px] top-4 db-commit" title="DB Commit"></div>
+</div>
+<!-- Step 2 -->
+<div class="relative h-16 flex items-center">
+<div class="absolute left-[192px] w-[128px] sync-arrow message-arrow text-primary-fixed-dim"></div>
+<span class="absolute left-[200px] -top-1 font-code-xs text-code-xs text-primary bg-surface-container-lowest px-1">GET_OPT_ROUTE(coords)</span>
+</div>
+<!-- Step 3 (Self Message Aura AI) -->
+<div class="relative h-20 flex items-center">
+<div class="absolute left-[320px] top-2 border-l-2 border-t-2 border-r-2 border-primary-fixed-dim w-12 h-8 rounded-tr-md"></div>
+<div class="absolute left-[320px] top-10 border-r-2 border-b-2 border-primary-fixed-dim w-12 h-2 message-arrow transform rotate-180"></div>
+<span class="absolute left-[340px] top-4 font-code-xs text-code-xs text-primary">MODEL_INFERENCE</span>
+</div>
+<!-- Step 4 -->
+<div class="relative h-16 flex items-center">
+<div class="absolute left-[192px] right-[1024px] w-[128px] async-arrow message-arrow text-on-surface-variant transform scale-x-[-1]"></div>
+<span class="absolute left-[200px] -top-1 font-code-xs text-code-xs text-on-surface-variant bg-surface-container-lowest px-1">OPTIMIZED_PAYLOAD</span>
+</div>
+<!-- Step 5 -->
+<div class="relative h-16 flex items-center">
+<div class="absolute left-[192px] w-[256px] sync-arrow message-arrow text-primary-fixed-dim"></div>
+<span class="absolute left-[200px] -top-1 font-code-xs text-code-xs text-primary bg-surface-container-lowest px-1">FIND_NEAREST_DRIVER()</span>
+</div>
+<!-- Step 6 (Fleet & GPS Check) -->
+<div class="relative h-16 flex items-center">
+<div class="absolute left-[448px] w-[256px] sync-arrow message-arrow text-primary-fixed-dim"></div>
+<span class="absolute left-[460px] -top-1 font-code-xs text-code-xs text-primary bg-surface-container-lowest px-1">QUERY_FLEET_STATUS</span>
+<div class="absolute left-[576px] w-[128px] async-arrow message-arrow text-on-surface-variant"></div>
+<span class="absolute left-[580px] top-4 font-code-xs text-code-xs text-on-surface-variant">POLL_LOC</span>
+</div>
+<!-- Step 7 -->
+<div class="relative h-16 flex items-center">
+<div class="absolute left-[448px] w-[256px] async-arrow message-arrow text-on-surface-variant transform scale-x-[-1]"></div>
+<span class="absolute left-[460px] -top-1 font-code-xs text-code-xs text-on-surface-variant bg-surface-container-lowest px-1">DRIVER_ASSIGNED(id: 02)</span>
+<div class="absolute left-[442px] top-4 db-commit"></div>
+</div>
+<!-- Step 8 (Notification & App) -->
+<div class="relative h-16 flex items-center">
+<div class="absolute left-[192px] w-[640px] sync-arrow message-arrow text-primary-fixed-dim"></div>
+<span class="absolute left-[200px] -top-1 font-code-xs text-code-xs text-primary bg-surface-container-lowest px-1">PUSH_ALERT(driver_02)</span>
+</div>
+<!-- Step 9 -->
+<div class="relative h-16 flex items-center">
+<div class="absolute left-[832px] w-[256px] sync-arrow message-arrow text-primary-fixed-dim"></div>
+<span class="absolute left-[840px] -top-1 font-code-xs text-code-xs text-primary bg-surface-container-lowest px-1">SOCKET_EMIT(job_offer)</span>
+</div>
+<!-- Step 10 (Audit) -->
+<div class="relative h-16 flex items-center">
+<div class="absolute left-[64px] w-[896px] async-arrow message-arrow text-on-surface-variant"></div>
+<span class="absolute left-[80px] -top-1 font-code-xs text-code-xs text-on-surface-variant bg-surface-container-lowest px-1">TRACE_WRITE(full_sequence)</span>
+</div>
+<!-- Activation Bars (Conceptual) -->
+<div class="absolute left-14 top-0 w-4 h-12 bg-surface-variant border border-outline opacity-50"></div>
+<div class="absolute left-[182px] top-12 w-4 h-[400px] bg-surface-variant border border-outline opacity-50"></div>
+<div class="absolute left-[310px] top-28 w-4 h-64 bg-surface-variant border border-outline opacity-50"></div>
+<div class="absolute left-[1078px] top-[500px] w-4 h-24 bg-surface-variant border border-outline opacity-50"></div>
+</div>
+</div>
+</div>
+<!-- Telemetry & Logs Sidebar -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="bg-surface-container p-4 border border-outline-variant">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">analytics</span>
+<h3 class="font-label-caps text-label-caps text-primary">REAL-TIME METRICS</h3>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between border-b border-outline-variant pb-1">
+<span class="font-code-xs text-code-xs text-on-surface-variant">AVG_LATENCY</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">42ms</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-1">
+<span class="font-code-xs text-code-xs text-on-surface-variant">EXEC_SUCCESS</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">99.98%</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-1">
+<span class="font-code-xs text-code-xs text-on-surface-variant">ACTIVE_NODES</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">09/09</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2 bg-surface-container p-4 border border-outline-variant">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">terminal</span>
+<h3 class="font-label-caps text-label-caps text-primary">EXECUTION_AUDIT_STUB</h3>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant space-y-1">
+<p>[2024-05-24 14:02:01.442] <span class="text-primary-fixed-dim">INFO</span> [SHIPMENT_SRV] Initiated workflow WF-022</p>
+<p>[2024-05-24 14:02:01.445] <span class="text-primary-fixed-dim">INFO</span> [DISPATCH_ENG] Handshake with AURA_AI established</p>
+<p>[2024-05-24 14:02:01.512] <span class="text-tertiary-fixed-dim">WARN</span> [GPS_HUB] High jitter detected on NODE_7 (Retry 1/3)</p>
+<p>[2024-05-24 14:02:01.620] <span class="text-primary-fixed-dim">DB</span> [AUDIT_LOG] Commit successful: TRANSACTION_ID_66x9</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar from JSON -->
+<footer class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest backdrop-blur-md border-t border-outline-variant flex justify-around items-center h-12">
+<div class="text-primary-fixed-dim scale-110 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<div class="text-on-surface-variant opacity-60 hover:opacity-100 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">memory</span>
+</div>
+<div class="text-on-surface-variant opacity-60 hover:opacity-100 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">security</span>
+</div>
+<div class="text-on-surface-variant opacity-60 hover:opacity-100 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">support_agent</span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for activation bars and arrows
+        document.querySelectorAll('.lifeline-path').forEach(line => {
+            line.addEventListener('mouseover', () => {
+                line.style.boxShadow = '0 0 15px rgba(0, 230, 57, 0.2)';
+                line.style.borderColor = '#00e639';
+            });
+            line.addEventListener('mouseout', () => {
+                line.style.boxShadow = 'none';
+                line.style.borderColor = 'transparent';
+            });
+        });
+    </script>
+</body></html>

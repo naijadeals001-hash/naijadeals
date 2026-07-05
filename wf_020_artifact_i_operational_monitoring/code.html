@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAIJADEALS ATLAS V2.0 | Operational Monitoring</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --grid-bg: radial-gradient(circle, rgba(59, 75, 55, 0.15) 1px, transparent 1px);
+        }
+        body {
+            background-color: #051424;
+            background-image: var(--grid-bg);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .node-border-glow {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.1);
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, rgba(0, 230, 57, 0.1), transparent);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant flex justify-between items-center w-full px-grid-unit h-12 z-50 fixed top-0 left-0">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-tighter text-primary-container dark:text-primary-container">NAIJADEALS_ATLAS_V2.0</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<span class="font-label-caps text-label-caps text-primary dark:text-primary font-bold opacity-80 cursor-pointer">MONITORING</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors cursor-pointer px-2">LOGS</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors cursor-pointer px-2">NODES</span>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 pb-4 z-40 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant w-64 hidden lg:flex">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-on-primary-container font-label-caps">SYSTEM_MODULES</h2>
+</div>
+<nav class="flex-1 space-y-1 px-2">
+<div class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container font-bold border-l-4 border-surface-tint scale-[0.99] transition-transform cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">ARCHITECTURE</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">LOGIC</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high cursor-pointer">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">DATA</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high cursor-pointer">
+<span class="material-symbols-outlined">api</span>
+<span class="font-label-caps text-label-caps">API</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">TELEMETRY</span>
+</div>
+</nav>
+<div class="mt-auto px-6 border-t border-outline-variant pt-4">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">NODE_STATUS</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant opacity-60 uppercase">Cluster: 0x92f_primary</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="lg:ml-64 pt-12 flex-1 relative overflow-hidden flex flex-col">
+<div class="scanline"></div>
+<!-- Header Section: High-Density KPIs -->
+<section class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 border-b border-outline-variant bg-surface-dim">
+<!-- Telemetry Unit -->
+<div class="bg-surface-container-low p-4 border border-outline-variant relative group hover:border-primary-fixed-dim transition-all overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-fixed-dim"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ORDERS PER HOUR</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">show_chart</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">1,429</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">+12.4%</span>
+</div>
+<div class="mt-4 flex gap-1 items-end h-12">
+<div class="w-full bg-outline-variant h-4"></div>
+<div class="w-full bg-outline-variant h-6"></div>
+<div class="w-full bg-primary-fixed-dim h-10"></div>
+<div class="w-full bg-primary-fixed-dim h-8"></div>
+<div class="w-full bg-primary-fixed-dim h-12"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant relative group hover:border-secondary transition-all">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">REVENUE_STREAM (24H)</span>
+<span class="material-symbols-outlined text-secondary text-sm">payments</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">₦4.2M</span>
+<span class="font-code-xs text-code-xs text-secondary">REAL_TIME</span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant mt-2 opacity-60">Avg. ₦175,000 / hr</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant relative group hover:border-tertiary-fixed-dim transition-all">
+<div class="absolute top-0 left-0 w-1 h-full bg-tertiary-fixed-dim"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">AVG ORDER VALUE</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-sm">shopping_basket</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">₦2,940</span>
+<span class="font-code-xs text-code-xs text-error">-0.4%</span>
+</div>
+<div class="mt-4 flex gap-2">
+<div class="h-1 bg-tertiary-fixed-dim flex-1"></div>
+<div class="h-1 bg-outline-variant flex-1"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant relative group hover:border-primary-fixed-dim transition-all">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-fixed-dim"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">MERCHANT_GROWTH</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">person_add</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">84</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">NEW_ACQ</span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant mt-2 opacity-60">TOTAL: 12,492 ACTIVE</div>
+</div>
+</section>
+<!-- Dynamic Workflow & Grid Section -->
+<section class="flex-1 grid grid-cols-12 overflow-hidden">
+<!-- Left Panel: Commerce Health Map -->
+<div class="col-span-12 xl:col-span-8 p-6 overflow-y-auto terminal-scroll">
+<div class="mb-6 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">hub</span>
+<h3 class="font-headline-md text-headline-md uppercase tracking-tight">OPERATIONAL_NODE_MATRIX</h3>
+</div>
+<div class="flex gap-2">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">LIVE: 45ms LATENCY</span>
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">REPLICA: SYNCED</span>
+</div>
+</div>
+<!-- Bento Logic Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- Inventory Health Node -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-3 group transition-all hover:bg-surface-container-high">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">inventory_2</span> INVENTORY_HEALTH
+                            </span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-sm">
+<span class="text-on-surface-variant">IN_STOCK</span>
+<span class="text-primary font-bold">92.4%</span>
+</div>
+<div class="w-full bg-outline-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full w-[92%]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-sm">
+<span class="text-on-surface-variant">LOW_STOCK_ALERTS</span>
+<span class="text-error font-bold">12</span>
+</div>
+</div>
+<div class="mt-2 text-code-xs font-mono text-on-surface-variant opacity-50">#45-SYS-INV-POLL-OK</div>
+</div>
+<!-- Return Rate Logic -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-3">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">keyboard_return</span> RETURN_REASON_MAP
+                            </span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-end gap-2">
+<div class="flex-1">
+<div class="flex justify-between text-code-xs mb-1">
+<span>DEFECTIVE</span>
+<span>4.2%</span>
+</div>
+<div class="h-1 bg-outline-variant"><div class="h-full bg-error w-[4%]"></div></div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-code-xs mb-1">
+<span>FIT/SIZE</span>
+<span>12.8%</span>
+</div>
+<div class="h-1 bg-outline-variant"><div class="h-full bg-secondary w-[13%]"></div></div>
+</div>
+</div>
+<div class="font-code-sm text-center text-primary-fixed-dim bg-primary-fixed-dim/5 py-1 border border-primary-fixed-dim/20">
+                                AGGREGATE RATE: 2.1%
+                            </div>
+</div>
+</div>
+<!-- Trust Score Trends -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col gap-3">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified_user</span> TRUST_INDEX
+                            </span>
+<div class="flex gap-1">
+<div class="w-1 h-3 bg-primary-fixed-dim"></div>
+<div class="w-1 h-3 bg-primary-fixed-dim"></div>
+<div class="w-1 h-3 bg-primary-fixed-dim"></div>
+<div class="w-1 h-3 bg-outline-variant"></div>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-center items-center py-4">
+<div class="text-headline-lg font-headline-lg text-primary">94.8</div>
+<div class="font-code-xs text-on-surface-variant">SYSTEMIC_TRUST_STABILITY</div>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-auto">
+<div class="text-code-xs border border-outline-variant p-1 text-center">KYC: 100%</div>
+<div class="text-code-xs border border-outline-variant p-1 text-center">FRAUD: 0.02%</div>
+</div>
+</div>
+<!-- Settlement Time Performance -->
+<div class="md:col-span-2 bg-surface-container border border-outline-variant p-4 flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SETTLEMENT_VELOCITY (T+X)</span>
+<span class="font-code-xs px-2 bg-primary-fixed-dim text-on-primary-fixed">OPTIMIZED</span>
+</div>
+<div class="grid grid-cols-3 gap-6">
+<div class="border-l border-outline-variant pl-4">
+<div class="text-code-xs text-on-surface-variant">T+0 RATE</div>
+<div class="text-headline-md font-headline-md text-primary">68%</div>
+</div>
+<div class="border-l border-outline-variant pl-4">
+<div class="text-code-xs text-on-surface-variant">T+1 RATE</div>
+<div class="text-headline-md font-headline-md text-primary">24%</div>
+</div>
+<div class="border-l border-outline-variant pl-4">
+<div class="text-code-xs text-on-surface-variant">T+2+ RATE</div>
+<div class="text-headline-md font-headline-md text-error">8%</div>
+</div>
+</div>
+<div class="h-2 w-full flex bg-outline-variant">
+<div class="h-full bg-primary-fixed-dim" style="width: 68%;"></div>
+<div class="h-full bg-secondary" style="width: 24%;"></div>
+<div class="h-full bg-error" style="width: 8%;"></div>
+</div>
+</div>
+<!-- Conversion & Cart -->
+<div class="bg-surface-container-high border border-primary-fixed-dim/30 p-4 flex flex-col justify-between overflow-hidden relative">
+<div class="absolute -right-4 -top-4 opacity-10">
+<span class="material-symbols-outlined text-[100px] text-primary">shopping_cart</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">CONVERSION_RATE</div>
+<div class="text-headline-lg font-headline-lg">3.82%</div>
+</div>
+<div class="mt-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">CART_ABANDONMENT</div>
+<div class="flex items-center gap-3">
+<div class="text-headline-md font-headline-md text-on-surface">62.4%</div>
+<div class="flex-1 h-[1px] bg-outline-variant"></div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">warning</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Workflow Flow Visualization -->
+<div class="mt-8 border border-outline-variant bg-surface-container-lowest p-6 relative">
+<div class="flex justify-between items-center mb-6">
+<span class="font-label-caps text-label-caps text-on-surface-variant">TRANSACTION_PIPELINE_STATUS</span>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 bg-primary-fixed-dim"></div>
+<span class="text-code-xs">PRIMARY</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 bg-secondary"></div>
+<span class="text-code-xs">FALLBACK</span>
+</div>
+</div>
+</div>
+<!-- Flow Diagram -->
+<div class="flex flex-col md:flex-row items-center justify-between gap-4 relative">
+<!-- Step 1 -->
+<div class="w-full md:w-32 bg-surface border border-primary-fixed-dim p-2 text-center relative z-10">
+<div class="text-code-xs text-primary-fixed-dim mb-1">GATEWAY</div>
+<div class="font-code-sm">INGRESS_OK</div>
+<div class="absolute -bottom-4 md:bottom-auto md:-right-4 left-1/2 md:left-auto transform -translate-x-1/2 md:translate-x-0 md:top-1/2 md:-translate-y-1/2 z-0">
+<span class="material-symbols-outlined text-primary-fixed-dim">arrow_forward</span>
+</div>
+</div>
+<!-- Connector Row 1 -->
+<div class="hidden md:block flex-1 h-[1px] bg-primary-fixed-dim/30"></div>
+<!-- Step 2 -->
+<div class="w-full md:w-32 bg-surface border border-outline-variant p-2 text-center relative z-10">
+<div class="text-code-xs text-on-surface-variant mb-1">VALIDATION</div>
+<div class="font-code-sm">AUTH_PASS</div>
+<div class="absolute -bottom-4 md:bottom-auto md:-right-4 left-1/2 md:left-auto transform -translate-x-1/2 md:translate-x-0 md:top-1/2 md:-translate-y-1/2 z-0">
+<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+</div>
+</div>
+<!-- Connector Row 2 -->
+<div class="hidden md:block flex-1 h-[1px] bg-outline-variant/30"></div>
+<!-- Step 3 -->
+<div class="w-full md:w-32 bg-surface border border-secondary p-2 text-center relative z-10">
+<div class="text-code-xs text-secondary mb-1">SETTLEMENT</div>
+<div class="font-code-sm">QUEUED_80ms</div>
+<div class="absolute -bottom-4 md:bottom-auto md:-right-4 left-1/2 md:left-auto transform -translate-x-1/2 md:translate-x-0 md:top-1/2 md:-translate-y-1/2 z-0">
+<span class="material-symbols-outlined text-secondary">arrow_forward</span>
+</div>
+</div>
+<!-- Connector Row 3 -->
+<div class="hidden md:block flex-1 h-[1px] bg-secondary/30"></div>
+<!-- Step 4 -->
+<div class="w-full md:w-32 bg-primary-fixed-dim/10 border border-primary-fixed-dim p-2 text-center relative z-10">
+<div class="text-code-xs text-primary-fixed-dim mb-1">DISPATCH</div>
+<div class="font-code-sm text-primary">WEBHOOK_SENT</div>
+</div>
+</div>
+<div class="mt-12 p-4 bg-surface flex flex-wrap gap-6 border-t border-outline-variant">
+<div class="flex-1 min-w-[120px]">
+<div class="text-code-xs text-on-surface-variant">SYSTEM_TEMP</div>
+<div class="font-code-sm">42.2°C <span class="text-primary-fixed-dim">OPTIMAL</span></div>
+</div>
+<div class="flex-1 min-w-[120px]">
+<div class="text-code-xs text-on-surface-variant">STORAGE_IO</div>
+<div class="font-code-sm">1.2GB/s <span class="text-primary-fixed-dim">PEAK</span></div>
+</div>
+<div class="flex-1 min-w-[120px]">
+<div class="text-code-xs text-on-surface-variant">ACTIVE_SESSIONS</div>
+<div class="font-code-sm">48,291 <span class="text-secondary">BURSTING</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Panel: Audit Logs & Events -->
+<div class="col-span-12 xl:col-span-4 border-l border-outline-variant bg-surface-container-low flex flex-col overflow-hidden">
+<div class="p-4 border-b border-outline-variant flex items-center justify-between">
+<span class="font-label-caps text-label-caps">AUDIT_LOG_STREAM</span>
+<span class="material-symbols-outlined text-sm animate-spin">refresh</span>
+</div>
+<div class="flex-1 overflow-y-auto terminal-scroll p-4 space-y-3">
+<!-- Log Item -->
+<div class="font-code-xs border-l-2 border-primary-fixed-dim pl-3 py-1 bg-surface-container-highest/30">
+<div class="flex justify-between mb-1 opacity-50">
+<span>14:28:01.422</span>
+<span>NODE_04</span>
+</div>
+<div class="text-on-surface">SETTLEMENT_INITIATED: 0x9f2...81A (₦45,000)</div>
+</div>
+<!-- Log Item -->
+<div class="font-code-xs border-l-2 border-secondary pl-3 py-1 bg-surface-container-highest/30">
+<div class="flex justify-between mb-1 opacity-50">
+<span>14:27:58.109</span>
+<span>API_GATEWAY</span>
+</div>
+<div class="text-on-surface">RATE_LIMIT_CHECK: IP 104.22.181.* ALLOWED</div>
+</div>
+<!-- Log Item -->
+<div class="font-code-xs border-l-2 border-error pl-3 py-1 bg-error/5">
+<div class="flex justify-between mb-1 opacity-50">
+<span>14:27:44.921</span>
+<span>DB_CLUSTER</span>
+</div>
+<div class="text-error">REPLICA_LAG_DETECTED: +140ms on CLUSTER_B</div>
+</div>
+<!-- Log Item -->
+<div class="font-code-xs border-l-2 border-outline-variant pl-3 py-1">
+<div class="flex justify-between mb-1 opacity-50">
+<span>14:27:32.001</span>
+<span>SYS_CRON</span>
+</div>
+<div class="text-on-surface-variant">INVENTORY_SNAPSHOT_COMPLETE (45,221 records)</div>
+</div>
+<!-- More generic logs to fill density -->
+<div class="font-code-xs border-l-2 border-primary-fixed-dim pl-3 py-1 bg-surface-container-highest/30">
+<div class="flex justify-between mb-1 opacity-50">
+<span>14:27:22.422</span>
+<span>NODE_01</span>
+</div>
+<div class="text-on-surface">SETTLEMENT_COMPLETE: 0x221...A12 (₦12,400)</div>
+</div>
+<div class="font-code-xs border-l-2 border-primary-fixed-dim pl-3 py-1 bg-surface-container-highest/30">
+<div class="flex justify-between mb-1 opacity-50">
+<span>14:27:18.422</span>
+<span>NODE_01</span>
+</div>
+<div class="text-on-surface">USER_AUTH_GRANTED: session_id: 88219-X</div>
+</div>
+<div class="font-code-xs border-l-2 border-primary-fixed-dim pl-3 py-1 bg-surface-container-highest/30">
+<div class="flex justify-between mb-1 opacity-50">
+<span>14:27:01.422</span>
+<span>NODE_02</span>
+</div>
+<div class="text-on-surface">CART_TRANSFORM: guest -&gt; user_8821</div>
+</div>
+<div class="font-code-xs border-l-2 border-outline-variant pl-3 py-1">
+<div class="flex justify-between mb-1 opacity-50">
+<span>14:26:44.212</span>
+<span>SYS_POLL</span>
+</div>
+<div class="text-on-surface-variant">PING_PONG: All health-checks green</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-lowest border-t border-outline-variant">
+<div class="mb-2 flex justify-between">
+<span class="font-label-caps text-label-caps text-xs">MEMORY_ALLOCATION</span>
+<span class="font-code-xs">84%</span>
+</div>
+<div class="h-1 bg-outline-variant w-full">
+<div class="h-full bg-primary-fixed-dim w-[84%]"></div>
+</div>
+<div class="mt-4 flex gap-2">
+<button class="flex-1 bg-outline-variant/20 border border-outline-variant font-label-caps text-label-caps py-2 hover:bg-outline-variant/40 transition-colors">EXPORT_CSV</button>
+<button class="flex-1 bg-primary-fixed-dim text-on-primary-fixed font-label-caps text-label-caps py-2 hover:bg-primary-fixed transition-colors">SYS_DEBUG</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Interactive Layer: Hover Details / Micro-Telemetry -->
+<div class="fixed pointer-events-none opacity-0 bg-surface-bright border border-primary-fixed-dim p-2 z-[100] transition-opacity shadow-xl" id="telemetry-tooltip">
+<div class="font-label-caps text-[10px] text-primary-fixed-dim mb-1">NODE_TELEMETRY</div>
+<div class="font-code-xs text-white" id="tooltip-content"></div>
+</div>
+<script>
+        // Micro-interactions for terminal-style UI
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('mouseenter', (e) => {
+                const tooltip = document.getElementById('telemetry-tooltip');
+                const content = document.getElementById('tooltip-content');
+                const title = node.querySelector('.font-label-caps').textContent;
+                
+                content.innerHTML = `
+                    <div class='flex justify-between gap-4'><span>ID:</span> <span>0x${Math.floor(Math.random()*16777215).toString(16)}</span></div>
+                    <div class='flex justify-between gap-4'><span>LOAD:</span> <span>${Math.floor(Math.random()*40)+10}%</span></div>
+                    <div class='flex justify-between gap-4'><span>UPTIME:</span> <span>482d 12h</span></div>
+                `;
+                
+                tooltip.style.opacity = '1';
+                tooltip.style.left = `${e.clientX + 10}px`;
+                tooltip.style.top = `${e.clientY + 10}px`;
+            });
+            
+            node.addEventListener('mousemove', (e) => {
+                const tooltip = document.getElementById('telemetry-tooltip');
+                tooltip.style.left = `${e.clientX + 10}px`;
+                tooltip.style.top = `${e.clientY + 10}px`;
+            });
+
+            node.addEventListener('mouseleave', () => {
+                document.getElementById('telemetry-tooltip').style.opacity = '0';
+            });
+        });
+
+        // Simulating log scroll
+        const logContainer = document.querySelector('.terminal-scroll');
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                const logs = document.querySelector('.space-y-3');
+                const first = logs.firstElementChild;
+                const clone = first.cloneNode(true);
+                const timeStr = new Date().toLocaleTimeString('en-GB', { hour12: false }) + '.' + Math.floor(Math.random()*999);
+                clone.querySelector('span').textContent = timeStr;
+                logs.appendChild(clone);
+                if (logs.children.length > 20) logs.removeChild(logs.firstElementChild);
+            }
+        }, 3000);
+    </script>
+</body></html>

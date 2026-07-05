@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-022: Executive Dispatch Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#273647",
+                    "on-error": "#690005",
+                    "surface-container-low": "#0d1c2d",
+                    "on-tertiary-container": "#862ed4",
+                    "on-secondary": "#002388",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-dim": "#051424",
+                    "inverse-primary": "#006e16",
+                    "primary-fixed": "#72ff70",
+                    "on-secondary-fixed": "#001356",
+                    "on-secondary-container": "#c6ceff",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "primary": "#ebffe2",
+                    "surface-container": "#122131",
+                    "surface-bright": "#2c3a4c",
+                    "on-primary-fixed": "#002203",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-background": "#d4e4fa",
+                    "error-container": "#93000a",
+                    "secondary": "#b8c3ff",
+                    "on-primary": "#003907",
+                    "primary-fixed-dim": "#00e639",
+                    "on-primary-fixed-variant": "#00530e",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "inverse-on-surface": "#233143",
+                    "surface-container-lowest": "#010f1f",
+                    "on-tertiary-fixed": "#2c0051",
+                    "inverse-surface": "#d4e4fa",
+                    "secondary-fixed": "#dde1ff",
+                    "error": "#ffb4ab",
+                    "secondary-container": "#0043eb",
+                    "surface": "#051424",
+                    "background": "#051424",
+                    "tertiary-container": "#ecd3ff",
+                    "on-tertiary": "#490080",
+                    "outline-variant": "#3b4b37",
+                    "on-primary-container": "#007117",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "primary-container": "#00ff41",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-surface": "#d4e4fa",
+                    "surface-tint": "#00e639",
+                    "surface-container-highest": "#273647",
+                    "on-error-container": "#ffdad6",
+                    "tertiary": "#fff6ff",
+                    "outline": "#84967e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "node-gutter": "24px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .workflow-canvas {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            min-height: calc(100vh - 64px);
+        }
+        .swimlane-header {
+            writing-mode: vertical-lr;
+            transform: rotate(180deg);
+        }
+        .node-port {
+            width: 8px;
+            height: 8px;
+            background: #00e639;
+            border-radius: 50%;
+        }
+        .connector-line {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .glow-green {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.3);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface border-b border-outline-variant docked full-width top-0 fixed w-full z-50 flex justify-between items-center px-lane-margin h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary-fixed-dim dark:text-primary-fixed-dim uppercase tracking-widest">AURA_CORE_V2</h1>
+<span class="font-code-sm text-code-sm text-on-surface-variant opacity-50 px-3 border-l border-outline-variant">SYSTEM_ID: WF-022</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-8">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim font-bold cursor-pointer transition-colors">ARCHIVE_LOGS</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors">LIVE_FEED</span>
+</nav>
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] z-40 flex flex-col bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant w-64 hidden lg:flex">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase opacity-60">SYSTEM_MODULES</span>
+</div>
+<nav class="flex-1 py-2">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-l-2 border-primary-fixed-dim cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="font-label-caps text-label-caps">Architecture</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">Logic</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+<span class="font-label-caps text-label-caps">API</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</div>
+</nav>
+<div class="p-4 bg-surface-container border-t border-outline-variant">
+<div class="font-code-sm text-code-sm text-secondary-fixed mb-2 uppercase">Aura AI Status</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-on-surface">Optimizing Dispatch...</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="pt-16 lg:pl-64 min-h-screen">
+<div class="p-lane-margin">
+<!-- Header Section: Executive Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-lg flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Success Criteria</span>
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">98% Acceptance</span>
+<div class="mt-2 h-1 w-full bg-surface-container">
+<div class="h-full bg-primary-fixed-dim" style="width: 98%;"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-lg flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Business Objective</span>
+<span class="font-code-sm text-code-sm">Minimize Latency / Maximize Yield</span>
+<span class="font-code-xs text-code-xs text-secondary-fixed mt-1">STATUS: OPERATIONAL</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-lg flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Optimization Strategy</span>
+<span class="font-code-sm text-code-sm">AI-Driven Matching (Aura V4)</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim mt-1">LOAD: 12.4k/s</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-lg flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Process ID</span>
+<span class="font-headline-md text-headline-md text-secondary">WF-022 DISPATCH</span>
+<span class="font-code-xs text-code-xs opacity-50 mt-1">TIMESTAMP: 2023.10.27_14:42:01</span>
+</div>
+</div>
+<!-- Workflow Canvas Title -->
+<div class="mb-6 flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg uppercase tracking-tight">Executive Dispatch Overview</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Logic sequence for automated logistics fulfilment engine.</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high border border-outline px-4 py-2 font-label-caps text-label-caps hover:bg-surface-variant transition-colors">EXPORT_GRAPH</button>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 font-label-caps text-label-caps font-bold transition-transform active:scale-95">RUN_SIMULATION</button>
+</div>
+</div>
+<!-- The Workflow Logic Chain (Bento/Node Hybrid) -->
+<div class="space-y-6 relative">
+<!-- ROW 1: Initialization -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+<div class="lg:col-span-3">
+<div class="bg-[#0F0F0F] border border-primary-fixed-dim p-4 relative group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">INIT_PHASE</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-[16px]" data-icon="inventory_2">inventory_2</span>
+</div>
+<h3 class="font-code-sm text-code-sm uppercase">Shipment Ready</h3>
+<div class="mt-3 flex justify-between items-center">
+<span class="font-code-xs text-code-xs opacity-60">ID: SHP-9021</span>
+<div class="node-port animate-pulse"></div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex justify-center">
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<div class="lg:col-span-4">
+<div class="bg-[#0F0F0F] border border-outline-variant p-4 relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">POOL_LOAD</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" data-icon="group">group</span>
+</div>
+<h3 class="font-code-sm text-code-sm uppercase">Driver Pool Loaded</h3>
+<div class="mt-2 space-y-1">
+<div class="h-1 bg-surface-container-high w-full rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-2/3"></div>
+</div>
+<span class="font-code-xs text-code-xs">Active Drivers: 1,402</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex justify-center">
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<div class="lg:col-span-3">
+<div class="bg-[#0F0F0F] border border-outline-variant p-4">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CHECK_CAP</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="local_shipping">local_shipping</span>
+</div>
+<h3 class="font-code-sm text-code-sm uppercase">Vehicle Capacity Check</h3>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim mt-2 block">VERIFIED: 100%</span>
+</div>
+</div>
+</div>
+<!-- ROW 2: AI Evaluation -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+<div class="lg:col-span-1 space-y-6">
+<div class="bg-[#0F0F0F] border border-outline-variant p-4 flex items-center justify-between">
+<div>
+<span class="font-label-caps text-label-caps opacity-50 block mb-1">METRIC_01</span>
+<h3 class="font-code-sm text-code-sm">Distance Calculation</h3>
+</div>
+<span class="font-code-xs text-code-xs text-secondary-fixed">8.4km Avg</span>
+</div>
+<div class="bg-[#0F0F0F] border border-outline-variant p-4 flex items-center justify-between">
+<div>
+<span class="font-label-caps text-label-caps opacity-50 block mb-1">METRIC_02</span>
+<h3 class="font-code-sm text-code-sm">ETA Calculation</h3>
+</div>
+<span class="font-code-xs text-code-xs text-secondary-fixed">14m Arrival</span>
+</div>
+</div>
+<div class="lg:col-span-2 relative bg-surface-container-low border border-primary-fixed-dim p-8 rounded-lg overflow-hidden">
+<!-- AI Visual Backdrop -->
+
+<div class="relative z-10 text-center">
+<span class="material-symbols-outlined text-primary-fixed-dim text-4xl mb-4" data-icon="psychology">psychology</span>
+<h2 class="font-headline-lg text-headline-lg text-primary-fixed-dim uppercase mb-2">Aura AI Optimization</h2>
+<p class="font-code-sm text-code-sm text-on-surface max-w-md mx-auto">Evaluating 42,000+ permutations per second to find optimal dispatch match based on distance, trust, and historical performance.</p>
+<div class="mt-6 flex justify-center gap-8">
+<div class="text-center">
+<span class="font-label-caps text-label-caps block opacity-50 uppercase">Trust Score</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">0.992</span>
+</div>
+<div class="text-center border-l border-outline-variant pl-8">
+<span class="font-label-caps text-label-caps block opacity-50 uppercase">Perf Analysis</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">PASS</span>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 space-y-4">
+<div class="bg-[#0F0F0F] border border-secondary-container p-4">
+<span class="font-label-caps text-label-caps text-secondary uppercase mb-2 block">Result Found</span>
+<h3 class="font-code-sm text-code-sm uppercase">Best Driver Selected</h3>
+<div class="mt-3 flex items-center gap-3">
+<div class="w-10 h-10 bg-surface-container-high rounded border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="person">person</span>
+</div>
+<div>
+<div class="font-code-sm text-code-sm">ID: DRV-4421</div>
+<div class="font-code-xs text-code-xs opacity-50">Score: 9.8/10</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-highest/30 p-3 border border-dashed border-outline-variant">
+<span class="font-label-caps text-label-caps opacity-50">TELEMETRY_LOG</span>
+<div class="mt-2 font-code-xs text-code-xs text-on-surface-variant leading-relaxed">
+                                [14:42:05] AI_ENGINE: Lock selected.<br/>
+                                [14:42:06] COMM: Payload encrypted.
+                            </div>
+</div>
+</div>
+</div>
+<!-- ROW 3: Dispatch Loop & Branching -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<div class="lg:col-span-3">
+<div class="bg-[#0F0F0F] border border-primary-fixed-dim p-4 glow-green">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="send">send</span>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">ACTION_SENT</span>
+</div>
+<h3 class="font-code-sm text-code-sm uppercase">Dispatch Offer Sent</h3>
+<div class="mt-4 flex items-center justify-between text-on-surface-variant">
+<span class="font-code-xs text-code-xs">TTL: 45s</span>
+<div class="flex gap-1">
+<div class="w-1 h-3 bg-primary-fixed-dim"></div>
+<div class="w-1 h-3 bg-primary-fixed-dim"></div>
+<div class="w-1 h-3 bg-surface-container"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Alternative Path: Branching logic -->
+<div class="lg:col-span-6 flex flex-col items-center justify-center p-8 border-x border-dashed border-outline-variant gap-6">
+<div class="grid grid-cols-2 gap-4 w-full">
+<div class="bg-surface-container-low border border-error-container p-4 group hover:bg-error-container/20 cursor-help transition-all">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error">DRIVER_REJECTS</span>
+<span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span>
+</div>
+<h4 class="font-code-sm text-code-sm">Loop: Next Driver</h4>
+<span class="font-code-xs text-code-xs opacity-50">Back to AI selection phase.</span>
+</div>
+<div class="bg-surface-container-low border border-tertiary-fixed-dim p-4">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">ESCALATION</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="priority_high">priority_high</span>
+</div>
+<h4 class="font-code-sm text-code-sm">Manual Dispatch</h4>
+<span class="font-code-xs text-code-xs opacity-50">Operator intervention required.</span>
+</div>
+</div>
+<div class="w-full h-[1px] bg-outline-variant relative">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface px-4 font-label-caps text-label-caps opacity-30">BRANCHING_LOGIC</div>
+</div>
+<div class="bg-primary-container/10 border border-primary-fixed-dim p-4 w-full flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim animate-bounce" data-icon="check_circle">check_circle</span>
+<div>
+<h4 class="font-code-sm text-code-sm uppercase text-primary-fixed-dim">Driver Accepts</h4>
+<span class="font-code-xs text-code-xs">Latent Ack: 1.2s</span>
+</div>
+</div>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">PROCEEDING</span>
+</div>
+</div>
+<div class="lg:col-span-3">
+<div class="bg-[#0F0F0F] border border-outline-variant p-4 h-full flex flex-col justify-between">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-2">EXECUTION_START</span>
+<h3 class="font-code-sm text-code-sm uppercase">Mission Created</h3>
+<p class="font-code-xs text-code-xs mt-2 opacity-60">Digital twin for route active.</p>
+</div>
+<div class="mt-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="near_me">near_me</span>
+<span class="font-code-sm text-code-sm">Navigation Started</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 4: Finalization -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+<div class="lg:col-span-3">
+<div class="bg-[#0F0F0F] border border-outline-variant p-4">
+<h3 class="font-code-sm text-code-sm uppercase mb-1">Pickup Scheduled</h3>
+<span class="font-code-xs text-code-xs text-secondary">T-MINUS 12:00</span>
+</div>
+</div>
+<div class="lg:col-span-1 flex justify-center">
+<div class="h-[1px] w-full bg-outline-variant"></div>
+</div>
+<div class="lg:col-span-8">
+<div class="bg-primary-container text-on-primary-container p-6 flex justify-between items-center rounded-lg shadow-2xl">
+<div>
+<h2 class="font-headline-lg text-headline-lg uppercase font-extrabold tracking-tighter">Dispatch Completed</h2>
+<p class="font-label-caps text-label-caps opacity-80 mt-1">Status Code: 200_SUCCESS | All parameters met.</p>
+</div>
+<div class="flex items-center gap-6">
+<div class="text-right">
+<div class="font-label-caps text-label-caps uppercase opacity-60">Cycle Time</div>
+<div class="font-headline-md text-headline-md">4.8s</div>
+</div>
+<span class="material-symbols-outlined text-4xl" data-icon="task_alt">task_alt</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Audit Log Stubs / Mini-Telemetry Overlay -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<h5 class="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant pb-2 mb-3">TELEMETRY_STREAM</h5>
+<div class="space-y-2 max-h-32 overflow-y-auto font-code-xs text-code-xs opacity-70">
+<div class="flex gap-2">
+<span class="text-primary-fixed-dim">[OK]</span>
+<span>NODE_04: Vehicle verification pass.</span>
+</div>
+<div class="flex gap-2">
+<span class="text-primary-fixed-dim">[OK]</span>
+<span>NODE_07: Trust vector updated (+0.04).</span>
+</div>
+<div class="flex gap-2 text-secondary">
+<span>[INFO]</span>
+<span>AI_MATCH: Driver DRV-4421 chosen (Confidence 0.94).</span>
+</div>
+<div class="flex gap-2 text-on-surface-variant">
+<span>[LOG]</span>
+<span>Packet broadcast to pool shard 02.</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<h5 class="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant pb-2 mb-3">SYSTEM_LOAD</h5>
+<div class="flex items-end gap-1 h-20 px-2">
+<div class="flex-1 bg-primary-fixed-dim h-1/2"></div>
+<div class="flex-1 bg-primary-fixed-dim h-2/3"></div>
+<div class="flex-1 bg-primary-fixed-dim h-3/4"></div>
+<div class="flex-1 bg-primary-fixed-dim h-1/3"></div>
+<div class="flex-1 bg-secondary h-full animate-pulse"></div>
+<div class="flex-1 bg-primary-fixed-dim h-2/3"></div>
+<div class="flex-1 bg-primary-fixed-dim h-4/5"></div>
+<div class="flex-1 bg-primary-fixed-dim h-1/2"></div>
+<div class="flex-1 bg-primary-fixed-dim h-3/4"></div>
+</div>
+<div class="mt-2 flex justify-between font-code-xs text-code-xs opacity-50 uppercase">
+<span>CPU: 42%</span>
+<span>MEM: 12.1GB</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<h5 class="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant pb-2 mb-3">GLOBAL_CONTEXT</h5>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="font-code-sm text-code-sm">Weather Influence</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">MODERATE (0.8)</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-sm text-code-sm">Traffic Density</span>
+<span class="font-code-sm text-code-sm text-error">HIGH (1.2)</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-sm text-code-sm">Peak Surcharge</span>
+<span class="font-code-sm text-code-sm">ACTIVE (1.15x)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 bg-surface-container-lowest bg-opacity-90 backdrop-blur-md border-t border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim scale-110 cursor-pointer active:scale-95 transition-transform" data-icon="terminal">terminal</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-60 cursor-pointer active:scale-95 transition-transform" data-icon="memory">memory</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-60 cursor-pointer active:scale-95 transition-transform" data-icon="security">security</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-60 cursor-pointer active:scale-95 transition-transform" data-icon="support_agent">support_agent</span>
+</nav>
+<script>
+        // Micro-interactions for technical feel
+        document.querySelectorAll('.group').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                // Potential for adding data-driven tooltips or sound effects (muted)
+                console.log('Inspecting node details...');
+            });
+        });
+
+        // Simple ticker for the telemetry log
+        const logContainer = document.querySelector('.space-y-2');
+        if (logContainer) {
+            setInterval(() => {
+                const logs = [
+                    "[OK] LATENCY: 22ms",
+                    "[INFO] RECALC: Distance re-optimized.",
+                    "[OK] PORT_8080: Heartbeat received.",
+                    "[LOG] AUTH: Signature verified."
+                ];
+                const newLog = document.createElement('div');
+                newLog.className = 'flex gap-2 opacity-0 transition-opacity duration-500';
+                newLog.innerHTML = `<span class="text-primary-fixed-dim">[OK]</span> <span>${logs[Math.floor(Math.random() * logs.length)]}</span>`;
+                logContainer.prepend(newLog);
+                setTimeout(() => newLog.classList.remove('opacity-0'), 100);
+                if (logContainer.children.length > 8) logContainer.removeChild(logContainer.lastChild);
+            }, 3000);
+        }
+    </script>
+</body></html>

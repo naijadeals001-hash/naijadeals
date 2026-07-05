@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>REVERSE_LOGISTICS_v4.2 | BPMN Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --grid-size: 24px;
+            --dot-color: rgba(132, 150, 126, 0.07);
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 0);
+            background-size: var(--grid-size) var(--grid-size);
+            overflow-x: hidden;
+        }
+        .swimlane-container {
+            display: grid;
+            grid-template-columns: repeat(11, 280px);
+            min-height: calc(100vh - 64px);
+        }
+        .connector-line {
+            position: absolute;
+            background-color: #00e639;
+            z-index: 10;
+        }
+        .connector-arrow::after {
+            content: '';
+            position: absolute;
+            width: 0; height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid #00e639;
+        }
+        .dashed-connector {
+            background-image: linear-gradient(to bottom, #ffb4ab 50%, transparent 50%);
+            background-size: 1px 8px;
+            background-color: transparent !important;
+        }
+        .node-port {
+            width: 6px;
+            height: 6px;
+            background: #00e639;
+            border-radius: 50%;
+            position: absolute;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container": "#122131",
+                      "primary-fixed-dim": "#00e639",
+                      "surface-bright": "#2c3a4c",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary": "#003907",
+                      "secondary-fixed": "#dde1ff",
+                      "on-secondary": "#002388",
+                      "surface-container-high": "#1c2b3c",
+                      "on-tertiary": "#490080",
+                      "primary-container": "#00ff41",
+                      "inverse-surface": "#d4e4fa",
+                      "secondary": "#b8c3ff",
+                      "inverse-on-surface": "#233143",
+                      "on-primary-container": "#007117",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "inverse-primary": "#006e16",
+                      "error": "#ffb4ab",
+                      "surface": "#051424",
+                      "tertiary-fixed": "#f0dbff",
+                      "error-container": "#93000a",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "surface-tint": "#00e639",
+                      "on-background": "#d4e4fa",
+                      "surface-dim": "#051424",
+                      "primary-fixed": "#72ff70",
+                      "surface-variant": "#273647",
+                      "on-surface": "#d4e4fa",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-error": "#690005",
+                      "tertiary": "#fff6ff",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-container-lowest": "#010f1f",
+                      "outline-variant": "#3b4b37",
+                      "surface-container-highest": "#273647",
+                      "outline": "#84967e",
+                      "on-secondary-fixed": "#001356",
+                      "surface-container-low": "#0d1c2d",
+                      "background": "#051424",
+                      "primary": "#ebffe2",
+                      "on-tertiary-fixed": "#2c0051",
+                      "secondary-container": "#0043eb",
+                      "on-primary-fixed": "#002203",
+                      "on-error-container": "#ffdad6",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-secondary-container": "#c6ceff",
+                      "on-tertiary-container": "#862ed4"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col h-screen text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 w-full fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed">REVERSE_LOGISTICS_v4.2</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="font-code-sm text-code-sm text-primary-fixed-dim hover:bg-surface-container-highest transition-colors px-3 py-1" href="#">RUNTIME</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-3 py-1" href="#">SCHEMA</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-3 py-1" href="#">GATEWAY</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- Sidebar NavigationDrawer -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-low border-r border-outline-variant flex flex-col py-node-gutter z-40">
+<div class="px-6 mb-8">
+<h2 class="font-headline-md text-headline-md text-primary">CORE_ENGINE</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-6 py-3 text-primary-fixed bg-surface-container-highest border-l-4 border-primary-fixed cursor-pointer font-label-caps text-label-caps">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span>System Map</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer font-label-caps text-label-caps">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+<span>API Contracts</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer font-label-caps text-label-caps">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<span>Logic Gates</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer font-label-caps text-label-caps">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span>Audit Logs</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer font-label-caps text-label-caps">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span>Telemetry</span>
+</div>
+</nav>
+<div class="mt-auto px-6 py-4 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim uppercase">Engine Online</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">v4.2.0-STABLE</p>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 overflow-x-auto overflow-y-auto bg-surface">
+<div class="swimlane-container relative p-lane-margin">
+<!-- Swimlane Labels -->
+<div class="absolute top-0 left-0 w-full flex pointer-events-none">
+<!-- Calculated width for labels matching the grid -->
+<div class="flex h-12 w-full border-b border-outline-variant bg-surface-container-low/50 sticky top-0 z-30">
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps">Customer</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="hub">hub</span>
+<span class="font-label-caps text-label-caps">Logistics Service</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2 text-primary-fixed-dim">
+<span class="material-symbols-outlined text-sm" data-icon="calculate">calculate</span>
+<span class="font-label-caps text-label-caps">Pricing Engine</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="alt_route">alt_route</span>
+<span class="font-label-caps text-label-caps">Route Engine</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2 text-tertiary-fixed-dim">
+<span class="material-symbols-outlined text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-caps text-label-caps">Aura AI</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-caps text-label-caps">Wallet</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="lock_clock">lock_clock</span>
+<span class="font-label-caps text-label-caps">Escrow</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="local_shipping">local_shipping</span>
+<span class="font-label-caps text-label-caps">NaijaSend</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="groups">groups</span>
+<span class="font-label-caps text-label-caps">Fleet</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="notifications_active">notifications_active</span>
+<span class="font-label-caps text-label-caps">Notification</span>
+</div>
+<div class="w-[280px] border-r border-outline-variant flex items-center px-4 gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="security">security</span>
+<span class="font-label-caps text-label-caps">Audit</span>
+</div>
+</div>
+</div>
+<!-- Vertical Lane Dividers -->
+<div class="absolute inset-0 flex pointer-events-none opacity-20">
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+<div class="w-[280px] h-full border-r border-outline"></div>
+</div>
+<!-- Nodes Layer -->
+<div class="relative z-20 pt-16 space-y-12">
+<!-- START EVENT -->
+<div class="flex">
+<div class="w-[280px] flex justify-center">
+<div class="w-12 h-12 rounded-full border-2 border-primary-fixed-dim bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="play_arrow">play_arrow</span>
+</div>
+</div>
+</div>
+<!-- CONNECTOR -->
+<div class="h-8 w-0.5 bg-primary-fixed-dim mx-auto ml-[140px]"></div>
+<!-- T1: Request Booking -->
+<div class="flex">
+<div class="w-[280px] px-4">
+<div class="bg-surface-container-low border border-outline p-3 rounded-sm shadow-lg hover:border-primary-fixed transition-all group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-code-xs text-on-surface-variant">REQ_001</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant" data-icon="edit_note">edit_note</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-primary">Initiate Shipment Booking</h4>
+<div class="mt-2 flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></span>
+<span class="text-code-xs font-code-xs opacity-60">Status: Active</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Decision Diamond 1: Dangerous Goods? -->
+<div class="flex mt-8">
+<div class="w-[280px] px-4"></div>
+<div class="w-[280px] flex justify-center relative">
+<div class="w-16 h-16 bg-surface-container border border-outline transform rotate-45 flex items-center justify-center">
+<div class="transform -rotate-45 text-center px-1">
+<span class="font-code-xs text-code-xs leading-tight">Dangerous Goods?</span>
+</div>
+</div>
+<!-- Decision Labels -->
+<div class="absolute top-1/2 left-0 -translate-x-full pr-2 font-code-xs text-error">YES (Escalated)</div>
+<div class="absolute bottom-0 translate-y-full font-code-xs text-primary-fixed-dim">NO (Continue)</div>
+</div>
+</div>
+<!-- Error Path (Manual Override) -->
+<div class="flex mt-4 h-16">
+<div class="w-[280px]"></div>
+<div class="w-[280px] border-l border-dashed border-error relative">
+<div class="absolute top-8 left-0 w-24 h-0.5 border-t border-dashed border-error"></div>
+<div class="absolute top-6 left-24 bg-error-container/20 border border-error p-2 rounded-sm max-w-[120px]">
+<span class="font-label-caps text-code-xs text-error">MANUAL_OVERRIDE</span>
+<p class="text-code-xs leading-tight opacity-80">Safety protocol audit required for Class 7 materials.</p>
+</div>
+</div>
+</div>
+<!-- Parallel Processing Start -->
+<div class="flex items-center">
+<div class="w-[280px]"></div>
+<div class="w-[280px] border-b border-primary-fixed-dim relative h-4">
+<div class="absolute right-0 bottom-0 w-full h-1 bg-primary-fixed-dim"></div>
+</div>
+<div class="w-[280px] border-b border-primary-fixed-dim relative h-4">
+<div class="absolute left-0 bottom-0 w-full h-1 bg-primary-fixed-dim"></div>
+</div>
+</div>
+<!-- Parallel Tasks (Pricing + Route) -->
+<div class="flex">
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div> <!-- Spacer for Logic Lane -->
+<div class="w-[280px] px-4">
+<div class="bg-surface-container-high border border-primary-fixed-dim p-3 rounded-sm">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-code-xs text-primary-fixed-dim">CALC_V2</span>
+<span class="text-code-xs text-on-surface-variant">45ms</span>
+</div>
+<h4 class="font-code-sm text-code-sm">Generate Quotation</h4>
+<div class="mt-2 text-code-xs font-code-xs text-primary-fixed-dim">Price: $1,240.00</div>
+</div>
+</div>
+<div class="w-[280px] px-4">
+<div class="bg-surface-container-high border border-outline p-3 rounded-sm opacity-80">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-code-xs text-on-surface-variant">RT_OPT</span>
+<span class="text-code-xs text-on-surface-variant">12ms</span>
+</div>
+<h4 class="font-code-sm text-code-sm">Route Optimization</h4>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Nodes: 14 Waypoints</div>
+</div>
+</div>
+</div>
+<!-- Aura AI Analysis -->
+<div class="flex">
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px] px-4 relative">
+<div class="absolute -left-4 top-1/2 w-4 h-0.5 bg-outline-variant"></div>
+<div class="bg-tertiary-container/10 border border-tertiary-fixed-dim p-4 rounded-sm relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:rotate-12 transition-transform">
+<span class="material-symbols-outlined text-6xl text-tertiary-fixed-dim" data-icon="psychology">psychology</span>
+</div>
+<h4 class="font-label-caps text-code-xs text-tertiary-fixed-dim mb-1">AURA_ANALYSIS_ENGINE</h4>
+<p class="font-code-sm text-code-sm text-tertiary">Risk Score: 0.04 (LOW)</p>
+<div class="mt-2 h-1 w-full bg-surface-container-highest rounded-full">
+<div class="h-full bg-tertiary-fixed-dim w-3/4"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Payment Integration -->
+<div class="flex">
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px] px-4">
+<div class="bg-surface-container border border-outline p-3 rounded-sm">
+<h4 class="font-code-sm text-code-sm">Deduct Credits</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="material-symbols-outlined text-xs text-primary-fixed-dim" data-icon="check_circle">check_circle</span>
+<span class="text-code-xs">TXN_991823 Verified</span>
+</div>
+</div>
+</div>
+<div class="w-[280px] px-4">
+<div class="bg-surface-container border border-outline p-3 rounded-sm">
+<h4 class="font-code-sm text-code-sm">Lock Funds in Escrow</h4>
+<div class="mt-1 font-code-xs text-on-surface-variant">TTL: 72 Hours</div>
+</div>
+</div>
+</div>
+<!-- Final Fulfillment & Notifications -->
+<div class="flex">
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px]"></div>
+<div class="w-[280px] px-4">
+<div class="bg-primary-container/20 border border-primary-fixed-dim p-3 rounded-sm animate-pulse">
+<h4 class="font-code-sm text-code-sm text-primary-fixed-dim">NaijaSend Dispatch</h4>
+<div class="mt-1 text-code-xs">Carrier: Express-7</div>
+</div>
+</div>
+<div class="w-[280px] px-4">
+<div class="bg-surface-container-low border border-outline p-3 rounded-sm">
+<h4 class="font-code-sm text-code-sm">Assign Fleet Driver</h4>
+<div class="mt-1 text-code-xs text-on-surface-variant">ID: 0x99281...</div>
+</div>
+</div>
+<div class="w-[280px] px-4">
+<div class="bg-surface-container-high border border-outline p-3 rounded-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary-fixed-dim" data-icon="mail">mail</span>
+<h4 class="font-code-sm text-code-sm">Push Receipt</h4>
+</div>
+</div>
+</div>
+<div class="w-[280px] px-4">
+<div class="bg-surface-container-low border border-outline p-3 rounded-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="receipt_long">receipt_long</span>
+<h4 class="font-code-sm text-code-sm text-on-surface-variant">Audit Commit</h4>
+</div>
+</div>
+</div>
+</div>
+<!-- END EVENT -->
+<div class="flex mt-12">
+<div class="w-full flex justify-center ml-[280px]">
+<div class="w-12 h-12 rounded-full border-4 border-error bg-surface flex items-center justify-center">
+<div class="w-6 h-6 bg-error rounded-sm"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Background Decoration / Context Layer -->
+<div class="fixed bottom-24 right-8 z-50">
+<div class="bg-surface-container-high border border-outline-variant p-4 rounded-sm shadow-2xl backdrop-blur-md w-72">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">LATEST_LOGS</span>
+<div class="flex gap-1">
+<div class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-on-surface-variant rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+<div class="flex gap-3 items-start border-b border-outline-variant pb-2">
+<span class="font-code-xs text-on-surface-variant">12:04:12</span>
+<div>
+<p class="font-code-xs text-primary-fixed-dim">PRICING_ENGINE::SUCCESS</p>
+<p class="text-[10px] text-on-surface-variant">V-Region fee calculated: +$14.50</p>
+</div>
+</div>
+<div class="flex gap-3 items-start border-b border-outline-variant pb-2">
+<span class="font-code-xs text-on-surface-variant">12:04:09</span>
+<div>
+<p class="font-code-xs text-tertiary-fixed-dim">AURA_AI::INFERENCE</p>
+<p class="text-[10px] text-on-surface-variant">Pattern match found for user 9982</p>
+</div>
+</div>
+<div class="flex gap-3 items-start border-b border-outline-variant pb-2">
+<span class="font-code-xs text-on-surface-variant">12:03:55</span>
+<div>
+<p class="font-code-xs text-on-primary-container">SYSTEM::BOOT</p>
+<p class="text-[10px] text-on-surface-variant">BPMN instance created: BK-4412</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile only suppression logic handled by layout classes) -->
+<footer class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-12 px-grid-unit bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-sm p-1 cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="memory">memory</span>
+<span class="font-code-xs text-code-xs font-label-caps">Runtime</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="schema">schema</span>
+<span class="font-code-xs text-code-xs font-label-caps">Schema</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="dns">dns</span>
+<span class="font-code-xs text-code-xs font-label-caps">Gateway</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="analytics">analytics</span>
+<span class="font-code-xs text-code-xs font-label-caps">Metrics</span>
+</div>
+</footer>
+<script>
+        // Simple micro-interaction for node hovering
+        document.querySelectorAll('.bg-surface-container-low, .bg-surface-container-high').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('shadow-[0_0_15px_rgba(0,230,57,0.1)]');
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('shadow-[0_0_15px_rgba(0,230,57,0.1)]');
+            });
+        });
+
+        // Dynamic status update simulation
+        setInterval(() => {
+            const logs = document.querySelector('.custom-scrollbar');
+            if(logs) {
+                const timestamp = new Date().toLocaleTimeString('en-GB');
+                const newLog = document.createElement('div');
+                newLog.className = 'flex gap-3 items-start border-b border-outline-variant pb-2 animate-pulse';
+                newLog.innerHTML = `
+                    <span class="font-code-xs text-on-surface-variant">${timestamp}</span>
+                    <div>
+                        <p class="font-code-xs text-primary-fixed-dim">TELEMETRY::PING</p>
+                        <p class="text-[10px] text-on-surface-variant">Heartbeat response from Route_Cluster_02</p>
+                    </div>
+                `;
+                logs.prepend(newLog);
+                if(logs.children.length > 8) logs.lastElementChild.remove();
+            }
+        }, 8000);
+    </script>
+</body></html>

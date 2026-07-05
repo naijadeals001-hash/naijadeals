@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-019: PARCEL_DELIVERY_SPEC | Core Engine V2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    body {
+      background-color: #051424;
+      background-image: radial-gradient(#122131 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: #d4e4fa;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .connector-line {
+      position: absolute;
+      background: #3b4b37;
+      z-index: 0;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0d1c2d;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #3b4b37;
+      border-radius: 2px;
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-low": "#0d1c2d",
+            "on-secondary-container": "#c6ceff",
+            "surface-container-high": "#1c2b3c",
+            "surface-container": "#122131",
+            "inverse-primary": "#006e16",
+            "on-surface-variant": "#b9ccb2",
+            "primary-container": "#00ff41",
+            "on-secondary-fixed-variant": "#0035be",
+            "on-error-container": "#ffdad6",
+            "error-container": "#93000a",
+            "background": "#051424",
+            "surface": "#051424",
+            "surface-container-lowest": "#010f1f",
+            "tertiary": "#fff6ff",
+            "surface-variant": "#273647",
+            "on-tertiary-container": "#862ed4",
+            "on-primary-fixed-variant": "#00530e",
+            "inverse-surface": "#d4e4fa",
+            "secondary-container": "#0043eb",
+            "tertiary-fixed": "#f0dbff",
+            "inverse-on-surface": "#233143",
+            "primary-fixed": "#72ff70",
+            "on-secondary-fixed": "#001356",
+            "primary": "#ebffe2",
+            "tertiary-container": "#ecd3ff",
+            "surface-bright": "#2c3a4c",
+            "on-primary-fixed": "#002203",
+            "error": "#ffb4ab",
+            "on-primary": "#003907",
+            "on-background": "#d4e4fa",
+            "outline": "#84967e",
+            "on-tertiary-fixed": "#2c0051",
+            "surface-container-highest": "#273647",
+            "outline-variant": "#3b4b37",
+            "secondary-fixed": "#dde1ff",
+            "tertiary-fixed-dim": "#ddb7ff",
+            "on-error": "#690005",
+            "primary-fixed-dim": "#00e639",
+            "on-primary-container": "#007117",
+            "on-surface": "#d4e4fa",
+            "surface-dim": "#051424",
+            "secondary": "#b8c3ff",
+            "on-tertiary-fixed-variant": "#6900b3",
+            "on-tertiary": "#490080",
+            "secondary-fixed-dim": "#b8c3ff",
+            "surface-tint": "#00e639",
+            "on-secondary": "#002388"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "node-gutter": "24px",
+            "stack-gap": "4px",
+            "grid-unit": "8px",
+            "lane-margin": "32px"
+          },
+          "fontFamily": {
+            "label-caps": ["JetBrains Mono"],
+            "code-sm": ["JetBrains Mono"],
+            "body-md": ["Plus Jakarta Sans"],
+            "code-xs": ["JetBrains Mono"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+            "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+            "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+            "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-12 px-lane-margin w-full fixed top-0 z-50 border-b border-outline-variant bg-background">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">WF-019: PARCEL_DELIVERY_SPEC</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-2 py-1 bg-surface-container-high rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENGINE_V2_ACTIVE</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<nav class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 flex flex-col pt-stack-gap border-r border-outline-variant bg-surface-container-low z-40">
+<div class="px-6 py-4">
+<span class="font-label-caps text-label-caps text-on-surface">MODULE_REGISTRY</span>
+</div>
+<div class="flex flex-col gap-1 px-2">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded">
+<span class="material-symbols-outlined text-[20px]" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-caps text-label-caps">Inventory_Flow</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed">
+<span class="material-symbols-outlined text-[20px]" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-label-caps text-label-caps">Order_Lifecycle</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded">
+<span class="material-symbols-outlined text-[20px]" data-icon="payments">payments</span>
+<span class="font-label-caps text-label-caps">Payment_Gateway</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded">
+<span class="material-symbols-outlined text-[20px]" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit_Logs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all rounded">
+<span class="material-symbols-outlined text-[20px]" data-icon="hub">hub</span>
+<span class="font-label-caps text-label-caps">n8n_Connectors</span>
+</a>
+</div>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="p-3 bg-surface-container rounded-lg">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SLA STATUS</span>
+<span class="text-[10px] font-bold text-primary-fixed">98.4%</span>
+</div>
+<div class="w-full bg-outline-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed h-full w-[98%]"></div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="ml-64 mt-12 h-[calc(100vh-48px)] overflow-hidden flex flex-col relative">
+<!-- Swimlane Container -->
+<div class="flex-1 overflow-auto custom-scrollbar p-lane-margin relative">
+<!-- Background Visuals -->
+
+<!-- Layout Grid -->
+<div class="grid grid-cols-4 gap-8 min-w-[1200px] relative z-10">
+<!-- Headers -->
+<div class="col-span-4 grid grid-cols-4 border-b border-outline-variant pb-4 sticky top-0 bg-background/80 backdrop-blur-md z-30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="person">person</span>
+<span class="font-headline-md text-headline-md">Customer</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="local_shipping">local_shipping</span>
+<span class="font-headline-md text-headline-md">Driver</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="dns">dns</span>
+<span class="font-headline-md text-headline-md">NaijaSend</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="notifications_active">notifications_active</span>
+<span class="font-headline-md text-headline-md">Notification_Engine</span>
+</div>
+</div>
+<!-- Row 1: Initiation -->
+<div class="flex flex-col gap-node-gutter pt-8">
+<!-- Node 1 -->
+<div class="bg-surface-container-lowest border border-primary-fixed/30 p-4 rounded-lg relative">
+<div class="font-label-caps text-label-caps text-primary-fixed mb-1">ENTRY_POINT</div>
+<div class="font-code-sm text-code-sm">Pickup_Requested</div>
+<div class="mt-4 flex gap-2">
+<div class="px-2 py-0.5 bg-surface-container-high border border-outline-variant text-code-xs font-code-xs">CID: 992-AX</div>
+</div>
+</div>
+</div>
+<div class="pt-8"></div>
+<div class="pt-8 flex flex-col gap-node-gutter">
+<!-- Node 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">TRANS_LOCK</div>
+<div class="font-code-sm text-code-sm">Initialize_Shipment_Tx</div>
+<div class="mt-2 text-code-xs text-on-surface-variant/60">DB_COMMIT: pending</div>
+</div>
+</div>
+<div class="pt-8 flex flex-col gap-node-gutter">
+<!-- Node 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-1">PUSH_EVENT</div>
+<div class="font-code-sm text-code-sm">Broadcast_Availability</div>
+<div class="mt-2 text-code-xs text-on-surface-variant/60">n8n_id: flow_8122</div>
+</div>
+</div>
+<!-- Row 2: Dispatch -->
+<div class="pt-8"></div>
+<div class="flex flex-col gap-node-gutter pt-8">
+<!-- Node 4 -->
+<div class="bg-surface-container-lowest border border-secondary/30 p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-secondary mb-1">ACTION_RECV</div>
+<div class="font-code-sm text-code-sm">Driver_Accepted</div>
+<div class="mt-2 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-code-xs text-on-surface-variant">LAT: 6.5244 N</span>
+</div>
+</div>
+</div>
+<div class="pt-8 flex flex-col gap-node-gutter">
+<!-- Node 5 -->
+<div class="bg-surface-container-highest border border-primary-fixed p-4 rounded-lg shadow-[0_0_15px_rgba(0,230,57,0.1)]">
+<div class="font-label-caps text-label-caps text-primary-fixed mb-1">POST /v1/dispatch</div>
+<div class="font-code-sm text-code-sm">Assign_Carrier_Route</div>
+<div class="mt-4 p-2 bg-black/40 font-code-sm text-[10px] text-primary-fixed-dim border-l border-primary-fixed">
+              { "carrier_id": "DRV_882", "est_pickup": 420 }
+            </div>
+</div>
+</div>
+<div class="pt-8"></div>
+<!-- Row 3: Security & Verification -->
+<div class="pt-8"></div>
+<div class="flex flex-col gap-node-gutter pt-8">
+<!-- Node 6 -->
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">SEC_VALIDATION</div>
+<div class="font-code-sm text-code-sm">Generate_QR_Payload</div>
+<div class="mt-2 h-16 w-16 bg-white flex items-center justify-center p-1">
+<div class="w-full h-full bg-black/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-black" data-icon="qr_code_2">qr_code_2</span>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-8"></div>
+<div class="flex flex-col gap-node-gutter pt-8">
+<!-- Node 7 -->
+<div class="bg-surface-container-lowest border border-tertiary-fixed-dim/30 p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-1">DISPATCH_SMS</div>
+<div class="font-code-sm text-code-sm">Notify_Customer_ETD</div>
+<div class="mt-2 text-code-xs text-on-surface-variant">Queue: 1.2s delay</div>
+</div>
+</div>
+<!-- Row 4: Final State -->
+<div class="pt-8"></div>
+<div class="pt-8"></div>
+<div class="flex flex-col gap-node-gutter pt-8">
+<!-- Node 8 -->
+<div class="bg-primary-container/10 border border-primary-fixed p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-on-primary-container mb-1">TERMINAL_STATE</div>
+<div class="font-code-sm text-code-sm">Status: Delivered</div>
+<div class="mt-4 flex items-center justify-between">
+<span class="text-code-xs text-primary-fixed">SLA_COMPLIANT</span>
+<span class="material-symbols-outlined text-primary-fixed text-sm" data-icon="verified">verified</span>
+</div>
+</div>
+</div>
+<div class="pt-8"></div>
+</div>
+<!-- Connecting Lines (Visual Decor) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-20" xmlns="http://www.w3.org/2000/svg">
+<path d="M150 120 L150 400 M450 200 L750 200 M750 280 L450 280 L450 450" fill="none" stroke="#3b4b37" stroke-dasharray="4 4" stroke-width="1.5"></path>
+</svg>
+</div>
+<!-- Right Sidebar: Technical Artifacts Grid -->
+<div class="w-96 border-l border-outline-variant bg-surface-container-lowest flex flex-col h-full fixed right-0 top-12 z-40">
+<div class="p-4 border-b border-outline-variant bg-surface-container">
+<h2 class="font-label-caps text-label-caps text-on-surface">TECHNICAL_ARTIFACTS (12)</h2>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+<!-- Artifact 1: API Blueprint -->
+<div class="p-3 bg-surface-container rounded border border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed" data-icon="api">api</span>
+<span class="font-label-caps text-code-xs text-on-surface-variant">API_BLUEPRINT</span>
+</div>
+<div class="font-code-sm text-[11px] bg-black/30 p-2 rounded text-primary-fixed-dim">
+            POST /v1/logistics/dispatch<br/>
+            Auth: Bearer {JWT_ENGINE}<br/>
+            Latency: &lt;120ms
+          </div>
+</div>
+<!-- Artifact 2: DB Transaction -->
+<div class="p-3 bg-surface-container rounded border border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[14px] text-on-secondary-container" data-icon="database">database</span>
+<span class="font-label-caps text-code-xs text-on-surface-variant">TX_ISOLATION</span>
+</div>
+<div class="text-code-xs space-y-1">
+<div class="flex justify-between"><span>isolation_lvl</span><span class="text-primary-fixed">SERIALIZABLE</span></div>
+<div class="flex justify-between"><span>row_lock</span><span class="text-primary-fixed">shipment_id</span></div>
+</div>
+</div>
+<!-- Artifact 3: SLA Targets -->
+<div class="p-3 bg-surface-container rounded border border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="timer">timer</span>
+<span class="font-label-caps text-code-xs text-on-surface-variant">SLA_TARGETS</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container-high p-2 rounded">
+<div class="text-[9px] text-on-surface-variant">URBAN_DROP</div>
+<div class="font-code-sm text-primary-fixed">45m</div>
+</div>
+<div class="bg-surface-container-high p-2 rounded">
+<div class="text-[9px] text-on-surface-variant">DISPATCH_ACK</div>
+<div class="font-code-sm text-primary-fixed">120s</div>
+</div>
+</div>
+</div>
+<!-- Artifact 4: Notification Matrix -->
+<div class="p-3 bg-surface-container rounded border border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim" data-icon="matrix">grid_view</span>
+<span class="font-label-caps text-code-xs text-on-surface-variant">NOTIF_MATRIX</span>
+</div>
+<table class="w-full text-[10px] border-collapse">
+<tbody><tr class="border-b border-outline-variant text-on-surface-variant">
+<th class="text-left py-1">ROLE</th>
+<th class="text-left py-1">CHANNEL</th>
+<th class="text-left py-1">PRIO</th>
+</tr>
+<tr>
+<td class="py-1">Driver</td>
+<td>In-App</td>
+<td class="text-error">P0</td>
+</tr>
+<tr>
+<td class="py-1">Customer</td>
+<td>SMS</td>
+<td>P1</td>
+</tr>
+</tbody></table>
+</div>
+<!-- Artifact 5: QR Validation -->
+<div class="p-3 bg-surface-container rounded border border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed" data-icon="enhanced_encryption">enhanced_encryption</span>
+<span class="font-label-caps text-code-xs text-on-surface-variant">SEC_VALIDATION</span>
+</div>
+<div class="text-code-xs text-on-surface-variant italic">
+            HMAC-SHA256 signature required for driver-customer handoff verification.
+          </div>
+</div>
+<!-- Artifact 6: n8n Workflow IDs -->
+<div class="p-3 bg-surface-container-lowest border-l-2 border-primary-fixed">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-[10px] text-primary-fixed">DEV_NOTES</span>
+<span class="text-[8px] bg-primary-fixed text-on-primary-fixed px-1 rounded">n8n</span>
+</div>
+<div class="text-[11px] font-code-sm text-on-surface leading-tight">
+            WF_DISPATCH_MAIN: <span class="text-primary-fixed-dim">id_9921_xa</span><br/>
+            WF_RETRY_LOGIC: <span class="text-primary-fixed-dim">id_2281_rt</span>
+</div>
+</div>
+<!-- Image Gallery/Map -->
+<div class="relative rounded-lg overflow-hidden border border-outline-variant h-32 group">
+<div class="absolute inset-0 bg-cover bg-center transition-transform group-hover:scale-105" data-alt="A futuristic dark logistics map interface showing complex delivery routes in Lagos, Nigeria. Neon green lines connect geometric node points across a stylized dark blue grid map. The visualization uses a high-density enterprise UI aesthetic with glowing accents and technical telemetry data overlays, creating a mood of professional efficiency and cyber-authority." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBCvZ2UUKys3yArDISRNBmqgbxOz7VFgADj04bHpKLkoQ5tEQp_2Z0O2o-lQrXp1X6CU8OpV5UudAg4A9DY8b96JXz2CYYHC-YCm1VTIXWv0PuPktTBlPQkd8MC6u20fOafR5Sw-Hg9Y3g8iUB_oqLs6BMpZUqwoWbVmyat-z6sRFkic652fMcpjmflxg9VoOx2QuLXxbP-dn7PyMkCjk6nEIas45BRwj7hSK14HnoYS8y3Af40QYBteAXLvgovBfiGqCYFwnwcFE0')">
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-primary-fixed" data-icon="location_on">location_on</span>
+<span class="font-code-xs text-code-xs text-white">LIVE_FLEET_MAP: LAGOS_CENTRAL</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile/Focused Control) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-center pb-4 z-50">
+<div class="flex items-center bg-surface-container-highest border border-outline-variant rounded-full p-1 shadow-lg gap-1">
+<button class="text-primary-fixed bg-surface-container-high rounded-full p-2 hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined" data-icon="zoom_in">zoom_in</span>
+</button>
+<button class="text-on-surface-variant p-2 hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined" data-icon="zoom_out">zoom_out</span>
+</button>
+<button class="text-on-surface-variant p-2 hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined" data-icon="grid_4x4">grid_4x4</span>
+</button>
+<div class="w-px h-6 bg-outline-variant mx-1"></div>
+<button class="text-on-surface-variant p-2 hover:text-primary transition-colors scale-95 active:scale-90">
+<span class="material-symbols-outlined" data-icon="file_download">file_download</span>
+</button>
+</div>
+</nav>
+<script>
+    // Micro-interaction: Node hover highlights
+    document.querySelectorAll('.bg-surface-container-lowest').forEach(node => {
+      node.addEventListener('mouseenter', () => {
+        node.style.borderColor = '#00ff41';
+        node.style.transform = 'translateY(-2px)';
+        node.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+      });
+      node.addEventListener('mouseleave', () => {
+        node.style.borderColor = node.classList.contains('border-primary-fixed') ? '#00e639' : '#3b4b37';
+        node.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Pulse effect for Terminal State
+    setInterval(() => {
+      const deliveredNode = document.querySelector('.bg-primary-container\\/10');
+      if(deliveredNode) {
+        deliveredNode.classList.toggle('border-opacity-50');
+      }
+    }, 1000);
+  </script>
+</body></html>
