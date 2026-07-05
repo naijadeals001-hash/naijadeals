@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEURAL_ROUTE_ENGINE_V2 - Business Rules Matrix</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, #122131 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: #3b4b37;
+            left: 50%;
+            top: 0;
+            z-index: -1;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        @keyframes pulse-neon {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .status-pulse {
+            animation: pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#273647",
+                        "surface": "#051424",
+                        "surface-bright": "#2c3a4c",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary-fixed-dim": "#00e639",
+                        "primary-container": "#00ff41",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff",
+                        "secondary-container": "#0043eb",
+                        "on-secondary-fixed": "#001356",
+                        "on-primary-container": "#007117",
+                        "secondary": "#b8c3ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-low": "#0d1c2d",
+                        "on-surface": "#d4e4fa",
+                        "outline": "#84967e",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container-lowest": "#010f1f",
+                        "on-secondary-container": "#c6ceff",
+                        "primary-fixed": "#72ff70",
+                        "surface-container": "#122131",
+                        "surface-tint": "#00e639",
+                        "surface-container-high": "#1c2b3c",
+                        "tertiary": "#fff6ff",
+                        "on-secondary": "#002388",
+                        "on-primary-fixed": "#002203",
+                        "on-primary": "#003907",
+                        "background": "#051424",
+                        "on-error": "#690005",
+                        "primary": "#ebffe2",
+                        "on-tertiary": "#490080",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006e16",
+                        "surface-container-highest": "#273647",
+                        "on-surface-variant": "#b9ccb2",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#f0dbff",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-dim": "#051424",
+                        "on-background": "#d4e4fa",
+                        "outline-variant": "#3b4b37",
+                        "on-tertiary-fixed-variant": "#6900b3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lane-margin": "32px",
+                        "stack-gap": "4px",
+                        "grid-unit": "8px",
+                        "node-gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface border-b border-outline-variant flex justify-between items-center h-16 px-lane-margin">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="hub">hub</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary-container tracking-widest">NEURAL_ROUTE_ENGINE_V2</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6 h-full items-center">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright transition-colors px-3 py-1" href="#">SYS_INDEX</a>
+<a class="font-label-caps text-label-caps text-primary-fixed-dim border-b-2 border-primary-fixed-dim px-3 py-1" href="#">LOGIC_FLOWS</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright transition-colors px-3 py-1" href="#">TELEMETRY</a>
+</nav>
+<button class="material-symbols-outlined text-primary-fixed-dim cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</button>
+</div>
+</header>
+<!-- NavigationDrawer (SideNav) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container border-r border-outline-variant hidden md:flex flex-col py-grid-unit z-40">
+<div class="px-6 py-4 border-b border-outline-variant mb-4">
+<span class="font-label-caps text-label-caps text-on-surface">SYSTEM_INDEX</span>
+</div>
+<nav class="flex flex-col gap-1 px-2">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">SYS_INDEX</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">LOGIC_FLOWS</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="analytics">analytics</span>
+<span class="font-label-caps text-label-caps">TELEMETRY</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="map">map</span>
+<span class="font-label-caps text-label-caps">NODE_MAP</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps">AUDIT_LOG</span>
+</a>
+</nav>
+<div class="mt-auto px-6 py-4 opacity-40">
+<div class="font-code-xs text-code-xs">AUTH_LVL: ROOT</div>
+<div class="font-code-xs text-code-xs">SESSION: 0x8F22A</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 mt-16 p-lane-margin h-[calc(100vh-104px)] overflow-y-auto custom-scrollbar">
+<!-- Header Section -->
+<div class="mb-8 flex justify-between items-end">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="w-2 h-2 bg-primary-fixed-dim rounded-full status-pulse"></span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim tracking-widest">WORKFLOW ID: WF-024</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">BUSINESS_RULES_ENGINE_V2.4</h2>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-high px-4 py-2 border border-outline-variant flex flex-col">
+<span class="font-label-caps text-[9px] text-on-surface-variant">ACTIVE_NODES</span>
+<span class="font-code-sm text-code-sm text-primary-container">11 / 11</span>
+</div>
+<div class="bg-surface-container-high px-4 py-2 border border-outline-variant flex flex-col">
+<span class="font-label-caps text-[9px] text-on-surface-variant">LATENCY_AVG</span>
+<span class="font-code-sm text-code-sm text-primary-container">4.2ms</span>
+</div>
+</div>
+</div>
+<!-- Rules Matrix Table -->
+<div class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
+<div class="grid grid-cols-12 bg-surface-container-highest border-b border-outline-variant">
+<div class="col-span-3 p-4 font-label-caps text-label-caps text-on-surface-variant">RULE_IDENTIFIER</div>
+<div class="col-span-3 p-4 font-label-caps text-label-caps text-on-surface-variant border-l border-outline-variant">DECISION_LOGIC</div>
+<div class="col-span-2 p-4 font-label-caps text-label-caps text-on-surface-variant border-l border-outline-variant">SERVICE_UID</div>
+<div class="col-span-2 p-4 font-label-caps text-label-caps text-on-surface-variant border-l border-outline-variant">FAILURE_RESULT</div>
+<div class="col-span-2 p-4 font-label-caps text-label-caps text-on-surface-variant border-l border-outline-variant">RECOVERY_PATH</div>
+</div>
+<!-- Rule Rows -->
+<div class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<div class="grid grid-cols-12 group hover:bg-surface-container transition-colors">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg" data-icon="person_check">person_check</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Driver Available?</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: VALID</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        IF (shift_active &amp;&amp; fatigue_score &lt; 0.2) RETURN true;
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">HRMS_PROTO_01</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_004: NO_DRIVER</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-surface-variant italic">Queue for manual dispatch</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-12 group hover:bg-surface-container transition-colors">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg" data-icon="local_shipping">local_shipping</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Vehicle Suitable?</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: VALID</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        payload_vol &lt;= v_capacity &amp;&amp; cooling_req == v_type;
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">ASSET_MGR_V4</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_009: INCOMPATIBLE</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-surface-variant italic">Request asset upgrade</div>
+</div>
+<!-- Row 3 - FAILED -->
+<div class="grid grid-cols-12 group bg-error-container/10 border-l-4 border-l-error">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-error text-lg" data-icon="traffic">traffic</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Traffic Congestion?</div>
+<div class="font-code-xs text-code-xs text-error status-pulse">STATUS: EXCEEDED</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        delay_threshold &lt; current_route_latency;
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">REAL_TIME_MAPS</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_112: DELAY_CRITICAL</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-primary-container bg-primary-fixed-dim/20 px-2 py-1 border border-primary-fixed-dim/30">Reroute via Segment B-12</div>
+</div>
+<!-- Row 4 -->
+<div class="grid grid-cols-12 group hover:bg-surface-container transition-colors">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg" data-icon="block">block</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Road Closed?</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: CLEAR</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        lookup(osm_segments, state=OPEN);
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">TELEMATICS_IN</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_055: HARD_BLOCK</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-surface-variant italic">Recalculate pathing</div>
+</div>
+<!-- Row 5 -->
+<div class="grid grid-cols-12 group hover:bg-surface-container transition-colors">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg" data-icon="tsunami">tsunami</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Weather Safe?</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: NOMINAL</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        wind_speed &lt; 40mph &amp;&amp; vis &gt; 0.5mi;
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">METEO_STREAM</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_088: ADVERSE_COND</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-surface-variant italic">Delay 120 mins</div>
+</div>
+<!-- Row 6 -->
+<div class="grid grid-cols-12 group hover:bg-surface-container transition-colors">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg" data-icon="height">height</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Bridge Height?</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: VERIFIED</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        segment_clearance &gt; vehicle_height + 0.5ft;
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">GEO_DATA_S3</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_021: COLLISION_RISK</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-surface-variant italic">Avoid tunnel system</div>
+</div>
+<!-- Row 7 -->
+<div class="grid grid-cols-12 group hover:bg-surface-container transition-colors">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg" data-icon="scale">scale</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Weight Restriction?</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: PASS</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        v_weight_actual &lt; structural_limit;
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">LOAD_MASTER</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_077: OVERWEIGHT</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-surface-variant italic">Offload partial shipment</div>
+</div>
+<!-- Row 8 - FAILED -->
+<div class="grid grid-cols-12 group bg-error-container/10 border-l-4 border-l-error">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-error text-lg" data-icon="warning">warning</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Hazmat Restriction?</div>
+<div class="font-code-xs text-code-xs text-error status-pulse">STATUS: PROHIBITED</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        IF (hazard_class IN zone_prohibited) RETURN false;
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">GOV_REG_API</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_999: LAW_BREACH</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-primary-container bg-primary-fixed-dim/20 px-2 py-1 border border-primary-fixed-dim/30">External bypass via Highway 19</div>
+</div>
+<!-- Row 9 -->
+<div class="grid grid-cols-12 group hover:bg-surface-container transition-colors">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg" data-icon="alt_route">alt_route</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Multi-stop Route?</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: OPTIMIZED</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        compute_tsp(waypoints, constraints);
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">OPTIMA_SOLVER</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_033: SUBOPTIMAL</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-surface-variant italic">Recursive solve</div>
+</div>
+<!-- Row 10 -->
+<div class="grid grid-cols-12 group hover:bg-surface-container transition-colors">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg" data-icon="local_gas_station">local_gas_station</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Fuel Optimization?</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: TARGET_MET</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        IF (refuel_stop_needed) add(optimized_station);
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">FIN_CORP_API</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_012: FUEL_EXCEEDED</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-surface-variant italic">Adjust eco-params</div>
+</div>
+<!-- Row 11 -->
+<div class="grid grid-cols-12 group hover:bg-surface-container transition-colors">
+<div class="col-span-3 p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg" data-icon="schedule">schedule</span>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">ETA Acceptable?</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">STATUS: WITHIN_SLA</div>
+</div>
+</div>
+<div class="col-span-3 p-4 font-code-sm text-code-sm border-l border-outline-variant self-center text-on-surface-variant">
+                        arrival_time &lt;= customer_sla - 15min;
+                    </div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center">
+<span class="px-2 py-1 bg-surface-container-high border border-outline-variant font-code-xs text-code-xs text-secondary">CUST_REL_MGR</span>
+</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-error">RT_011: SLA_MISS</div>
+<div class="col-span-2 p-4 border-l border-outline-variant self-center font-code-sm text-on-surface-variant italic">Trigger late alert</div>
+</div>
+</div>
+</div>
+<!-- System Visualization Bottom Row -->
+<div class="grid grid-cols-3 gap-node-gutter mt-8 h-48">
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col justify-between relative overflow-hidden">
+<div class="flex justify-between items-start z-10">
+<span class="font-label-caps text-label-caps text-on-surface-variant">REAL_TIME_FLOW</span>
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="monitoring">monitoring</span>
+</div>
+<div class="h-24 flex items-end gap-1 z-10">
+<div class="flex-1 bg-primary-fixed-dim/20 border-t border-primary-fixed-dim h-12"></div>
+<div class="flex-1 bg-primary-fixed-dim/20 border-t border-primary-fixed-dim h-16"></div>
+<div class="flex-1 bg-primary-fixed-dim/20 border-t border-primary-fixed-dim h-10"></div>
+<div class="flex-1 bg-primary-fixed-dim/20 border-t border-primary-fixed-dim h-20"></div>
+<div class="flex-1 bg-primary-fixed-dim/20 border-t border-primary-fixed-dim h-14"></div>
+<div class="flex-1 bg-primary-fixed-dim/20 border-t border-primary-fixed-dim h-8"></div>
+<div class="flex-1 bg-error/20 border-t border-error h-22"></div>
+<div class="flex-1 bg-primary-fixed-dim/20 border-t border-primary-fixed-dim h-12"></div>
+</div>
+<div class="absolute inset-0 opacity-10">
+
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant">RULE_CONNECTORS</span>
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+</div>
+<div class="flex flex-wrap gap-2 py-4">
+<div class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-code-xs text-code-xs text-on-surface">IF -&gt; THEN</div>
+<div class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-code-xs text-code-xs text-on-surface">SWITCH -&gt; CASE</div>
+<div class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-code-xs text-code-xs text-on-surface">WHILE -&gt; DO</div>
+<div class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-code-xs text-code-xs text-on-surface">ASSERT -&gt; TRUE</div>
+<div class="px-2 py-1 bg-surface-container-highest border border-outline-variant font-code-xs text-code-xs text-on-surface">VALIDATE -&gt; FAIL</div>
+</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">ACTIVE_TOPOLOGY: HEX_V4</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">AUDIT_LOG_STREAM</span>
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="list_alt">list_alt</span>
+</div>
+<div class="flex flex-col gap-2 overflow-hidden">
+<div class="flex justify-between font-code-xs text-[10px]">
+<span class="text-on-surface-variant">14:22:01.032</span>
+<span class="text-primary-container">E_RULE_PASS: 0x221</span>
+</div>
+<div class="flex justify-between font-code-xs text-[10px]">
+<span class="text-on-surface-variant">14:22:01.045</span>
+<span class="text-primary-container">E_RULE_PASS: 0x222</span>
+</div>
+<div class="flex justify-between font-code-xs text-[10px]">
+<span class="text-on-surface-variant">14:22:01.089</span>
+<span class="text-error">E_RULE_FAIL: 0x223</span>
+</div>
+<div class="flex justify-between font-code-xs text-[10px]">
+<span class="text-on-surface-variant">14:22:01.112</span>
+<span class="text-primary-container">E_RECOVERY_INIT: 0x223_RE</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Status Bar -->
+<footer class="fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-lane-margin py-2 z-50">
+<div class="flex items-center gap-6">
+<span class="font-code-xs text-code-xs text-secondary">CORE_ENGINE_STABLE_8.2.1</span>
+<div class="flex gap-4">
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary-fixed cursor-default">LATENCY: 12ms</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary-fixed cursor-default">NODES: 1,422</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-primary-fixed-dim rounded-full shadow-[0_0_8px_rgba(0,230,57,0.6)]"></span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim tracking-tight">STATUS: OPERATIONAL</span>
+</div>
+</footer>
+<!-- Mobile Navigation (Bottom) -->
+<nav class="md:hidden fixed bottom-10 left-0 w-full bg-surface-container border-t border-outline-variant flex justify-around py-3 z-40">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="schema">schema</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="account_tree">account_tree</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="analytics">analytics</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="map">map</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings">settings</span>
+</nav>
+<script>
+        // Simple micro-interactions for the matrix
+        document.querySelectorAll('.grid-cols-12').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.toggle('bg-surface-bright');
+            });
+        });
+
+        // Simulating log stream
+        const logsContainer = document.querySelector('.flex.flex-col.gap-2');
+        setInterval(() => {
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false }) + '.' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            const pass = Math.random() > 0.15;
+            const logId = '0x' + Math.floor(Math.random() * 1000).toString(16).toUpperCase();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'flex justify-between font-code-xs text-[10px] animate-pulse';
+            logEntry.innerHTML = `
+                <span class="text-on-surface-variant">${time}</span>
+                <span class="${pass ? 'text-primary-container' : 'text-error'}">${pass ? 'E_RULE_PASS' : 'E_RULE_FAIL'}: ${logId}</span>
+            `;
+            
+            logsContainer.prepend(logEntry);
+            if (logsContainer.children.length > 5) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+        }, 3000);
+    </script>
+</body></html>

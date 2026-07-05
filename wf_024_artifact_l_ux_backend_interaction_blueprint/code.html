@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEURAL_ROUTE_ENGINE_V2 | PROPAGATION_MAP</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-line {
+            position: absolute;
+            background-color: #00e639;
+            height: 2px;
+            z-index: 0;
+            opacity: 0.4;
+        }
+        .connector-line-error {
+            position: absolute;
+            border-top: 2px dashed #ffb4ab;
+            z-index: 0;
+        }
+        .node-pulse {
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(0, 230, 57, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 230, 57, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 230, 57, 0); }
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #00ff41, transparent);
+            opacity: 0.1;
+            position: absolute;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#273647",
+                        "surface": "#051424",
+                        "surface-bright": "#2c3a4c",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary-fixed-dim": "#00e639",
+                        "primary-container": "#00ff41",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff",
+                        "secondary-container": "#0043eb",
+                        "on-secondary-fixed": "#001356",
+                        "on-primary-container": "#007117",
+                        "secondary": "#b8c3ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-low": "#0d1c2d",
+                        "on-surface": "#d4e4fa",
+                        "outline": "#84967e",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container-lowest": "#010f1f",
+                        "on-secondary-container": "#c6ceff",
+                        "primary-fixed": "#72ff70",
+                        "surface-container": "#122131",
+                        "surface-tint": "#00e639",
+                        "surface-container-high": "#1c2b3c",
+                        "tertiary": "#fff6ff",
+                        "on-secondary": "#002388",
+                        "on-primary-fixed": "#002203",
+                        "on-primary": "#003907",
+                        "background": "#051424",
+                        "on-error": "#690005",
+                        "primary": "#ebffe2",
+                        "on-tertiary": "#490080",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006e16",
+                        "surface-container-highest": "#273647",
+                        "on-surface-variant": "#b9ccb2",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#f0dbff",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-dim": "#051424",
+                        "on-background": "#d4e4fa",
+                        "outline-variant": "#3b4b37",
+                        "on-tertiary-fixed-variant": "#6900b3"
+                    },
+                    "spacing": {
+                        "lane-margin": "32px",
+                        "stack-gap": "4px",
+                        "grid-unit": "8px",
+                        "node-gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- Top Navigation -->
+<header class="fixed w-full top-0 z-50 bg-surface border-b border-outline-variant flex justify-between items-center h-16 px-lane-margin">
+<div class="flex items-center gap-grid-unit">
+<span class="material-symbols-outlined text-primary-fixed-dim">hub</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary-container tracking-widest">NEURAL_ROUTE_ENGINE_V2</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8 h-full">
+<a class="font-label-caps text-label-caps text-primary-fixed-dim border-b-2 border-primary-fixed-dim h-full flex items-center px-2" href="#">PROPAGATION_MAP</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright transition-colors h-full flex items-center px-2" href="#">NODE_HEALTH</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright transition-colors h-full flex items-center px-2" href="#">CLUSTER_STATS</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SYSTEM_UPTIME</span>
+<span class="font-code-sm text-code-sm font-bold">428:12:04</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<!-- Side Navigation Drawer -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px-36px)] w-64 bg-surface-container border-r border-outline-variant flex flex-col py-grid-unit z-40">
+<div class="px-lane-margin py-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">SYSTEM_INDEX</p>
+<div class="space-y-stack-gap">
+<div class="flex items-center gap-4 p-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-label-caps text-label-caps">SYS_INDEX</span>
+</div>
+<div class="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">LOGIC_FLOWS</span>
+</div>
+<div class="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">TELEMETRY</span>
+</div>
+<div class="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">map</span>
+<span class="font-label-caps text-label-caps">NODE_MAP</span>
+</div>
+<div class="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps">AUDIT_LOG</span>
+</div>
+</div>
+</div>
+<div class="mt-auto px-lane-margin py-4 border-t border-outline-variant">
+<div class="bg-surface-container-lowest p-3 border border-outline-variant">
+<p class="font-code-xs text-code-xs text-secondary mb-1">CURRENT_CONTEXT</p>
+<p class="font-code-sm text-code-sm text-on-surface">WF-024_DEPLOYMENT</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-lane-margin pb-24 min-h-screen relative overflow-hidden">
+<div class="scanline"></div>
+<!-- Header & Breadcrumb -->
+<div class="flex justify-between items-end mb-12">
+<div>
+<nav class="flex gap-2 mb-2">
+<span class="font-code-xs text-code-xs text-outline">ROOT</span>
+<span class="font-code-xs text-code-xs text-outline">/</span>
+<span class="font-code-xs text-code-xs text-outline">BLUEPRINTS</span>
+<span class="font-code-xs text-code-xs text-outline">/</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">WF-024_PROPAGATION</span>
+</nav>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">CHRONOLOGICAL PROPAGATION MAP</h2>
+</div>
+<div class="flex gap-grid-unit">
+<button class="bg-surface-container-high border border-outline-variant px-4 py-2 flex items-center gap-2 hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-base">refresh</span>
+<span class="font-label-caps text-label-caps">LIVE_STREAM</span>
+</button>
+<button class="bg-primary-fixed-dim text-on-primary-fixed px-4 py-2 flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-base">download</span>
+<span class="font-label-caps text-label-caps">EXPORT_MAP</span>
+</button>
+</div>
+</div>
+<!-- Swimlane Container -->
+<div class="relative w-full border border-outline-variant bg-surface-container-lowest/50 backdrop-blur-sm">
+<!-- Lane Headers -->
+<div class="grid grid-cols-[180px_1fr] border-b border-outline-variant bg-surface-container">
+<div class="p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">person</span>
+<span class="font-label-caps text-label-caps">DRIVER_ACTOR</span>
+</div>
+<div class="p-4 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SEQUENCE_TIMELINE (ms)</span>
+<div class="flex gap-8 font-code-xs text-code-xs text-outline">
+<span>0ms</span>
+<span>100ms</span>
+<span>250ms</span>
+<span>500ms</span>
+<span>1000ms</span>
+<span>2000ms</span>
+</div>
+</div>
+</div>
+<!-- Flow Visualizer -->
+<div class="relative p-lane-margin min-h-[600px]">
+<!-- SVG Connector Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0;">
+<path d="M 220 60 H 380 V 150 H 500" fill="none" stroke="#00e639" stroke-width="2"></path>
+<path d="M 640 170 H 750 V 250 H 550 V 350 H 680" fill="none" stroke="#00e639" stroke-dasharray="4" stroke-width="2"></path>
+<path d="M 820 370 H 950 V 480 H 700 V 550 H 450" fill="none" stroke="#00e639" stroke-width="2"></path>
+<circle cx="500" cy="150" fill="#00e639" r="4"></circle>
+<circle cx="680" cy="350" fill="#00e639" r="4"></circle>
+<circle cx="450" cy="550" fill="#00e639" r="4"></circle>
+</svg>
+<!-- Step 1: Frontend Interaction -->
+<div class="absolute left-10 top-10 w-48 bg-surface-container-high border border-primary-fixed-dim p-3 node-pulse z-10">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim">UX_ACTION</span>
+<span class="material-symbols-outlined text-xs text-primary-fixed-dim">touch_app</span>
+</div>
+<p class="font-code-sm text-code-sm mb-2">Driver Accepts Mission</p>
+<div class="flex justify-between text-[9px] font-code-xs text-outline">
+<span>LATENCY</span>
+<span>~12ms</span>
+</div>
+</div>
+<!-- Step 2: API Gateway -->
+<div class="absolute left-[380px] top-[140px] w-52 bg-surface-container border border-outline-variant p-3 z-10">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-[10px] text-secondary">API_GATEWAY</span>
+<span class="material-symbols-outlined text-xs text-secondary">router</span>
+</div>
+<p class="font-code-sm text-code-sm mb-2">Request Authentication &amp; Sanitization</p>
+<div class="bg-surface-container-lowest px-1 py-0.5 font-code-xs text-[9px] text-primary-fixed-dim mb-1">
+                        STATUS: 200 OK
+                    </div>
+<div class="flex justify-between text-[9px] font-code-xs text-outline">
+<span>LATENCY</span>
+<span>45ms</span>
+</div>
+</div>
+<!-- Step 3: Route Engine (The Hub) -->
+<div class="absolute left-[580px] top-[120px] w-64 bg-surface-container-highest border border-primary-container p-4 z-10 shadow-xl">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-[10px] text-primary-container">ROUTE_ENGINE_CORE</span>
+<span class="material-symbols-outlined text-xs text-primary-container">psychology</span>
+</div>
+<p class="font-code-sm text-code-sm mb-2 text-primary-fixed-dim">Orchestrating Multimodal Pathing</p>
+<div class="space-y-1 mb-2">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-[9px]">TRAFFIC_ENGINE</span>
+<span class="h-1 w-12 bg-primary-fixed-dim"></span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-[9px]">WEATHER_DATA</span>
+<span class="h-1 w-8 bg-primary-fixed-dim"></span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-[9px]">GPS_PINGS</span>
+<span class="h-1 w-16 bg-primary-fixed-dim"></span>
+</div>
+</div>
+<div class="flex justify-between text-[9px] font-code-xs text-outline">
+<span>EXEC_TIME</span>
+<span>240ms</span>
+</div>
+</div>
+<!-- Step 4: Aura AI Refinement -->
+<div class="absolute left-[700px] top-[320px] w-56 bg-surface-container border border-tertiary-container p-3 z-10">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-[10px] text-tertiary-fixed-dim">AURA_AI_V4</span>
+<span class="material-symbols-outlined text-xs text-tertiary-fixed-dim">auto_awesome</span>
+</div>
+<p class="font-code-sm text-code-sm mb-2">Predictive Logic &amp; Optimization</p>
+<p class="font-code-xs text-[10px] text-on-surface-variant italic">"Re-routing for high-density congestion avoidance..."</p>
+<div class="flex justify-between text-[9px] font-code-xs text-outline mt-2">
+<span>CONFIDENCE</span>
+<span>98.2%</span>
+</div>
+</div>
+<!-- Step 5: Navigation Dispatch -->
+<div class="absolute left-[450px] top-[500px] w-52 bg-surface-container border border-outline-variant p-3 z-10">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-[10px] text-secondary">NAV_PROTO_02</span>
+<span class="material-symbols-outlined text-xs text-secondary">navigation</span>
+</div>
+<p class="font-code-sm text-code-sm mb-2">Broadcasting to Client Socket</p>
+<div class="flex justify-between text-[9px] font-code-xs text-outline">
+<span>PACKETS</span>
+<span>12.4kbps</span>
+</div>
+</div>
+<!-- Step 6: Frontend Update -->
+<div class="absolute left-10 top-[520px] w-48 bg-surface-container-high border border-primary-fixed-dim p-3 z-10">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-1">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim">UX_UPDATE</span>
+<span class="material-symbols-outlined text-xs text-primary-fixed-dim">visibility</span>
+</div>
+<p class="font-code-sm text-code-sm mb-2">Dashboard Updated: Route Locked</p>
+<div class="flex justify-between text-[9px] font-code-xs text-outline">
+<span>TOTAL_RTT</span>
+<span>842ms</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Data Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-grid-unit mt-lane-margin">
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">PEAK_LATENCY</p>
+<p class="font-code-sm text-headline-md text-primary-fixed-dim">1.2s</p>
+<div class="w-full h-1 bg-surface-container-lowest mt-2">
+<div class="w-[70%] h-full bg-primary-fixed-dim"></div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">SERVICE_HANDOFFS</p>
+<p class="font-code-sm text-headline-md text-secondary">14_NODES</p>
+<div class="w-full h-1 bg-surface-container-lowest mt-2">
+<div class="w-[45%] h-full bg-secondary"></div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">ERROR_RATE</p>
+<p class="font-code-sm text-headline-md text-error">0.02%</p>
+<div class="w-full h-1 bg-surface-container-lowest mt-2">
+<div class="w-[5%] h-full bg-error"></div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">SUCCESS_INDEX</p>
+<p class="font-code-sm text-headline-md text-on-primary-container">0.998</p>
+<div class="w-full h-1 bg-surface-container-lowest mt-2">
+<div class="w-[99%] h-full bg-on-primary-container"></div>
+</div>
+</div>
+</div>
+<!-- Audit Log Sidebar (Simplified) -->
+<div class="mt-lane-margin bg-surface-container border border-outline-variant">
+<div class="p-3 border-b border-outline-variant flex justify-between items-center bg-surface-container-high">
+<span class="font-label-caps text-label-caps">REAL_TIME_AUDIT_STREAM</span>
+<span class="material-symbols-outlined text-sm">history</span>
+</div>
+<div class="p-3 max-h-48 overflow-y-auto no-scrollbar font-code-sm text-code-sm space-y-1">
+<div class="flex gap-4">
+<span class="text-outline">12:04:22.01</span>
+<span class="text-primary-fixed-dim">SUCCESS</span>
+<span class="text-on-surface-variant">Handshake with GPS_ENGINE verified.</span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline">12:04:21.84</span>
+<span class="text-secondary">INFO</span>
+<span class="text-on-surface-variant">AURA_AI pushing optimized node weight for WF-024.</span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline">12:04:21.55</span>
+<span class="text-secondary">INFO</span>
+<span class="text-on-surface-variant">Route Engine calculated primary path in 21ms.</span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline">12:04:21.22</span>
+<span class="text-primary-fixed-dim">AUTH</span>
+<span class="text-on-surface-variant">Driver 892-X-12 session validated.</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full z-50 bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-lane-margin py-2">
+<div class="flex items-center gap-6">
+<span class="font-code-xs text-code-xs text-secondary tracking-widest uppercase">CORE_ENGINE_STABLE_8.2.1</span>
+<div class="flex items-center gap-4 text-on-surface-variant font-code-sm text-code-sm">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span> STATUS: OPERATIONAL</span>
+<span>LATENCY: 12ms</span>
+<span>NODES: 1,422</span>
+</div>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-primary-fixed">terminal</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-primary-fixed">monitoring</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-primary-fixed">bug_report</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Node hover effects
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('border-primary-fixed-dim');
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s ease-out';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('border-primary-fixed-dim');
+                node.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Simple ticker for the audit stream
+        const logContainer = document.querySelector('.max-h-48');
+        setInterval(() => {
+            const lastLog = logContainer.children[0].cloneNode(true);
+            const time = new Date().toISOString().split('T')[1].split('Z')[0];
+            lastLog.children[0].innerText = time;
+            logContainer.prepend(lastLog);
+            if(logContainer.children.length > 50) logContainer.lastElementChild.remove();
+        }, 3000);
+    </script>
+</body></html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAIJADEALS_ENGINEERING_ATLAS | Operational Monitoring</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed-variant": "#0035be",
+                    "error-container": "#93000a",
+                    "surface-tint": "#00e639",
+                    "on-background": "#d4e4fa",
+                    "on-primary-container": "#007117",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "inverse-primary": "#006e16",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface": "#051424",
+                    "primary-container": "#00ff41",
+                    "inverse-surface": "#d4e4fa",
+                    "inverse-on-surface": "#233143",
+                    "secondary": "#b8c3ff",
+                    "surface-container": "#122131",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-bright": "#2c3a4c",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary": "#003907",
+                    "secondary-fixed": "#dde1ff",
+                    "on-secondary": "#002388",
+                    "on-tertiary": "#490080",
+                    "surface-container-high": "#1c2b3c",
+                    "secondary-container": "#0043eb",
+                    "on-error-container": "#ffdad6",
+                    "on-primary-fixed": "#002203",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-tertiary-container": "#862ed4",
+                    "on-secondary-container": "#c6ceff",
+                    "on-secondary-fixed": "#001356",
+                    "surface-container-low": "#0d1c2d",
+                    "background": "#051424",
+                    "primary": "#ebffe2",
+                    "on-tertiary-fixed": "#2c0051",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-container-lowest": "#010f1f",
+                    "outline-variant": "#3b4b37",
+                    "surface-container-highest": "#273647",
+                    "outline": "#84967e",
+                    "primary-fixed": "#72ff70",
+                    "surface-dim": "#051424",
+                    "surface-variant": "#273647",
+                    "on-surface": "#d4e4fa",
+                    "tertiary": "#fff6ff",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-error": "#690005"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(rgba(114, 255, 112, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #84967e;
+            opacity: 0.3;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(114, 255, 112, 0.1);
+            position: absolute;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-background selection:bg-primary-fixed-dim selection:text-on-primary-fixed">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center px-node-gutter h-14">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed">account_tree</span>
+<h1 class="font-label-caps text-label-caps text-primary-fixed border border-primary-fixed px-2 py-1">NAIJADEALS_ENGINEERING_ATLAS</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+                    SYSTEM_STABLE
+                </span>
+</div>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim opacity-80">v4.2.1-STABLE</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full w-64 border-r border-outline-variant bg-surface-container-low flex flex-col gap-stack-gap pt-16 z-40">
+<div class="px-4 py-2 mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed uppercase tracking-widest opacity-50">SYSTEM_INDEX</span>
+</div>
+<nav class="flex flex-col">
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+<span class="font-code-sm text-code-sm">CORE_ENGINE</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+<span class="font-code-sm text-code-sm">MARKET_LOGIC</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="font-code-sm text-code-sm">DEALS_ROUTING</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">query_stats</span>
+<span class="font-code-sm text-code-sm">USER_GRAPH</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">shield_lock</span>
+<span class="font-code-sm text-code-sm">AUTH_SERVICE</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant opacity-70 hover:bg-surface-container-highest hover:opacity-100 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="font-code-sm text-code-sm">TELEMETRY</span>
+</a>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant bg-surface-container-lowest/50">
+<div class="font-code-xs text-code-xs text-on-surface-variant mb-2">IO_LOAD: 12%</div>
+<div class="w-full bg-surface-container-high h-1 overflow-hidden">
+<div class="bg-primary-fixed h-full w-[12%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-14 pb-8 min-h-screen relative overflow-x-hidden">
+<div class="scanline pointer-events-none"></div>
+<header class="px-node-gutter py-8 border-b border-outline-variant bg-surface-container-lowest/30 backdrop-blur-sm">
+<div class="flex justify-between items-end">
+<div>
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">MONITORING_ORBIT_01</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">WF-023: Artifact I — Operational Monitoring</h2>
+</div>
+<div class="flex gap-4">
+<div class="px-3 py-1 border border-outline-variant rounded-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed">refresh</span>
+<span class="font-code-xs text-code-xs">AUTO_SYNC: ON</span>
+</div>
+<div class="px-3 py-1 border border-outline-variant rounded-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">schedule</span>
+<span class="font-code-xs text-code-xs" id="timestamp">14:23:45.021</span>
+</div>
+</div>
+</div>
+</header>
+<div class="p-node-gutter space-y-node-gutter">
+<!-- High Density KPI Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- KPI 1 -->
+<div class="bg-surface-container p-4 border border-outline-variant relative group hover:border-primary-fixed/50 transition-colors">
+<div class="absolute top-2 right-2 font-code-xs text-primary-fixed">01</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">group</span>
+                        DRIVERS_REGISTERED
+                    </div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary-fixed">14,209</span>
+<span class="font-code-xs text-code-xs text-on-primary-container bg-primary-container/20 px-1">+2.4%</span>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/30 flex justify-between font-code-xs text-on-surface-variant">
+<span>LIFETIME_SUM</span>
+<span class="text-on-surface">TOTAL_POOL_Σ</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container p-4 border border-outline-variant relative group hover:border-primary-fixed/50 transition-colors">
+<div class="absolute top-2 right-2 font-code-xs text-primary-fixed">02</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">sensors</span>
+                        DRIVERS_ONLINE
+                    </div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">3,842</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">LIVE_NOW</span>
+</div>
+<div class="mt-4 flex gap-[2px]">
+<div class="h-1 bg-primary-fixed w-[40%]"></div>
+<div class="h-1 bg-outline-variant w-[60%]"></div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container p-4 border border-outline-variant relative group hover:border-primary-fixed/50 transition-colors">
+<div class="absolute top-2 right-2 font-code-xs text-primary-fixed">03</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">person_off</span>
+                        DRIVERS_OFFLINE
+                    </div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface-variant">10,367</span>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/30 flex justify-between font-code-xs text-on-surface-variant">
+<span>IDLE_STATE</span>
+<span class="text-on-surface">OFF_DUTY</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container p-4 border border-outline-variant relative group hover:border-primary-fixed/50 transition-colors">
+<div class="absolute top-2 right-2 font-code-xs text-primary-fixed">04</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+                        UTILIZATION
+                    </div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary-fixed">87.4%</span>
+</div>
+<div class="mt-4 flex items-center justify-between">
+<div class="font-code-xs text-code-xs text-on-surface-variant">TARGET: 85%</div>
+<div class="font-code-xs text-code-xs text-primary-fixed">OPTIMAL</div>
+</div>
+</div>
+</div>
+<!-- Main Monitoring Matrix -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-node-gutter">
+<!-- Performance Metrics (Centerpiece) -->
+<div class="xl:col-span-2 space-y-4">
+<div class="bg-surface-container-low border border-outline-variant overflow-hidden">
+<div class="p-4 border-b border-outline-variant bg-surface-container-high flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary-fixed flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">show_chart</span>
+                                PERFORMANCE_TELEMETRY_STREAM
+                            </span>
+<div class="flex gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+</div>
+</div>
+<div class="p-6 relative h-[320px] bg-surface">
+<!-- Visualizing a complex graph with SVG -->
+
+<div class="absolute inset-0 p-6 flex flex-col justify-between pointer-events-none">
+<div class="flex justify-between font-code-xs text-on-surface-variant opacity-50">
+<span>Y_AXIS: ACCEPTANCE_RATIO (%)</span>
+<span>X_AXIS: TIME_T [24H]</span>
+</div>
+<div class="mt-auto grid grid-cols-6 gap-2">
+<div class="h-32 border-l border-outline-variant/30 flex flex-col justify-end items-center gap-1">
+<div class="w-2 bg-primary-fixed/40 h-[60%]"></div>
+<div class="w-2 bg-primary-fixed h-[80%]"></div>
+<span class="text-[8px]">00:00</span>
+</div>
+<div class="h-32 border-l border-outline-variant/30 flex flex-col justify-end items-center gap-1">
+<div class="w-2 bg-primary-fixed/40 h-[40%]"></div>
+<div class="w-2 bg-primary-fixed h-[70%]"></div>
+<span class="text-[8px]">04:00</span>
+</div>
+<div class="h-32 border-l border-outline-variant/30 flex flex-col justify-end items-center gap-1">
+<div class="w-2 bg-primary-fixed/40 h-[90%]"></div>
+<div class="w-2 bg-primary-fixed h-[95%]"></div>
+<span class="text-[8px]">08:00</span>
+</div>
+<div class="h-32 border-l border-outline-variant/30 flex flex-col justify-end items-center gap-1">
+<div class="w-2 bg-primary-fixed/40 h-[75%]"></div>
+<div class="w-2 bg-primary-fixed h-[85%]"></div>
+<span class="text-[8px]">12:00</span>
+</div>
+<div class="h-32 border-l border-outline-variant/30 flex flex-col justify-end items-center gap-1">
+<div class="w-2 bg-primary-fixed/40 h-[80%]"></div>
+<div class="w-2 bg-primary-fixed h-[90%]"></div>
+<span class="text-[8px]">16:00</span>
+</div>
+<div class="h-32 border-l border-outline-variant/30 flex flex-col justify-end items-center gap-1">
+<div class="w-2 bg-primary-fixed/40 h-[65%]"></div>
+<div class="w-2 bg-primary-fixed h-[75%]"></div>
+<span class="text-[8px]">20:00</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">AVG_ACCEPTANCE_RATE</div>
+<div class="font-headline-md text-headline-md text-primary-fixed">92.41%</div>
+<div class="mt-1 font-code-xs text-on-surface-variant">SLA_THRESHOLD: &gt;90%</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">AVG_COMPLETION_RATE</div>
+<div class="font-headline-md text-headline-md text-secondary-fixed">98.12%</div>
+<div class="mt-1 font-code-xs text-on-surface-variant">SLA_THRESHOLD: &gt;95%</div>
+</div>
+</div>
+</div>
+<!-- Compliance & Trust Sidebar -->
+<div class="space-y-4">
+<!-- Compliance Section -->
+<div class="bg-surface-container-low border border-outline-variant">
+<div class="p-4 border-b border-outline-variant bg-surface-container-high font-label-caps text-label-caps text-on-surface flex justify-between">
+<span>VEHICLE_COMPLIANCE</span>
+<span class="text-primary-fixed">99.2%</span>
+</div>
+<div class="p-4 space-y-4">
+<div class="space-y-1">
+<div class="flex justify-between font-code-xs text-on-surface-variant">
+<span>REGISTRATION_STATUS</span>
+<span>14,102 OK</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1">
+<div class="bg-primary-fixed h-full w-[99.1%]"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between font-code-xs text-on-surface-variant">
+<span>INSURANCE_VALIDITY</span>
+<span>14,095 OK</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1">
+<div class="bg-primary-fixed h-full w-[98.8%]"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between font-code-xs text-on-surface-variant">
+<span>SAFETY_INSPECTION</span>
+<span>14,198 OK</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1">
+<div class="bg-primary-fixed h-full w-[99.9%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Trust Trends Card -->
+<div class="bg-surface-container-low border border-outline-variant relative overflow-hidden">
+<div class="p-4 border-b border-outline-variant bg-surface-container-high font-label-caps text-label-caps">TRUST_TRENDS_INDEX</div>
+<div class="p-4 h-48 bg-surface-container-lowest">
+<div class="flex items-center justify-center h-full flex-col gap-2">
+<span class="material-symbols-outlined text-[48px] text-primary-fixed opacity-50">verified_user</span>
+<div class="text-center">
+<div class="font-headline-md text-headline-md">4.92 / 5.0</div>
+<div class="font-code-xs text-primary-fixed-dim uppercase">High Trust Equilibrium</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLA Status Module -->
+<div class="bg-surface-container-lowest border border-primary-fixed/20 p-4 relative">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-fixed"></div>
+<div class="font-label-caps text-label-caps text-primary-fixed mb-2">SLA_STATUS: CRITICAL_PASS</div>
+<div class="flex items-center gap-4">
+<div class="text-primary-fixed">
+<span class="material-symbols-outlined text-[32px]">task_alt</span>
+</div>
+<div class="font-code-xs text-on-surface-variant">
+                                Current ecosystem health satisfies all institutional performance benchmarks for Q3-Operational-Windows.
+                            </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Event Stream (Audit Log Style) -->
+<div class="bg-surface-container-low border border-outline-variant">
+<div class="p-4 border-b border-outline-variant bg-surface-container-high flex justify-between items-center">
+<span class="font-label-caps text-label-caps">SYSTEM_AUDIT_LOGS</span>
+<button class="font-code-xs text-code-xs border border-outline-variant px-2 py-1 hover:bg-surface-container-highest transition-colors">EXPORT_CSV</button>
+</div>
+<div class="custom-scrollbar overflow-y-auto max-h-[160px] font-code-xs">
+<div class="grid grid-cols-12 px-4 py-2 border-b border-outline-variant/30 text-on-surface-variant">
+<div class="col-span-2">TIMESTAMP</div>
+<div class="col-span-2">LEVEL</div>
+<div class="col-span-2">COMPONENT</div>
+<div class="col-span-6">EVENT_MESSAGE</div>
+</div>
+<div class="grid grid-cols-12 px-4 py-1.5 border-b border-outline-variant/10 text-primary-fixed">
+<div class="col-span-2">14:23:45.021</div>
+<div class="col-span-2">[INFO]</div>
+<div class="col-span-2">DRV_COORD</div>
+<div class="col-span-6">NEW_DRIVER_REGISTRATION: ID_45923_LAGOS</div>
+</div>
+<div class="grid grid-cols-12 px-4 py-1.5 border-b border-outline-variant/10">
+<div class="col-span-2">14:23:44.110</div>
+<div class="col-span-2">[PASS]</div>
+<div class="col-span-2">AUTH_SRVC</div>
+<div class="col-span-6">SLA_RECONCILIATION_COMPLETE: 99.98% UPTIME</div>
+</div>
+<div class="grid grid-cols-12 px-4 py-1.5 border-b border-outline-variant/10 text-secondary-fixed">
+<div class="col-span-2">14:23:42.894</div>
+<div class="col-span-2">[DEBUG]</div>
+<div class="col-span-2">POOL_MGMT</div>
+<div class="col-span-6">CAPACITY_REBALANCING_TRIGGERED_ZONE_7</div>
+</div>
+<div class="grid grid-cols-12 px-4 py-1.5 border-b border-outline-variant/10">
+<div class="col-span-2">14:23:40.002</div>
+<div class="col-span-2">[INFO]</div>
+<div class="col-span-2">SYS_HEALTH</div>
+<div class="col-span-6">TELEMETRY_BATCH_COMMITTED_INDEX_723</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full z-50 border-t border-outline-variant bg-surface-container-lowest flex justify-between items-center px-node-gutter h-8 font-code-xs text-code-xs text-primary-fixed-dim">
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-label-caps">© 2024 NAIJADEALS_SYS_OPS</span>
+<div class="flex gap-4">
+<span class="hover:text-primary-fixed cursor-help">LATENCY: 42ms</span>
+<span class="hover:text-primary-fixed cursor-help">UPTIME: 99.98%</span>
+<span class="hover:text-primary-fixed cursor-help text-primary-fixed font-bold">THREADS: ACTIVE</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span>
+            LIVE_SYNC_STABLE
+        </div>
+</footer>
+<script>
+        // Micro-interaction for timestamp
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
+                            now.getMinutes().toString().padStart(2, '0') + ":" + 
+                            now.getSeconds().toString().padStart(2, '0') + "." +
+                            now.getMilliseconds().toString().padStart(3, '0');
+            document.getElementById('timestamp').textContent = timeStr;
+        }
+        setInterval(updateTime, 1);
+        
+        // Randomly simulate KPI fluctuations
+        setInterval(() => {
+            const utilizationElement = document.querySelector('.lg\\:grid-cols-4 > div:nth-child(4) .text-headline-lg');
+            if (utilizationElement) {
+                const currentVal = parseFloat(utilizationElement.textContent);
+                const variance = (Math.random() - 0.5) * 0.2;
+                utilizationElement.textContent = (currentVal + variance).toFixed(1) + '%';
+            }
+        }, 3000);
+    </script>
+</body></html>

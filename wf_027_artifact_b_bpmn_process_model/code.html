@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-027: GLOBAL_LOGISTICS_ORCHESTRATOR</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#1c2b3c",
+                        "surface-bright": "#2c3a4c",
+                        "outline-variant": "#3b4b37",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#00e639",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#84967e",
+                        "on-primary-container": "#007117",
+                        "tertiary": "#fff6ff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary": "#ebffe2",
+                        "surface-container-highest": "#273647",
+                        "on-error": "#690005",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-container": "#c6ceff",
+                        "background": "#051424",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-fixed": "#dde1ff",
+                        "on-surface": "#d4e4fa",
+                        "surface": "#051424",
+                        "surface-container-low": "#0d1c2d",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "surface-tint": "#00e639",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-fixed": "#72ff70",
+                        "inverse-primary": "#006e16",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-fixed": "#002203",
+                        "on-primary": "#003907",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "secondary-container": "#0043eb",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "primary-container": "#00ff41",
+                        "surface-dim": "#051424",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container": "#122131",
+                        "surface-variant": "#273647",
+                        "on-secondary": "#002388",
+                        "tertiary-container": "#ecd3ff",
+                        "on-secondary-fixed": "#001356",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-line {
+            position: absolute;
+            background: #84967e;
+            pointer-events: none;
+        }
+        .swimlane-header {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+        .bpmn-node {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bpmn-node:hover {
+            border-color: #00e639;
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.15);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+            border-radius: 4px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin h-16 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-headline-md">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="text-primary border-b-2 border-primary font-label-caps text-label-caps h-16 flex items-center px-2" href="#">LIFECYCLE_MAP</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-caps text-label-caps h-16 flex items-center px-2" href="#">TELEMETRY</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-caps text-label-caps h-16 flex items-center px-2" href="#">NODES</a>
+</nav>
+<span class="text-label-caps font-label-caps bg-surface-container-highest px-3 py-1 rounded text-primary-fixed-dim">v4.2.0 LIVE</span>
+</div>
+</header>
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container border-r border-outline-variant w-64">
+<div class="px-6 mb-8">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant mb-2">WORKFLOW_INDEX</h2>
+<div class="h-px bg-outline-variant w-full"></div>
+</div>
+<nav class="flex-1 overflow-y-auto space-y-1">
+<div class="group cursor-pointer bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 translate-x-1 transition-transform flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">lan</span>
+<span class="text-code-sm font-code-sm">WF-027: FREIGHT</span>
+</div>
+<!-- Dynamic Navigation Mapping -->
+<div class="group cursor-pointer text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</div>
+<div class="group cursor-pointer text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</div>
+<div class="group cursor-pointer text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</div>
+<div class="group cursor-pointer text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">psychology</span>
+<span class="text-code-sm font-code-sm">WF-008: AI_INF</span>
+</div>
+<div class="group cursor-pointer text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest transition-all flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">database</span>
+<span class="text-code-sm font-code-sm">WF-005: DATA</span>
+</div>
+</nav>
+<div class="p-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 text-code-xs font-code-xs text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+                SYSTEM_STABLE: 99.98%
+            </div>
+</div>
+</aside>
+<!-- Main Workflow Canvas -->
+<main class="ml-64 pt-16 pb-12 min-h-screen overflow-x-auto">
+<div class="min-w-[2800px] relative p-12">
+<!-- Swimlanes Overlay Grid -->
+<div class="absolute inset-0 z-0 pointer-events-none">
+<!-- Row divisions -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Merchant -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Warehouse -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Freight -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Container -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Customs -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Border -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Fleet -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- GPS -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Aura AI -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Insurance -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Wallet -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Escrow -->
+<div class="h-24 border-b border-outline-variant opacity-30"></div> <!-- Audit -->
+</div>
+<!-- BPMN Actors Column (Swimlane Labels) -->
+<div class="fixed left-64 top-16 bottom-12 w-12 bg-surface-container-low border-r border-outline-variant z-30 flex flex-col">
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant">MERCHANT</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant text-[9px]">WAREHOUSE</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant text-[9px]">FREIGHT_SVC</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant text-[9px]">CONTAINER_SVC</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant">CUSTOMS</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant text-[9px]">BORDER_AUTH</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant">FLEET</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant">GPS_IOT</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50 text-secondary-fixed"><span class="swimlane-header text-label-caps font-label-caps">AURA_AI</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant">INSURANCE</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant">WALLET</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant">ESCROW</span></div>
+<div class="h-24 flex items-center justify-center border-b border-outline-variant/50"><span class="swimlane-header text-label-caps font-label-caps text-on-surface-variant">AUDIT</span></div>
+</div>
+<!-- Workflow Logic Nodes -->
+<div class="ml-16 space-y-0 relative z-10">
+<!-- START EVENT -->
+<div class="absolute left-0 top-8 flex flex-col items-center">
+<div class="w-12 h-12 rounded-full border-2 border-primary-fixed-dim bg-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed-dim">play_arrow</span>
+</div>
+<span class="text-code-xs font-code-xs mt-2 text-primary">SHIPMENT_INIT</span>
+</div>
+<!-- MERCHANT LANE -->
+<div class="h-24 flex items-center gap-12 pl-24">
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-outline px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant text-[8px]">TASK: 027-01</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">GENERATE_BILL_LADING</span>
+</div>
+<div class="w-8 h-8 rotate-45 border-2 border-outline-variant bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined -rotate-45 text-[14px]">call_split</span>
+</div>
+</div>
+<!-- WAREHOUSE LANE -->
+<div class="h-24 flex items-center gap-12 pl-96">
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-outline px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant text-[8px]">TASK: 027-02</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">LOAD_CONSIGNMENT</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-outline-variant">timer</span>
+<span class="text-code-xs font-code-xs">T-04:00:00</span>
+</div>
+</div>
+<!-- FREIGHT SVC LANE -->
+<div class="h-24 flex items-center gap-12 pl-[600px]">
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-outline px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant text-[8px]">SUB: 027-03</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">ROUTE_OPTIMIZATION</span>
+</div>
+</div>
+<!-- CONTAINER SVC LANE -->
+<div class="h-24 flex items-center gap-12 pl-[800px]">
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-outline px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant text-[8px]">TASK: 027-04</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">SEAL_CONTAINER_IOT</span>
+</div>
+</div>
+<!-- CUSTOMS & INSURANCE PARALLEL -->
+<div class="h-24 flex items-center gap-12 pl-[1000px] relative">
+<div class="absolute -top-12 left-0 h-48 w-1 border-l-2 border-dashed border-secondary"></div>
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-secondary px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-secondary text-[8px]">TASK: 027-05-A</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">IMPORT_DECLARATION</span>
+</div>
+<div class="w-8 h-8 border-2 border-secondary bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-[16px]">add</span>
+</div>
+</div>
+<!-- BORDER AUTHORITY LANE -->
+<div class="h-24 flex items-center gap-12 pl-[1300px]">
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-error">hourglass_bottom</span>
+<span class="text-code-xs font-code-xs text-error">CLEARANCE_WAIT</span>
+</div>
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-error px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-error text-[8px]">GATE: 027-06</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">VERIFY_MANIFEST</span>
+</div>
+</div>
+<!-- FLEET LANE -->
+<div class="h-24 flex items-center gap-12 pl-[1600px]">
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-outline px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant text-[8px]">TASK: 027-07</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">ASSIGN_AUTONOMOUS_FLEET</span>
+</div>
+</div>
+<!-- GPS / IOT LANE -->
+<div class="h-24 flex items-center gap-12 pl-[1800px]">
+<div class="w-12 h-12 rounded bg-surface border border-primary-container flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-primary-container">location_on</span>
+<span class="text-[8px] font-code-xs">TELE</span>
+</div>
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-outline px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant text-[8px]">TASK: 027-08</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">STREAM_GEO_COORD</span>
+</div>
+</div>
+<!-- AURA AI LANE -->
+<div class="h-24 flex items-center gap-12 pl-[2000px]">
+<div class="bpmn-node w-64 h-14 bg-surface-container-high border border-primary-fixed px-3 flex flex-col justify-center relative overflow-hidden">
+<div class="absolute top-0 right-0 p-1 opacity-20"><span class="material-symbols-outlined text-headline-lg">psychology</span></div>
+<span class="text-label-caps font-label-caps text-primary-fixed text-[8px]">AI_LOGIC: 027-09</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">PREDICTIVE_MAINTENANCE_SYNC</span>
+</div>
+</div>
+<!-- INSURANCE LANE -->
+<div class="h-24 flex items-center gap-12 pl-[1000px]">
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-tertiary-fixed-dim px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-tertiary-fixed-dim text-[8px]">TASK: 027-05-B</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">UNDERWRITE_TRANSIT_RISK</span>
+</div>
+</div>
+<!-- WALLET LANE -->
+<div class="h-24 flex items-center gap-12 pl-[2300px]">
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-secondary-container px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-secondary-container text-[8px]">FIN: 027-10</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">RESERVE_GAS_FEES</span>
+</div>
+</div>
+<!-- ESCROW LANE -->
+<div class="h-24 flex items-center gap-12 pl-[2500px]">
+<div class="bpmn-node w-48 h-12 bg-surface-container border border-secondary-container px-3 flex flex-col justify-center">
+<span class="text-label-caps font-label-caps text-secondary-container text-[8px]">ESCROW: 027-11</span>
+<span class="text-code-sm font-code-sm text-on-surface truncate uppercase">SMART_CONTRACT_LOCK</span>
+</div>
+</div>
+<!-- AUDIT LANE -->
+<div class="h-24 flex items-center gap-12 pl-[2700px]">
+<div class="bpmn-node w-32 h-12 bg-surface-container-lowest border border-outline-variant px-3 flex items-center justify-between">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span class="text-code-sm font-code-sm">FINAL_HASH</span>
+</div>
+<div class="w-12 h-12 rounded-full border-4 border-on-surface-variant bg-surface flex items-center justify-center">
+<div class="w-4 h-4 bg-error rounded-sm"></div>
+</div>
+</div>
+</div>
+<!-- Orthogonal Connectors (Visual Only Layer) -->
+<svg class="absolute inset-0 z-0 pointer-events-none w-full h-full" style="min-height: 1248px;">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#84967e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead-red" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#ffb4ab" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Main Flow -->
+<path d="M 112 56 L 240 152 M 432 152 L 480 248 M 672 248 L 736 344" fill="none" marker-end="url(#arrowhead)" stroke="#84967e" stroke-width="2"></path>
+<path d="M 928 344 L 984 440" fill="none" marker-end="url(#arrowhead)" stroke="#84967e" stroke-width="2"></path>
+<!-- Parallel Splitting -->
+<path d="M 1176 440 L 1232 440 L 1232 536 L 1320 536" fill="none" marker-end="url(#arrowhead)" stroke="#b8c3ff" stroke-width="2"></path>
+<path d="M 1176 440 L 1232 440 L 1232 1016 L 1320 1016" fill="none" marker-end="url(#arrowhead)" stroke="#b8c3ff" stroke-width="2"></path>
+<!-- Border Gate Path -->
+<path d="M 1512 536 L 1580 536 L 1580 632 L 1650 632" fill="none" marker-end="url(#arrowhead-red)" stroke="#ffb4ab" stroke-dasharray="4" stroke-width="2"></path>
+</svg>
+</div>
+</main>
+<!-- Node Editor Drawer (Contextual) -->
+<div class="fixed right-0 top-16 bottom-0 w-80 bg-surface-container border-l border-outline-variant z-50 translate-x-full transition-transform duration-300" id="node-editor">
+<div class="p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-headline-md font-headline-md text-primary">NODE_CONFIG</h3>
+<button class="material-symbols-outlined text-on-surface-variant" onclick="document.getElementById('node-editor').classList.add('translate-x-full')">close</button>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<label class="text-label-caps font-label-caps text-on-surface-variant">PROCESS_ID</label>
+<input class="w-full bg-transparent border border-outline p-2 font-code-sm text-primary focus:border-primary-fixed outline-none" readonly="" type="text" value="WF-027-TXN-99"/>
+</div>
+<div class="space-y-2">
+<label class="text-label-caps font-label-caps text-on-surface-variant">TIMEOUT_STRATEGY</label>
+<select class="w-full bg-transparent border border-outline p-2 font-code-sm text-on-surface focus:border-primary-fixed outline-none appearance-none">
+<option>ABORT_ON_FAILURE</option>
+<option>RETRY_BACKOFF</option>
+<option>ESCALATE_AURA</option>
+</select>
+</div>
+<div class="p-4 bg-surface-container-highest border border-primary-container/20 rounded">
+<p class="text-code-xs font-code-xs text-primary-container mb-2">TELEMETRY_REALTIME</p>
+<div class="flex justify-between text-code-xs">
+<span>LATENCY</span>
+<span>12.4ms</span>
+</div>
+<div class="flex justify-between text-code-xs">
+<span>THROUGHPUT</span>
+<span>1.2k ops/s</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-6">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-4">
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">AUDIT_TRAIL: ACTIVE</a>
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">N8N_SYNC: OK</a>
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">LATENCY: 12ms</a>
+</div>
+</div>
+<div class="flex items-center gap-4 text-code-xs font-code-xs text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">bolt</span> ENERGY_GRID: OPTIMAL</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">lock</span> SECURE_ENCLAVE: ARMED</span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for BPMN nodes
+        document.querySelectorAll('.bpmn-node').forEach(node => {
+            node.addEventListener('click', () => {
+                const editor = document.getElementById('node-editor');
+                editor.classList.remove('translate-x-full');
+                
+                // Randomize some telemetry for effect
+                const latency = (Math.random() * 50 + 5).toFixed(1);
+                editor.querySelector('.flex.justify-between span:last-child').textContent = latency + 'ms';
+            });
+        });
+
+        // Simulation of moving data packets along lines
+        function createDataPacket() {
+            const canvas = document.querySelector('main > div');
+            const packet = document.createElement('div');
+            packet.className = 'absolute w-1 h-1 bg-primary-fixed-dim rounded-full z-20 shadow-[0_0_5px_#00e639]';
+            packet.style.left = '100px';
+            packet.style.top = '100px';
+            canvas.appendChild(packet);
+
+            // Simple animation along the first path segment
+            let progress = 0;
+            const animate = () => {
+                progress += 0.005;
+                if (progress > 1) {
+                    packet.remove();
+                    return;
+                }
+                packet.style.left = (112 + progress * (240 - 112)) + 'px';
+                packet.style.top = (56 + progress * (152 - 56)) + 'px';
+                requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+        }
+
+        setInterval(createDataPacket, 3000);
+    </script>
+</body></html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEURAL_ROUTE_ENGINE_V2 | WF-024 Exception Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-port {
+            width: 8px;
+            height: 8px;
+            background: #00e639;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .connector-line {
+            position: absolute;
+            background: #84967e;
+            z-index: 0;
+        }
+        .connector-line.danger { background: #ffb4ab; border-style: dashed; border-width: 1px; }
+        .connector-line.warning { background: #f0dbff; }
+        .connector-arrow {
+            width: 0; height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid #84967e;
+            position: absolute;
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(18, 33, 49, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#273647",
+                        "surface": "#051424",
+                        "surface-bright": "#2c3a4c",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary-fixed-dim": "#00e639",
+                        "primary-container": "#00ff41",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff",
+                        "secondary-container": "#0043eb",
+                        "on-secondary-fixed": "#001356",
+                        "on-primary-container": "#007117",
+                        "secondary": "#b8c3ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-low": "#0d1c2d",
+                        "on-surface": "#d4e4fa",
+                        "outline": "#84967e",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container-lowest": "#010f1f",
+                        "on-secondary-container": "#c6ceff",
+                        "primary-fixed": "#72ff70",
+                        "surface-container": "#122131",
+                        "surface-tint": "#00e639",
+                        "surface-container-high": "#1c2b3c",
+                        "tertiary": "#fff6ff",
+                        "on-secondary": "#002388",
+                        "on-primary-fixed": "#002203",
+                        "on-primary": "#003907",
+                        "background": "#051424",
+                        "on-error": "#690005",
+                        "primary": "#ebffe2",
+                        "on-tertiary": "#490080",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006e16",
+                        "surface-container-highest": "#273647",
+                        "on-surface-variant": "#b9ccb2",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#f0dbff",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-dim": "#051424",
+                        "on-background": "#d4e4fa",
+                        "outline-variant": "#3b4b37",
+                        "on-tertiary-fixed-variant": "#6900b3"
+                    },
+                    "spacing": {
+                        "lane-margin": "32px",
+                        "stack-gap": "4px",
+                        "grid-unit": "8px",
+                        "node-gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full top-0 bg-surface dark:bg-surface text-primary-fixed-dim dark:text-primary-fixed-dim border-b border-outline-variant dark:border-outline-variant flex justify-between items-center h-16 px-lane-margin w-full z-50 fixed">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer active:opacity-80">hub</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary-container dark:text-primary-container tracking-widest uppercase">NEURAL_ROUTE_ENGINE_V2</h1>
+</div>
+<nav class="hidden md:flex gap-8">
+<a class="font-label-caps text-label-caps text-primary-fixed-dim border-b-2 border-primary-fixed-dim transition-colors h-16 flex items-center" href="#">LOGIC_FLOWS</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright dark:hover:bg-surface-bright transition-colors h-16 flex items-center px-4" href="#">TELEMETRY</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright dark:hover:bg-surface-bright transition-colors h-16 flex items-center px-4" href="#">NODE_MAP</a>
+</nav>
+<span class="material-symbols-outlined cursor-pointer active:opacity-80">settings_input_component</span>
+</header>
+<div class="flex flex-1 pt-16">
+<!-- NavigationDrawer -->
+<aside class="h-screen w-64 left-0 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant flex flex-col py-grid-unit sticky top-16 hidden lg:flex">
+<div class="px-6 py-4">
+<span class="font-label-caps text-label-caps text-on-surface">SYSTEM_INDEX</span>
+</div>
+<div class="flex flex-col gap-1 mt-4">
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-all">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-label-caps text-label-caps">SYS_INDEX</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">LOGIC_FLOWS</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-all">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">TELEMETRY</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-all">
+<span class="material-symbols-outlined">map</span>
+<span class="font-label-caps text-label-caps">NODE_MAP</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-all">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps">AUDIT_LOG</span>
+</div>
+</div>
+</aside>
+<!-- Main Content (Workflow Canvas) -->
+<main class="flex-1 relative overflow-hidden bg-surface">
+<!-- Canvas Header -->
+<div class="p-lane-margin flex justify-between items-start">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary-fixed-dim uppercase tracking-tighter">WF-024 // EXCEPTION_MODEL</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-2">Active Recovery Layer: 0x992-DELTA</p>
+</div>
+<div class="flex gap-4">
+<div class="glass-panel border border-outline-variant px-4 py-2 flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">NODE_DENSITY</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">OPTIMAL</span>
+</div>
+<div class="glass-panel border border-outline-variant px-4 py-2 flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Uptime</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">99.9992%</span>
+</div>
+</div>
+</div>
+<!-- Workflow Visualizer -->
+<div class="relative w-full h-[700px] overflow-auto px-lane-margin pb-32">
+<div class="grid grid-cols-4 gap-node-gutter relative">
+<!-- COLUMN 1: SENSORS / INPUTS -->
+<div class="flex flex-col gap-12">
+<div class="font-headline-md text-headline-md border-b border-outline-variant pb-2 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">sensors</span>
+<span>SENSORS</span>
+</div>
+<!-- Node: GPS_PROBE -->
+<div class="bg-surface-container border border-primary-fixed-dim p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">PROBE_01</div>
+<div class="font-code-sm text-code-sm">GPS_SIGNAL_MONITOR</div>
+<div class="flex justify-between mt-3">
+<span class="font-code-xs text-code-xs opacity-50">LAT: 12.5ms</span>
+<div class="node-port -right-5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<!-- Node: TRAFFIC_MONITOR -->
+<div class="bg-surface-container border border-primary-fixed-dim p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">PROBE_02</div>
+<div class="font-code-sm text-code-sm">TRAFFIC_API_HOOK</div>
+<div class="flex justify-between mt-3">
+<span class="font-code-xs text-code-xs opacity-50">FREQ: 1.0Hz</span>
+<div class="node-port -right-5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+</div>
+<!-- COLUMN 2: EXCEPTION HANDLERS -->
+<div class="flex flex-col gap-12">
+<div class="font-headline-md text-headline-md border-b border-outline-variant pb-2 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-error">warning</span>
+<span>EXCEPTIONS</span>
+</div>
+<!-- Exception: GPS FAILURE -->
+<div class="bg-surface-container-highest border border-error p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-error mb-1">CRITICAL_01</div>
+<div class="font-code-sm text-code-sm">GPS_SIGNAL_FAILURE</div>
+<div class="mt-2 py-1 bg-error-container/20 text-error px-2 font-code-xs text-center">DANGER: NO_SIGNAL</div>
+<div class="node-port -right-5 top-1/2 -translate-y-1/2" style="background:#ffb4ab"></div>
+</div>
+<!-- Exception: TRAFFIC JAM -->
+<div class="bg-surface-container-highest border border-tertiary-fixed-dim p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-1">WARN_02</div>
+<div class="font-code-sm text-code-sm">TRAFFIC_JAM_DETECTED</div>
+<div class="mt-2 py-1 bg-tertiary-container/10 text-tertiary-fixed-dim px-2 font-code-xs text-center">INFO: DELAY_EXPECTED</div>
+<div class="node-port -right-5 top-1/2 -translate-y-1/2" style="background:#ddb7ff"></div>
+</div>
+<!-- Exception: ROAD CLOSED -->
+<div class="bg-surface-container-highest border border-tertiary-fixed-dim p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-1">WARN_03</div>
+<div class="font-code-sm text-code-sm">ROAD_CLOSED_EVENT</div>
+<div class="node-port -right-5 top-1/2 -translate-y-1/2" style="background:#ddb7ff"></div>
+</div>
+</div>
+<!-- COLUMN 3: RECOVERY LOGIC -->
+<div class="flex flex-col gap-12">
+<div class="font-headline-md text-headline-md border-b border-outline-variant pb-2 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">settings_backup_restore</span>
+<span>RECOVERY</span>
+</div>
+<!-- Recovery: FALLBACK POSITION -->
+<div class="bg-surface-container-low border border-secondary p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-secondary mb-1">REC_01</div>
+<div class="font-code-sm text-code-sm">FALLBACK_POSITIONING</div>
+<div class="font-code-xs text-code-xs mt-2 text-on-surface-variant">Method: Dead Reckoning</div>
+<div class="node-port -right-5 top-1/2 -translate-y-1/2" style="background:#b8c3ff"></div>
+</div>
+<!-- Recovery: RECALCULATE -->
+<div class="bg-surface-container-low border border-secondary p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-secondary mb-1">REC_02</div>
+<div class="font-code-sm text-code-sm">RECALCULATE_ROUTE</div>
+<div class="node-port -right-5 top-1/2 -translate-y-1/2" style="background:#b8c3ff"></div>
+</div>
+<!-- Recovery: ALT ROUTE -->
+<div class="bg-surface-container-low border border-secondary p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-secondary mb-1">REC_03</div>
+<div class="font-code-sm text-code-sm">ALTERNATIVE_BRANCHING</div>
+<div class="node-port -right-5 top-1/2 -translate-y-1/2" style="background:#b8c3ff"></div>
+</div>
+</div>
+<!-- COLUMN 4: ACTION / OUTPUT -->
+<div class="flex flex-col gap-12">
+<div class="font-headline-md text-headline-md border-b border-outline-variant pb-2 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">play_arrow</span>
+<span>EXECUTORS</span>
+</div>
+<!-- Executor: MANUAL NAV -->
+<div class="bg-surface-container border border-primary-fixed p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-primary-fixed mb-1">EXEC_01</div>
+<div class="font-code-sm text-code-sm uppercase">Manual_Navigation_Mode</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="h-2 w-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+<span class="font-code-xs text-code-xs">WAITING_FOR_USER</span>
+</div>
+</div>
+<!-- Executor: ENGINE_UPDATE -->
+<div class="bg-surface-container border border-primary-fixed p-4 relative z-10">
+<div class="font-label-caps text-label-caps text-primary-fixed mb-1">EXEC_02</div>
+<div class="font-code-sm text-code-sm uppercase">Update_Route_Manifest</div>
+</div>
+</div>
+<!-- Connector Lines (Visual Emulation) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;">
+<!-- GPS to Fail -->
+<path d="M 250 150 L 300 150" fill="none" stroke="#ffb4ab" stroke-dasharray="4 2" stroke-width="1.5"></path>
+<!-- Traffic to Jam -->
+<path d="M 250 250 L 300 250" fill="none" stroke="#84967e" stroke-width="1.5"></path>
+<!-- Road to Closed -->
+<path d="M 250 350 L 300 350" fill="none" stroke="#84967e" stroke-width="1.5"></path>
+<!-- Fail to Fallback -->
+<path d="M 550 150 L 600 150" fill="none" stroke="#ffb4ab" stroke-dasharray="4 2" stroke-width="1.5"></path>
+<!-- Fallback to Manual -->
+<path d="M 850 150 L 900 150" fill="none" stroke="#ffb4ab" stroke-dasharray="4 2" stroke-width="1.5"></path>
+<!-- Jam to Recalc -->
+<path d="M 550 250 L 600 250" fill="none" stroke="#84967e" stroke-width="1.5"></path>
+<!-- Closed to Alt -->
+<path d="M 550 350 L 600 350" fill="none" stroke="#84967e" stroke-width="1.5"></path>
+<!-- Recalc/Alt to Manifest -->
+<path d="M 850 250 L 875 250 L 875 350 L 900 350" fill="none" stroke="#00e639" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Secondary Scenarios (Floating Bento Grid Style) -->
+<div class="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Weather Warning Scenario -->
+<div class="bg-surface-container-low border-l-4 border-tertiary-fixed-dim p-6">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">thunderstorm</span>
+<h3 class="font-label-caps text-label-caps uppercase">Weather_Warning_H3</h3>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">SCENARIO</span>
+<span class="font-code-sm text-code-sm">PRECIPITATION &gt; 80%</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">RESPONSE</span>
+<span class="font-code-sm text-code-sm text-tertiary-fixed-dim">DELAY_MISSION</span>
+</div>
+<div class="pt-2 text-on-surface-variant font-code-xs text-code-xs italic">
+                                Action: Hold node until visibility index &gt; 450.
+                            </div>
+</div>
+</div>
+<!-- Vehicle Breakdown Scenario -->
+<div class="bg-surface-container-low border-l-4 border-error p-6">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-error">car_crash</span>
+<h3 class="font-label-caps text-label-caps uppercase">Vehicle_Breakdown_04</h3>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">SCENARIO</span>
+<span class="font-code-sm text-code-sm">ENGINE_FAILURE_0x04</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">RESPONSE</span>
+<span class="font-code-sm text-code-sm text-error">DISPATCH_REPLACEMENT</span>
+</div>
+<div class="pt-2 text-on-surface-variant font-code-xs text-code-xs italic">
+                                Action: Query Unit-N closest proximity; Transfer manifest.
+                            </div>
+</div>
+</div>
+<!-- Telemetry Summary -->
+<div class="bg-surface-container-high p-6 border border-outline-variant">
+<h3 class="font-label-caps text-label-caps mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">query_stats</span>
+                            RECOVERY_TELEMETRY
+                        </h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="text-center p-3 bg-surface border border-outline-variant">
+<div class="font-headline-md text-headline-md text-primary-fixed">12ms</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant uppercase">Latency</div>
+</div>
+<div class="text-center p-3 bg-surface border border-outline-variant">
+<div class="font-headline-md text-headline-md text-secondary">1.4k</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant uppercase">Nodes</div>
+</div>
+<div class="col-span-2 p-3 bg-surface border border-outline-variant flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">RECOVERY_SUCCESS_RATE</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">99.81%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Mission Context Visualization Section -->
+<div class="mt-12 grid grid-cols-1 lg:grid-cols-4 gap-6">
+<div class="lg:col-span-3 h-64 relative bg-surface-container-highest border border-outline-variant overflow-hidden">
+<div class="absolute inset-0 opacity-40 mix-blend-overlay">
+<div class="w-full h-full" style="background-image: linear-gradient(45deg, #122131 25%, transparent 25%), linear-gradient(-45deg, #122131 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #122131 75%), linear-gradient(-45deg, transparent 75%, #122131 75%); background-size: 40px 40px;"></div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="text-center">
+<div class="font-label-caps text-label-caps text-secondary mb-2">LIVE_SATELLITE_FEED_0x82</div>
+<div class="w-48 h-1 bg-outline-variant mb-4 overflow-hidden">
+<div class="h-full bg-primary-fixed-dim animate-[shimmer_2s_infinite]" style="width: 30%"></div>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant uppercase">Overlaying Exception Zones...</div>
+</div>
+</div>
+<style>
+                            @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
+                        </style>
+<!-- Image representation for Satellite/Map area -->
+<div class="absolute top-4 right-4 w-32 h-32 border border-primary-fixed-dim/30 bg-surface">
+<img class="w-full h-full object-cover grayscale opacity-60" data-alt="A top-down architectural satellite view of a futuristic city grid at night, rendered in a terminal-style aesthetic with dark navy and cyan highlights. Neon grid lines intersect with dark gray blocks representing buildings. The atmosphere is technical, dense with information, and reflects a professional cyberpunk command center vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIzNMz6UXRxo38f2bM8w6oMcBFxHgHe2z2RLKoVq2NK8Z9Jg_m-QSooHRjUzX7KGQwo7TthTMcNdUsbri25_zG1M2CnV2hkiLAzGKhIJjXxkBVQZpaJ2KuJi1ABrbpd63mTJaauqaoHI-dTpNBfVlXWsJeL_fluWw4RtJcvfTdX7-pB0_NtO77gXusyDc77tISHCR2cJs06F63_KC4_SY6L2vFirpZjX6_ja-7p96lLL1HAoqcf7K302m4Nb8vazPR2icdvcrX2UI"/>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="bg-error-container/10 border border-error p-4 flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-error">CRITICAL_ALERT</span>
+<p class="font-code-xs text-code-xs leading-relaxed">Unit-024 reporting total GPS occlusion in Sector 7G. Initiating Fallback-01.</p>
+<button class="w-full py-2 bg-error text-on-error font-label-caps text-label-caps mt-2 hover:opacity-90 active:scale-95 transition-all">MANUAL_OVERRIDE</button>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Active_Listeners</span>
+<div class="mt-2 space-y-1">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span>HUB_A</span><span class="text-primary-fixed">UP</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span>HUB_B</span><span class="text-primary-fixed">UP</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span>SAT_X</span><span class="text-error">FAIL</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full bottom-0 fixed bg-surface-container-lowest dark:bg-surface-container-lowest text-primary-fixed-dim dark:text-primary-fixed-dim font-code-sm text-code-sm border-t border-outline-variant dark:border-outline-variant flex justify-between items-center px-lane-margin py-2 w-full z-50">
+<div class="flex items-center gap-6">
+<span class="font-code-xs text-code-xs text-secondary uppercase">CORE_ENGINE_STABLE_8.2.1</span>
+<span class="text-on-surface-variant">LATENCY: 12ms</span>
+<span class="text-on-surface-variant">NODES: 1,422</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-2">
+<span class="h-1.5 w-1.5 rounded-full bg-primary-fixed-dim"></span>
+                STATUS: OPERATIONAL
+            </span>
+</div>
+</footer>
+<!-- FAB (Suppressed on details screens, but WF-024 is high level dashboard - keeping one functional context FAB) -->
+<button class="fixed bottom-12 right-lane-margin z-[60] bg-primary-container text-on-primary-container w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+</body></html>

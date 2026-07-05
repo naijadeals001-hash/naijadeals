@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-027 | ATLAS V2.0 EVENT BUS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.1);
+        }
+        .connector-line {
+            position: relative;
+        }
+        .connector-line::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+        }
+        .scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pulse-dot {
+            animation: pulse-dot 2s infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#1c2b3c",
+                      "surface-bright": "#2c3a4c",
+                      "outline-variant": "#3b4b37",
+                      "error": "#ffb4ab",
+                      "primary-fixed-dim": "#00e639",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-error-container": "#ffdad6",
+                      "outline": "#84967e",
+                      "on-primary-container": "#007117",
+                      "tertiary": "#fff6ff",
+                      "on-primary-fixed-variant": "#00530e",
+                      "primary": "#ebffe2",
+                      "surface-container-highest": "#273647",
+                      "on-error": "#690005",
+                      "on-background": "#d4e4fa",
+                      "on-tertiary-container": "#862ed4",
+                      "on-secondary-container": "#c6ceff",
+                      "background": "#051424",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "surface-container-lowest": "#010f1f",
+                      "secondary-fixed": "#dde1ff",
+                      "on-surface": "#d4e4fa",
+                      "surface": "#051424",
+                      "surface-container-low": "#0d1c2d",
+                      "secondary": "#b8c3ff",
+                      "on-tertiary": "#490080",
+                      "surface-tint": "#00e639",
+                      "inverse-surface": "#d4e4fa",
+                      "primary-fixed": "#72ff70",
+                      "inverse-primary": "#006e16",
+                      "inverse-on-surface": "#233143",
+                      "on-primary-fixed": "#002203",
+                      "on-primary": "#003907",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "secondary-container": "#0043eb",
+                      "tertiary-fixed": "#f0dbff",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "primary-container": "#00ff41",
+                      "surface-dim": "#051424",
+                      "on-tertiary-fixed": "#2c0051",
+                      "surface-container": "#122131",
+                      "surface-variant": "#273647",
+                      "on-secondary": "#002388",
+                      "tertiary-container": "#ecd3ff",
+                      "on-secondary-fixed": "#001356",
+                      "error-container": "#93000a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "node-gutter": "24px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-surface text-primary-fixed border-b border-outline-variant flex justify-between items-center px-node-gutter h-16 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed">ND-ENT_WF_ATLAS_V2.0</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<nav class="flex gap-6 h-full items-center">
+<a class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed h-16 flex items-center px-2" href="#">MONITOR</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors px-2" href="#">LOGS</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors px-2" href="#">TOPOLOGY</a>
+</nav>
+<span class="material-symbols-outlined cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 h-full w-64 bg-surface-container-low border-r border-outline-variant flex flex-col gap-stack-gap p-grid-unit z-40">
+<div class="p-4 border-b border-outline-variant/30 mb-2">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant">ARTIFACT_INDEX</h2>
+</div>
+<div class="flex flex-col gap-1">
+<button class="flex items-center gap-3 px-3 py-2 bg-primary-container text-on-primary-container font-bold rounded transition-all duration-150">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-code-sm text-code-sm">System_Nodes</span>
+</button>
+<button class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-all duration-150">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+<span class="font-code-sm text-code-sm">Edge_Gateways</span>
+</button>
+<button class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-all duration-150">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-code-sm text-code-sm">Process_Maps</span>
+</button>
+<button class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-all duration-150">
+<span class="material-symbols-outlined text-[18px]">schema</span>
+<span class="font-code-sm text-code-sm">Auth_Schemas</span>
+</button>
+<button class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-all duration-150">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+<span class="font-code-sm text-code-sm">Audit_Logs</span>
+</button>
+<button class="flex items-center gap-3 px-3 py-2 text-on-surface-variant font-code-sm hover:bg-surface-container-highest transition-all duration-150">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span class="font-code-sm text-code-sm">Terminal</span>
+</button>
+</div>
+<!-- Telemetry Summary -->
+<div class="mt-auto p-4 bg-surface-container-lowest border border-outline-variant/30 rounded mb-20">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase">Cluster Health</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-on-surface-variant">Throughput</span>
+<span class="text-primary-fixed">14.2k eps</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-on-surface-variant">Avg Latency</span>
+<span class="text-primary-fixed">45ms</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 h-[calc(100vh-64px)] overflow-auto scroll-hide p-node-gutter">
+<!-- Workflow Header & Controls -->
+<div class="flex justify-between items-end mb-8 border-b border-outline-variant pb-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-1 uppercase tracking-tight">Workflow: WF-027_Industrial_Edge</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Active Instance: <span class="text-primary-fixed">8842-X-ATLAS</span> | Status: <span class="text-primary-fixed">OPERATIONAL</span></p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-surface-container-highest border border-outline-variant font-label-caps text-label-caps text-on-surface-variant hover:text-primary-fixed transition-colors">EXPORT_GRAPH</button>
+<button class="px-4 py-2 bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:brightness-110 transition-all">TRIGGER_MANUAL</button>
+</div>
+</div>
+<!-- Topological Map Container -->
+<div class="relative min-w-[1200px] h-[700px] border border-outline-variant/20 rounded-xl bg-surface-container-lowest/50 p-8 overflow-hidden">
+<!-- Swimlane Labels -->
+<div class="absolute left-0 top-0 h-full w-12 flex flex-col border-r border-outline-variant/20">
+<div class="flex-1 flex items-center justify-center -rotate-90">
+<span class="font-label-caps text-label-caps text-outline uppercase whitespace-nowrap">Source_Systems</span>
+</div>
+<div class="flex-1 flex items-center justify-center -rotate-90 border-t border-outline-variant/20">
+<span class="font-label-caps text-label-caps text-outline uppercase whitespace-nowrap">Logic_Orchestration</span>
+</div>
+<div class="flex-1 flex items-center justify-center -rotate-90 border-t border-outline-variant/20">
+<span class="font-label-caps text-label-caps text-outline uppercase whitespace-nowrap">Data_Sinks</span>
+</div>
+</div>
+<!-- THE GRAPH -->
+<div class="ml-12 grid grid-cols-5 gap-y-12 relative">
+<!-- ROW 1: Events -->
+<!-- Node 1 -->
+<div class="flex flex-col items-center">
+<div class="w-48 bg-surface border border-primary-fixed-dim/50 p-3 node-glow">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-primary-fixed bg-primary-fixed/10 px-1">KAFKA_TOPIC</span>
+<span class="material-symbols-outlined text-[14px] text-primary-fixed animate-pulse-dot">sensors</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">FreightCreated</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">ID: FR-9921-A</p>
+</div>
+</div>
+<!-- Node 2 -->
+<div class="flex flex-col items-center">
+<div class="w-48 bg-surface border border-outline-variant p-3">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-on-surface-variant bg-surface-container-high px-1">N8N_FLOW</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">account_tree</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">ContainerAssigned</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">AutoID: n8n_882</p>
+</div>
+</div>
+<!-- Node 3 -->
+<div class="flex flex-col items-center">
+<div class="w-48 bg-surface border border-outline-variant p-3">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-on-surface-variant bg-surface-container-high px-1">BRIDGE_PROC</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">gavel</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">CustomsSubmitted</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Agent: Atlas_Auth</p>
+</div>
+</div>
+<!-- Node 4 -->
+<div class="flex flex-col items-center">
+<div class="w-48 bg-surface border border-outline-variant p-3">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-on-surface-variant bg-surface-container-high px-1">GATEWAY</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">door_front</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">BorderCleared</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Node: HK_E01</p>
+</div>
+</div>
+<!-- Node 5 -->
+<div class="flex flex-col items-center">
+<div class="w-48 bg-surface border border-outline-variant p-3">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-on-surface-variant bg-surface-container-high px-1">LOGISTICS</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">local_shipping</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">ShipmentTransferred</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Carrier: ND_LOG_X</p>
+</div>
+</div>
+<!-- ROW 2: More Process Nodes with DLQ connection -->
+<!-- Node 6 -->
+<div class="flex flex-col items-center">
+<div class="w-48 bg-surface border border-outline-variant p-3">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-on-surface-variant bg-surface-container-high px-1">INVENTORY</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">warehouse</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">WarehouseReceived</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Bin: Z-441-FF</p>
+</div>
+</div>
+<!-- Node 7: DLQ Handling Node (Distinct) -->
+<div class="flex flex-col items-center col-span-1">
+<div class="w-48 bg-error-container/20 border border-error p-3 relative">
+<div class="absolute -top-3 -right-3 w-6 h-6 bg-error flex items-center justify-center rounded-full text-on-error font-bold text-[10px]">!</div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-error bg-error/10 px-1">DLQ_HANDLER</span>
+<span class="material-symbols-outlined text-[14px] text-error">warning</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-error-container mb-1">TransitStarted_RET</h3>
+<p class="font-code-xs text-code-xs text-on-error-container/70">Retry Cycle: 03/10</p>
+</div>
+</div>
+<!-- Node 8 -->
+<div class="flex flex-col items-center">
+<div class="w-48 bg-surface border border-outline-variant p-3">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-on-surface-variant bg-surface-container-high px-1">GEOLOC</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">location_on</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">DestinationReached</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Zone: EMEA_WEST</p>
+</div>
+</div>
+<!-- Node 9 -->
+<div class="flex flex-col items-center">
+<div class="w-48 bg-surface border border-outline-variant p-3">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-on-surface-variant bg-surface-container-high px-1">LAST_MILE</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">done_all</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">DeliveryCompleted</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">POD: Signed_v4</p>
+</div>
+</div>
+<!-- Node 10 -->
+<div class="flex flex-col items-center">
+<div class="w-48 bg-surface border border-primary-container p-3 border-dashed">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-primary-container bg-primary-container/10 px-1">FINANCIAL</span>
+<span class="material-symbols-outlined text-[14px] text-primary-container">payments</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">EscrowReleased</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">TX: 0x882...192</p>
+</div>
+</div>
+</div>
+<!-- Overlay for real-time Kafka Feed -->
+<div class="absolute right-4 bottom-4 w-80 bg-surface-container border border-outline-variant/30 rounded-lg overflow-hidden flex flex-col max-h-[240px]">
+<div class="bg-surface-container-high p-2 flex justify-between items-center">
+<span class="font-label-caps text-[10px] text-primary-fixed">KAFKA_STREAM_v2</span>
+<span class="font-code-xs text-[10px] text-on-surface-variant">LIVE_TOPIC</span>
+</div>
+<div class="p-2 space-y-1 overflow-y-auto scroll-hide">
+<div class="font-code-xs text-[11px] p-1 border-b border-outline-variant/10 flex gap-2">
+<span class="text-on-surface-variant">20:14:02</span>
+<span class="text-primary-fixed-dim">[ACK]</span>
+<span>Topic.FreightCreated</span>
+</div>
+<div class="font-code-xs text-[11px] p-1 border-b border-outline-variant/10 flex gap-2">
+<span class="text-on-surface-variant">20:14:05</span>
+<span class="text-on-tertiary-container">[JOB]</span>
+<span>n8n_Automation_Start_881</span>
+</div>
+<div class="font-code-xs text-[11px] p-1 border-b border-outline-variant/10 flex gap-2">
+<span class="text-on-surface-variant">20:14:08</span>
+<span class="text-error">[DLQ]</span>
+<span class="text-error">ValidationError: ContainerID_NULL</span>
+</div>
+<div class="font-code-xs text-[11px] p-1 border-b border-outline-variant/10 flex gap-2">
+<span class="text-on-surface-variant">20:14:12</span>
+<span class="text-primary-fixed-dim">[ACK]</span>
+<span>Topic.CustomsSubmitted</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Metric Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-node-gutter mt-8 pb-32">
+<div class="bg-surface-container-low p-4 border border-outline-variant/30">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-2">Kafka Health</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md text-primary-fixed">99.99%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Uptime</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant/30">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-2">n8n Workers</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md text-on-surface">12/12</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Available</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant/30">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-2">DLQ Backlog</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md text-error">02</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Pending</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant/30">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-2">System Load</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">28%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">CPU_OPTIMAL</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant flex justify-around items-center h-16 px-lane-margin z-50">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-lg p-2 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">memory</span>
+<span class="font-label-caps text-[10px]">Runtime</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">database_search</span>
+<span class="font-label-caps text-[10px]">Schema</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">router</span>
+<span class="font-label-caps text-[10px]">Gateway</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-[10px]">Metrics</span>
+</button>
+</nav>
+<!-- Contextual FAB (Only shown on primary workflow screen) -->
+<button class="fixed right-8 bottom-24 w-14 h-14 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-lg hover:rotate-90 transition-transform z-40">
+<span class="material-symbols-outlined">add</span>
+</button>
+<script>
+        // Simple interactive simulation for the Kafka feed
+        const kafkaMessages = [
+            { time: "20:14:15", status: "ACK", type: "primary-fixed-dim", msg: "Topic.TransitStarted" },
+            { time: "20:14:18", status: "PROC", type: "on-tertiary-container", msg: "n8n_Script_Transform_X" },
+            { time: "20:14:22", status: "ACK", type: "primary-fixed-dim", msg: "Topic.DestinationReached" },
+            { time: "20:14:25", status: "IO", type: "on-surface-variant", msg: "DB_Write_Success_ID_82" }
+        ];
+
+        let index = 0;
+        const feedContainer = document.querySelector('.space-y-1');
+
+        setInterval(() => {
+            const item = kafkaMessages[index];
+            const div = document.createElement('div');
+            div.className = "font-code-xs text-[11px] p-1 border-b border-outline-variant/10 flex gap-2 opacity-0 transform translate-y-2 transition-all duration-300";
+            div.innerHTML = `
+                <span class="text-on-surface-variant">${new Date().toLocaleTimeString('en-GB', { hour12: false })}</span>
+                <span class="text-${item.type}">[${item.status}]</span>
+                <span>${item.msg}</span>
+            `;
+            feedContainer.prepend(div);
+            setTimeout(() => div.classList.remove('opacity-0', 'translate-y-2'), 10);
+            
+            if (feedContainer.children.length > 15) {
+                feedContainer.lastElementChild.remove();
+            }
+            
+            index = (index + 1) % kafkaMessages.length;
+        }, 4000);
+    </script>
+</body></html>

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-025: CHAIN-OF-CUSTODY | API Specification</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, rgba(132, 150, 126, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .code-block {
+            scrollbar-width: thin;
+            scrollbar-color: #3b4b37 transparent;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background: #00e639;
+            z-index: -1;
+        }
+        .custom-glass {
+            backdrop-filter: blur(8px);
+            background: rgba(13, 28, 45, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-surface": "#d4e4fa",
+                      "on-secondary-container": "#c6ceff",
+                      "tertiary": "#fff6ff",
+                      "on-secondary": "#002388",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "error-container": "#93000a",
+                      "surface-tint": "#00e639",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-bright": "#2c3a4c",
+                      "on-surface": "#d4e4fa",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-primary-container": "#007117",
+                      "surface-container-lowest": "#010f1f",
+                      "surface-variant": "#273647",
+                      "outline": "#84967e",
+                      "surface": "#051424",
+                      "outline-variant": "#3b4b37",
+                      "inverse-primary": "#006e16",
+                      "error": "#ffb4ab",
+                      "surface-container-high": "#1c2b3c",
+                      "on-secondary-fixed": "#001356",
+                      "primary-fixed": "#72ff70",
+                      "primary-container": "#00ff41",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "primary": "#ebffe2",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary-fixed": "#2c0051",
+                      "secondary": "#b8c3ff",
+                      "tertiary-fixed": "#f0dbff",
+                      "background": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary": "#003907",
+                      "on-tertiary-container": "#862ed4",
+                      "on-error": "#690005",
+                      "secondary-fixed": "#dde1ff",
+                      "secondary-container": "#0043eb",
+                      "primary-fixed-dim": "#00e639",
+                      "on-tertiary": "#490080",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#122131",
+                      "surface-container-highest": "#273647",
+                      "on-primary-fixed-variant": "#00530e",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-background": "#d4e4fa",
+                      "inverse-on-surface": "#233143",
+                      "surface-dim": "#051424",
+                      "surface-container-low": "#0d1c2d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px",
+                      "node-gutter": "24px"
+              },
+              "fontFamily": {
+                      "code-sm": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface">
+<div class="flex h-screen overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col h-screen p-stack-gap bg-surface-container border-r border-outline-variant w-64">
+<div class="px-lane-margin py-8">
+<span class="font-headline-md text-headline-md text-primary uppercase tracking-widest">SYSTEM ARCHITECT</span>
+<div class="h-1 w-12 bg-primary-fixed-dim mt-2"></div>
+</div>
+<nav class="flex-1 space-y-1 px-4">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps font-code-sm text-code-sm transition-all duration-150 hover:bg-surface-variant" href="#">
+<span class="material-symbols-outlined">schema</span> PROCESS MAP
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary-fixed-dim font-label-caps text-label-caps font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">settings_ethernet</span> API SPECS
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps font-code-sm text-code-sm transition-all duration-150 hover:bg-surface-variant" href="#">
+<span class="material-symbols-outlined">database</span> DATA MODEL
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps font-code-sm text-code-sm transition-all duration-150 hover:bg-surface-variant" href="#">
+<span class="material-symbols-outlined">history_edu</span> AUDIT LOGS
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps font-code-sm text-code-sm transition-all duration-150 hover:bg-surface-variant" href="#">
+<span class="material-symbols-outlined">rule</span> VALIDATION
+                </a>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-2 text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span class="font-code-xs text-code-xs uppercase">v4.0.12-stable</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- TopAppBar -->
+<header class="w-full top-0 border-b border-outline-variant flex justify-between items-center px-lane-margin py-grid-unit bg-surface-container-low">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+<h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary">WF-025: CHAIN-OF-CUSTODY</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center gap-4">
+<span class="font-code-sm text-code-sm text-on-surface-variant border-b-2 border-primary-fixed-dim">DOCS</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-variant transition-colors cursor-pointer">SANDBOX</span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">terminal</span>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto bg-surface relative p-lane-margin">
+<!-- Background Grid -->
+<div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: linear-gradient(#84967e 1px, transparent 1px), linear-gradient(90deg, #84967e 1px, transparent 1px); background-size: 80px 80px;"></div>
+<div class="relative max-w-6xl mx-auto space-y-12">
+<!-- Section: Security Strategy -->
+<section>
+<div class="flex items-center gap-4 mb-6">
+<span class="px-2 py-1 bg-primary-container text-on-primary-container font-label-caps text-label-caps">AUTH STRATEGY</span>
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+</div>
+<div class="grid md:grid-cols-2 gap-6">
+<div class="p-6 bg-surface-container border border-outline-variant rounded shadow-lg">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">verified_user</span>
+<h3 class="font-headline-md text-headline-md text-primary">Mutual TLS (mTLS)</h3>
+</div>
+<p class="text-on-surface-variant font-body-md mb-4">Required for all service-to-service communication. Client certificates must be issued by the Internal PKI (Root CA 02).</p>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded font-code-xs text-code-xs text-on-surface-variant">
+                                    X.509 Extensions: critical, digitalSignature, keyEncipherment
+                                </div>
+</div>
+<div class="p-6 bg-surface-container border border-outline-variant rounded shadow-lg">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">token</span>
+<h3 class="font-headline-md text-headline-md text-primary">JWT Bearer</h3>
+</div>
+<p class="text-on-surface-variant font-body-md mb-4">Stateless authentication for Edge-Client transactions. Tokens must contain signed ephemeral session IDs and actor scopes.</p>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded font-code-xs text-code-xs text-on-surface-variant">
+                                    Algorithm: RS256 | Exp: 3600s | Aud: wf-025-api
+                                </div>
+</div>
+</div>
+</section>
+<!-- Section: Primary Endpoints -->
+<section>
+<div class="flex items-center gap-4 mb-6">
+<span class="px-2 py-1 bg-secondary-container text-on-secondary-container font-label-caps text-label-caps">ENDPOINT REGISTRY</span>
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+</div>
+<div class="space-y-4">
+<!-- Endpoint 1: Pickup Start -->
+<div class="border border-outline-variant bg-surface-container-low overflow-hidden">
+<div class="flex items-center justify-between p-4 bg-surface-container border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 bg-primary text-on-primary font-code-sm text-code-sm font-bold">POST</span>
+<span class="font-code-sm text-code-sm text-on-surface tracking-tighter">/pickup/start</span>
+</div>
+<div class="flex gap-4 items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Timeout: 5000ms</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">expand_more</span>
+</div>
+</div>
+<div class="p-6 grid lg:grid-cols-2 gap-8">
+<div>
+<h4 class="font-label-caps text-label-caps text-primary-fixed-dim mb-3 uppercase">Request Schema</h4>
+<div class="bg-surface-container-lowest p-4 font-code-sm text-code-sm text-on-surface-variant code-block overflow-x-auto border border-outline-variant">
+<pre>{
+  "process_id": "UUID-V4",
+  "actor_id": "STRING",
+  "timestamp": "ISO8601",
+  "location_context": {
+    "lat": "FLOAT",
+    "lng": "FLOAT",
+    "accuracy": "FLOAT"
+  }
+}</pre>
+</div>
+</div>
+<div>
+<h4 class="font-label-caps text-label-caps text-primary-fixed-dim mb-3 uppercase">Response (201 Created)</h4>
+<div class="bg-surface-container-lowest p-4 font-code-sm text-code-sm text-on-surface-variant code-block overflow-x-auto border border-outline-variant">
+<pre>{
+  "session_token": "JWT_STR",
+  "next_required": "VERIFY",
+  "expires_at": "ISO8601"
+}</pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Endpoint 2: Pickup Weight -->
+<div class="border border-outline-variant bg-surface-container-low overflow-hidden">
+<div class="flex items-center justify-between p-4 bg-surface-container border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 bg-primary text-on-primary font-code-sm text-code-sm font-bold">POST</span>
+<span class="font-code-sm text-code-sm text-on-surface tracking-tighter">/pickup/weight</span>
+</div>
+<div class="flex gap-4 items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Timeout: 3000ms</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">expand_more</span>
+</div>
+</div>
+<div class="p-6">
+<div class="grid lg:grid-cols-2 gap-8">
+<div>
+<h4 class="font-label-caps text-label-caps text-primary-fixed-dim mb-3 uppercase">Telemetry Schema</h4>
+<div class="bg-surface-container-lowest p-4 font-code-sm text-code-sm text-on-surface-variant code-block overflow-x-auto border border-outline-variant">
+<pre>{
+  "session_token": "JWT_STR",
+  "weight_data": {
+    "value": 12.42,
+    "unit": "kg",
+    "device_id": "SN-992-K"
+  },
+  "checksum": "SHA256_HEX"
+}</pre>
+</div>
+</div>
+<div class="flex flex-col justify-center gap-4">
+<div class="flex items-start gap-3">
+<div class="w-1 h-12 bg-primary-fixed-dim"></div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">Retry Logic: Exponential Backoff</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Max attempts: 3 | Base delay: 200ms</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-1 h-12 bg-error"></div>
+<div>
+<p class="font-code-sm text-code-sm text-error">Failure Code: ERR-W-04</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Calibration drift detected (&gt;0.05% deviation).</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Infrastructure Visualization -->
+<section class="grid lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 p-8 bg-surface-container-high border border-outline-variant relative overflow-hidden group">
+
+<div class="relative z-10">
+<h2 class="font-headline-md text-headline-md text-primary mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined">hub</span> TRANSACTION FLOWTOPOLOGY
+                                </h2>
+<div class="flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex flex-col items-center">
+<div class="w-16 h-16 bg-surface border border-primary-fixed-dim flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+</div>
+<span class="font-code-xs text-code-xs mt-2 uppercase text-on-surface-variant">Edge CLI</span>
+</div>
+<div class="flex-1 h-[2px] bg-outline-variant relative">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface-container-high px-2 font-code-xs text-code-xs text-primary-fixed-dim">JWT/mTLS</div>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-20 h-20 bg-surface border-2 border-primary flex items-center justify-center rounded shadow-[0_0_15px_rgba(0,230,57,0.2)]">
+<span class="material-symbols-outlined text-primary text-4xl">dns</span>
+</div>
+<span class="font-code-xs text-code-xs mt-2 uppercase text-on-surface">API Gateway</span>
+</div>
+<div class="flex-1 h-[2px] bg-outline-variant border-dashed border-t"></div>
+<div class="flex flex-col items-center">
+<div class="w-16 h-16 bg-surface border border-outline-variant flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">storage</span>
+</div>
+<span class="font-code-xs text-code-xs mt-2 uppercase text-on-surface-variant">Ledger DB</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 bg-surface-container border border-outline-variant">
+<h3 class="font-label-caps text-label-caps text-primary mb-4 uppercase">System Telemetry</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-end border-b border-outline-variant pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant uppercase">P99 Latency</span>
+<span class="font-code-sm text-code-sm text-primary">45.2ms</span>
+</div>
+<div class="flex justify-between items-end border-b border-outline-variant pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant uppercase">Throughput</span>
+<span class="font-code-sm text-code-sm text-primary">12.4k req/s</span>
+</div>
+<div class="flex justify-between items-end border-b border-outline-variant pb-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant uppercase">Active Sessions</span>
+<span class="font-code-sm text-code-sm text-primary">4,892</span>
+</div>
+<div class="mt-6">
+<div class="flex justify-between items-center mb-1">
+<span class="font-code-xs text-code-xs text-on-surface-variant">API AVAILABILITY</span>
+<span class="font-code-xs text-code-xs text-primary">99.998%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant">
+<div class="h-full bg-primary-fixed-dim" style="width: 99.9%"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Error Codes & Audit -->
+<section class="grid lg:grid-cols-2 gap-12">
+<div>
+<h3 class="font-headline-md text-headline-md text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined">warning</span> ERROR DICTIONARY
+                            </h3>
+<table class="w-full border-collapse">
+<thead>
+<tr class="text-left font-label-caps text-label-caps text-on-surface-variant bg-surface-container border-b border-outline">
+<th class="p-3">CODE</th>
+<th class="p-3">DESCRIPTION</th>
+<th class="p-3">HTTP</th>
+</tr>
+</thead>
+<tbody class="font-code-sm text-code-sm">
+<tr class="border-b border-outline-variant hover:bg-surface-variant">
+<td class="p-3 text-error">ERR-A-01</td>
+<td class="p-3">JWT Signature Mismatch</td>
+<td class="p-3">401</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-variant">
+<td class="p-3 text-error">ERR-C-44</td>
+<td class="p-3">Geometric Geo-fence Violation</td>
+<td class="p-3">403</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-variant">
+<td class="p-3 text-error">ERR-S-99</td>
+<td class="p-3">Upstream Consensus Failure</td>
+<td class="p-3">503</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined">history_edu</span> AUDIT STUBS
+                            </h3>
+<div class="space-y-2">
+<div class="p-3 border-l-2 border-primary-fixed-dim bg-surface-container-lowest flex justify-between items-center group cursor-pointer hover:bg-surface-variant transition-colors">
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">EVENT::CHAIN_CREATED</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">ID: f092-11ee-8392</p>
+</div>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">2024-05-22 14:20:11.002</span>
+</div>
+<div class="p-3 border-l-2 border-primary-fixed-dim bg-surface-container-lowest flex justify-between items-center group cursor-pointer hover:bg-surface-variant transition-colors">
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">EVENT::MTLS_HANDSHAKE_OK</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">CLIENT: node-edge-044</p>
+</div>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">2024-05-22 14:20:11.045</span>
+</div>
+<div class="p-3 border-l-2 border-error bg-surface-container-lowest flex justify-between items-center group cursor-pointer hover:bg-surface-variant transition-colors">
+<div>
+<p class="font-code-sm text-code-sm text-error">EVENT::VALIDATION_FAIL</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">FIELD: pickup_qr</p>
+</div>
+<span class="font-code-xs text-code-xs text-error">2024-05-22 14:20:12.118</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<footer class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-stretch h-16 bg-surface-container-highest border-t border-outline-variant z-50">
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 flex-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+<span class="font-label-caps text-label-caps">SCAN</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 flex-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">location_on</span>
+<span class="font-label-caps text-label-caps">GPS</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container py-2 flex-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">scale</span>
+<span class="font-label-caps text-label-caps">WEIGHT</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 flex-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">photo_camera</span>
+<span class="font-label-caps text-label-caps">PROOF</span>
+</div>
+</footer>
+</main>
+</div>
+<!-- Node Editor Modal (Simulated) -->
+<div class="fixed right-0 top-0 h-full w-full md:w-96 custom-glass border-l border-outline-variant z-[100] translate-x-full transition-transform duration-300 ease-in-out" id="config-drawer">
+<div class="p-lane-margin flex flex-col h-full">
+<div class="flex justify-between items-center mb-8">
+<h2 class="font-headline-md text-headline-md text-primary uppercase">ENDPOINT CONFIG</h2>
+<button class="material-symbols-outlined text-on-surface-variant" onclick="toggleDrawer()">close</button>
+</div>
+<div class="space-y-6 flex-1 overflow-y-auto">
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-primary-fixed-dim block">RETRY THRESHOLD</label>
+<input class="w-full bg-transparent border border-outline-variant focus:border-primary-fixed-dim focus:ring-0 font-code-sm text-code-sm text-on-surface" type="number" value="3"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-primary-fixed-dim block">MTLS CIPHER SUITE</label>
+<select class="w-full bg-transparent border border-outline-variant focus:border-primary-fixed-dim focus:ring-0 font-code-sm text-code-sm text-on-surface">
+<option>ECDHE-RSA-AES256-GCM-SHA384</option>
+<option>TLS_AES_256_GCM_SHA384</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-primary-fixed-dim block">DEBUG LOGGING</label>
+<div class="flex items-center gap-4">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="bg-transparent border-outline-variant text-primary focus:ring-0" name="debug" type="radio"/>
+<span class="font-code-xs text-code-xs text-on-surface">ENABLED</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="bg-transparent border-outline-variant text-primary focus:ring-0" name="debug" type="radio"/>
+<span class="font-code-xs text-code-xs text-on-surface">DISABLED</span>
+</label>
+</div>
+</div>
+</div>
+<button class="w-full py-4 bg-primary text-on-primary font-label-caps text-label-caps mt-8 hover:opacity-90 active:scale-[0.98] transition-all">
+                COMMIT TO SYSTEM.YAML
+            </button>
+</div>
+</div>
+<script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('config-drawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        // Add interaction to endpoints
+        document.querySelectorAll('.material-symbols-outlined').forEach(icon => {
+            if(icon.innerText === 'terminal' || icon.innerText === 'settings_ethernet') {
+                icon.parentElement.addEventListener('click', toggleDrawer);
+            }
+        });
+
+        // Atmospheric Micro-interactions
+        document.addEventListener('mousemove', (e) => {
+            const cursorGlow = document.createElement('div');
+            // Logic for a very subtle grid-snapped cursor light could be added here
+        });
+    </script>
+</body></html>

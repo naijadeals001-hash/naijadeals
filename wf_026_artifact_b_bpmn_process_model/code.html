@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-026 | Enterprise BPMN Swimlane</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#002388",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "secondary-fixed": "#dde1ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-dim": "#051424",
+                        "secondary": "#b8c3ff",
+                        "on-secondary-container": "#c6ceff",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-container-lowest": "#010f1f",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-background": "#d4e4fa",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-container-high": "#1c2b3c",
+                        "on-secondary-fixed": "#001356",
+                        "on-error": "#690005",
+                        "on-primary": "#003907",
+                        "primary": "#ebffe2",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container-highest": "#273647",
+                        "surface-bright": "#2c3a4c",
+                        "on-tertiary": "#490080",
+                        "surface": "#051424",
+                        "on-primary-fixed-variant": "#00530e",
+                        "inverse-on-surface": "#233143",
+                        "on-surface": "#d4e4fa",
+                        "background": "#051424",
+                        "tertiary-container": "#ecd3ff",
+                        "outline": "#84967e",
+                        "tertiary": "#fff6ff",
+                        "surface-variant": "#273647",
+                        "outline-variant": "#3b4b37",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#002203",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-tint": "#00e639",
+                        "secondary-container": "#0043eb",
+                        "on-tertiary-container": "#862ed4",
+                        "surface-container": "#122131",
+                        "on-primary-container": "#007117",
+                        "inverse-primary": "#006e16"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "lane-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .bpmn-node {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bpmn-node:hover {
+            filter: brightness(1.2);
+            transform: translateY(-1px);
+        }
+        .connector-line {
+            stroke: #72ff70;
+            stroke-width: 2;
+            fill: none;
+        }
+        .connector-line-error {
+            stroke: #ffb4ab;
+            stroke-width: 1.5;
+            stroke-dasharray: 4 2;
+            fill: none;
+        }
+        .swimlane-header {
+            writing-mode: vertical-lr;
+            transform: rotate(180deg);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #273647;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b4b37;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-hidden font-body-md text-on-surface">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full bg-surface dark:bg-surface text-primary-fixed dark:text-primary-fixed-dim border-b border-outline-variant dark:border-outline-variant flex justify-between items-center px-node-gutter h-16 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed">ND-ENT_WF_ATLAS_V2.0</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="text-primary-fixed border-b-2 border-primary-fixed py-2 font-code-sm text-code-sm" href="#">Process_Maps</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high transition-colors py-2 font-code-sm text-code-sm" href="#">System_Nodes</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high transition-colors py-2 font-code-sm text-code-sm" href="#">Audit_Logs</a>
+</nav>
+<span class="material-symbols-outlined cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="fixed left-0 top-16 h-full w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant flex flex-col gap-stack-gap p-grid-unit z-40">
+<div class="px-4 py-4 mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">ARTIFACT_INDEX</span>
+<div class="h-px bg-outline-variant w-full"></div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-code-sm hover:bg-surface-container-highest cursor-pointer transition-all">
+<span class="material-symbols-outlined">account_tree</span>
+<span>System_Nodes</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-code-sm hover:bg-surface-container-highest cursor-pointer transition-all">
+<span class="material-symbols-outlined">hub</span>
+<span>Edge_Gateways</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container font-bold font-code-sm cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span>Process_Maps</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-code-sm hover:bg-surface-container-highest cursor-pointer transition-all">
+<span class="material-symbols-outlined">schema</span>
+<span>Auth_Schemas</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-code-sm hover:bg-surface-container-highest cursor-pointer transition-all">
+<span class="material-symbols-outlined">history_edu</span>
+<span>Audit_Logs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-code-sm hover:bg-surface-container-highest cursor-pointer transition-all">
+<span class="material-symbols-outlined">terminal</span>
+<span>Terminal</span>
+</div>
+</div>
+</aside>
+<!-- Main Canvas Area -->
+<main class="ml-64 pt-16 h-screen overflow-auto relative">
+<!-- Zoom/Pan Controls Overlay -->
+<div class="fixed bottom-24 right-8 z-50 flex flex-col gap-2 bg-surface-container border border-outline-variant p-2 rounded-lg">
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-highest"><span class="material-symbols-outlined">add</span></button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-highest"><span class="material-symbols-outlined">remove</span></button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-highest"><span class="material-symbols-outlined">center_focus_strong</span></button>
+</div>
+<!-- BPMN Flow Container -->
+<div class="min-w-[4000px] flex flex-col">
+<!-- Swimlanes Grid -->
+<!-- Actor: Driver -->
+<div class="flex h-48 border-b border-outline-variant">
+<div class="w-12 bg-surface-container-high border-r border-outline-variant flex items-center justify-center">
+<span class="swimlane-header font-label-caps text-label-caps text-on-surface">DRIVER</span>
+</div>
+<div class="flex-1 relative flex items-center px-lane-margin gap-24">
+<!-- Nodes -->
+<div class="bpmn-node w-48 bg-surface-container-low border border-primary-fixed rounded p-2">
+<div class="flex justify-between mb-1">
+<span class="font-label-caps text-[9px] text-primary-fixed">MANUAL_TASK</span>
+<span class="material-symbols-outlined text-[12px]">directions_car</span>
+</div>
+<div class="font-code-sm text-code-sm">Arrival at Destination</div>
+<div class="mt-1 flex items-center gap-1">
+<div class="w-1 h-1 rounded-full bg-primary-fixed"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Lat: 40.7128</span>
+</div>
+</div>
+<div class="bpmn-node w-48 bg-surface-container-low border border-primary-fixed rounded p-2">
+<div class="flex justify-between mb-1">
+<span class="font-label-caps text-[9px] text-primary-fixed">MANUAL_TASK</span>
+<span class="material-symbols-outlined text-[12px]">qr_code_scanner</span>
+</div>
+<div class="font-code-sm text-code-sm">Scan Package QR</div>
+</div>
+</div>
+</div>
+<!-- Actor: GPS Service -->
+<div class="flex h-32 border-b border-outline-variant bg-surface-container-lowest/30">
+<div class="w-12 bg-surface-container-high border-r border-outline-variant flex items-center justify-center">
+<span class="swimlane-header font-label-caps text-label-caps text-on-surface">GPS_SERVICE</span>
+</div>
+<div class="flex-1 relative flex items-center px-lane-margin gap-24">
+<div class="bpmn-node w-48 bg-surface border border-secondary-container rounded p-2">
+<div class="flex justify-between mb-1">
+<span class="font-label-caps text-[9px] text-secondary">SYSTEM_SVC</span>
+<span class="material-symbols-outlined text-[12px]">location_on</span>
+</div>
+<div class="font-code-sm text-code-sm">Geofence Validation</div>
+<div class="mt-1 font-code-xs text-code-xs text-secondary-fixed">Status: ACTIVE</div>
+</div>
+</div>
+</div>
+<!-- Actor: Customer / Recipient -->
+<div class="flex h-48 border-b border-outline-variant">
+<div class="w-12 bg-surface-container-high border-r border-outline-variant flex items-center justify-center">
+<span class="swimlane-header font-label-caps text-label-caps text-on-surface">RECIPIENT</span>
+</div>
+<div class="flex-1 relative flex items-center px-lane-margin gap-24">
+<!-- Spacing to align with flow -->
+<div class="w-[600px]"></div>
+<div class="bpmn-node w-48 bg-surface-container-low border border-primary-fixed rounded p-2">
+<div class="flex justify-between mb-1">
+<span class="font-label-caps text-[9px] text-primary-fixed">MANUAL_TASK</span>
+<span class="material-symbols-outlined text-[12px]">password</span>
+</div>
+<div class="font-code-sm text-code-sm">Provide Delivery OTP</div>
+</div>
+<!-- Decision Diamond -->
+<div class="relative w-16 h-16 flex items-center justify-center">
+<div class="absolute w-12 h-12 border-2 border-on-surface-variant rotate-45"></div>
+<span class="material-symbols-outlined text-on-surface-variant z-10">question_mark</span>
+<div class="absolute -bottom-8 font-code-xs text-code-xs text-on-surface-variant whitespace-nowrap">OTP Valid?</div>
+</div>
+</div>
+</div>
+<!-- Actor: Trust Engine -->
+<div class="flex h-40 border-b border-outline-variant bg-surface-container-lowest/30">
+<div class="w-12 bg-surface-container-high border-r border-outline-variant flex items-center justify-center">
+<span class="swimlane-header font-label-caps text-label-caps text-on-surface">TRUST_ENGINE</span>
+</div>
+<div class="flex-1 relative flex items-center px-lane-margin gap-24">
+<div class="w-[1100px]"></div>
+<div class="bpmn-node w-56 bg-surface-container-high border border-tertiary-fixed rounded p-2">
+<div class="flex justify-between mb-1">
+<span class="font-label-caps text-[9px] text-tertiary-fixed">LOGIC_GATE</span>
+<span class="material-symbols-outlined text-[12px]">security</span>
+</div>
+<div class="font-code-sm text-code-sm">Verify Chain of Custody</div>
+<div class="mt-1 grid grid-cols-2 gap-1">
+<div class="font-code-xs text-code-xs text-on-surface-variant">Hash: 0x82...</div>
+<div class="font-code-xs text-code-xs text-primary-fixed">SECURE</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Actor: Escrow & Settlement -->
+<div class="flex h-48 border-b border-outline-variant">
+<div class="w-12 bg-surface-container-high border-r border-outline-variant flex items-center justify-center">
+<span class="swimlane-header font-label-caps text-label-caps text-on-surface">SETTLEMENT</span>
+</div>
+<div class="flex-1 relative flex items-center px-lane-margin gap-24">
+<div class="w-[1400px]"></div>
+<div class="bpmn-node w-56 bg-surface-container-low border border-on-secondary-container rounded p-2">
+<div class="flex justify-between mb-1">
+<span class="font-label-caps text-[9px] text-on-secondary-container">TX_TASK</span>
+<span class="material-symbols-outlined text-[12px]">payments</span>
+</div>
+<div class="font-code-sm text-code-sm">Release Escrow Funds</div>
+</div>
+<div class="bpmn-node w-56 bg-surface-container-low border border-on-secondary-container rounded p-2">
+<div class="flex justify-between mb-1">
+<span class="font-label-caps text-[9px] text-on-secondary-container">TX_TASK</span>
+<span class="material-symbols-outlined text-[12px]">account_balance</span>
+</div>
+<div class="font-code-sm text-code-sm">Merchant Disbursement</div>
+<div class="mt-1 font-code-xs text-code-xs text-on-surface-variant">Fee: 2.5%</div>
+</div>
+</div>
+</div>
+<!-- Actor: Notification & Messaging -->
+<div class="flex h-32 border-b border-outline-variant bg-surface-container-lowest/30">
+<div class="w-12 bg-surface-container-high border-r border-outline-variant flex items-center justify-center">
+<span class="swimlane-header font-label-caps text-label-caps text-on-surface">NOTIF_SVC</span>
+</div>
+<div class="flex-1 relative flex items-center px-lane-margin gap-24">
+<div class="w-[2000px]"></div>
+<div class="bpmn-node w-48 bg-surface border border-outline rounded p-2">
+<div class="flex justify-between mb-1">
+<span class="font-label-caps text-[9px] text-outline">EVT_TRIGGER</span>
+<span class="material-symbols-outlined text-[12px]">notifications_active</span>
+</div>
+<div class="font-code-sm text-code-sm">Broadcast Completion</div>
+</div>
+</div>
+</div>
+<!-- Actor: Audit & Admin -->
+<div class="flex h-32">
+<div class="w-12 bg-surface-container-high border-r border-outline-variant flex items-center justify-center">
+<span class="swimlane-header font-label-caps text-label-caps text-on-surface">AUDIT_LOG</span>
+</div>
+<div class="flex-1 relative flex items-center px-lane-margin gap-12">
+<!-- Dense Telemetry Stream -->
+<div class="flex gap-4">
+<div class="px-2 py-1 border border-outline-variant bg-surface-container text-on-surface-variant font-code-xs">EVT_026_ARRIVE</div>
+<div class="px-2 py-1 border border-outline-variant bg-surface-container text-on-surface-variant font-code-xs">EVT_026_SCAN</div>
+<div class="px-2 py-1 border border-outline-variant bg-surface-container text-on-surface-variant font-code-xs">EVT_026_OTP_VAL</div>
+<div class="px-2 py-1 border border-outline-variant bg-surface-container text-on-surface-variant font-code-xs">EVT_026_ESCROW_REL</div>
+<div class="px-2 py-1 border border-outline-variant bg-surface-container text-on-surface-variant font-code-xs">EVT_026_SETTLE_COMP</div>
+</div>
+</div>
+</div>
+<!-- Global SVG Connectors Overlay -->
+<svg class="absolute top-0 left-0 w-full h-full pointer-events-none" style="z-index: 5;">
+<!-- Driver Arrival -> GPS Validation -->
+<path class="connector-line" d="M 288 88 L 288 200" fill="none" marker-end="url(#arrowhead)"></path>
+<!-- GPS Validation -> QR Scan -->
+<path class="connector-line" d="M 480 224 L 528 224 L 528 88 L 576 88" fill="none" marker-end="url(#arrowhead)"></path>
+<!-- QR Scan -> Recipient OTP -->
+<path class="connector-line" d="M 768 88 L 864 88 L 864 328 L 912 328" fill="none" marker-end="url(#arrowhead)"></path>
+<!-- OTP -> Decision -->
+<path class="connector-line" d="M 1104 328 L 1152 328" fill="none" marker-end="url(#arrowhead)"></path>
+<!-- OTP Fail Path (Dashed) -->
+<path class="connector-line-error" d="M 1184 300 L 1184 200 L 1250 200" fill="none" marker-end="url(#arrowhead-error)"></path>
+<!-- OTP Success -> Trust Engine -->
+<path class="connector-line" d="M 1184 360 L 1184 512 L 1224 512" fill="none" marker-end="url(#arrowhead)"></path>
+<!-- Trust Engine -> Escrow -->
+<path class="connector-line" d="M 1448 512 L 1488 512 L 1488 680 L 1528 680" fill="none" marker-end="url(#arrowhead)"></path>
+<!-- Escrow -> Settlement -->
+<path class="connector-line" d="M 1752 680 L 1816 680" fill="none" marker-end="url(#arrowhead)"></path>
+<!-- Settlement -> Notification -->
+<path class="connector-line" d="M 2040 680 L 2100 680 L 2100 832 L 2140 832" fill="none" marker-end="url(#arrowhead)"></path>
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="10" refy="3.5">
+<polygon fill="#72ff70" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead-error" markerheight="7" markerwidth="10" orient="auto" refx="10" refy="3.5">
+<polygon fill="#ffb4ab" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile Visibility Only as per Shared Components Logic) -->
+<footer class="md:hidden fixed bottom-0 w-full z-50 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant flex justify-around items-center h-16 px-lane-margin">
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">memory</span>
+<span class="font-label-caps text-label-caps">Runtime</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-lg p-2 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">database_search</span>
+<span class="font-label-caps text-label-caps">Schema</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">router</span>
+<span class="font-label-caps text-label-caps">Gateway</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Metrics</span>
+</div>
+</footer>
+<!-- Micro-Telemetry Side Panel (Fixed Right) -->
+<div class="fixed top-16 right-0 h-[calc(100%-4rem)] w-16 bg-surface-container border-l border-outline-variant flex flex-col items-center py-4 gap-8 z-40 hidden lg:flex">
+<div class="group relative">
+<span class="material-symbols-outlined text-primary-fixed cursor-help">speed</span>
+<div class="absolute right-20 top-0 bg-surface-container-high border border-outline-variant p-2 rounded hidden group-hover:block whitespace-nowrap">
+<div class="font-label-caps text-[10px] mb-1">LATENCY_CORE</div>
+<div class="font-code-sm text-primary-fixed">14ms</div>
+</div>
+</div>
+<div class="group relative">
+<span class="material-symbols-outlined text-on-surface-variant cursor-help">hub</span>
+<div class="absolute right-20 top-0 bg-surface-container-high border border-outline-variant p-2 rounded hidden group-hover:block whitespace-nowrap">
+<div class="font-label-caps text-[10px] mb-1">ACTIVE_NODES</div>
+<div class="font-code-sm text-primary-fixed">1,248</div>
+</div>
+</div>
+<div class="group relative">
+<span class="material-symbols-outlined text-error cursor-help">warning</span>
+<div class="absolute right-20 top-0 bg-surface-container-high border border-outline-variant p-2 rounded hidden group-hover:block whitespace-nowrap">
+<div class="font-label-caps text-[10px] mb-1">SYS_EXCEPTIONS</div>
+<div class="font-code-sm text-error">0.02%</div>
+</div>
+</div>
+</div>
+<script>
+        // Simple Interaction for Node Clicks
+        document.querySelectorAll('.bpmn-node').forEach(node => {
+            node.addEventListener('click', () => {
+                const title = node.querySelector('.font-code-sm').innerText;
+                console.log(`Inspecting Node: ${title}`);
+                // In a real app, this would open a configuration drawer
+            });
+        });
+
+        // Handle Horizontal Scroll with Mouse Wheel (optional refinement)
+        const mainCanvas = document.querySelector('main');
+        mainCanvas.addEventListener('wheel', (evt) => {
+            if (evt.deltaY !== 0) {
+                mainCanvas.scrollLeft += evt.deltaY;
+            }
+        });
+    </script>
+</body></html>

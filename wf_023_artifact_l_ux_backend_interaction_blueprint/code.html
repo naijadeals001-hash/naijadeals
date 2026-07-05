@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-023: Artifact L — System Propagation Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed-variant": "#0035be",
+                    "error-container": "#93000a",
+                    "surface-tint": "#00e639",
+                    "on-background": "#d4e4fa",
+                    "on-primary-container": "#007117",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "inverse-primary": "#006e16",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface": "#051424",
+                    "primary-container": "#00ff41",
+                    "inverse-surface": "#d4e4fa",
+                    "inverse-on-surface": "#233143",
+                    "secondary": "#b8c3ff",
+                    "surface-container": "#122131",
+                    "primary-container": "#00ff41",
+                    "inverse-surface": "#d4e4fa",
+                    "inverse-on-surface": "#233143",
+                    "secondary": "#b8c3ff",
+                    "surface-container": "#122131",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-bright": "#2c3a4c",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary": "#003907",
+                    "secondary-fixed": "#dde1ff",
+                    "on-secondary": "#002388",
+                    "on-tertiary": "#490080",
+                    "surface-container-high": "#1c2b3c",
+                    "secondary-container": "#0043eb",
+                    "on-error-container": "#ffdad6",
+                    "on-primary-fixed": "#002203",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-tertiary-container": "#862ed4",
+                    "on-secondary-container": "#c6ceff",
+                    "on-secondary-fixed": "#001356",
+                    "surface-container-low": "#0d1c2d",
+                    "background": "#051424",
+                    "primary": "#ebffe2",
+                    "on-tertiary-fixed": "#2c0051",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-container-lowest": "#010f1f",
+                    "outline-variant": "#3b4b37",
+                    "surface-container-highest": "#273647",
+                    "outline": "#84967e",
+                    "primary-fixed": "#72ff70",
+                    "surface-dim": "#051424",
+                    "surface-variant": "#273647",
+                    "on-surface": "#d4e4fa",
+                    "tertiary": "#fff6ff",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-error": "#690005"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .node-connector-active {
+            background: #00e639;
+            box-shadow: 0 0 10px #00e639;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.1);
+            position: absolute;
+            animation: scan 8s linear infinite;
+        }
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
+        }
+        .pulse-node {
+            animation: node-glow 2s infinite alternate;
+        }
+        @keyframes node-glow {
+            from { box-shadow: 0 0 0px transparent; }
+            to { box-shadow: 0 0 8px rgba(0, 230, 57, 0.4); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed overflow-hidden">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-node-gutter h-14 w-full border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<h1 class="font-label-caps text-label-caps text-primary-fixed border border-primary-fixed px-2 py-1">NAIJADEALS_ENGINEERING_ATLAS</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">SYNC_STATUS: ACTIVE</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant px-2 py-1 bg-surface-container-high transition-colors cursor-pointer active:opacity-80">v4.2.1-STABLE</span>
+</div>
+</header>
+<!-- Side Navigation -->
+<nav class="fixed left-0 top-0 h-full w-64 border-r border-outline-variant bg-surface-container-low flex flex-col gap-stack-gap pt-16 z-40">
+<div class="px-6 py-2 mb-4">
+<span class="font-label-caps text-label-caps text-primary-fixed">SYSTEM_INDEX</span>
+</div>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-highest hover:opacity-100 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed group" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<span class="font-code-sm text-code-sm">CORE_ENGINE</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-highest hover:opacity-100 text-on-surface-variant opacity-70" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span class="font-code-sm text-code-sm">MARKET_LOGIC</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-highest hover:opacity-100 text-on-surface-variant opacity-70" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-code-sm text-code-sm">DEALS_ROUTING</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-highest hover:opacity-100 text-on-surface-variant opacity-70" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-code-sm text-code-sm">USER_GRAPH</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-highest hover:opacity-100 text-on-surface-variant opacity-70" href="#">
+<span class="material-symbols-outlined">shield_lock</span>
+<span class="font-code-sm text-code-sm">AUTH_SERVICE</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-highest hover:opacity-100 text-on-surface-variant opacity-70" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-code-sm text-code-sm">TELEMETRY</span>
+</a>
+<!-- System Stats Mini-Panel -->
+<div class="mt-auto p-4 border-t border-outline-variant bg-surface-container-lowest">
+<div class="space-y-2">
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs opacity-50 uppercase">CPU Load</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">12.4%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 rounded overflow-hidden">
+<div class="bg-primary-fixed h-full" style="width: 12.4%"></div>
+</div>
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs opacity-50 uppercase">Mem Usage</span>
+<span class="font-code-xs text-code-xs text-on-secondary">4.2GB</span>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Area: The Blueprint Canvas -->
+<main class="ml-64 pt-14 pb-8 min-h-screen relative overflow-auto p-node-gutter">
+<div class="scanline"></div>
+<!-- Header Info -->
+<div class="mb-lane-margin">
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-2">WF-023: Artifact L — UX ↔ Backend Interaction Blueprint</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Visualizing asynchronous state propagation across the core fleet orchestration mesh. Mapping the journey from Driver Intake to Dashboard Availability.</p>
+</div>
+<!-- The Flow Map -->
+<div class="relative min-h-[1200px] w-full">
+<!-- Swimlanes -->
+<div class="absolute inset-0 flex">
+<div class="w-1/3 border-r border-outline-variant h-full flex flex-col">
+<div class="sticky top-14 bg-surface py-2 px-4 border-b border-outline-variant flex items-center gap-2 z-10">
+<span class="material-symbols-outlined text-primary-fixed-dim">smartphone</span>
+<span class="font-label-caps text-label-caps">CLIENT_LAYER</span>
+</div>
+</div>
+<div class="w-1/3 border-r border-outline-variant h-full">
+<div class="sticky top-14 bg-surface py-2 px-4 border-b border-outline-variant flex items-center gap-2 z-10">
+<span class="material-symbols-outlined text-secondary">cloud</span>
+<span class="font-label-caps text-label-caps">ORCHESTRATION_LAYER</span>
+</div>
+</div>
+<div class="w-1/3 h-full">
+<div class="sticky top-14 bg-surface py-2 px-4 border-b border-outline-variant flex items-center gap-2 z-10">
+<span class="material-symbols-outlined text-tertiary-fixed">database</span>
+<span class="font-label-caps text-label-caps">DOMAIN_SERVICES</span>
+</div>
+</div>
+</div>
+<!-- Nodes Container -->
+<div class="relative z-10 pt-12 space-y-24">
+<!-- 01: Driver Applies -->
+<div class="flex items-center group">
+<div class="w-[33.33%] flex justify-center">
+<div class="bg-surface-container border border-primary-fixed-dim p-3 w-56 rounded-sm pulse-node">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-primary-fixed">ENTRY_POINT</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: DRV_001</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1">Driver Applies</h3>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs text-primary-fixed opacity-60">Latency: 0ms</span>
+<span class="material-symbols-outlined text-primary-fixed text-xs" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 02: Frontend Logic -->
+<div class="flex items-center">
+<div class="w-[33.33%] flex justify-center">
+<div class="bg-surface-container border border-outline p-3 w-56 rounded-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">VALIDATION</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">JS_ENV</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1">Frontend Process</h3>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Latency: 12ms</span>
+<span class="material-symbols-outlined text-on-surface-variant text-xs">memory</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 03: API Gateway -->
+<div class="flex items-center">
+<div class="w-[33.33%] flex justify-end pr-12">
+<!-- Connector Mockup (simplified for structure) -->
+<div class="h-[1px] w-12 bg-primary-fixed"></div>
+</div>
+<div class="w-[33.33%] flex justify-center">
+<div class="bg-surface-container-high border border-secondary p-3 w-56 rounded-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-secondary">GATEWAY</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">AUTH_TOKEN</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1">API Gateway</h3>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Latency: 45ms</span>
+<span class="material-symbols-outlined text-secondary text-xs">lan</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 04: Driver Service Mesh (KYC -> Fleet) -->
+<div class="flex">
+<div class="w-[33.33%]"></div>
+<div class="w-[66.66%] px-node-gutter">
+<div class="grid grid-cols-2 gap-node-gutter">
+<!-- KYC Service -->
+<div class="bg-surface-container border border-error p-3 rounded-sm relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-error">SECURITY</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">VERIFY_ASYNC</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1">KYC Service</h3>
+<p class="text-[10px] font-code-xs opacity-50 mb-2">ID_MATCH / BIO_VERIFY</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs text-error">Latency: 1.2s</span>
+<span class="material-symbols-outlined text-error text-xs">security</span>
+</div>
+</div>
+<!-- Fleet Service -->
+<div class="bg-surface-container border border-tertiary-fixed-dim p-3 rounded-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[10px] text-tertiary-fixed-dim">ASSET_MGR</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">FLT_MAP_09</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1">Fleet Service</h3>
+<p class="text-[10px] font-code-xs opacity-50 mb-2">VEHICLE_ASSIGN / BIND</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs text-tertiary-fixed-dim">Latency: 88ms</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-xs">local_shipping</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 05: Logic Sequence Cluster -->
+<div class="flex flex-col gap-12 items-end pr-24">
+<!-- Trust Service -->
+<div class="bg-surface-container-highest border border-primary-fixed-variant p-3 w-64 rounded-sm flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-[10px] text-primary-fixed-variant">SCORE_ENGINE</span>
+<span class="px-1 bg-primary-fixed-variant text-[8px] text-on-primary">CRITICAL</span>
+</div>
+<h3 class="font-code-sm text-code-sm">Trust Service Analytics</h3>
+<div class="flex items-end gap-1 h-8">
+<div class="w-2 bg-primary-fixed h-4"></div>
+<div class="w-2 bg-primary-fixed h-6"></div>
+<div class="w-2 bg-primary-fixed h-8"></div>
+<div class="w-2 bg-primary-fixed-variant h-3"></div>
+<div class="w-2 bg-primary-fixed h-5"></div>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-outline-variant">
+<span class="font-code-xs text-code-xs">Latency: 340ms</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">SC: 844</span>
+</div>
+</div>
+<!-- Wallet Service -->
+<div class="bg-surface-container-highest border border-secondary-fixed-dim p-3 w-64 rounded-sm">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[10px] text-secondary-fixed-dim">LEDGER</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">TX_INIT</span>
+</div>
+<h3 class="font-code-sm text-code-sm">Wallet &amp; Balance Provision</h3>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs">Latency: 112ms</span>
+<span class="material-symbols-outlined text-secondary-fixed-dim text-xs">payments</span>
+</div>
+</div>
+<!-- Dispatch Mesh -->
+<div class="bg-surface-container-highest border border-on-tertiary-fixed-variant p-3 w-64 rounded-sm">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[10px] text-on-tertiary-fixed-variant">LOAD_BALANCER</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">QUEUED</span>
+</div>
+<h3 class="font-code-sm text-code-sm">Dispatch Routing Sync</h3>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs">Latency: 28ms</span>
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant text-xs">rocket_launch</span>
+</div>
+</div>
+</div>
+<!-- 06: Final Success Phase -->
+<div class="flex justify-between items-center px-lane-margin">
+<div class="bg-surface-container border border-outline-variant p-3 w-72 rounded-sm border-dashed">
+<span class="font-label-caps text-[10px] opacity-50">NOTIFICATION_HUB</span>
+<div class="flex items-center gap-3 mt-2">
+<div class="p-2 bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined text-primary-fixed">notifications_active</span>
+</div>
+<div>
+<p class="font-code-sm text-code-sm">Push: State Ready</p>
+<p class="font-code-xs text-code-xs opacity-50">Sent via WebSockets</p>
+</div>
+</div>
+</div>
+<div class="bg-primary-fixed text-on-primary-fixed p-6 w-80 shadow-2xl">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps opacity-80">FINAL_STATE</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-2">Driver Dashboard Ready</h3>
+<p class="font-code-xs text-code-xs mb-4">All downstream services synchronized. Profile operational at 100% capacity.</p>
+<div class="flex justify-between items-center border-t border-on-primary pt-4">
+<span class="font-code-sm text-code-sm">TOTAL_RTT</span>
+<span class="font-headline-md text-headline-md">1.84s</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Global Connectors (Handled with SVG for better precision in Blueprint) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40" style="z-index: 5;">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#00e639" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Simplified Path lines -->
+<path d="M 400 130 L 400 230" fill="none" stroke="#00e639" stroke-dasharray="4" stroke-width="2"></path>
+<path d="M 400 310 L 600 310 L 600 400" fill="none" stroke="#00e639" stroke-width="2"></path>
+<path d="M 600 480 L 600 600" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<path d="M 700 680 L 1000 680 L 1000 780" fill="none" stroke="#00e639" stroke-width="2"></path>
+<path d="M 1000 840 L 1000 950" fill="none" stroke="#00e639" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Telemetry Floating Panel -->
+<div class="fixed right-8 top-20 w-80 bg-surface-container border border-outline-variant p-4 z-50">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps">LIVE_STREAM</span>
+<span class="w-2 h-2 bg-error rounded-full animate-ping"></span>
+</div>
+<div class="space-y-3">
+<div class="flex gap-3 items-start">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:02:11</span>
+<p class="font-code-xs text-code-xs text-primary-fixed">ACK: KYC_PROCESS_SUCCESS (34ms)</p>
+</div>
+<div class="flex gap-3 items-start">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:02:12</span>
+<p class="font-code-xs text-code-xs">PUSH: DISPATCH_UPGRADE_READY</p>
+</div>
+<div class="flex gap-3 items-start">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:02:14</span>
+<p class="font-code-xs text-code-xs text-secondary">LEDGER: TX_ID_771822 COMMIT</p>
+</div>
+<div class="flex gap-3 items-start">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:02:15</span>
+<p class="font-code-xs text-code-xs text-error">WARN: HIGH_LATENCY_FLEET_NODE_A</p>
+</div>
+<div class="flex gap-3 items-start opacity-30">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:02:18</span>
+<p class="font-code-xs text-code-xs">WAIT: BUFFERING_IO_STREAM...</p>
+</div>
+</div>
+<div class="mt-6">
+<button class="w-full bg-surface-container-high border border-outline hover:border-primary-fixed font-label-caps text-[10px] py-2 transition-colors">EXPORT_TRACE_LOGS</button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full z-50 flex justify-between items-center px-node-gutter h-8 w-full border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">© 2024 NAIJADEALS_SYS_OPS</span>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant cursor-help hover:text-primary-fixed transition-colors">LATENCY: 42ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant cursor-help hover:text-primary-fixed transition-colors">UPTIME: 99.98%</span>
+<span class="font-code-xs text-code-xs text-primary-fixed font-bold cursor-help hover:text-primary-fixed transition-colors">THREADS: ACTIVE</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+<span class="font-code-xs text-code-xs opacity-50 uppercase">Region: Lagos-West-A1</span>
+</div>
+</footer>
+<!-- Overlay Grid Pattern -->
+<div class="pointer-events-none fixed inset-0 z-[-1] opacity-5 overflow-hidden">
+<div class="absolute inset-0" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 8px 8px;"></div>
+</div>
+<script>
+        // Simple Interaction Logic
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('border-primary-fixed');
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s ease-out';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('border-primary-fixed');
+                node.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Console logger simulation
+        const logs = [
+            "TX: BROADCASTING STATE TO CLUSTER_C",
+            "OK: HANDSHAKE GATEWAY_SECURE",
+            "WARN: PACKET_LOSS AT EDGE_POINT_N4",
+            "INFO: REBALANCING WORKER_THREADS",
+            "SYNC: DRIVER_ENTITY_ID_883011"
+        ];
+        
+        setInterval(() => {
+            const telemetryContainer = document.querySelector('.space-y-3');
+            const newLog = document.createElement('div');
+            newLog.className = 'flex gap-3 items-start opacity-0 transform translate-y-2 transition-all duration-300';
+            newLog.innerHTML = `
+                <span class="font-code-xs text-code-xs text-on-surface-variant">${new Date().toLocaleTimeString()}</span>
+                <p class="font-code-xs text-code-xs text-primary-fixed">${logs[Math.floor(Math.random() * logs.length)]}</p>
+            `;
+            telemetryContainer.prepend(newLog);
+            setTimeout(() => {
+                newLog.classList.remove('opacity-0', 'translate-y-2');
+                if (telemetryContainer.children.length > 8) {
+                    telemetryContainer.lastElementChild.remove();
+                }
+            }, 100);
+        }, 3000);
+    </script>
+</body></html>

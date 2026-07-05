@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-025: CHAIN-OF-CUSTODY | SECURITY BLUEPRINT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector {
+            position: absolute;
+            background: #84967e;
+            z-index: 0;
+        }
+        .glass-overlay {
+            backdrop-filter: blur(12px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-surface": "#d4e4fa",
+                    "on-secondary-container": "#c6ceff",
+                    "tertiary": "#fff6ff",
+                    "on-secondary": "#002388",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "error-container": "#93000a",
+                    "surface-tint": "#00e639",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "on-surface": "#d4e4fa",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-primary-container": "#007117",
+                    "surface-container-lowest": "#010f1f",
+                    "surface-variant": "#273647",
+                    "outline": "#84967e",
+                    "surface": "#051424",
+                    "outline-variant": "#3b4b37",
+                    "inverse-primary": "#006e16",
+                    "error": "#ffb4ab",
+                    "surface-container-high": "#1c2b3c",
+                    "on-secondary-fixed": "#001356",
+                    "primary-fixed": "#72ff70",
+                    "primary-container": "#00ff41",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "primary": "#ebffe2",
+                    "on-primary-fixed": "#002203",
+                    "on-tertiary-fixed": "#2c0051",
+                    "secondary": "#b8c3ff",
+                    "tertiary-fixed": "#f0dbff",
+                    "background": "#051424",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary": "#003907",
+                    "on-tertiary-container": "#862ed4",
+                    "on-error": "#690005",
+                    "secondary-fixed": "#dde1ff",
+                    "secondary-container": "#0043eb",
+                    "primary-fixed-dim": "#00e639",
+                    "on-tertiary": "#490080",
+                    "on-error-container": "#ffdad6",
+                    "surface-container": "#122131",
+                    "surface-container-highest": "#273647",
+                    "on-primary-fixed-variant": "#00530e",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-background": "#d4e4fa",
+                    "inverse-on-surface": "#233143",
+                    "surface-dim": "#051424",
+                    "surface-container-low": "#0d1c2d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "node-gutter": "24px"
+            },
+            "fontFamily": {
+                    "code-sm": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-lane-margin py-grid-unit bg-surface dark:bg-surface border-b border-outline-variant z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary dark:text-primary-fixed-dim">WF-025: CHAIN-OF-CUSTODY</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim border-b-2 border-primary-fixed-dim cursor-pointer">GOVERNANCE</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-variant transition-colors cursor-pointer px-2">POLICIES</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-variant transition-colors cursor-pointer px-2">COMPLIANCE</span>
+</nav>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80" data-icon="terminal">terminal</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="flex flex-col h-screen p-stack-gap h-full w-64 border-r border-outline-variant bg-surface-container dark:bg-surface-container hidden lg:flex">
+<div class="p-4 mb-4">
+<h2 class="font-label-caps text-label-caps text-primary opacity-70 tracking-widest">SYSTEM ARCHITECT</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary-fixed-dim transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">Process Map</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-label-caps text-label-caps">API Specs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data Model</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="rule">rule</span>
+<span class="font-label-caps text-label-caps">Validation</span>
+</div>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">NODE: SEC-ALPHA-09</span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant opacity-50">Uptime: 99.998%</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 relative overflow-auto p-lane-margin flex flex-col gap-node-gutter">
+<!-- Security Status Header -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-stack-gap">
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">FRAUD_DETECTION</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">PASSING</span>
+</div>
+<div class="font-headline-md text-headline-md text-primary font-code-sm">0.002% RISK</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">GPS_INTEGRITY</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">STABLE</span>
+</div>
+<div class="font-headline-md text-headline-md text-primary font-code-sm">± 1.2M VARIANCE</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">MFA_COMPLIANCE</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">ENFORCED</span>
+</div>
+<div class="font-headline-md text-headline-md text-primary font-code-sm">100% COVERAGE</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">AUDIT_SYNC</span>
+<span class="font-code-xs text-code-xs text-secondary">ACTIVE</span>
+</div>
+<div class="font-headline-md text-headline-md text-primary font-code-sm">IMMUTABLE_LOG_V3</div>
+</div>
+</section>
+<!-- Flow Visualization & Checklist Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-node-gutter flex-1">
+<!-- Left: Flow Diagram (Conceptual Node Representation) -->
+<div class="lg:col-span-8 relative bg-surface-container-lowest border border-outline-variant p-6 overflow-hidden min-h-[500px]">
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<!-- Background decoration representing logic flow -->
+<div class="w-full h-full border-t border-l border-outline-variant ml-24 mt-24"></div>
+</div>
+<div class="relative z-10 flex flex-col gap-12">
+<!-- Node 1: Initialization -->
+<div class="flex items-center gap-16">
+<div class="w-64 bg-surface border-l-4 border-primary-fixed-dim p-3 shadow-lg">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-60">AUTH_01</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="verified_user">verified_user</span>
+</div>
+<div class="font-code-sm text-code-sm text-primary mb-2">DRIVER_MERCHANT_MFA</div>
+<div class="flex gap-2">
+<span class="font-code-xs text-code-xs px-1 bg-surface-variant text-on-surface-variant">Biometric</span>
+<span class="font-code-xs text-code-xs px-1 bg-surface-variant text-on-surface-variant">TOTP</span>
+</div>
+</div>
+<div class="h-[2px] bg-primary-fixed-dim flex-1 relative">
+<div class="absolute -right-2 -top-[3px] w-2 h-2 border-t-2 border-r-2 border-primary-fixed-dim rotate-45"></div>
+<div class="absolute top-2 left-1/2 -translate-x-1/2 font-code-xs text-code-xs text-primary-fixed-dim">TLS 1.3 SECURE_TUNNEL</div>
+</div>
+</div>
+<!-- Node 2: Scan & Validate -->
+<div class="flex items-center gap-16 ml-16">
+<div class="w-72 bg-surface border-l-4 border-secondary p-3 shadow-lg">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-60">VALID_02</span>
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="qr_code_scanner">qr_code_scanner</span>
+</div>
+<div class="font-code-sm text-code-sm text-primary mb-2">QR ANTI-TAMPER CHECK</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Signature Hash</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">MATCH</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">TTL Check</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">&lt;30s</span>
+</div>
+</div>
+</div>
+<div class="h-[2px] bg-secondary flex-1 relative">
+<div class="absolute -right-2 -top-[3px] w-2 h-2 border-t-2 border-r-2 border-secondary rotate-45"></div>
+</div>
+</div>
+<!-- Node 3: Metadata Harvesting -->
+<div class="flex items-center gap-16 ml-32">
+<div class="w-80 bg-surface border-l-4 border-tertiary-fixed-dim p-3 shadow-lg">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-60">TELM_03</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-sm" data-icon="sensors">sensors</span>
+</div>
+<div class="font-code-sm text-code-sm text-primary mb-2">METADATA INTEGRITY UNIT</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="p-1 bg-surface-variant/30 border border-outline-variant">
+<div class="font-label-caps text-[8px] text-on-surface-variant">GPS_SPOOF</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">NEG</div>
+</div>
+<div class="p-1 bg-surface-variant/30 border border-outline-variant">
+<div class="font-label-caps text-[8px] text-on-surface-variant">EXIF_VAL</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">VALID</div>
+</div>
+<div class="p-1 bg-surface-variant/30 border border-outline-variant">
+<div class="font-label-caps text-[8px] text-on-surface-variant">FINGERPRINT</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">DEV_993</div>
+</div>
+<div class="p-1 bg-surface-variant/30 border border-outline-variant">
+<div class="font-label-caps text-[8px] text-on-surface-variant">TS_SYNC</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">UTC_0</div>
+</div>
+</div>
+</div>
+<div class="h-[2px] bg-tertiary-fixed-dim flex-1 relative">
+<div class="absolute -right-2 -top-[3px] w-2 h-2 border-t-2 border-r-2 border-tertiary-fixed-dim rotate-45"></div>
+</div>
+</div>
+<!-- Terminal Node: Ledger -->
+<div class="flex items-center gap-16 ml-48">
+<div class="w-72 bg-primary-container p-3 shadow-lg">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-caps text-label-caps text-on-primary-container">FINAL_04</span>
+<span class="material-symbols-outlined text-on-primary-container text-sm" data-icon="task_alt">task_alt</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-primary-container font-bold">IMMUTABLE_LOG_COMMIT</div>
+<div class="font-code-xs text-code-xs text-on-primary-container opacity-80 mt-1">SHA-256: e3b0c44298fc1c149afbf4...</div>
+</div>
+</div>
+</div>
+<!-- Flow Connectors (Simplified logic path) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-20">
+<path d="M 100 100 L 100 200 L 200 200" fill="none" stroke="#84967e" stroke-dasharray="4 4"></path>
+<path d="M 200 250 L 200 350 L 300 350" fill="none" stroke="#84967e" stroke-dasharray="4 4"></path>
+</svg>
+</div>
+<!-- Right: Governance Checklist & Audit Panel -->
+<div class="lg:col-span-4 flex flex-col gap-node-gutter">
+<!-- Policy Checklist -->
+<div class="bg-surface-container border border-outline-variant p-6 h-full flex flex-col">
+<div class="flex items-center gap-2 mb-6 border-b border-outline-variant pb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="policy">policy</span>
+<h3 class="font-headline-md text-headline-md text-primary">GOVERNANCE_CHECKLIST</h3>
+</div>
+<div class="flex-1 space-y-4">
+<label class="flex items-start gap-4 p-3 bg-surface border border-outline-variant cursor-pointer hover:bg-surface-variant transition-colors group">
+<input checked="" class="mt-1 w-4 h-4 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+<div>
+<div class="font-code-sm text-code-sm text-primary group-hover:text-primary-fixed-dim">COMPLIANCE_GDPR_KYC</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">PII scrubbed from primary ledger; audit logs encrypted.</div>
+</div>
+</label>
+<label class="flex items-start gap-4 p-3 bg-surface border border-outline-variant cursor-pointer hover:bg-surface-variant transition-colors group">
+<input checked="" class="mt-1 w-4 h-4 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+<div>
+<div class="font-code-sm text-code-sm text-primary group-hover:text-primary-fixed-dim">FRAUD_DETECTION_H1</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Velocity checks &amp; device affinity scoring active.</div>
+</div>
+</label>
+<label class="flex items-start gap-4 p-3 bg-surface border border-outline-variant cursor-pointer hover:bg-surface-variant transition-colors group">
+<input checked="" class="mt-1 w-4 h-4 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+<div>
+<div class="font-code-sm text-code-sm text-primary group-hover:text-primary-fixed-dim">PHOTO_METADATA_INTEGRITY</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Validation of EXIF timestamps vs System time.</div>
+</div>
+</label>
+<label class="flex items-start gap-4 p-3 bg-surface border border-outline-variant cursor-pointer hover:bg-surface-variant transition-colors group">
+<input class="mt-1 w-4 h-4 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+<div>
+<div class="font-code-sm text-code-sm text-primary group-hover:text-primary-fixed-dim">HARDWARE_ATTESTATION</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Verify TEE/Secure Enclave availability.</div>
+</div>
+</label>
+</div>
+<button class="mt-6 w-full py-3 bg-primary text-on-primary font-label-caps text-label-caps hover:bg-primary-fixed-dim transition-all uppercase tracking-widest">
+                            EXECUTE COMPLIANCE SCAN
+                        </button>
+</div>
+<!-- Live Audit Feed -->
+<div class="bg-surface-container-high border border-outline-variant p-4 h-64 overflow-hidden flex flex-col">
+<div class="font-label-caps text-label-caps text-on-surface-variant opacity-60 mb-2 border-b border-outline-variant pb-1">LIVE_AUDIT_STREAM</div>
+<div class="flex-1 overflow-y-auto space-y-1 pr-2">
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">[14:02:11] SEC_AUTH_SUCCESS: DRIVER_77</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">[14:02:12] GPS_VAL_PASS: ±0.8m</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">[14:02:15] QR_SIG_VERIFIED: PK_9921</div>
+<div class="font-code-xs text-code-xs text-error">[14:02:18] ALERT: VELOCITY_WARN_DEV_102</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">[14:02:22] METADATA_EXTRACTED: PHOTO_IMG_3</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">[14:02:30] LEDGER_COMMIT_OK: TX_A192B</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">[14:02:35] AUDIT_PIPE_FLUSHED</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-stretch h-16 bg-surface-container-highest border-t border-outline-variant z-50">
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span class="font-label-caps text-label-caps">SCAN</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-none py-2 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span class="font-label-caps text-label-caps">GPS</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" data-icon="scale">scale</span>
+<span class="font-label-caps text-label-caps">WEIGHT</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" data-icon="photo_camera">photo_camera</span>
+<span class="font-label-caps text-label-caps">PROOF</span>
+</div>
+</nav>
+<!-- Background Shader (Ambient Security Pulse) -->
+<div class="fixed inset-0 pointer-events-none -z-10 opacity-30">
+
+</div>
+<script>
+        // Simple micro-interaction for checklist simulation
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const label = e.target.closest('label');
+                if (e.target.checked) {
+                    label.classList.add('border-primary-fixed-dim');
+                    label.classList.remove('border-outline-variant');
+                } else {
+                    label.classList.remove('border-primary-fixed-dim');
+                    label.classList.add('border-outline-variant');
+                }
+            });
+        });
+
+        // Live stream auto-scroll simulation
+        const stream = document.querySelector('.overflow-y-auto');
+        setInterval(() => {
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const events = [
+                { msg: 'HEARTBEAT_STABLE: SEC_GATEWAY_3', color: 'text-on-surface-variant' },
+                { msg: 'POL_SYNC_COMPLETE: REGS_2024', color: 'text-primary-fixed-dim' },
+                { msg: 'METRIC_PUSH: LATENCY_12ms', color: 'text-on-surface-variant' }
+            ];
+            const event = events[Math.floor(Math.random() * events.length)];
+            const div = document.createElement('div');
+            div.className = `font-code-xs text-code-xs ${event.color}`;
+            div.textContent = `[${time}] ${event.msg}`;
+            stream.appendChild(div);
+            stream.scrollTop = stream.scrollHeight;
+            if (stream.children.length > 50) stream.removeChild(stream.firstChild);
+        }, 3000);
+    </script>
+</body></html>

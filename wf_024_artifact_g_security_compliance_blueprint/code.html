@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEURAL_ROUTE_ENGINE_V2 | Security Artifact G</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hud-scanline {
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 230, 57, 0.05) 50.5%, transparent 51%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+        .node-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.1);
+        }
+        @keyframes pulse-border {
+            0% { border-color: rgba(0, 230, 57, 0.3); }
+            50% { border-color: rgba(0, 230, 57, 1); }
+            100% { border-color: rgba(0, 230, 57, 0.3); }
+        }
+        .animate-pulse-border {
+            animation: pulse-border 2s infinite;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#273647",
+                    "surface": "#051424",
+                    "surface-bright": "#2c3a4c",
+                    "inverse-on-surface": "#233143",
+                    "on-primary-fixed-variant": "#00530e",
+                    "primary-fixed-dim": "#00e639",
+                    "primary-container": "#00ff41",
+                    "error": "#ffb4ab",
+                    "on-tertiary-container": "#862ed4",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary-container": "#ecd3ff",
+                    "secondary-container": "#0043eb",
+                    "on-secondary-fixed": "#001356",
+                    "on-primary-container": "#007117",
+                    "secondary": "#b8c3ff",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface-container-low": "#0d1c2d",
+                    "on-surface": "#d4e4fa",
+                    "outline": "#84967e",
+                    "secondary-fixed": "#dde1ff",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-container-lowest": "#010f1f",
+                    "on-secondary-container": "#c6ceff",
+                    "primary-fixed": "#72ff70",
+                    "surface-container": "#122131",
+                    "surface-tint": "#00e639",
+                    "surface-container-high": "#1c2b3c",
+                    "tertiary": "#fff6ff",
+                    "on-secondary": "#002388",
+                    "on-primary-fixed": "#002203",
+                    "on-primary": "#003907",
+                    "background": "#051424",
+                    "on-error": "#690005",
+                    "primary": "#ebffe2",
+                    "on-tertiary": "#490080",
+                    "on-error-container": "#ffdad6",
+                    "inverse-primary": "#006e16",
+                    "surface-container-highest": "#273647",
+                    "on-surface-variant": "#b9ccb2",
+                    "error-container": "#93000a",
+                    "tertiary-fixed": "#f0dbff",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-dim": "#051424",
+                    "on-background": "#d4e4fa",
+                    "outline-variant": "#3b4b37",
+                    "on-tertiary-fixed-variant": "#6900b3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lane-margin": "32px",
+                    "stack-gap": "4px",
+                    "grid-unit": "8px",
+                    "node-gutter": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- HUD Scanline Overlay -->
+<div class="fixed inset-0 hud-scanline opacity-20 pointer-events-none z-[100]"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface border-b border-outline-variant flex justify-between items-center h-16 px-lane-margin">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="hub">hub</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary-container tracking-widest">NEURAL_ROUTE_ENGINE_V2</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim border-b-2 border-primary-fixed-dim pb-1 cursor-pointer">SECURITY_CORE</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright transition-colors px-2 pb-1 cursor-pointer">NETWORK_NODES</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright transition-colors px-2 pb-1 cursor-pointer">LOG_STREAMS</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex pt-16 min-h-screen">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col h-[calc(100vh-64px)] w-64 bg-surface-container border-r border-outline-variant sticky top-16 py-grid-unit">
+<div class="px-4 mb-8">
+<p class="font-label-caps text-label-caps text-on-surface opacity-60">SYSTEM_INDEX</p>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">SYS_INDEX</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">LOGIC_FLOWS</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+<span class="font-label-caps text-label-caps">TELEMETRY</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="map">map</span>
+<span class="font-label-caps text-label-caps">NODE_MAP</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps">AUDIT_LOG</span>
+</div>
+</nav>
+<div class="mt-auto px-4 py-6 border-t border-outline-variant">
+<div class="flex flex-col gap-2">
+<p class="font-code-xs text-code-xs text-primary-fixed-dim">ENC: AES-256-GCM</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">SEC_LEVEL: ALPHA-9</p>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-lane-margin overflow-x-hidden">
+<!-- Breadcrumbs / Top Stats -->
+<div class="flex justify-between items-end mb-8 border-b border-outline-variant pb-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary-fixed-dim uppercase tracking-tighter">Artifact G: Security Blueprint</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">SEC_ID: WF-024 // STABLE_STATE_CONFIRMED</p>
+</div>
+<div class="flex gap-4">
+<div class="text-right">
+<p class="font-label-caps text-label-caps text-on-surface-variant">ACTIVE_THREATS</p>
+<p class="font-code-sm text-code-sm text-error">000_DETECTED</p>
+</div>
+<div class="text-right border-l border-outline-variant pl-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant">COMPLIANCE</p>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim">100.00%_VALID</p>
+</div>
+</div>
+</div>
+<!-- Bento Grid Security Nodes -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Authentication Node (Bento Span) -->
+<div class="md:col-span-4 bg-surface-container-low border border-outline-variant p-4 flex flex-col gap-4 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-4xl" data-icon="fingerprint">fingerprint</span>
+</div>
+<header class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps bg-primary-container/10 text-primary-fixed-dim px-2 py-0.5 rounded">AUTHENTICATION</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: SEC-A1</span>
+</header>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface mb-2">Driver Authentication Protocol</p>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-mono text-on-surface-variant border-b border-outline-variant/30 pb-1">
+<span>BIOMETRIC_CHECK</span>
+<span class="text-primary-fixed-dim">VERIFIED</span>
+</div>
+<div class="flex justify-between text-[10px] font-mono text-on-surface-variant border-b border-outline-variant/30 pb-1">
+<span>JWT_ROTATION</span>
+<span class="text-primary-fixed-dim">04s_REMAINING</span>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-4 flex gap-2">
+<button class="flex-1 font-label-caps text-label-caps border border-outline-variant py-2 hover:bg-surface-variant transition-colors">REVOKE_ACCESS</button>
+</div>
+</div>
+<!-- GPS Integrity (Center Map Visualization) -->
+<div class="md:col-span-8 bg-surface-container-low border border-outline-variant p-4 relative min-h-[300px] flex flex-col">
+<div class="absolute inset-0 z-0 opacity-40">
+<div class="w-full h-full bg-cover bg-center" data-alt="A technical wireframe map of a city grid in deep blues and greens with glowing node points and vector data paths, showcasing architectural precision and digital network topology. High-contrast HUD elements and coordinate data overlays give it a professional engineering aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDlp-ol8Yf_wWuL6QeQR0BkfzSaZFtdI8bHmQ-rez_QMfzgr19d686YHLLJ59DQLnbuuoJuXmIdipCsW0JNhveqK4wFBkUzGI_gqPph6_64FlO-lWPRNHNh1JDiUK24QiC44tky_gwesgvdq6Z_4R5LbaFzsDgLLERRe0pnQXSbO2BVb-eraY9kchtm6WuRbYjN9z4Qt0KRWrNIzVqBlPJY7LM15J_gTZ0P0MwfEbfphGnU1D0ws60603BjXespVLgP6yWCyGOokKc')"></div>
+</div>
+<div class="relative z-10 flex flex-col h-full">
+<header class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps bg-secondary-container/20 text-secondary-fixed-dim px-2 py-0.5 rounded">GPS_INTEGRITY</span>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant">SATS: 12_FIXED</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SIGNAL: 99%</span>
+</div>
+</header>
+<!-- Telemetry Overlay -->
+<div class="mt-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="bg-surface/80 backdrop-blur-md border border-outline-variant p-2">
+<p class="font-label-caps text-[9px] text-on-surface-variant">LATITUDE</p>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim">37.7749° N</p>
+</div>
+<div class="bg-surface/80 backdrop-blur-md border border-outline-variant p-2">
+<p class="font-label-caps text-[9px] text-on-surface-variant">LONGITUDE</p>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim">122.4194° W</p>
+</div>
+<div class="bg-surface/80 backdrop-blur-md border border-outline-variant p-2">
+<p class="font-label-caps text-[9px] text-on-surface-variant">VELOCITY</p>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim">42.4 KM/H</p>
+</div>
+<div class="bg-surface/80 backdrop-blur-md border border-outline-variant p-2">
+<p class="font-label-caps text-[9px] text-on-surface-variant">HEADING</p>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim">142° SE</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Validation Status Column -->
+<div class="md:col-span-3 space-y-6">
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-3">TAMPER_DETECTION</p>
+<div class="flex items-center gap-3 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim shadow-[0_0_8px_#00e639]"></div>
+<span class="font-code-sm text-code-sm">CHASSIS_SECURE</span>
+</div>
+<div class="flex items-center gap-3 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim shadow-[0_0_8px_#00e639]"></div>
+<span class="font-code-sm text-code-sm">OBD_ENCRYPTED</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim shadow-[0_0_8px_#00e639]"></div>
+<span class="font-code-sm text-code-sm">PORT_32_LOCKED</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-3">SPOOF_DETECTION</p>
+<div class="h-1 bg-surface-variant w-full rounded-full overflow-hidden mb-2">
+<div class="h-full bg-primary-fixed-dim w-3/4"></div>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">PROBABILITY_OF_SPOOF: <span class="text-primary-fixed-dim">0.002%</span></p>
+</div>
+</div>
+<!-- Audit Log Stream -->
+<div class="md:col-span-6 bg-surface-container-low border border-outline-variant p-4 flex flex-col">
+<header class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">REALTIME_AUDIT_LOG</span>
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim animate-pulse" data-icon="fiber_manual_record">fiber_manual_record</span>
+</header>
+<div class="font-code-xs text-[10px] space-y-2 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar">
+<div class="flex gap-4 border-l-2 border-primary-fixed-dim pl-3 py-1 bg-surface-variant/20">
+<span class="text-on-surface-variant shrink-0">14:22:01.04</span>
+<span class="text-primary-fixed-dim">[AUTH]</span>
+<span class="truncate">SESSION_REVALIDATED: DRIVER_ID_9921_SIG_MATCH</span>
+</div>
+<div class="flex gap-4 border-l-2 border-outline-variant pl-3 py-1">
+<span class="text-on-surface-variant shrink-0">14:21:58.12</span>
+<span class="text-secondary-fixed-dim">[GPS]</span>
+<span class="truncate">MOCK_LOCATION_CHECK: NEGATIVE_RESULT</span>
+</div>
+<div class="flex gap-4 border-l-2 border-outline-variant pl-3 py-1">
+<span class="text-on-surface-variant shrink-0">14:21:55.45</span>
+<span class="text-on-surface-variant">[SYS]</span>
+<span class="truncate">HEARTBEAT_SIGNAL_SENT: STATUS_OK</span>
+</div>
+<div class="flex gap-4 border-l-2 border-outline-variant pl-3 py-1">
+<span class="text-on-surface-variant shrink-0">14:21:52.09</span>
+<span class="text-primary-fixed-dim">[ENC]</span>
+<span class="truncate">BLOCK_HASH_GEN: f492...e281_VERIFIED</span>
+</div>
+<div class="flex gap-4 border-l-2 border-outline-variant pl-3 py-1">
+<span class="text-on-surface-variant shrink-0">14:21:48.33</span>
+<span class="text-on-surface-variant">[SYS]</span>
+<span class="truncate">COMPLIANCE_WATCHDOG_CYCLED</span>
+</div>
+</div>
+</div>
+<!-- Compliance Monitoring + Overrides -->
+<div class="md:col-span-3 flex flex-col gap-4">
+<div class="bg-surface-container-high border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">CRITICAL_OVERRIDES</p>
+<div class="space-y-3">
+<button class="w-full bg-surface-variant hover:bg-on-surface-variant/20 text-on-surface font-label-caps text-label-caps py-3 border border-outline-variant transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="manual_record">fiber_manual_record</span>
+                                MANUAL_OVERRIDE
+                            </button>
+<button class="w-full bg-error-container hover:bg-error text-on-error-container hover:text-on-error font-label-caps text-label-caps py-3 border border-error transition-all active:scale-95 flex items-center justify-center gap-2 animate-pulse-border">
+<span class="material-symbols-outlined text-sm" data-icon="emergency_home">emergency_home</span>
+                                EMERGENCY_OVERRIDE
+                            </button>
+</div>
+</div>
+<div class="flex-1 bg-primary-container/5 border border-primary-fixed-dim/30 p-4 flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-3xl text-primary-fixed-dim mb-2" data-icon="verified_user">verified_user</span>
+<p class="font-label-caps text-label-caps text-primary-fixed-dim">COMPLIANCE_STATUS</p>
+<p class="font-headline-md text-headline-md text-on-surface">NOMINAL</p>
+</div>
+</div>
+</div>
+<!-- Footer-ish Data Bar -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<div class="p-3 bg-surface-container border border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<div>
+<p class="font-label-caps text-[10px] text-on-surface-variant">ENCRYPTION_STANDARD</p>
+<p class="font-code-sm text-code-sm">AES-256-GCM / SHA-512</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="p-3 bg-surface-container border border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="lan">lan</span>
+</div>
+<div>
+<p class="font-label-caps text-[10px] text-on-surface-variant">PROTOCOL_VERSION</p>
+<p class="font-code-sm text-code-sm">WF-V2_SEC_NODE_X</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="p-3 bg-surface-container border border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="dns">dns</span>
+</div>
+<div>
+<p class="font-label-caps text-[10px] text-on-surface-variant">CLUSTER_SYNC</p>
+<p class="font-code-sm text-code-sm">1,422_NODES_STABLE</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-lane-margin py-2 w-full z-50 fixed bottom-0">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-secondary tracking-widest uppercase">CORE_ENGINE_STABLE_8.2.1</span>
+</div>
+<div class="flex gap-6">
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary-fixed transition-colors cursor-default">LATENCY: 12ms</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary-fixed transition-colors cursor-default">NODES: 1,422</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim transition-colors cursor-default">STATUS: OPERATIONAL</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction for Log Updates
+        const logContainer = document.querySelector('.custom-scrollbar');
+        const logs = [
+            { time: "14:22:15.01", tag: "[GPS]", msg: "LOC_VALIDATION_PASSED: SECTOR_A4" },
+            { time: "14:22:12.44", tag: "[SEC]", msg: "AES_HANDSHAKE_COMPLETE: NODE_X72" },
+            { time: "14:22:10.92", tag: "[AUD]", msg: "INTEGRITY_SNAPSHOT_STORED: CID_49221" }
+        ];
+        
+        let logIndex = 0;
+        setInterval(() => {
+            const log = logs[logIndex];
+            const div = document.createElement('div');
+            div.className = 'flex gap-4 border-l-2 border-outline-variant pl-3 py-1 opacity-0 transition-opacity duration-500';
+            div.innerHTML = `
+                <span class="text-on-surface-variant shrink-0">${log.time}</span>
+                <span class="${log.tag === '[GPS]' ? 'text-secondary-fixed-dim' : 'text-primary-fixed-dim'}">${log.tag}</span>
+                <span class="truncate">${log.msg}</span>
+            `;
+            logContainer.prepend(div);
+            setTimeout(() => div.classList.remove('opacity-0'), 50);
+            
+            if(logContainer.children.length > 8) {
+                logContainer.lastElementChild.remove();
+            }
+            logIndex = (logIndex + 1) % logs.length;
+        }, 4000);
+
+        // Simple button active state visual feedback
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.add('opacity-50');
+                setTimeout(() => this.classList.remove('opacity-50'), 100);
+            });
+        });
+    </script>
+</body></html>

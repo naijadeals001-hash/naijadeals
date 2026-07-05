@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-025 Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+            z-index: -1;
+        }
+        .connector-h::after { height: 2px; width: 24px; top: 50%; right: -24px; }
+        .connector-v::after { width: 2px; height: 24px; left: 50%; bottom: -24px; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #051424; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; }
+        ::-webkit-scrollbar-thumb:hover { background: #84967e; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-surface": "#d4e4fa",
+                      "on-secondary-container": "#c6ceff",
+                      "tertiary": "#fff6ff",
+                      "on-secondary": "#002388",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "error-container": "#93000a",
+                      "surface-tint": "#00e639",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-bright": "#2c3a4c",
+                      "on-surface": "#d4e4fa",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-primary-container": "#007117",
+                      "surface-container-lowest": "#010f1f",
+                      "surface-variant": "#273647",
+                      "outline": "#84967e",
+                      "surface": "#051424",
+                      "outline-variant": "#3b4b37",
+                      "inverse-primary": "#006e16",
+                      "error": "#ffb4ab",
+                      "surface-container-high": "#1c2b3c",
+                      "on-secondary-fixed": "#001356",
+                      "primary-fixed": "#72ff70",
+                      "primary-container": "#00ff41",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "primary": "#ebffe2",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary-fixed": "#2c0051",
+                      "secondary": "#b8c3ff",
+                      "tertiary-fixed": "#f0dbff",
+                      "background": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary": "#003907",
+                      "on-tertiary-container": "#862ed4",
+                      "on-error": "#690005",
+                      "secondary-fixed": "#dde1ff",
+                      "secondary-container": "#0043eb",
+                      "primary-fixed-dim": "#00e639",
+                      "on-tertiary": "#490080",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#122131",
+                      "surface-container-highest": "#273647",
+                      "on-primary-fixed-variant": "#00530e",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-background": "#d4e4fa",
+                      "inverse-on-surface": "#233143",
+                      "surface-dim": "#051424",
+                      "surface-container-low": "#0d1c2d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px",
+                      "node-gutter": "24px"
+              },
+              "fontFamily": {
+                      "code-sm": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen text-on-surface font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="w-full top-0 border-b border-outline-variant border-b border-outline-variant bg-surface-container-low sticky z-50">
+<div class="flex justify-between items-center w-full px-lane-margin py-grid-unit">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">account_tree</span>
+<h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary dark:text-primary-fixed-dim">WF-025: CHAIN-OF-CUSTODY</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<a class="text-primary-fixed-dim border-b-2 border-primary-fixed-dim px-2 py-1 font-code-sm text-code-sm transition-colors cursor-pointer" href="#">ARCHITECTURE</a>
+<a class="text-on-surface-variant hover:bg-surface-variant px-2 py-1 font-code-sm text-code-sm transition-colors cursor-pointer" href="#">DEPLOYMENT</a>
+<a class="text-on-surface-variant hover:bg-surface-variant px-2 py-1 font-code-sm text-code-sm transition-colors cursor-pointer" href="#">RESOURCES</a>
+</nav>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">terminal</span>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col h-full w-64 border-r border-outline-variant bg-surface-container dark:bg-surface-container p-stack-gap border-r border-outline-variant shrink-0">
+<div class="px-4 py-6 border-b border-outline-variant mb-4">
+<span class="font-headline-md text-headline-md text-primary block">SYSTEM ARCHITECT</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">v2.4.0-STABLE</span>
+</div>
+<nav class="space-y-1">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary-fixed-dim transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-label-caps text-label-caps">Process Map</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">settings_ethernet</span>
+<span class="font-label-caps text-label-caps">API Specs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data Model</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">rule</span>
+<span class="font-label-caps text-label-caps">Validation</span>
+</div>
+</nav>
+<div class="mt-auto p-4 bg-surface-container-low rounded m-2 border border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">K8s Clusters</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+</div>
+<div class="text-primary font-code-sm text-code-sm">US-WEST-2-PROD</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto p-lane-margin relative">
+<!-- Hero Header Section -->
+<section class="mb-12">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+<div class="max-w-2xl">
+<div class="inline-block px-2 py-0.5 bg-primary-container text-on-primary-container font-code-xs text-code-xs mb-4">CONFIDENTIAL // PROJECT WF-025</div>
+<h2 class="font-headline-lg text-[40px] leading-tight mb-4 text-primary">Microservice Interoperability &amp; Chain-of-Custody Implementation Guide</h2>
+<p class="text-on-surface-variant font-body-md text-body-md">Engineering handoff for the end-to-end logistics validation cycle. This document serves as the single source of truth for the interaction between physical sensors and distributed ledger services.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="bg-surface-container-highest border border-outline-variant text-on-surface px-4 py-2 font-label-caps text-label-caps flex items-center gap-2 hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-[16px]">download</span> PDF EXPORT
+                        </button>
+<button class="bg-primary-fixed-dim text-on-primary-fixed px-4 py-2 font-label-caps text-label-caps flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span> DEPLOY TO STAGING
+                        </button>
+</div>
+</div>
+<!-- Bento Service Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-stack-gap">
+<!-- Pickup Service -->
+<div class="col-span-1 md:col-span-2 p-6 bg-surface-container-high border border-outline-variant flex flex-col gap-4 relative overflow-hidden group">
+<div class="flex justify-between items-start z-10">
+<div>
+<span class="font-label-caps text-label-caps text-primary mb-1 block">MICROSERVICE</span>
+<h3 class="font-headline-md text-headline-md">Pickup Service</h3>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim">package_2</span>
+</div>
+<p class="text-on-surface-variant font-code-sm text-code-sm z-10">Initial state orchestration. Manages the transition from 'Pending' to 'In-Transit' via NFC trigger events.</p>
+<div class="flex gap-4 mt-auto z-10">
+<div class="flex flex-col">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Runtime</span>
+<span class="font-code-sm text-code-sm">Go 1.21</span>
+</div>
+<div class="flex flex-col">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Latency</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">12ms</span>
+</div>
+</div>
+<div class="absolute right-[-20%] bottom-[-20%] opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+<span class="material-symbols-outlined text-[180px]">package_2</span>
+</div>
+</div>
+<!-- Hardware Spec Card -->
+<div class="col-span-1 p-6 bg-surface-container-highest border border-outline-variant flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">memory</span>
+<span class="font-label-caps text-label-caps uppercase">Hardware Requirements</span>
+</div>
+<ul class="space-y-3 mt-2">
+<li class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></span>
+<span class="font-code-sm text-code-sm">GPS (L1/L5 Dual Band)</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></span>
+<span class="font-code-sm text-code-sm">Camera (4K HDR, OCR Ready)</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full"></span>
+<span class="font-code-sm text-code-sm">NFC/QR Integrated Reader</span>
+</li>
+</ul>
+</div>
+<!-- K8s Namespace -->
+<div class="col-span-1 p-6 bg-surface-container-low border border-outline-variant flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">K8s NAMESPACE</span>
+<div class="font-code-sm text-code-sm text-primary p-2 bg-surface-container-highest rounded border border-outline-variant">
+                            wf-production-v2-coc
+                        </div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mt-4">CI/CD ID</span>
+<div class="font-code-sm text-code-sm text-secondary-fixed p-2 bg-surface-container-highest rounded border border-outline-variant">
+                            PIPELINE_HASH_6772X
+                        </div>
+</div>
+</div>
+</section>
+<!-- Process Blueprint Section -->
+<section class="mb-12">
+<h3 class="font-headline-md text-headline-md mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined">flowsheet</span>
+                    EXECUTION BLUEPRINT
+                </h3>
+<div class="relative min-h-[400px] border border-outline-variant bg-surface-container-lowest p-8 flex items-center justify-center overflow-x-auto">
+<!-- Workflow Visualization -->
+<div class="flex gap-12 items-center">
+<!-- Step 1 -->
+<div class="flex flex-col items-center gap-4">
+<div class="w-48 bg-surface-container border border-primary-fixed-dim p-4 rounded relative node-connector connector-h">
+<span class="font-label-caps text-label-caps text-primary mb-2 block">ENTRY</span>
+<span class="font-code-sm text-code-sm">QR_SCAN_EVENT</span>
+<div class="mt-3 flex justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">PORT: 8080</span>
+<span class="font-code-xs text-code-xs text-primary">HEALTH: OK</span>
+</div>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">QR Service</span>
+</div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center gap-4">
+<div class="w-48 bg-surface-container border border-outline text-on-surface p-4 rounded relative node-connector connector-h">
+<span class="font-label-caps text-label-caps mb-2 block">COORD_LOCK</span>
+<span class="font-code-sm text-code-sm">GPS_VALIDATION</span>
+<div class="mt-3 flex justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">LAT: 45.5ms</span>
+<span class="font-code-xs text-code-xs text-primary">12 SAT</span>
+</div>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">GPS Service</span>
+</div>
+<!-- Step 3 -->
+<div class="flex flex-col items-center gap-4">
+<div class="w-48 bg-surface-container border border-tertiary-fixed-dim p-4 rounded relative">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-2 block">COMMIT</span>
+<span class="font-code-sm text-code-sm">COC_LEDGER_SYNC</span>
+<div class="mt-3 flex justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant">RETRY: 0</span>
+<span class="font-code-xs text-code-xs text-tertiary-fixed-dim">ENCRYPTED</span>
+</div>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">CoC Service</span>
+</div>
+</div>
+<!-- Atmospheric WebGL Layer Background (Simulated) -->
+<div class="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
+
+</div>
+</div>
+</section>
+<!-- Technical Table / Testing Criteria -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-node-gutter">
+<div class="p-6 bg-surface-container border border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-primary-fixed-dim mb-4 uppercase">Completion Criteria</h4>
+<div class="space-y-4">
+<div class="flex items-start gap-4 pb-4 border-b border-outline-variant">
+<div class="mt-1">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<div class="font-code-sm text-code-sm font-bold">API COMPLIANCE</div>
+<div class="text-on-surface-variant font-body-md text-body-md">100% adherence to Shared UI Lib v2 design tokens and API versioning specs.</div>
+</div>
+</div>
+<div class="flex items-start gap-4 pb-4 border-b border-outline-variant">
+<div class="mt-1">
+<span class="material-symbols-outlined text-on-surface-variant">radio_button_unchecked</span>
+</div>
+<div>
+<div class="font-code-sm text-code-sm font-bold">REDUNDANCY TEST</div>
+<div class="text-on-surface-variant font-body-md text-body-md">Simulate total GPS failure; system must fallback to manual coordinate input with audit flag.</div>
+</div>
+</div>
+<div class="flex items-start gap-4 pb-4">
+<div class="mt-1">
+<span class="material-symbols-outlined text-on-surface-variant">radio_button_unchecked</span>
+</div>
+<div>
+<div class="font-code-sm text-code-sm font-bold">LOAD BALANCE</div>
+<div class="text-on-surface-variant font-body-md text-body-md">Handle 5,000 concurrent QR scan events per minute with latency under 100ms.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 bg-surface-container border border-outline-variant relative">
+<h4 class="font-label-caps text-label-caps text-secondary mb-4 uppercase">Reference Visuals</h4>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-cover bg-center h-32 rounded border border-outline-variant" data-alt="A high-tech control room with large monitors displaying complex real-time logistical data maps and network nodes. The lighting is low and cool-toned, dominated by deep blues and terminal greens. Monospaced code overlays part of the screen, creating a professional engineering aesthetic. The mood is focused and authoritative." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDUTBgAhzpTEAJRiDWTBqafB4CNBJrq3H-omQuy6akxMdYu6Xq0fWY3Tz0B4JAQX5BC1EhXMxfFX0vdcaqed_05a1dF9rUhVFhhHsD_8DIbvzV_X4-j34bQOLx986firzyE8WXGmQlV_qrdatKp2cNpIOMlHEXGOLeubNiYEbMVQ7XGXbHUSPZ4YQzb8kDbR-smaKyzIRXG-ufneiVGsq-NK6zkjIpKhdXVykR3eF6cDULKoapocGSI76cygHGL2tQ3o1dDj8MTfN4')"></div>
+<div class="bg-cover bg-center h-32 rounded border border-outline-variant" data-alt="Close-up macro photography of a rugged, industrial-grade handheld device scanning a high-density QR code on a steel cargo container. The background shows a busy, dimly lit shipping dock at twilight. Glowing indicators on the device show green for a successful GPS lock and data sync. The style is hyper-detailed, modern corporate brutalism." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCOqiHTn0sAcqQ7ME_WNO44pXYd_cvdpxOiZs6ui24HAWYj_Q6pGKCxDh1tYl1GtkoqYNxcTTFe6BEVqPyVina9SGtQulZHMg7FzISvEXXrBALlhDl1hxfueOj9A9Wyyv7mVNZPzEEHFIloyW2_g_Yz5QwY72lo9XxUBfv3qJpuuyJIpV-BHtWWC2ofK5_QeuI4yWnLKsZ2cdnag-FIABAna4lNgo7gVTBd4K2pqZcJTt6-2IfaW3my5nxTpSR1bpHZS7uOca2uvi0')"></div>
+<div class="bg-cover bg-center h-32 rounded border border-outline-variant" data-alt="A sophisticated technical diagram of a global satellite network providing high-precision GPS coordinates to a centralized data hub. The visual is rendered in a minimalist blueprint style with thin glowing lines and terminal green accents against a dark slate background. Technical callouts highlight latency and encryption protocols." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBcWmkJH3WPthdT5UhzcQVj17Oy2NPifuq2KbkCxtrDLUUtQfa1XGI9j3QdwR409UXzTyXTIVTyjXnwXEn7KgCqAP_5bb9rzvoVqtgFNQY4wamFBT8Ycl0goztWNkHr3jNd3BV1ag2c90R1xUKF0dDcF9s4BSe6bm3RWYiU7OjuWhueKc0xWSkaONb0sPrPS_l-79ok-CN2xRpOA3MzNLjVhfzMKNImT70mWmPRv39xSF-O0mp3jH--O8j8icgyyLKctxhtAwBzLOQ')"></div>
+<div class="bg-cover bg-center h-32 rounded border border-outline-variant" data-alt="Abstract 3D rendering of a distributed ledger or blockchain network. Glowing nodes are connected by intricate crystalline structures representing secure data transfers. The scene is illuminated by soft primary-green light, casting long shadows in a dark void. The aesthetic is clean, technical, and evokes 'Cyber-Authority' and architectural precision." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBa0xoVxJwxvDIiqfQ0dHXAJ5PnBkIA3WH3blHqRlXLujMGjZfmvBu0qLehYPjByHRt6dZKkhe1GFsWHXL8ddJg00CzyK3oheNS3bsh7kl6wpiuDbJvOi_gmLpQkbU3T_M_UC8GjJni46m0NC9ufKFc9XMm58paGkqb9xJrJqkUy7SqVG14RkExnN09Bc9rKWQ6bYCYxvCC2Zes2I9l51D563Rw5ppN4IuT2MBt_o-JcF_owXXee7_A5mOmVBEHNV60DHREafOpNDM')"></div>
+</div>
+<div class="mt-4 flex items-center justify-between">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Asset Manifest v4.1</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Shared UI Lib v2</span>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-stretch h-16 bg-surface-container-highest dark:bg-surface-container-highest border-t border-outline-variant z-50">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-none py-2 px-6 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+<span class="font-label-caps text-label-caps">SCAN</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 px-6 hover:bg-surface-bright active:scale-95 transition-transform">
+<span class="material-symbols-outlined">location_on</span>
+<span class="font-label-caps text-label-caps">GPS</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 px-6 hover:bg-surface-bright active:scale-95 transition-transform">
+<span class="material-symbols-outlined">scale</span>
+<span class="font-label-caps text-label-caps">WEIGHT</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 px-6 hover:bg-surface-bright active:scale-95 transition-transform">
+<span class="material-symbols-outlined">photo_camera</span>
+<span class="font-label-caps text-label-caps">PROOF</span>
+</div>
+</nav>
+<script>
+        // Micro-interaction for process nodes
+        document.querySelectorAll('.node-connector').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('border-primary-fixed');
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('border-primary-fixed');
+                node.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Telemetry Data Simulation
+        const latencies = document.querySelectorAll('.text-primary-fixed-dim');
+        setInterval(() => {
+            latencies.forEach(span => {
+                if(span.innerText.includes('ms')) {
+                    const newVal = (Math.random() * 5 + 10).toFixed(1);
+                    span.innerText = `${newVal}ms`;
+                }
+            });
+        }, 3000);
+    </script>
+</body></html>

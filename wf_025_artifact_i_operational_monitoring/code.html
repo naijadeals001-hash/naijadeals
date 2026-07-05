@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-025: CHAIN-OF-CUSTODY | SYSTEM ARCHITECT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-border {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.1);
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        @keyframes pulse-dot {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+        .animate-pulse-dot {
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-surface": "#d4e4fa",
+                      "on-secondary-container": "#c6ceff",
+                      "tertiary": "#fff6ff",
+                      "on-secondary": "#002388",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "error-container": "#93000a",
+                      "surface-tint": "#00e639",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-bright": "#2c3a4c",
+                      "on-surface": "#d4e4fa",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-primary-container": "#007117",
+                      "surface-container-lowest": "#010f1f",
+                      "surface-variant": "#273647",
+                      "outline": "#84967e",
+                      "surface": "#051424",
+                      "outline-variant": "#3b4b37",
+                      "inverse-primary": "#006e16",
+                      "error": "#ffb4ab",
+                      "surface-container-high": "#1c2b3c",
+                      "on-secondary-fixed": "#001356",
+                      "primary-fixed": "#72ff70",
+                      "primary-container": "#00ff41",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "primary": "#ebffe2",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary-fixed": "#2c0051",
+                      "secondary": "#b8c3ff",
+                      "tertiary-fixed": "#f0dbff",
+                      "background": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary": "#003907",
+                      "on-tertiary-container": "#862ed4",
+                      "on-error": "#690005",
+                      "secondary-fixed": "#dde1ff",
+                      "secondary-container": "#0043eb",
+                      "primary-fixed-dim": "#00e639",
+                      "on-tertiary": "#490080",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#122131",
+                      "surface-container-highest": "#273647",
+                      "on-primary-fixed-variant": "#00530e",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-background": "#d4e4fa",
+                      "inverse-on-surface": "#233143",
+                      "surface-dim": "#051424",
+                      "surface-container-low": "#0d1c2d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px",
+                      "node-gutter": "24px"
+              },
+              "fontFamily": {
+                      "code-sm": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden text-on-surface">
+<!-- SIDE NAVIGATION DRAWER (Shared Component) -->
+<aside class="hidden md:flex flex-col h-screen p-stack-gap bg-surface-container border-r border-outline-variant h-full w-64">
+<div class="px-lane-margin py-grid-unit mb-8">
+<h2 class="font-headline-md text-headline-md text-primary">SYSTEM ARCHITECT</h2>
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-60">KERNEL V4.0.1</p>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Process Map -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined mr-3" style="font-variation-settings: 'FILL' 0;">schema</span>
+<span class="font-label-caps text-label-caps">Process Map</span>
+</a>
+<!-- API Specs -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined mr-3">settings_ethernet</span>
+<span class="font-label-caps text-label-caps">API Specs</span>
+</a>
+<!-- Data Model -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined mr-3">database</span>
+<span class="font-label-caps text-label-caps">Data Model</span>
+</a>
+<!-- Audit Logs (ACTIVE) -->
+<a class="flex items-center px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary-fixed-dim transition-all duration-150" href="#">
+<span class="material-symbols-outlined mr-3" style="font-variation-settings: 'FILL' 1;">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</a>
+<!-- Validation -->
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined mr-3">rule</span>
+<span class="font-label-caps text-label-caps">Validation</span>
+</a>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse-dot"></div>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim uppercase tracking-widest">System Online</span>
+</div>
+<div class="bg-surface-container-lowest p-2 rounded">
+<p class="font-code-xs text-code-xs text-on-surface-variant">NODE: US-EAST-01</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">LATENCY: 14ms</p>
+</div>
+</div>
+</aside>
+<!-- MAIN CONTENT AREA -->
+<main class="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden">
+<!-- TOP APP BAR (Shared Component) -->
+<header class="flex justify-between items-center w-full px-lane-margin py-grid-unit bg-surface border-b border-outline-variant z-10">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary">WF-025: CHAIN-OF-CUSTODY</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex gap-4">
+<span class="text-primary-fixed-dim border-b-2 border-primary-fixed-dim px-2 py-1 font-code-sm text-code-sm cursor-pointer">MONITORING</span>
+<span class="text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-1 font-code-sm text-code-sm cursor-pointer">TERMINAL</span>
+<span class="text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-1 font-code-sm text-code-sm cursor-pointer">CONFIG</span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">terminal</span>
+</div>
+</header>
+<!-- DASHBOARD CANVAS -->
+<div class="flex-1 overflow-y-auto p-grid-unit md:p-lane-margin space-y-6">
+<!-- KEY PERFORMANCE INDICATORS ROW -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-stack-gap">
+<!-- KPI: Chain Of Custody Health Index -->
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">COC HEALTH INDEX</p>
+<h3 class="font-headline-lg text-headline-lg text-primary-fixed-dim mt-1">99.82%</h3>
+</div>
+<div class="mt-4 h-1 w-full bg-surface-container-lowest overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[99.82%]"></div>
+</div>
+</div>
+<!-- KPI: SLA (Pickup Time < 5mins) -->
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">SLA ADHERENCE (&lt;5M)</p>
+<h3 class="font-headline-lg text-headline-lg text-secondary mt-1">94.1%</h3>
+</div>
+<div class="mt-4 flex gap-1">
+<div class="h-2 w-1 bg-primary-fixed-dim"></div>
+<div class="h-2 w-1 bg-primary-fixed-dim"></div>
+<div class="h-2 w-1 bg-primary-fixed-dim"></div>
+<div class="h-2 w-1 bg-primary-fixed-dim"></div>
+<div class="h-2 w-1 bg-error"></div>
+</div>
+</div>
+<!-- KPI: Fraud Alert Frequency -->
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">FRAUD ANOMALIES</p>
+<h3 class="font-headline-lg text-headline-lg text-error mt-1">0.04%</h3>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-2">THRESHOLD: 0.10%</p>
+</div>
+<!-- KPI: Real-time Throughput -->
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">SYSTEM THROUGHPUT</p>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mt-1">1,248 <span class="text-label-caps">TX/M</span></h3>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">trending_up</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">+12% vs last hour</span>
+</div>
+</div>
+</div>
+<!-- MAIN TELEMETRY GRID -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- BENTO COLUMN 1: SENSOR DATA -->
+<div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- QR SCAN LATENCY -->
+<div class="bg-surface-container p-6 border border-outline-variant relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[64px]">qr_code_scanner</span>
+</div>
+<div class="relative z-10">
+<div class="flex justify-between items-start">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">QR SCAN LATENCY</p>
+<h4 class="font-headline-md text-headline-md mt-1">42ms <span class="text-code-xs text-on-surface-variant opacity-60">AVG</span></h4>
+</div>
+<div class="px-2 py-1 bg-surface-container-lowest border border-outline-variant">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">OPTIMAL</span>
+</div>
+</div>
+<!-- Mini Telemetry Sparkline Placeholder -->
+<div class="mt-8 h-24 flex items-end gap-1">
+<div class="w-full bg-primary-fixed-dim opacity-20 h-[40%]"></div>
+<div class="w-full bg-primary-fixed-dim opacity-40 h-[60%]"></div>
+<div class="w-full bg-primary-fixed-dim h-[45%]"></div>
+<div class="w-full bg-primary-fixed-dim opacity-30 h-[70%]"></div>
+<div class="w-full bg-primary-fixed-dim opacity-60 h-[55%]"></div>
+<div class="w-full bg-primary-fixed-dim h-[40%]"></div>
+<div class="w-full bg-primary-fixed-dim opacity-80 h-[90%]"></div>
+<div class="w-full bg-primary-fixed-dim h-[30%]"></div>
+</div>
+</div>
+</div>
+<!-- GPS ACCURACY DRIFT -->
+<div class="bg-surface-container p-6 border border-outline-variant relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[64px]">location_on</span>
+</div>
+<div class="relative z-10">
+<div class="flex justify-between items-start">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">GPS ACCURACY DRIFT</p>
+<h4 class="font-headline-md text-headline-md mt-1">1.2m <span class="text-code-xs text-on-surface-variant opacity-60">RMS</span></h4>
+</div>
+<div class="px-2 py-1 bg-surface-container-lowest border border-outline-variant">
+<span class="font-code-xs text-code-xs text-secondary">STABLE</span>
+</div>
+</div>
+<div class="mt-8 flex justify-center items-center h-24">
+<!-- Radar Sweep Simulation -->
+<div class="relative w-20 h-20 border border-outline-variant rounded-full flex items-center justify-center">
+<div class="absolute inset-0 border border-outline-variant rounded-full opacity-20 scale-75"></div>
+<div class="w-1 h-1 bg-primary-fixed-dim rounded-full shadow-[0_0_10px_#00e639]"></div>
+<div class="absolute w-1/2 h-[1px] bg-primary-fixed-dim origin-right animate-[spin_4s_linear_infinite] opacity-50"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- PHOTO UPLOAD SUCCESS -->
+<div class="bg-surface-container p-6 border border-outline-variant md:col-span-2">
+<div class="flex justify-between items-end mb-6">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">PHOTO UPLOAD PIPELINE</p>
+<h4 class="font-headline-md text-headline-md mt-1">98.4% SUCCESS RATE</h4>
+</div>
+<div class="text-right">
+<p class="font-code-xs text-code-xs text-on-surface-variant">LATENCY: 1.4s</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">SIZE: 3.2MB AVG</p>
+</div>
+</div>
+<div class="grid grid-cols-6 gap-2">
+<!-- Matrix of status indicators -->
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-error"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+<div class="h-2 bg-primary-fixed-dim"></div>
+</div>
+</div>
+</div>
+<!-- BENTO COLUMN 2: REAL-TIME AUDIT LOG -->
+<div class="bg-surface-container-low border border-outline-variant flex flex-col">
+<div class="p-4 border-b border-outline-variant bg-surface-container-high flex justify-between items-center">
+<h5 class="font-label-caps text-label-caps">LIVE SYSTEM TELEMETRY</h5>
+<div class="flex gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<span class="font-code-xs text-code-xs uppercase">Receiving</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto terminal-scroll p-4 space-y-3">
+<!-- Log Entry -->
+<div class="border-l-2 border-primary-fixed-dim pl-3 py-1">
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">[14:22:01.042]</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">EVENT: PICKUP_INIT</span>
+</div>
+<p class="font-code-sm text-code-sm mt-1">Transaction 0x77AF... validated via QR-3</p>
+<div class="flex gap-2 mt-1">
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-50">LATENCY: 12ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-50">SLA: PASS</span>
+</div>
+</div>
+<!-- Log Entry -->
+<div class="border-l-2 border-secondary pl-3 py-1">
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs text-secondary">[14:21:58.910]</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">EVENT: GPS_SYNC</span>
+</div>
+<p class="font-code-sm text-code-sm mt-1">Anchor Lock acquired. Drift 0.8m.</p>
+</div>
+<!-- Log Entry Error -->
+<div class="border-l-2 border-error pl-3 py-1 bg-error-container/10">
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs text-error">[14:21:55.221]</span>
+<span class="font-code-xs text-code-xs text-error">WARN: UPLOAD_TIMEOUT</span>
+</div>
+<p class="font-code-sm text-code-sm mt-1 text-on-error-container">Retrying image frame CID-992 (408 Error)</p>
+</div>
+<!-- Log Entry -->
+<div class="border-l-2 border-primary-fixed-dim pl-3 py-1">
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">[14:21:50.005]</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">EVENT: WEIGHT_VERIFIED</span>
+</div>
+<p class="font-code-sm text-code-sm mt-1">Load detected: 14.2kg. Accuracy within 2%.</p>
+</div>
+<!-- Log Entry -->
+<div class="border-l-2 border-primary-fixed-dim pl-3 py-1 opacity-60">
+<div class="flex justify-between">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">[14:21:48.331]</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">EVENT: USER_AUTH</span>
+</div>
+<p class="font-code-sm text-code-sm mt-1">Identity key 0xBC11 verified against chain.</p>
+</div>
+</div>
+<div class="p-3 bg-surface-container-highest flex items-center border-t border-outline-variant">
+<span class="material-symbols-outlined text-sm mr-2">keyboard_arrow_right</span>
+<input class="bg-transparent border-none p-0 focus:ring-0 font-code-sm text-code-sm w-full placeholder:text-outline-variant" placeholder="AWAITING COMMAND..." type="text"/>
+</div>
+</div>
+</div>
+<!-- PICKUP SUCCESS VS FAILED COMPARISON -->
+<div class="bg-surface-container border border-outline-variant">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center">
+<h5 class="font-label-caps text-label-caps">PICKUP PERFORMANCE DELTA (24H)</h5>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-primary-fixed-dim"></div>
+<span class="font-code-xs text-code-xs">SUCCESS</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-error"></div>
+<span class="font-code-xs text-code-xs">FAILED</span>
+</div>
+</div>
+</div>
+<div class="p-8 flex items-end justify-between h-48 gap-2">
+<!-- Success Bar -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-full bg-primary-fixed-dim h-32 relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-code-xs text-code-xs hidden group-hover:block">12,482</div>
+</div>
+<span class="font-code-xs text-code-xs mt-2 text-on-surface-variant">COMPLETED</span>
+</div>
+<!-- Failed Bar -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-full bg-error h-4 relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-code-xs text-code-xs hidden group-hover:block">142</div>
+</div>
+<span class="font-code-xs text-code-xs mt-2 text-on-surface-variant">TERMINATED</span>
+</div>
+<!-- SLA Violation Bar -->
+<div class="flex-1 flex flex-col items-center">
+<div class="w-full bg-secondary h-12 relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-code-xs text-code-xs hidden group-hover:block">892</div>
+</div>
+<span class="font-code-xs text-code-xs mt-2 text-on-surface-variant">SLA_BREACH</span>
+</div>
+</div>
+</div>
+</div>
+<!-- BOTTOM NAV BAR (Shared Component - Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-stretch h-16 bg-surface-container-highest border-t border-outline-variant z-50">
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+<span class="font-label-caps text-label-caps">SCAN</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">location_on</span>
+<span class="font-label-caps text-label-caps">GPS</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant py-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">scale</span>
+<span class="font-label-caps text-label-caps">WEIGHT</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-none py-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+<span class="font-label-caps text-label-caps">PROOF</span>
+</div>
+</nav>
+<!-- BACKGROUND SHADER -->
+<div class="absolute inset-0 pointer-events-none opacity-[0.03]">
+
+</div>
+</main>
+<script>
+        // Micro-interaction for the console
+        const input = document.querySelector('input');
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && input.value.trim() !== '') {
+                const logContainer = document.querySelector('.terminal-scroll');
+                const newLog = document.createElement('div');
+                newLog.className = "border-l-2 border-on-surface-variant pl-3 py-1 animate-pulse";
+                const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+                newLog.innerHTML = `
+                    <div class="flex justify-between">
+                        <span class="font-code-xs text-code-xs text-on-surface-variant">[${time}]</span>
+                        <span class="font-code-xs text-code-xs text-on-surface-variant">CMD_EXE</span>
+                    </div>
+                    <p class="font-code-sm text-code-sm mt-1">Executing: ${input.value}</p>
+                `;
+                logContainer.prepend(newLog);
+                input.value = '';
+                setTimeout(() => newLog.classList.remove('animate-pulse'), 1000);
+            }
+        });
+    </script>
+</body></html>

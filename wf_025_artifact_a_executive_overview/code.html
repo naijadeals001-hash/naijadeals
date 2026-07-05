@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-025: CHAIN-OF-CUSTODY ENGINE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-surface": "#d4e4fa",
+                    "on-secondary-container": "#c6ceff",
+                    "tertiary": "#fff6ff",
+                    "on-secondary": "#002388",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "error-container": "#93000a",
+                    "surface-tint": "#00e639",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "on-surface": "#d4e4fa",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-primary-container": "#007117",
+                    "surface-container-lowest": "#010f1f",
+                    "surface-variant": "#273647",
+                    "outline": "#84967e",
+                    "surface": "#051424",
+                    "outline-variant": "#3b4b37",
+                    "inverse-primary": "#006e16",
+                    "error": "#ffb4ab",
+                    "surface-container-high": "#1c2b3c",
+                    "on-secondary-fixed": "#001356",
+                    "primary-fixed": "#72ff70",
+                    "primary-container": "#00ff41",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "primary": "#ebffe2",
+                    "on-primary-fixed": "#002203",
+                    "on-tertiary-fixed": "#2c0051",
+                    "secondary": "#b8c3ff",
+                    "tertiary-fixed": "#f0dbff",
+                    "background": "#051424",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary": "#003907",
+                    "on-tertiary-container": "#862ed4",
+                    "on-error": "#690005",
+                    "secondary-fixed": "#dde1ff",
+                    "secondary-container": "#0043eb",
+                    "primary-fixed-dim": "#00e639",
+                    "on-tertiary": "#490080",
+                    "on-error-container": "#ffdad6",
+                    "surface-container": "#122131",
+                    "surface-container-highest": "#273647",
+                    "on-primary-fixed-variant": "#00530e",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-background": "#d4e4fa",
+                    "inverse-on-surface": "#233143",
+                    "surface-dim": "#051424",
+                    "surface-container-low": "#0d1c2d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "node-gutter": "24px"
+            },
+            "fontFamily": {
+                    "code-sm": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #ebffe2;
+            overflow-x: hidden;
+        }
+        .flow-container {
+            scrollbar-width: thin;
+            scrollbar-color: #3b4b37 transparent;
+        }
+        .flow-line {
+            position: absolute;
+            z-index: 0;
+            background-color: #84967e;
+            transition: all 0.3s ease;
+        }
+        .flow-line-active {
+            background-color: #00e639;
+            box-shadow: 0 0 10px #00e639;
+        }
+        .flow-line-error {
+            background-image: repeating-linear-gradient(90deg, #ffb4ab, #ffb4ab 8px, transparent 8px, transparent 16px);
+            background-color: transparent;
+        }
+        .node-port {
+            width: 6px;
+            height: 6px;
+            background: #00e639;
+            border-radius: 50%;
+            position: absolute;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full top-0 border-b border-outline-variant bg-surface flex justify-between items-center w-full px-lane-margin py-grid-unit sticky z-50">
+<div class="flex items-center gap-stack-gap">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary">WF-025: CHAIN-OF-CUSTODY</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-low rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+<span class="font-code-sm text-code-sm text-primary">SYSTEM ACTIVE</span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80" data-icon="terminal">terminal</span>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col h-screen p-stack-gap h-full w-64 border-r border-outline-variant bg-surface-container sticky top-14">
+<div class="p-4 mb-4">
+<h2 class="font-headline-md text-headline-md text-primary">SYSTEM ARCHITECT</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 transition-all duration-150 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined" data-icon="schema" style="font-variation-settings: 'FILL' 1;">schema</span>
+<span class="font-label-caps text-label-caps">Process Map</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-label-caps text-label-caps">API Specs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data Model</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="rule">rule</span>
+<span class="font-label-caps text-label-caps">Validation</span>
+</a>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="shield">shield</span>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-primary">ENCRYPTION</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">AES-256 GCM</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto pb-20">
+<!-- Summary Bento Grid -->
+<section class="p-lane-margin grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="col-span-1 md:col-span-2 bg-surface-container-low border border-outline-variant p-6 flex flex-col gap-4 relative overflow-hidden">
+
+<div class="flex justify-between items-start z-10">
+<div>
+<h3 class="font-label-caps text-label-caps text-primary mb-1">PURPOSE</h3>
+<p class="font-body-md text-body-md text-on-surface">End-to-end cryptographic verification of physical asset movement, ensuring zero-knowledge trust between merchants, drivers, and consumers.</p>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="info">info</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-6 flex flex-col justify-between z-10">
+<h3 class="font-label-caps text-label-caps text-primary">OBJECTIVE</h3>
+<div class="mt-4">
+<p class="font-headline-md text-headline-md text-on-surface">99.9% ATTRIBUTION</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">TARGET LATENCY: &lt; 120MS</p>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-6 flex flex-col justify-between z-10">
+<h3 class="font-label-caps text-label-caps text-primary">STRATEGY</h3>
+<div class="flex flex-wrap gap-2 mt-4">
+<span class="px-2 py-0.5 bg-surface-variant border border-outline-variant font-code-xs text-code-xs text-primary">SCAN-FIRST</span>
+<span class="px-2 py-0.5 bg-surface-variant border border-outline-variant font-code-xs text-code-xs text-primary">GPS-FENCED</span>
+</div>
+</div>
+</section>
+<!-- Flow Visualizer -->
+<section class="px-lane-margin mb-12">
+<div class="bg-surface-container p-grid-unit border border-outline-variant relative min-h-[800px] overflow-hidden flow-container">
+<!-- Swimlane Headers -->
+<div class="absolute left-0 top-0 bottom-0 w-24 border-r border-outline-variant flex flex-col">
+<div class="h-1/3 flex items-center justify-center border-b border-outline-variant bg-surface-container-high">
+<span class="vertical-text font-label-caps text-label-caps text-on-surface-variant -rotate-90">LOGISTICS</span>
+</div>
+<div class="h-1/3 flex items-center justify-center border-b border-outline-variant bg-surface-container-high">
+<span class="vertical-text font-label-caps text-label-caps text-on-surface-variant -rotate-90">AUTHENTICATION</span>
+</div>
+<div class="h-1/3 flex items-center justify-center bg-surface-container-high">
+<span class="vertical-text font-label-caps text-label-caps text-on-surface-variant -rotate-90">VALIDATION</span>
+</div>
+</div>
+<!-- Flow Content -->
+<div class="ml-24 p-8 relative flex flex-wrap gap-12 items-start content-start">
+<!-- Row 1: Assignment & Arrival -->
+<div class="flex items-center gap-12 w-full">
+<!-- Node: Mission Assigned -->
+<div class="w-48 bg-surface-container-lowest border border-primary-fixed-dim p-3 relative">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-outline-variant pb-1 mb-2">PROC_01</div>
+<div class="font-code-sm text-code-sm uppercase">Mission Assigned</div>
+<div class="mt-3 flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Lat: 12ms</span>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<div class="w-12 h-0.5 bg-primary-fixed-dim"></div>
+<!-- Node: Driver Arrives -->
+<div class="w-48 bg-surface-container-lowest border border-primary-fixed-dim p-3 relative">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-outline-variant pb-1 mb-2">PROC_02</div>
+<div class="font-code-sm text-code-sm uppercase">Driver Arrives</div>
+<div class="mt-3 flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Geo-Lock</span>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<div class="w-12 h-0.5 bg-primary-fixed-dim"></div>
+<!-- Node: GPS Verification -->
+<div class="w-48 bg-surface-container-lowest border border-primary-fixed-dim p-3 relative">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-outline-variant pb-1 mb-2">AUTH_01</div>
+<div class="font-code-sm text-code-sm uppercase">GPS Verification</div>
+<div class="mt-3 flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">Radius: 50m</span>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+<!-- Alternative Path Connection -->
+<div class="absolute top-full left-1/2 w-0.5 h-12 border-l border-dashed border-error"></div>
+</div>
+</div>
+<!-- Row 2: Verification Loop -->
+<div class="flex items-center gap-12 w-full mt-8">
+<div class="w-48 invisible"></div> <!-- Spacer -->
+<div class="w-12 invisible"></div> <!-- Spacer -->
+<!-- Alternative Path: Redispatch -->
+<div class="w-48 bg-surface-container-low border border-error p-3 relative mt-4">
+<div class="font-label-caps text-label-caps text-error border-b border-error/30 pb-1 mb-2">ALT_ERR_01</div>
+<div class="font-code-sm text-code-sm uppercase">Redispatch Req</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-2">Wrong Driver Identity</p>
+</div>
+<div class="w-12 invisible"></div>
+<!-- Main Flow Continues: QR Scan -->
+<div class="w-48 bg-surface-container-lowest border border-primary-fixed-dim p-3 relative">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-outline-variant pb-1 mb-2">AUTH_02</div>
+<div class="font-code-sm text-code-sm uppercase">QR Scan</div>
+<div class="mt-3 flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">CRC: 0xFD4</span>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+</div>
+<!-- Row 3: Multimodal Checks -->
+<div class="grid grid-cols-4 gap-12 w-full mt-4">
+<div class="col-start-4 flex flex-col gap-8">
+<!-- Node: Package Verification -->
+<div class="w-48 bg-surface-container-lowest border border-primary-fixed-dim p-3 relative">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-outline-variant pb-1 mb-2">VAL_01</div>
+<div class="font-code-sm text-code-sm uppercase">Package Verification</div>
+<div class="node-port left-1/2 -bottom-1.5 -translate-x-1/2"></div>
+</div>
+<!-- Node: Merchant Verification -->
+<div class="w-48 bg-surface-container-lowest border border-primary-fixed-dim p-3 relative">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-outline-variant pb-1 mb-2">VAL_02</div>
+<div class="font-code-sm text-code-sm uppercase">Merchant Verification</div>
+<div class="node-port left-1/2 -bottom-1.5 -translate-x-1/2"></div>
+</div>
+<!-- Node: Photo Capture -->
+<div class="w-48 bg-surface-container-lowest border border-primary-fixed-dim p-3 relative">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-outline-variant pb-1 mb-2">VAL_03</div>
+<div class="font-code-sm text-code-sm uppercase">Photo Capture</div>
+<div class="node-port left-1/2 -bottom-1.5 -translate-x-1/2"></div>
+</div>
+</div>
+</div>
+<!-- Row 4: Finalization -->
+<div class="flex items-center gap-12 w-full mt-8">
+<div class="w-48 bg-surface-container-lowest border border-primary-fixed-dim p-3 relative">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-outline-variant pb-1 mb-2">FINAL_01</div>
+<div class="font-code-sm text-code-sm uppercase">Weight Verification</div>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+<div class="w-12 h-0.5 bg-primary-fixed-dim"></div>
+<div class="w-48 bg-surface-container-lowest border border-primary-fixed-dim p-3 relative">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim border-b border-outline-variant pb-1 mb-2">FINAL_02</div>
+<div class="font-code-sm text-code-sm uppercase">Seal Verification</div>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+<div class="w-12 h-0.5 bg-primary-fixed-dim"></div>
+<div class="w-48 bg-primary-container border border-on-primary-container p-3 relative shadow-[0_0_20px_rgba(0,230,57,0.3)]">
+<div class="font-label-caps text-label-caps text-on-primary-container border-b border-on-primary-container/30 pb-1 mb-2">COMPLETE</div>
+<div class="font-code-sm text-code-sm text-on-primary-container font-bold uppercase">Pickup Confirmation</div>
+<div class="mt-2 font-code-xs text-code-xs text-on-primary-container opacity-80">CHAIN GENERATED</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Technical Metadata Section -->
+<section class="px-lane-margin grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<h4 class="font-label-caps text-label-caps text-primary border-b border-outline-variant pb-2 mb-4">ACTORS</h4>
+<ul class="space-y-3">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="person">person</span>
+<span class="font-code-sm text-code-sm">Authenticated Carrier</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="store">store</span>
+<span class="font-code-sm text-code-sm">Authorized Merchant</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="smart_toy">smart_toy</span>
+<span class="font-code-sm text-code-sm">COC Engine (Automated)</span>
+</li>
+</ul>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<h4 class="font-label-caps text-label-caps text-primary border-b border-outline-variant pb-2 mb-4">DEPENDENCIES</h4>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center p-2 bg-surface">
+<span class="font-code-xs text-code-xs">GPS MESH API</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">STABLE</span>
+</div>
+<div class="flex justify-between items-center p-2 bg-surface">
+<span class="font-code-xs text-code-xs">HSM KEY VAULT</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">STABLE</span>
+</div>
+<div class="flex justify-between items-center p-2 bg-surface">
+<span class="font-code-xs text-code-xs">IMG PROC CLUSTER</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">STABLE</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<h4 class="font-label-caps text-label-caps text-primary border-b border-outline-variant pb-2 mb-4">SUCCESS CRITERIA</h4>
+<div class="space-y-2">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-xs mt-0.5" data-icon="check_circle">check_circle</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Immutable block hash generated for all 14 nodes.</p>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-xs mt-0.5" data-icon="check_circle">check_circle</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Multimodal biometric &amp; geographic verification passed.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-stretch h-16 bg-surface-container-highest dark:bg-surface-container-highest border-t border-outline-variant z-50 md:hidden">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-none py-2 flex-1 transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span class="font-label-caps text-label-caps">SCAN</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-2 flex-1 transition-transform active:scale-95 hover:bg-surface-bright">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span class="font-label-caps text-label-caps">GPS</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-2 flex-1 transition-transform active:scale-95 hover:bg-surface-bright">
+<span class="material-symbols-outlined" data-icon="scale">scale</span>
+<span class="font-label-caps text-label-caps">WEIGHT</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-2 flex-1 transition-transform active:scale-95 hover:bg-surface-bright">
+<span class="material-symbols-outlined" data-icon="photo_camera">photo_camera</span>
+<span class="font-label-caps text-label-caps">PROOF</span>
+</button>
+</nav>
+<!-- Floating UI Notification (Toast style) -->
+<div class="fixed bottom-20 right-8 bg-surface-container-high border border-primary-fixed-dim p-4 flex items-center gap-4 shadow-xl translate-y-24 transition-transform duration-500" id="status-toast">
+<div class="w-1 h-10 bg-primary-fixed-dim"></div>
+<div>
+<p class="font-label-caps text-label-caps text-primary">LIVE ENGINE FEED</p>
+<p class="font-code-sm text-code-sm text-on-surface">Node [VAL_03] - Photo Capture Process: COMPLETED</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer ml-4" data-icon="close" onclick="this.parentElement.classList.add('translate-y-24')">close</span>
+</div>
+<script>
+        // Simple interactive simulation
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('status-toast').classList.remove('translate-y-24');
+            }, 2000);
+
+            // Add simple node pulsing to simulate live data
+            const nodes = document.querySelectorAll('.bg-surface-container-lowest');
+            nodes.forEach((node, idx) => {
+                setTimeout(() => {
+                    node.classList.add('transition-all', 'duration-700');
+                    setInterval(() => {
+                        node.classList.toggle('border-primary-fixed-dim');
+                        node.classList.toggle('border-outline-variant');
+                    }, 2000 + (idx * 500));
+                }, idx * 100);
+            });
+        });
+    </script>
+</body></html>

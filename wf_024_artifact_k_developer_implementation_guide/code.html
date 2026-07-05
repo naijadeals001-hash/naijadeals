@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ARTIFACT K - Implementation Guide WF-024</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector-line {
+            background: repeating-linear-gradient(90deg, #00e639 0, #00e639 4px, transparent 4px, transparent 8px);
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(18, 33, 49, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#273647",
+                        "surface": "#051424",
+                        "surface-bright": "#2c3a4c",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary-fixed-dim": "#00e639",
+                        "primary-container": "#00ff41",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff",
+                        "secondary-container": "#0043eb",
+                        "on-secondary-fixed": "#001356",
+                        "on-primary-container": "#007117",
+                        "secondary": "#b8c3ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-low": "#0d1c2d",
+                        "on-surface": "#d4e4fa",
+                        "outline": "#84967e",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container-lowest": "#010f1f",
+                        "on-secondary-container": "#c6ceff",
+                        "primary-fixed": "#72ff70",
+                        "surface-container": "#122131",
+                        "surface-tint": "#00e639",
+                        "surface-container-high": "#1c2b3c",
+                        "tertiary": "#fff6ff",
+                        "on-secondary": "#002388",
+                        "on-primary-fixed": "#002203",
+                        "on-primary": "#003907",
+                        "background": "#051424",
+                        "on-error": "#690005",
+                        "primary": "#ebffe2",
+                        "on-tertiary": "#490080",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006e16",
+                        "surface-container-highest": "#273647",
+                        "on-surface-variant": "#b9ccb2",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#f0dbff",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-dim": "#051424",
+                        "on-background": "#d4e4fa",
+                        "outline-variant": "#3b4b37",
+                        "on-tertiary-fixed-variant": "#6900b3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lane-margin": "32px",
+                        "stack-gap": "4px",
+                        "grid-unit": "8px",
+                        "node-gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "code-xs": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "label-caps": ["11px", { "lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation -->
+<header class="bg-surface border-b border-outline-variant w-full top-0 sticky z-50 flex justify-between items-center h-16 px-lane-margin">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim text-2xl">hub</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary-container tracking-widest">NEURAL_ROUTE_ENGINE_V2</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8 h-full">
+<a class="text-primary-fixed-dim border-b-2 border-primary-fixed-dim h-full flex items-center px-2 transition-colors" href="#">SYS_INDEX</a>
+<a class="text-on-surface-variant hover:bg-surface-bright transition-colors h-full flex items-center px-2" href="#">LOGIC_FLOWS</a>
+<a class="text-on-surface-variant hover:bg-surface-bright transition-colors h-full flex items-center px-2" href="#">TELEMETRY</a>
+<a class="text-on-surface-variant hover:bg-surface-bright transition-colors h-full flex items-center px-2" href="#">NODE_MAP</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-64px)]">
+<!-- Sidebar Navigation -->
+<aside class="hidden md:flex flex-col h-auto w-64 left-0 bg-surface-container border-r border-outline-variant py-grid-unit shrink-0">
+<div class="px-4 py-2 mb-4">
+<span class="font-label-caps text-label-caps text-on-surface opacity-50 uppercase">Active Context</span>
+<p class="font-code-sm text-primary-fixed-dim">WF-024_IMPLEMENTATION</p>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim transition-all duration-150" href="#">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-label-caps text-label-caps">SYS_INDEX</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">LOGIC_FLOWS</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">TELEMETRY</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="font-label-caps text-label-caps">NODE_MAP</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps">AUDIT_LOG</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="flex-grow p-lane-margin overflow-y-auto">
+<!-- Page Header -->
+<div class="mb-12 border-l-4 border-primary-fixed-dim pl-6">
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 font-code-sm text-[10px] rounded">V8.2.1-STABLE</span>
+<span class="text-on-surface-variant font-code-xs">REF: DOCUMENT_GUIDE_K</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">WF-024 MICROSERVICE HANDOFF SPECIFICATION</h2>
+<p class="text-on-surface-variant font-body-md mt-2 max-w-2xl">Detailed technical implementation requirements for the core routing orchestration layer. Priority level: <span class="text-primary-fixed-dim">CRITICAL</span>.</p>
+</div>
+<!-- Bento Grid: Service Matrix -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- Owning Microservices -->
+<div class="col-span-1 md:col-span-2 bg-surface-container p-6 border border-outline-variant relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl">settings_ethernet</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-6 flex items-center gap-2">
+<span class="w-2 h-2 bg-primary-fixed-dim rounded-full"></span>
+                        OWNING_MICROSERVICES
+                    </h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="p-4 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<p class="font-code-sm text-primary-fixed-dim">Route Engine</p>
+<span class="font-code-xs text-on-surface-variant group-hover:text-primary-fixed">UPTIME: 99.98%</span>
+</div>
+<p class="font-body-md text-on-surface-variant text-sm">Pathfinding heuristics and A* optimization for multimodal transit.</p>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<p class="font-code-sm text-primary-fixed-dim">Navigation</p>
+<span class="font-code-xs text-on-surface-variant group-hover:text-primary-fixed">ID: SRV-NAV-02</span>
+</div>
+<p class="font-body-md text-on-surface-variant text-sm">Turn-by-turn instruction set generation and audio streaming.</p>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<p class="font-code-sm text-primary-fixed-dim">GPS / Telemetry</p>
+<span class="font-code-xs text-on-surface-variant group-hover:text-primary-fixed">LATENCY: 4ms</span>
+</div>
+<p class="font-body-md text-on-surface-variant text-sm">Coordinate resolution, dead reckoning, and signal processing.</p>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-low hover:border-primary-fixed-dim transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<p class="font-code-sm text-primary-fixed-dim">Dispatch API</p>
+<span class="font-code-xs text-on-surface-variant group-hover:text-primary-fixed">TPS: 12.4k</span>
+</div>
+<p class="font-body-md text-on-surface-variant text-sm">External fleet allocation and driver intent management.</p>
+</div>
+</div>
+</div>
+<!-- Database Requirements -->
+<div class="bg-surface-container-high p-6 border border-primary-fixed-dim border-opacity-20 flex flex-col justify-between">
+<div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-4">DB_STACK_PREREQUISITES</h3>
+<ul class="space-y-3">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">database</span>
+<div>
+<p class="font-code-sm text-on-surface">PostGIS Cluster</p>
+<p class="font-code-xs text-on-surface-variant">Spatial Indexing Required</p>
+</div>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">memory</span>
+<div>
+<p class="font-code-sm text-on-surface">Redis Vector</p>
+<p class="font-code-xs text-on-surface-variant">Hot-cache for current routes</p>
+</div>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">stream</span>
+<div>
+<p class="font-code-sm text-on-surface">Apache Kafka</p>
+<p class="font-code-xs text-on-surface-variant">Message Broker for GPS feeds</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant">
+<p class="font-code-xs text-on-surface-variant mb-2">SCHEMA_VERSION: 1.4.0-REV2</p>
+<div class="w-full bg-surface h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[85%]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- n8n Workflow IDs & Dependencies -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+<div class="bg-surface-container p-6 border border-outline-variant">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-6">N8N_WORKFLOW_ORCHESTRATION</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-3 bg-surface border-l-2 border-primary-fixed-dim">
+<div>
+<span class="font-code-xs text-on-surface-variant">ID: W024-TRIG-01</span>
+<p class="font-code-sm text-on-surface">Initial_Dispatch_Trigger</p>
+</div>
+<span class="material-symbols-outlined text-primary-fixed-dim">play_circle</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface border-l-2 border-outline-variant">
+<div>
+<span class="font-code-xs text-on-surface-variant">ID: W024-COND-05</span>
+<p class="font-code-sm text-on-surface">Weather_Anomaly_Check</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">fork_right</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface border-l-2 border-outline-variant">
+<div>
+<span class="font-code-xs text-on-surface-variant">ID: W024-SYNC-09</span>
+<p class="font-code-sm text-on-surface">DB_Writeback_Finalization</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">sync_alt</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container p-6 border border-outline-variant">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-6">SHARED_UI_COMPONENTS</h3>
+<div class="flex flex-col gap-4">
+<div class="p-4 border border-outline-variant flex items-center gap-4">
+<div class="w-12 h-12 bg-primary-container/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary-fixed-dim">map</span>
+</div>
+<div>
+<p class="font-code-sm text-on-surface">AuraMapEngine (v2.1)</p>
+<p class="font-body-md text-xs text-on-surface-variant">Base WebGL container for spatial visualization.</p>
+</div>
+</div>
+<div class="p-4 border border-outline-variant flex items-center gap-4">
+<div class="w-12 h-12 bg-primary-container/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary-fixed-dim">monitoring</span>
+</div>
+<div>
+<p class="font-code-sm text-on-surface">TelemetryOverlay</p>
+<p class="font-body-md text-xs text-on-surface-variant">Real-time vector paths for moving entities.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Deployment & Criteria -->
+<section class="bg-surface-container-highest p-8 border border-outline-variant mb-12">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">DEPLOYMENT_REQUIREMENTS</h3>
+<p class="font-code-xs text-on-surface-variant">ENVIRONMENT: PRODUCTION_GREEN_REGION_01</p>
+</div>
+<div class="px-4 py-2 bg-surface rounded border border-outline-variant">
+<span class="font-code-sm text-primary-fixed-dim">TARGET_DATE: 2024-Q3-ROLLOUT</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div>
+<h4 class="font-label-caps text-label-caps text-secondary mb-4">PRODUCTION_COMPLETION_CRITERIA</h4>
+<div class="space-y-4">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim">check_box</span>
+<p class="font-body-md text-on-surface">Latency < 15ms for 99th percentile of routing requests.</p>
+</div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim">check_box</span>
+<p class="font-body-md text-on-surface">Zero-data-loss failover between Primary and Secondary GPS clusters.</p>
+</div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">check_box_outline_blank</span>
+<p class="font-body-md text-on-surface opacity-60">Full compliance with GDPR/ISO-27001 data encryption standards.</p>
+</div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">check_box_outline_blank</span>
+<p class="font-body-md text-on-surface opacity-60">Automated documentation sync with LogicFlow IDs.</p>
+</div>
+</div>
+</div>
+<div class="bg-surface p-6 font-code-sm leading-relaxed border border-outline-variant">
+<p class="text-primary-fixed-dim mb-2">// SHELL_EXECUTION_COMMANDS</p>
+<p class="text-on-surface-variant">kubectl apply -f ./k8s/production/wf-024.yaml</p>
+<p class="text-on-surface-variant">n8n trigger --id=W024-TRIG-01 --env=prod</p>
+<p class="text-on-surface-variant">check-system-health --service=aura-map-engine</p>
+<div class="mt-4 animate-pulse text-primary-fixed-dim">_</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant w-full bottom-0 fixed z-50 flex justify-between items-center px-lane-margin py-2">
+<div class="flex items-center gap-6">
+<span class="font-code-xs text-secondary tracking-widest">CORE_ENGINE_STABLE_8.2.1</span>
+<div class="hidden sm:flex gap-4">
+<span class="font-code-sm text-on-surface-variant">LATENCY: 12ms</span>
+<span class="font-code-sm text-on-surface-variant">NODES: 1,422</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1 font-code-sm text-primary-fixed-dim">
+<span class="w-2 h-2 bg-primary-fixed-dim rounded-full animate-ping"></span>
+                STATUS: OPERATIONAL
+            </span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for terminal effect
+        document.addEventListener('DOMContentLoaded', () => {
+            const codeBlocks = document.querySelectorAll('.font-code-sm');
+            codeBlocks.forEach(block => {
+                block.addEventListener('mouseover', () => {
+                    block.classList.add('text-primary-container');
+                });
+                block.addEventListener('mouseout', () => {
+                    block.classList.remove('text-primary-container');
+                });
+            });
+        });
+    </script>
+</body></html>

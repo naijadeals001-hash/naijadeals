@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-025: CHAIN-OF-CUSTODY | Test &amp; Acceptance Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+            z-index: -1;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(13, 28, 45, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-surface": "#d4e4fa",
+                      "on-secondary-container": "#c6ceff",
+                      "tertiary": "#fff6ff",
+                      "on-secondary": "#002388",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "error-container": "#93000a",
+                      "surface-tint": "#00e639",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-bright": "#2c3a4c",
+                      "on-surface": "#d4e4fa",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-primary-container": "#007117",
+                      "surface-container-lowest": "#010f1f",
+                      "surface-variant": "#273647",
+                      "outline": "#84967e",
+                      "surface": "#051424",
+                      "outline-variant": "#3b4b37",
+                      "inverse-primary": "#006e16",
+                      "error": "#ffb4ab",
+                      "surface-container-high": "#1c2b3c",
+                      "on-secondary-fixed": "#001356",
+                      "primary-fixed": "#72ff70",
+                      "primary-container": "#00ff41",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "primary": "#ebffe2",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary-fixed": "#2c0051",
+                      "secondary": "#b8c3ff",
+                      "tertiary-fixed": "#f0dbff",
+                      "background": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary": "#003907",
+                      "on-tertiary-container": "#862ed4",
+                      "on-error": "#690005",
+                      "secondary-fixed": "#dde1ff",
+                      "secondary-container": "#0043eb",
+                      "primary-fixed-dim": "#00e639",
+                      "on-tertiary": "#490080",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#122131",
+                      "surface-container-highest": "#273647",
+                      "on-primary-fixed-variant": "#00530e",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-background": "#d4e4fa",
+                      "inverse-on-surface": "#233143",
+                      "surface-dim": "#051424",
+                      "surface-container-low": "#0d1c2d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px",
+                      "node-gutter": "24px"
+              },
+              "fontFamily": {
+                      "code-sm": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- Top Navigation Bar (Anchor) -->
+<header class="fixed top-0 w-full bg-surface-container-low border-b border-outline-variant flex justify-between items-center w-full px-lane-margin py-grid-unit z-50">
+<div class="flex items-center gap-stack-gap">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary dark:text-primary-fixed-dim">WF-025: CHAIN-OF-CUSTODY</h1>
+</div>
+<div class="flex gap-grid-unit">
+<div class="px-3 py-1 bg-surface-variant hover:bg-surface-variant transition-colors cursor-pointer active:opacity-80 flex items-center gap-2 border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="terminal">terminal</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">DEBUG_SHELL</span>
+</div>
+<div class="px-3 py-1 bg-primary-container text-on-primary-container font-code-sm text-code-sm uppercase tracking-widest border border-primary">
+                STATUS: VALIDATING
+            </div>
+</div>
+</header>
+<div class="flex h-screen pt-[64px] pb-16 md:pb-0">
+<!-- Sidebar (NavigationDrawer) -->
+<aside class="hidden md:flex flex-col h-full w-64 bg-surface-container dark:bg-surface-container border-r border-outline-variant p-stack-gap z-40">
+<div class="px-4 py-6">
+<p class="font-label-caps text-label-caps text-primary opacity-70 mb-1">SYSTEM ARCHITECT</p>
+<h2 class="font-headline-md text-headline-md text-primary">QA BLUEPRINT</h2>
+</div>
+<nav class="flex flex-col gap-1 overflow-y-auto custom-scrollbar">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">Process Map</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-label-caps text-label-caps">API Specs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Data Model</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-primary-fixed-dim transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="rule" style="font-variation-settings: 'FILL' 1;">rule</span>
+<span class="font-label-caps text-label-caps">Validation</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-xs text-code-xs opacity-50 uppercase">Global Coverage</span>
+<span class="font-code-sm text-code-sm text-primary">94.2%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full w-[94.2%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto custom-scrollbar p-lane-margin relative">
+<!-- Bento Header Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-grid-unit mb-lane-margin">
+<div class="md:col-span-3 bg-surface-container border border-outline-variant p-6 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-fixed-dim"></div>
+<p class="font-label-caps text-label-caps text-primary mb-2">VALIDATION_ARTIFACT_J</p>
+<h2 class="font-headline-lg text-headline-lg mb-4 text-inverse-surface">Acceptance Blueprint &amp; Standardized Matrix</h2>
+<p class="font-body-md text-on-surface-variant max-w-2xl">Defining technical benchmarks for the chain-of-custody workflow. This document serves as the final authority for Release Readiness and Production Handoff.</p>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-6 flex flex-col justify-center items-center">
+<span class="material-symbols-outlined text-[48px] text-primary-fixed-dim mb-2" data-icon="verified">verified</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">ENV: STAGING-04</span>
+<span class="font-label-caps text-label-caps text-primary mt-2">CERTIFIED</span>
+</div>
+</div>
+<!-- Validation Matrix (Bento Grid) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-node-gutter">
+<!-- Tests Column -->
+<div class="space-y-stack-gap">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="biotech">biotech</span>
+<h3 class="font-label-caps text-label-caps uppercase tracking-widest text-primary">Performance &amp; Precision</h3>
+</div>
+<!-- Node: QR Decode -->
+<div class="bg-surface-container border border-outline-variant group hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-center px-3 py-2 border-b border-outline-variant bg-surface-container-high">
+<span class="font-label-caps text-label-caps text-on-surface-variant">T-001</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">PASS</span>
+</div>
+<div class="p-4">
+<h4 class="font-code-sm text-code-sm mb-2 text-inverse-surface">QR Decode Precision</h4>
+<div class="flex items-center gap-4 text-code-xs text-on-surface-variant font-code-xs">
+<span>Success Rate: 99.98%</span>
+<span>Latency: 12ms</span>
+</div>
+</div>
+</div>
+<!-- Node: GPS Radius -->
+<div class="bg-surface-container border border-outline-variant group hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-center px-3 py-2 border-b border-outline-variant bg-surface-container-high">
+<span class="font-label-caps text-label-caps text-on-surface-variant">T-002</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">PASS</span>
+</div>
+<div class="p-4">
+<h4 class="font-code-sm text-code-sm mb-2 text-inverse-surface">GPS Radius Tolerance</h4>
+<div class="flex items-center gap-4 text-code-xs text-on-surface-variant font-code-xs">
+<span>Margin: &lt; 2.5m</span>
+<span>Refresh: 5Hz</span>
+</div>
+</div>
+</div>
+<!-- Node: Load Test -->
+<div class="bg-surface-container border border-outline-variant group hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-center px-3 py-2 border-b border-outline-variant bg-surface-container-high">
+<span class="font-label-caps text-label-caps text-on-surface-variant">T-003</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">PASS</span>
+</div>
+<div class="p-4">
+<h4 class="font-code-sm text-code-sm mb-2 text-inverse-surface">Load Test (10k/sec)</h4>
+<div class="flex items-center gap-4 text-code-xs text-on-surface-variant font-code-xs">
+<span>CPU: 42% Avg</span>
+<span>Mem: 4.2GB</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Integrity Column -->
+<div class="space-y-stack-gap">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary" data-icon="security">security</span>
+<h3 class="font-label-caps text-label-caps uppercase tracking-widest text-secondary">Security &amp; Integrity</h3>
+</div>
+<!-- Node: DB Integrity -->
+<div class="bg-surface-container border border-outline-variant group hover:border-secondary transition-colors">
+<div class="flex justify-between items-center px-3 py-2 border-b border-outline-variant bg-surface-container-high">
+<span class="font-label-caps text-label-caps text-on-surface-variant">S-001</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">VALID</span>
+</div>
+<div class="p-4">
+<h4 class="font-code-sm text-code-sm mb-2 text-inverse-surface">DB Integrity (ACID)</h4>
+<p class="text-code-xs text-on-surface-variant mb-2">Atomic transaction verify on cluster failover.</p>
+<div class="h-1 bg-surface-variant w-full">
+<div class="bg-secondary h-full w-full"></div>
+</div>
+</div>
+</div>
+<!-- Node: Fraud Detection -->
+<div class="bg-surface-container border border-outline-variant group hover:border-secondary transition-colors">
+<div class="flex justify-between items-center px-3 py-2 border-b border-outline-variant bg-surface-container-high">
+<span class="font-label-caps text-label-caps text-on-surface-variant">S-002</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">CLEAN</span>
+</div>
+<div class="p-4">
+<h4 class="font-code-sm text-code-sm mb-2 text-inverse-surface">Fraud Detection FP Rate</h4>
+<div class="flex items-center gap-4 text-code-xs text-on-surface-variant font-code-xs">
+<span>FP Limit: &lt; 0.01%</span>
+<span>Actual: 0.004%</span>
+</div>
+</div>
+</div>
+<!-- Node: Handoff Latency -->
+<div class="bg-surface-container border border-outline-variant group hover:border-secondary transition-colors">
+<div class="flex justify-between items-center px-3 py-2 border-b border-outline-variant bg-surface-container-high">
+<span class="font-label-caps text-label-caps text-on-surface-variant">S-003</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">OPTIMIZED</span>
+</div>
+<div class="p-4">
+<h4 class="font-code-sm text-code-sm mb-2 text-inverse-surface">Handoff Latency</h4>
+<div class="flex items-center gap-4 text-code-xs text-on-surface-variant font-code-xs">
+<span>P99: 140ms</span>
+<span>Threshold: 200ms</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Checklist Column -->
+<div class="space-y-stack-gap">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="checklist">checklist</span>
+<h3 class="font-label-caps text-label-caps uppercase tracking-widest text-tertiary-fixed-dim">Phase Checklists</h3>
+</div>
+<div class="bg-surface-container-highest border border-outline-variant p-4 space-y-4">
+<div>
+<p class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-3">Unit &amp; Regression</p>
+<ul class="space-y-2">
+<li class="flex items-center gap-2 font-code-xs text-code-xs text-on-surface">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[14px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Developer Unit Tests
+                                </li>
+<li class="flex items-center gap-2 font-code-xs text-code-xs text-on-surface">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[14px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    QA Regression Cycle 14
+                                </li>
+<li class="flex items-center gap-2 font-code-xs text-code-xs text-on-surface opacity-50">
+<span class="material-symbols-outlined text-[14px]" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+                                    Security Audit (In Progress)
+                                </li>
+<li class="flex items-center gap-2 font-code-xs text-code-xs text-on-surface opacity-50">
+<span class="material-symbols-outlined text-[14px]" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+                                    Release Readiness Final Sign-off
+                                </li>
+</ul>
+</div>
+<div class="pt-4 border-t border-outline-variant">
+<p class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-2">Audit Logs Preview</p>
+<div class="bg-surface p-3 font-code-xs text-code-xs text-on-surface-variant overflow-hidden">
+<div class="mb-1 text-primary-fixed-dim">09:14:12 - TEST_ACID_START</div>
+<div class="mb-1">09:14:15 - DATA_NODE_REPL_OK</div>
+<div class="text-secondary">09:14:22 - TRANS_COMMITTED_WF025</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Data Telemetry Visualizer -->
+<div class="mt-lane-margin grid grid-cols-1 md:grid-cols-2 gap-node-gutter">
+<div class="bg-surface-container border border-outline-variant h-48 relative overflow-hidden">
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+
+</div>
+<div class="absolute bottom-4 left-4 z-10">
+<p class="font-label-caps text-label-caps text-primary">REAL-TIME TRAFFIC LOAD</p>
+<p class="font-code-sm text-code-sm">10.2k Requests/Sec [Peak]</p>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-6 flex flex-col justify-between">
+<div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Infrastructure Health</h3>
+<p class="font-body-md text-on-surface-variant">Cluster node health monitoring across 12 distributed edge instances.</p>
+</div>
+<div class="flex gap-2">
+<div class="h-8 w-8 bg-primary-fixed-dim opacity-80 border border-primary"></div>
+<div class="h-8 w-8 bg-primary-fixed-dim opacity-80 border border-primary"></div>
+<div class="h-8 w-8 bg-primary-fixed-dim opacity-80 border border-primary"></div>
+<div class="h-8 w-8 bg-primary-fixed-dim opacity-80 border border-primary"></div>
+<div class="h-8 w-8 bg-primary-fixed-dim opacity-80 border border-primary"></div>
+<div class="h-8 w-8 bg-primary-fixed-dim opacity-80 border border-primary"></div>
+<div class="h-8 w-8 bg-error opacity-40 border border-error-container"></div>
+<div class="h-8 w-8 bg-primary-fixed-dim opacity-80 border border-primary"></div>
+<div class="h-8 w-8 bg-primary-fixed-dim opacity-80 border border-primary"></div>
+<div class="h-8 w-8 bg-primary-fixed-dim opacity-80 border border-primary"></div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Mobile Bottom Navigation (BottomNavBar) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-stretch h-16 bg-surface-container-highest dark:bg-surface-container-highest border-t border-outline-variant z-50">
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-2 flex-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span class="font-label-caps text-label-caps">SCAN</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-2 flex-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span class="font-label-caps text-label-caps">GPS</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-2 flex-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="scale">scale</span>
+<span class="font-label-caps text-label-caps">WEIGHT</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container py-2 flex-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="photo_camera" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+<span class="font-label-caps text-label-caps">PROOF</span>
+</button>
+</nav>
+<!-- UI Interaction Scripts -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Log interaction system
+            const logPanel = document.querySelector('.bg-surface.p-3');
+            setInterval(() => {
+                const logs = [
+                    '09:15:01 - PING_EDGE_LOC_A',
+                    '09:15:05 - SYNC_BATCH_C_SUCCESS',
+                    '09:15:12 - AUTH_TOKEN_REFRESHED',
+                    '09:15:20 - GPS_COORD_FIX_STABLE'
+                ];
+                const newLog = document.createElement('div');
+                newLog.className = 'mb-1 opacity-0 transition-opacity duration-500';
+                newLog.innerText = logs[Math.floor(Math.random() * logs.length)];
+                logPanel.prepend(newLog);
+                setTimeout(() => newLog.classList.remove('opacity-0'), 100);
+                if (logPanel.children.length > 5) logPanel.removeChild(logPanel.lastChild);
+            }, 3000);
+
+            // Hover effects on test nodes
+            const nodes = document.querySelectorAll('.bg-surface-container.border.border-outline-variant');
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', () => {
+                    node.style.boxShadow = '0 0 15px rgba(0, 230, 57, 0.1)';
+                });
+                node.addEventListener('mouseleave', () => {
+                    node.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+</body></html>

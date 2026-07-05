@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEURAL_ROUTE_ENGINE_V2 | ARTIFACT A</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .node-glow:hover {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.2);
+        }
+        .connector-line {
+            position: absolute;
+            background-color: #3b4b37;
+            z-index: 0;
+        }
+        .orthogonal-v { width: 2px; height: 100%; }
+        .orthogonal-h { height: 2px; width: 100%; }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#273647",
+                    "surface": "#051424",
+                    "surface-bright": "#2c3a4c",
+                    "inverse-on-surface": "#233143",
+                    "on-primary-fixed-variant": "#00530e",
+                    "primary-fixed-dim": "#00e639",
+                    "primary-container": "#00ff41",
+                    "error": "#ffb4ab",
+                    "on-tertiary-container": "#862ed4",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary-container": "#ecd3ff",
+                    "secondary-container": "#0043eb",
+                    "on-secondary-fixed": "#001356",
+                    "on-primary-container": "#007117",
+                    "secondary": "#b8c3ff",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface-container-low": "#0d1c2d",
+                    "on-surface": "#d4e4fa",
+                    "outline": "#84967e",
+                    "secondary-fixed": "#dde1ff",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-container-lowest": "#010f1f",
+                    "on-secondary-container": "#c6ceff",
+                    "primary-fixed": "#72ff70",
+                    "surface-container": "#122131",
+                    "surface-tint": "#00e639",
+                    "surface-container-high": "#1c2b3c",
+                    "tertiary": "#fff6ff",
+                    "on-secondary": "#002388",
+                    "on-primary-fixed": "#002203",
+                    "on-primary": "#003907",
+                    "background": "#051424",
+                    "on-error": "#690005",
+                    "primary": "#ebffe2",
+                    "on-tertiary": "#490080",
+                    "on-error-container": "#ffdad6",
+                    "inverse-primary": "#006e16",
+                    "surface-container-highest": "#273647",
+                    "on-surface-variant": "#b9ccb2",
+                    "error-container": "#93000a",
+                    "tertiary-fixed": "#f0dbff",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-dim": "#051424",
+                    "on-background": "#d4e4fa",
+                    "outline-variant": "#3b4b37",
+                    "on-tertiary-fixed-variant": "#6900b3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lane-margin": "32px",
+                    "stack-gap": "4px",
+                    "grid-unit": "8px",
+                    "node-gutter": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-[100] bg-surface flex justify-between items-center h-16 px-lane-margin border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="hub">hub</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary-container tracking-widest">NEURAL_ROUTE_ENGINE_V2</h1>
+</div>
+<div class="flex items-center gap-8">
+<nav class="hidden md:flex gap-6">
+<a class="font-label-caps text-label-caps text-primary-fixed-dim border-b-2 border-primary-fixed-dim pb-1" href="#">WF-024_OVERVIEW</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright transition-colors px-2 py-1 rounded" href="#">SYSTEM_LOGS</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-bright transition-colors px-2 py-1 rounded" href="#">NODE_HEALTH</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex pt-16 min-h-screen">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col h-screen w-64 left-0 bg-surface-container border-r border-outline-variant py-grid-unit fixed">
+<div class="px-4 py-6 border-b border-outline-variant mb-4">
+<span class="font-label-caps text-label-caps text-on-surface opacity-50 uppercase tracking-widest">SYSTEM_INDEX</span>
+</div>
+<nav class="flex flex-col gap-1 px-2">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed-dim cursor-pointer">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">SYS_INDEX</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">LOGIC_FLOWS</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-caps text-label-caps">TELEMETRY</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-label-caps text-label-caps">NODE_MAP</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps">AUDIT_LOG</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 p-lane-margin mb-12">
+<!-- Header Section -->
+<section class="mb-12 border-l-2 border-primary-fixed-dim pl-6 py-2">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary uppercase">Executive Workflow Overview</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-2">ID: WF-024 // STATUS: ACTIVE_SIMULATION // ENGINE: AURA_AI_V4</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-high p-4 border border-outline-variant">
+<p class="font-label-caps text-label-caps text-on-surface-variant">LATENCY_CORE</p>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim">0.0042ms</p>
+</div>
+<div class="bg-surface-container-high p-4 border border-outline-variant">
+<p class="font-label-caps text-label-caps text-on-surface-variant">THROUGHPUT</p>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim">1.4k REQ/S</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Context Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+<div class="md:col-span-1 bg-surface-container p-6 border border-outline-variant relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-[48px]" data-icon="target">target</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-4">PURPOSE</h3>
+<p class="font-body-md text-body-md text-on-surface">End-to-end logistics orchestration for mission-critical freight delivery in hyper-congested urban zones.</p>
+</div>
+<div class="md:col-span-1 bg-surface-container p-6 border border-outline-variant relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-[48px]" data-icon="business_center">business_center</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-4">BUSINESS_OBJECTIVE</h3>
+<ul class="font-code-sm text-code-sm text-on-surface list-none space-y-2">
+<li>&gt; REDUCE_OPEX: 14%</li>
+<li>&gt; AVG_ETA_ACCURACY: 99.2%</li>
+<li>&gt; CARBON_OFFSET_GOAL: 2.4t</li>
+</ul>
+</div>
+<div class="md:col-span-1 bg-surface-container p-6 border border-outline-variant relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-[48px]" data-icon="groups">groups</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-4">ACTORS</h3>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-variant px-2 py-1 font-code-xs text-code-xs text-on-surface">CORE_ENGINE</span>
+<span class="bg-surface-variant px-2 py-1 font-code-xs text-code-xs text-on-surface">FLEET_MGR</span>
+<span class="bg-surface-variant px-2 py-1 font-code-xs text-code-xs text-on-surface">FIELD_OPS</span>
+<span class="bg-surface-variant px-2 py-1 font-code-xs text-code-xs text-on-surface">AURA_AI</span>
+</div>
+</div>
+<div class="md:col-span-1 bg-surface-container p-6 border border-outline-variant relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-[48px]" data-icon="bolt">bolt</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-4">OPTIMIZATION_GOALS</h3>
+<p class="font-body-md text-body-md text-on-surface">Prioritize 'Fuel Efficiency' over 'Raw Speed' during peak surge pricing windows.</p>
+</div>
+</section>
+<!-- Mission Path Visualization -->
+<section class="relative bg-surface-container-lowest border border-outline-variant p-8 overflow-hidden">
+<!-- Background Grid Overlay -->
+<div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: linear-gradient(#3b4b37 1px, transparent 1px), linear-gradient(90deg, #3b4b37 1px, transparent 1px); background-size: 40px 40px;"></div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-12 flex items-center gap-2">
+<span class="w-2 h-2 bg-primary-fixed-dim rounded-full"></span>
+                    LOGIC_FLOW_RENDERER v2.0
+                </h3>
+<!-- The Swimlanes Container -->
+<div class="relative space-y-24">
+<!-- Lane 1: Initialization -->
+<div class="flex gap-node-gutter relative z-10 items-center">
+<div class="w-24 shrink-0 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant pr-4">SYSTEM_INIT</div>
+<!-- Nodes -->
+<div class="flex gap-12 flex-wrap items-center">
+<!-- Node 1 -->
+<div class="w-48 bg-surface border border-primary-fixed-dim p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-primary-fixed-dim mb-2 flex justify-between">
+                                    START <span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+</p>
+<p class="font-code-sm text-code-sm">Mission Created</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>T: 00:00:01</span>
+<span>ID: 9823</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 2 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">LOADING</p>
+<p class="font-code-sm text-code-sm">Pickup Loaded</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>KG: 450.2</span>
+<span>UNIT: L-04</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 3 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">GEO_DATA</p>
+<p class="font-code-sm text-code-sm">GPS Coordinates</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>LAT: 40.71</span>
+<span>LNG: -74.00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Lane 2: Environmental Analysis -->
+<div class="flex gap-node-gutter relative z-10 items-center">
+<div class="w-24 shrink-0 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant pr-4">ENV_ANALYSIS</div>
+<div class="flex gap-12 flex-wrap items-center">
+<!-- Node 4 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all relative">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">TRAFFIC</p>
+<p class="font-code-sm text-code-sm">Traffic Analysis</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>LOAD: 88%</span>
+<span>DELAY: +12m</span>
+</div>
+<!-- Path Split 1: Traffic Jam -->
+<div class="absolute -top-16 left-1/2 w-32 border-l border-t border-dashed border-error p-2 ml-4">
+<p class="font-code-xs text-code-xs text-error">Exception: Traffic Jam</p>
+<span class="material-symbols-outlined text-error text-[12px]" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 5 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all relative">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">METEO</p>
+<p class="font-code-sm text-code-sm">Weather Analysis</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>PRECIP: 5%</span>
+<span>VIS: 10km</span>
+</div>
+<!-- Path Split 2: Road Closure -->
+<div class="absolute -top-16 left-1/2 w-32 border-l border-t border-dashed border-error p-2 ml-4">
+<p class="font-code-xs text-code-xs text-error">Alt: Road Closure</p>
+<span class="material-symbols-outlined text-error text-[12px]" data-icon="block">block</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 6 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">CONSTRAINTS</p>
+<p class="font-code-sm text-code-sm">Road Restrictions</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>HT: &lt; 4.2m</span>
+<span>WT: &lt; 12t</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Lane 3: Resource Evaluation -->
+<div class="flex gap-node-gutter relative z-10 items-center">
+<div class="w-24 shrink-0 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant pr-4">RESOURCE_EVAL</div>
+<div class="flex gap-12 flex-wrap items-center">
+<!-- Node 7 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">ASSET_STATUS</p>
+<p class="font-code-sm text-code-sm">Driver Status</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>HOS: 4.2h</span>
+<span>RATE: 4.9/5</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 8 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">INVENTORY</p>
+<p class="font-code-sm text-code-sm">Vehicle Capacity</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>AVAIL: 1.2m³</span>
+<span>ID: VAN_04</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 9 (AI Optimization Hub) -->
+<div class="w-64 bg-surface-container-high border-2 border-primary-fixed-dim p-4 shadow-[0_0_20px_rgba(0,230,57,0.3)]">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="memory">memory</span>
+<p class="font-label-caps text-label-caps text-primary-fixed-dim">AURA_AI_OPTIMIZATION</p>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Synthesizing all inputs...</p>
+<div class="mt-3 grid grid-cols-2 gap-2">
+<div class="bg-surface p-1 text-[8px] font-code-xs border border-outline-variant">MODEL: GPT-L</div>
+<div class="bg-surface p-1 text-[8px] font-code-xs border border-outline-variant">CONF: 99.8%</div>
+</div>
+<div class="h-1 w-full bg-surface-variant mt-4 overflow-hidden">
+<div class="h-full bg-primary-fixed-dim animate-[progress_2s_ease-in-out_infinite]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Lane 4: Deployment & Execution -->
+<div class="flex gap-node-gutter relative z-10 items-center">
+<div class="w-24 shrink-0 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant pr-4">DEPLOYMENT</div>
+<div class="flex gap-12 flex-wrap items-center">
+<!-- Node 10 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">DECISION</p>
+<p class="font-code-sm text-code-sm">Best Route Selected</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>PATH: A-12</span>
+<span>DIST: 4.8km</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 11 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">METRIC</p>
+<p class="font-code-sm text-code-sm">ETA Calculated</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>ARRIVAL: 14:05</span>
+<span>VAR: +/-2m</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 12 -->
+<div class="w-48 bg-surface border border-primary-fixed-dim p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-primary-fixed-dim mb-2">ACTIVE_JOB</p>
+<p class="font-code-sm text-code-sm">Navigation Started</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>SIG: HIGH</span>
+<span>VER: V.102</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Lane 5: Live Operations -->
+<div class="flex gap-node-gutter relative z-10 items-center">
+<div class="w-24 shrink-0 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant pr-4">LIVE_OPS</div>
+<div class="flex gap-12 flex-wrap items-center">
+<!-- Node 13 -->
+<div class="w-48 bg-surface border border-outline-variant p-3 node-glow transition-all">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">TELEMETRY</p>
+<p class="font-code-sm text-code-sm">Live Tracking</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>HFR: 60fps</span>
+<span>ERR: 0.00%</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 14 (Re-routing Logic) -->
+<div class="w-48 bg-surface-container border border-secondary-container p-3 border-l-4 border-l-secondary-container">
+<p class="font-label-caps text-label-caps text-secondary mb-2">DYNAMO_V2</p>
+<p class="font-code-sm text-code-sm">Dynamic Re-routing</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>RE-CALC: 4</span>
+<span>GAIN: +3m</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 15 -->
+<div class="w-48 bg-surface-container border border-primary-fixed-dim p-3 shadow-[0_0_15px_rgba(0,255,65,0.1)]">
+<p class="font-label-caps text-label-caps text-primary-fixed-dim mb-2 flex justify-between">
+                                    TERMINATE <span class="material-symbols-outlined text-[14px]" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</p>
+<p class="font-code-sm text-code-sm">Delivery Completed</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs opacity-60">
+<span>SIG: VALID</span>
+<span>GEO: RADIUS_0</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<!-- Node 16 -->
+<div class="w-48 bg-surface-container-lowest border border-outline-variant p-3 opacity-60">
+<p class="font-label-caps text-label-caps mb-2">ARCHIVAL</p>
+<p class="font-code-sm text-code-sm">Route Archived</p>
+<div class="mt-2 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs">
+<span>DB_SYNC: OK</span>
+<span>TTL: 365d</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Connectors (Abstracted Polylines) -->
+<div class="absolute top-0 left-32 w-1 h-full border-l border-outline-variant opacity-30 z-0"></div>
+</div>
+</section>
+</main>
+</div>
+<!-- Footer Telemetry -->
+<footer class="fixed bottom-0 w-full z-[110] bg-surface-container-lowest flex justify-between items-center px-lane-margin py-2 border-t border-outline-variant font-code-sm text-code-sm">
+<div class="flex items-center gap-6">
+<span class="font-code-xs text-code-xs text-secondary">CORE_ENGINE_STABLE_8.2.1</span>
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full animate-pulse"></span>
+                STATUS: OPERATIONAL
+            </span>
+</div>
+<div class="flex gap-8 text-on-surface-variant">
+<span class="hover:text-primary-fixed transition-colors">LATENCY: 12ms</span>
+<span class="hover:text-primary-fixed transition-colors">NODES: 1,422</span>
+<span class="text-primary-container">SYS_TIME: 14:02:22:11</span>
+</div>
+</footer>
+<style>
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+<script>
+        // Micro-interaction: Randomly flash telemetry data
+        setInterval(() => {
+            const telemetryElements = document.querySelectorAll('.font-code-sm.text-primary-fixed-dim');
+            const randomEl = telemetryElements[Math.floor(Math.random() * telemetryElements.length)];
+            if(randomEl) {
+                randomEl.classList.add('opacity-50');
+                setTimeout(() => randomEl.classList.remove('opacity-50'), 100);
+            }
+        }, 3000);
+
+        // Simple observer to highlight nodes as they "load"
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, i * 50);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.node-glow').forEach(node => {
+            node.style.opacity = '0';
+            node.style.transform = 'translateY(10px)';
+            node.style.transition = 'all 0.4s ease-out';
+            observer.observe(node);
+        });
+    </script>
+</body></html>
