@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-036: Artifact K | Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#00530e",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-background": "#d4e4fa",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-container-highest": "#273647",
+                    "surface-container-high": "#1c2b3c",
+                    "inverse-on-surface": "#233143",
+                    "surface-dim": "#051424",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "outline": "#84967e",
+                    "on-secondary": "#002388",
+                    "secondary-container": "#0043eb",
+                    "on-primary": "#003907",
+                    "on-secondary-container": "#c6ceff",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface": "#051424",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-error": "#690005",
+                    "primary": "#ebffe2",
+                    "surface-tint": "#00e639",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-secondary-fixed": "#001356",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "surface-variant": "#273647",
+                    "surface-container": "#122131",
+                    "inverse-primary": "#006e16",
+                    "tertiary": "#fff6ff",
+                    "primary-fixed": "#72ff70",
+                    "on-tertiary-container": "#862ed4",
+                    "on-tertiary": "#490080",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary-fixed": "#002203",
+                    "secondary": "#b8c3ff",
+                    "on-surface": "#d4e4fa",
+                    "on-primary-container": "#007117",
+                    "secondary-fixed": "#dde1ff",
+                    "primary-container": "#00ff41",
+                    "inverse-surface": "#d4e4fa",
+                    "primary-fixed-dim": "#00e639",
+                    "background": "#051424",
+                    "surface-container-lowest": "#010f1f",
+                    "outline-variant": "#3b4b37"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle at 2px 2px, #1a1a1a 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #051424; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b4b37; }
+        .node-connector { border-left: 2px solid #00e639; position: relative; }
+        .node-connector::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 0;
+            width: 8px;
+            height: 8px;
+            background: #00e639;
+            border-radius: 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-node-gutter h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">AD_ENGINE_CORE_v2.0</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="font-code-sm text-code-sm text-primary border-b-2 border-primary-fixed-dim pb-1 transition-colors" href="#">Documentation</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant opacity-70 hover:bg-surface-container-highest transition-colors px-2" href="#">Services</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant opacity-70 hover:bg-surface-container-highest transition-colors px-2" href="#">API_Reference</a>
+</nav>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center border border-outline">
+<span class="material-symbols-outlined text-on-secondary-container text-sm" data-icon="person">person</span>
+</div>
+</div>
+</header>
+<!-- NavigationDrawer (Left) -->
+<aside class="fixed left-0 top-16 h-full w-64 bg-surface-container-low border-r border-outline-variant hidden lg:flex flex-col p-grid-unit z-40 overflow-y-auto custom-scrollbar">
+<div class="p-4 border-b border-outline-variant mb-4">
+<h2 class="font-headline-lg text-headline-lg text-primary">SYSTEM_OPERATIONS</h2>
+</div>
+<div class="flex flex-col gap-stack-gap">
+<div class="flex items-center gap-3 p-3 bg-on-primary-fixed-variant text-primary-fixed font-bold border-l-4 border-primary-fixed-dim cursor-pointer">
+<span class="material-symbols-outlined" data-icon="ads_click">ads_click</span>
+<span class="font-code-sm text-code-sm">Campaigns</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+<span class="font-code-sm text-code-sm">Bidding_Logs</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-code-sm text-code-sm">Audience_AI</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-code-sm text-code-sm">Placements</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-code-sm text-code-sm">Fraud_Shield</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-code-sm text-code-sm">Analytics</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:pl-64 pt-16 pb-24 min-h-screen">
+<div class="max-w-6xl mx-auto px-lane-margin py-12">
+<!-- Header Section -->
+<section class="mb-12">
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-label-caps text-[10px]">STABLE</span>
+<span class="text-on-surface-variant font-code-xs">v2.0.4-LTS</span>
+</div>
+<h1 class="font-headline-lg text-4xl text-primary mb-4">WF-036: Artifact K Implementation</h1>
+<p class="text-on-surface-variant max-w-2xl font-body-md leading-relaxed">
+                    Comprehensive technical blueprint for the modular integration of ad-serving microservices. 
+                    Artifact K defines the protocol for high-throughput bidding and real-time GPU-accelerated inference.
+                </p>
+</section></div></main>
+<!-- Ownership Swimlane -->
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-12">
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="hub">hub</span>
+<span class="font-label-caps text-on-primary-fixed">CAMPAIGN SERVICE</span>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-secondary mb-2" data-icon="ads_click">ads_click</span>
+<span class="font-label-caps text-on-background">ADVERTISING SERVICE</span>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-tertiary-fixed-dim mb-2" data-icon="payments">payments</span>
+<span class="font-label-caps text-on-background">BILLING</span>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="query_stats">query_stats</span>
+<span class="font-label-caps text-on-background">ANALYTICS</span>
+</div>
+<div class="bg-surface-container-high p-4 border border-primary-fixed-dim flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary-fixed-dim mb-2" data-icon="neurology">neurology</span>
+<span class="font-label-caps text-primary">AURA AI</span>
+</div>
+</div>
+<!-- Bento Architecture Grid -->
+<div class="grid grid-cols-12 gap-6 mb-12">
+<!-- Integration Hooks -->
+<div class="col-span-12 lg:col-span-8 bg-surface-dim border border-outline-variant p-6 rounded-lg relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-8xl" data-icon="settings_ethernet">settings_ethernet</span>
+</div>
+<h3 class="font-headline-md text-primary mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="link">link</span>
+                        Integration Hooks: Search &amp; Recommendation
+                    </h3>
+<div class="space-y-6">
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-32 font-label-caps text-on-surface-variant pt-1">HOOK_01_SRCH</div>
+<div class="flex-grow">
+<p class="text-on-surface mb-2 font-code-sm">POST /v2/engine/search/inject</p>
+<div class="bg-black p-4 rounded border border-outline-variant font-code-sm text-primary-fixed-dim">
+<span class="text-on-secondary-fixed">payload:</span> { "context": "user_vector_64", "intent": "purchase_intent_high" }
+                                </div>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-32 font-label-caps text-on-surface-variant pt-1">HOOK_02_RECO</div>
+<div class="flex-grow">
+<p class="text-on-surface mb-2 font-code-sm">STREAM /v2/aura/predict/realtime</p>
+<div class="bg-black p-4 rounded border border-outline-variant font-code-sm text-on-surface-variant">
+                                    // Subscription logic for persistent GPU affinity...
+                                </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Database Sharding Status -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-highest border border-outline-variant p-6 rounded-lg">
+<h3 class="font-headline-md text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+                        DB Sharding
+                    </h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-code-sm">Shard_Alpha (US-E)</span>
+<span class="text-primary-fixed font-code-xs">92% UTIL</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-code-sm">Shard_Beta (EU-W)</span>
+<span class="text-primary-fixed font-code-xs">41% UTIL</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 opacity-50">
+<span class="font-code-sm">Shard_Gamma (AS-S)</span>
+<span class="text-on-surface-variant font-code-xs">OFFLINE</span>
+</div>
+</div>
+<div class="mt-8">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-2">SHARDING POLICY</p>
+<p class="font-code-xs leading-relaxed text-secondary">Consistent hashing by tenant_id with replication factor 3. Automated migration triggers at 85% capacity.</p>
+</div>
+</div>
+<!-- Kubernetes GPU Specs -->
+<div class="col-span-12 bg-surface-container border-l-4 border-primary-fixed-dim p-8">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div>
+<h3 class="font-headline-md text-primary mb-2">Kubernetes GPU Cluster Deployment Specs</h3>
+<p class="text-on-surface-variant font-code-sm max-w-xl">Environment: Production-Aura-Cluster-04. Optimized for CUDA 12.x kernels.</p>
+</div>
+<div class="flex gap-4">
+<div class="text-right">
+<p class="font-label-caps text-on-surface-variant">NODE_TYPE</p>
+<p class="font-headline-md text-primary-fixed">g5.2xlarge</p>
+</div>
+<div class="w-px h-12 bg-outline-variant"></div>
+<div class="text-right">
+<p class="font-label-caps text-on-surface-variant">AUTO_SCALE</p>
+<p class="font-headline-md text-primary-fixed">8-64 Nodes</p>
+</div>
+</div>
+</div>
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="bg-black p-4 rounded-lg font-code-sm">
+<div class="flex justify-between mb-2">
+<span class="text-on-surface-variant">deployment.yaml</span>
+<span class="material-symbols-outlined text-xs" data-icon="content_copy">content_copy</span>
+</div>
+<pre class="text-primary-fixed-dim text-[11px] leading-tight">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aura-inference-service
+spec:
+  replicas: 12
+  template:
+    spec:
+      containers:
+      - name: inference-engine
+        image: adcore/aura:latest
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+                            </pre>
+</div>
+<div class="flex flex-col justify-center">
+<div class="flex items-start gap-4 mb-4">
+<span class="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></span>
+<p class="text-on-surface-variant font-body-md"><strong class="text-on-surface">Memory Pinning:</strong> Host memory pinned to 16GB per GPU core for zero-copy transfers.</p>
+</div>
+<div class="flex items-start gap-4">
+<span class="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></span>
+<p class="text-on-surface-variant font-body-md"><strong class="text-on-surface">Anti-Affinity:</strong> Services are spread across availability zones to prevent cluster-wide latency spikes.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Micro-Data -->
+<div class="flex flex-wrap gap-12 opacity-80 mb-12">
+<div class="flex flex-col">
+<span class="font-label-caps text-on-surface-variant text-[10px]">AVG_BID_LATENCY</span>
+<span class="font-code-sm text-primary">12.4ms <span class="text-error">↑ 1.2%</span></span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-on-surface-variant text-[10px]">QUERY_PPS</span>
+<span class="font-code-sm text-primary">145,200/s</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-on-surface-variant text-[10px]">AUTH_FAIL_RATE</span>
+<span class="font-code-sm text-primary">0.002%</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-on-surface-variant text-[10px]">GPU_THERMAL_AVG</span>
+<span class="font-code-sm text-primary">64°C</span>
+</div>
+</div>
+<!-- Visualization Mock -->
+<div class="w-full h-48 bg-surface-container-low border border-outline-variant rounded flex items-center justify-center relative overflow-hidden group">
+
+<div class="z-10 text-center pointer-events-none">
+<p class="font-label-caps text-on-surface-variant mb-1">SYSTEM MESH VISUALIZER</p>
+<p class="font-code-xs text-primary-fixed-dim">ACTIVE PACKET TRAFFIC: REAL-TIME</p>
+</div>
+<div class="absolute bottom-4 right-4 bg-black/80 p-2 border border-outline-variant">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="fullscreen">fullscreen</span>
+</div>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full h-12 bg-surface-container-highest border-t border-outline-variant flex justify-around items-center px-lane-margin z-50">
+<div class="text-primary-fixed bg-on-primary-fixed-variant p-1 rounded-sm flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+</div>
+<div class="text-on-surface-variant opacity-50 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+</div>
+<div class="text-on-surface-variant opacity-50 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</div>
+<div class="text-on-surface-variant opacity-50 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+</div>
+</nav>
+<!-- Floating Interaction (Optional, if contextual) -->
+<button class="fixed bottom-16 right-8 w-12 h-12 bg-primary-container text-on-primary-container rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50 lg:bottom-8">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+</button>
+</body></html>

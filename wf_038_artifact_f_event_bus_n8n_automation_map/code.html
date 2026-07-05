@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-038: Artifact F — Event Bus & n8n Automation Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#0d1c2d",
+                        "surface-tint": "#00e639",
+                        "on-error-container": "#ffdad6",
+                        "surface-variant": "#273647",
+                        "tertiary-fixed": "#f0dbff",
+                        "tertiary-container": "#ecd3ff",
+                        "on-tertiary": "#490080",
+                        "surface-container-high": "#1c2b3c",
+                        "secondary": "#b8c3ff",
+                        "on-background": "#d4e4fa",
+                        "surface": "#051424",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-dim": "#051424",
+                        "primary-fixed": "#72ff70",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "tertiary": "#fff6ff",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary-fixed": "#dde1ff",
+                        "primary-fixed-dim": "#00e639",
+                        "primary": "#ebffe2",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-container": "#122131",
+                        "surface-container-highest": "#273647",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-primary": "#003907",
+                        "inverse-on-surface": "#233143",
+                        "inverse-primary": "#006e16",
+                        "error-container": "#93000a",
+                        "surface-bright": "#2c3a4c",
+                        "secondary-container": "#0043eb",
+                        "on-tertiary-container": "#862ed4",
+                        "on-surface": "#d4e4fa",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "outline": "#84967e",
+                        "on-secondary": "#002388",
+                        "on-primary-container": "#007117",
+                        "background": "#051424",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-fixed": "#001356",
+                        "error": "#ffb4ab",
+                        "primary-container": "#00ff41",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "stack-gap": "4px",
+                        "lane-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector {
+            position: absolute;
+            background-color: #00e639;
+            z-index: 0;
+        }
+        .connector-horizontal { height: 2px; }
+        .connector-vertical { width: 2px; }
+        .error-path {
+            background-image: repeating-linear-gradient(90deg, #ffb4ab, #ffb4ab 4px, transparent 4px, transparent 8px);
+            background-color: transparent !important;
+        }
+        .glass-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-lane-margin h-16 z-50 border-b border-outline-variant bg-surface shrink-0">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="security">security</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tight text-primary-fixed-dim">GOV-ENGINE v4.02</h1>
+<span class="px-2 py-0.5 rounded bg-surface-container-high border border-outline-variant text-label-caps font-label-caps text-on-surface-variant">ARTIFACT_F: EVENT_BUS</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6">
+<a class="text-primary-fixed-dim font-bold text-label-caps font-label-caps hover:bg-surface-container-high transition-colors px-3 py-2 rounded" href="#">MONITORING</a>
+<a class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-container-high transition-colors px-3 py-2 rounded" href="#">LOGS</a>
+<a class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-container-high transition-colors px-3 py-2 rounded" href="#">CONFIG</a>
+</nav>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-2 rounded transition-colors" data-icon="settings_input_component">settings_input_component</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 bottom-0 z-40 flex flex-col overflow-y-auto border-r border-outline-variant bg-surface-container w-64 shrink-0">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant">ENGINEERING ARTIFACTS</h2>
+</div>
+<nav class="flex-1 py-2">
+<a class="text-on-surface-variant flex items-center px-4 py-3 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-all text-label-caps font-label-caps gap-3" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="dashboard">dashboard</span> Executive Overview
+                </a>
+<a class="bg-surface-container-highest text-primary-fixed-dim border-l-2 border-primary-fixed-dim flex items-center px-4 py-3 scale-[0.99] transition-transform text-label-caps font-label-caps gap-3" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="hub">hub</span> Event Bus
+                </a>
+<a class="text-on-surface-variant flex items-center px-4 py-3 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-all text-label-caps font-label-caps gap-3" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="account_tree">account_tree</span> BPMN Swimlane
+                </a>
+<a class="text-on-surface-variant flex items-center px-4 py-3 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-all text-label-caps font-label-caps gap-3" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="terminal">terminal</span> Dev Guide
+                </a>
+<a class="text-on-surface-variant flex items-center px-4 py-3 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-all text-label-caps font-label-caps gap-3" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="report_problem">report_problem</span> Exception Model
+                </a>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="text-code-xs font-code-xs opacity-50">BUS LOAD</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">12.4k/s</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-3/4"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content (Workflow Canvas) -->
+<main class="ml-64 flex-1 relative overflow-auto p-lane-margin bg-background">
+<!-- Flow Stage Headers (Swimlanes) -->
+<div class="flex w-full mb-12 border-b border-outline-variant pb-4 sticky top-0 bg-background z-10">
+<div class="w-1/4 px-4 flex items-center gap-2 border-r border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="input">input</span>
+<span class="text-headline-md font-headline-md uppercase tracking-widest text-on-surface">Ingress</span>
+</div>
+<div class="w-1/4 px-4 flex items-center gap-2 border-r border-outline-variant">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-headline-md font-headline-md uppercase tracking-widest text-on-surface">Automation</span>
+</div>
+<div class="w-1/4 px-4 flex items-center gap-2 border-r border-outline-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="memory">memory</span>
+<span class="text-headline-md font-headline-md uppercase tracking-widest text-on-surface">Model Ops</span>
+</div>
+<div class="w-1/4 px-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+<span class="text-headline-md font-headline-md uppercase tracking-widest text-on-surface">DLQ/Recovery</span>
+</div>
+</div>
+<!-- Workflow Visualizer Grid -->
+<div class="relative grid grid-cols-4 gap-y-16 items-start min-w-[1200px]">
+<!-- ROW 1: RequestReceived -> ContextHydration -->
+<!-- EVENT NODE -->
+<div class="relative flex flex-col gap-2 items-center">
+<div class="w-48 bg-surface-container border border-primary-fixed-dim rounded shadow-none p-3 z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">EVENT: TRIGGER</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+</div>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">RequestReceived</h3>
+<p class="text-code-xs font-code-xs text-on-surface-variant">ID: EV-8821-X</p>
+</div>
+<!-- Connector Line -->
+<div class="node-connector connector-horizontal w-full left-[60%] top-[40px] opacity-30"></div>
+</div>
+<!-- AUTOMATION NODE -->
+<div class="relative flex flex-col gap-2 items-center">
+<div class="w-48 bg-surface-container border border-outline rounded p-3 z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">n8n_WORKFLOW</span>
+<span class="text-code-xs font-code-xs opacity-50">#662</span>
+</div>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">ContextHydration</h3>
+<div class="flex gap-1 mt-2">
+<span class="px-1 text-[8px] border border-outline text-outline rounded">REDIS</span>
+<span class="px-1 text-[8px] border border-outline text-outline rounded">VECTOR_DB</span>
+</div>
+</div>
+<div class="node-connector connector-horizontal w-full left-[60%] top-[40px] opacity-30"></div>
+</div>
+<!-- IDLE SLOT -->
+<div class="flex justify-center">
+<div class="w-8 h-8 rounded-full border-2 border-dashed border-outline-variant flex items-center justify-center">
+<span class="text-code-xs text-outline-variant">...</span>
+</div>
+</div>
+<!-- DLQ STATUS -->
+<div class="flex justify-center">
+<div class="w-48 bg-surface-container-lowest border border-outline-variant border-dashed rounded p-3 opacity-40">
+<span class="text-label-caps font-label-caps text-outline-variant">DLQ: STABLE</span>
+<div class="mt-1 h-1 w-full bg-surface-container-high rounded overflow-hidden"></div>
+</div>
+</div>
+<!-- ROW 2: ModelResponseGenerated -> SafetyFilter_V2 -->
+<div class="col-span-4 h-8"></div><!-- Spacer -->
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-surface-container-high border border-outline-variant rounded p-3 opacity-60">
+<span class="text-label-caps font-label-caps text-on-surface-variant">QUEUE: PENDING</span>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">Awaiting Token...</h3>
+</div>
+</div>
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-surface-container border border-outline rounded p-3 z-10">
+<span class="text-label-caps font-label-caps text-on-surface-variant">AUTOMATION</span>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">SafetyFilter_V2</h3>
+<p class="text-code-xs font-code-xs text-on-surface-variant mt-1">LlamaGuard_3.1</p>
+</div>
+</div>
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-surface-container border border-secondary rounded p-3 z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-caps font-label-caps text-secondary">EVENT</span>
+<span class="material-symbols-outlined text-secondary text-[12px]" data-icon="check_circle">check_circle</span>
+</div>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">ModelResponseGenerated</h3>
+<div class="text-[9px] font-code-sm text-secondary bg-secondary/10 p-1 mt-2 rounded">TOKENS: 1,421 | L: 142ms</div>
+</div>
+<div class="node-connector connector-horizontal w-full right-[60%] top-[40px] opacity-30"></div>
+</div>
+<div class="relative flex flex-col items-center">
+<!-- DLQ EMPTY -->
+</div>
+<!-- ROW 3: HallucinationDetected -> SelfCorrection_Loop (Error Path) -->
+<div class="col-span-4 h-8"></div><!-- Spacer -->
+<div class="flex justify-center"></div>
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-surface-container border border-error rounded p-3 z-10 shadow-[0_0_15px_rgba(255,180,171,0.1)]">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-caps font-label-caps text-error">ALARM: CRITICAL</span>
+<span class="material-symbols-outlined text-error text-[14px]" data-icon="error">error</span>
+</div>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">HallucinationDetected</h3>
+<p class="text-code-xs font-code-xs text-on-error">Score: 0.89 [FAILED]</p>
+</div>
+<!-- Error connector to DLQ -->
+<div class="node-connector connector-horizontal w-full left-[60%] top-[40px] error-path"></div>
+</div>
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-surface-container border border-outline rounded p-3 z-10">
+<span class="text-label-caps font-label-caps text-on-surface-variant">AUTOMATION</span>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">SelfCorrection_Loop</h3>
+<p class="text-code-xs font-code-xs text-on-surface-variant mt-1">Retry Count: 2/3</p>
+</div>
+<!-- Connector from Hallucination to Correction -->
+<div class="node-connector connector-horizontal w-full left-[60%] top-[40px] opacity-30"></div>
+</div>
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-error-container border border-error rounded p-3 z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-caps font-label-caps text-on-error-container">DLQ_QUEUE</span>
+<span class="text-code-xs font-code-xs text-on-error-container font-bold">14 TASKS</span>
+</div>
+<h3 class="text-code-sm font-code-sm font-bold text-on-error-container mb-1">Failed AI Tasks</h3>
+<div class="mt-2 space-y-1">
+<div class="text-[9px] font-code-sm text-on-error-container/80 flex justify-between">
+<span>#8821-X</span><span>504 Gateway</span>
+</div>
+<div class="text-[9px] font-code-sm text-on-error-container/80 flex justify-between">
+<span>#8845-Z</span><span>Safety Reject</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 4: ToolCallTriggered -> n8n_Workflow_Execution -->
+<div class="col-span-4 h-8"></div><!-- Spacer -->
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-surface-container border border-primary-fixed-dim rounded p-3 z-10">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">EVENT: TOOL</span>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">ToolCallTriggered</h3>
+<p class="text-code-xs font-code-xs text-on-surface-variant mt-1">Fn: query_customer_crm</p>
+</div>
+<div class="node-connector connector-horizontal w-full left-[60%] top-[40px] opacity-30"></div>
+</div>
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-surface-container border border-primary-container rounded p-3 z-10">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-ping"></div>
+<span class="text-label-caps font-label-caps text-on-primary-container">RUNNING</span>
+</div>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">n8n_Workflow_Execution</h3>
+<div class="flex justify-between items-center mt-2">
+<span class="text-code-xs font-code-xs opacity-50">NODE_ID: 12</span>
+<span class="text-code-xs font-code-xs text-primary-container">ACTIVE</span>
+</div>
+</div>
+</div>
+<div class="flex justify-center"></div>
+<div class="flex justify-center"></div>
+<!-- ROW 5: ProviderDown -> Failover_Trigger -->
+<div class="col-span-4 h-8"></div><!-- Spacer -->
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-error border border-error-container rounded p-3 z-10">
+<div class="flex justify-between items-center mb-1">
+<span class="text-label-caps font-label-caps text-on-error">HARD_FAILURE</span>
+<span class="material-symbols-outlined text-on-error text-[12px]" data-icon="cloud_off">cloud_off</span>
+</div>
+<h3 class="text-code-sm font-code-sm font-bold text-on-error mb-1">ProviderDown</h3>
+<p class="text-code-xs font-code-xs text-on-error opacity-80">Target: GPT-4o-Primary</p>
+</div>
+<div class="node-connector connector-horizontal w-full left-[60%] top-[40px] error-path"></div>
+</div>
+<div class="relative flex flex-col items-center">
+<div class="w-48 bg-surface-container-high border border-outline rounded p-3 z-10 border-l-4 border-l-tertiary-fixed-dim">
+<span class="text-label-caps font-label-caps text-tertiary-fixed-dim">FAILOVER_POLICY</span>
+<h3 class="text-code-sm font-code-sm font-bold text-on-surface mb-1">Failover_Trigger</h3>
+<p class="text-code-xs font-code-xs text-on-surface-variant mt-1">Switch to Llama_3_Local</p>
+</div>
+</div>
+<div class="flex justify-center"></div>
+<div class="flex justify-center"></div>
+</div>
+<!-- Telemetry Footer Panel -->
+<div class="mt-24 grid grid-cols-4 gap-6">
+<div class="bg-surface-container-low p-4 border border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant block mb-2">BUS LATENCY (P99)</span>
+<div class="flex items-end gap-2">
+<span class="text-headline-lg font-headline-lg text-primary-fixed-dim">45ms</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim pb-1">+2%</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant block mb-2">ACTIVE n8n FLOWS</span>
+<div class="flex items-end gap-2">
+<span class="text-headline-lg font-headline-lg text-on-surface">1,204</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant pb-1">instances</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant block mb-2">AUTO-RECOVERY RATE</span>
+<div class="flex items-end gap-2">
+<span class="text-headline-lg font-headline-lg text-tertiary-fixed-dim">98.4%</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px] pb-1" data-icon="trending_up">trending_up</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant border-l-4 border-l-error">
+<span class="text-label-caps font-label-caps text-error block mb-2">DLQ PRESSURE</span>
+<div class="flex items-end gap-2">
+<span class="text-headline-lg font-headline-lg text-error">NOMINAL</span>
+<span class="text-code-xs font-code-xs text-error pb-1">14 items</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Right Configuration Drawer (Glassmorphism) -->
+<aside class="w-80 h-full glass-overlay border-l border-outline-variant flex flex-col p-6 z-30 transition-transform translate-x-0">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-label-caps font-label-caps text-primary-fixed-dim">NODE_CONFIG: EV-8821</h3>
+<button class="material-symbols-outlined text-on-surface-variant" data-icon="close">close</button>
+</div>
+<div class="space-y-6">
+<div>
+<label class="text-label-caps font-label-caps text-on-surface-variant block mb-2">RETRY_STRATEGY</label>
+<select class="w-full bg-transparent border border-outline rounded p-2 text-code-sm font-code-sm text-on-surface focus:ring-1 focus:ring-primary-fixed-dim">
+<option>Exponential Backoff</option>
+<option>Fixed Interval</option>
+<option>Manual Approval</option>
+</select>
+</div>
+<div>
+<label class="text-label-caps font-label-caps text-on-surface-variant block mb-2">ROUTING_KEY</label>
+<input class="w-full bg-transparent border border-outline rounded p-2 text-code-sm font-code-sm text-on-surface focus:ring-1 focus:ring-primary-fixed-dim" type="text" value="ai.lifecycle.ingress.v1"/>
+</div>
+<div>
+<label class="text-label-caps font-label-caps text-on-surface-variant block mb-2">PAYLOAD_PREVIEW</label>
+<div class="bg-surface-container-lowest p-3 rounded border border-outline-variant font-code-xs text-on-surface-variant whitespace-pre">
+{
+  "event": "RequestReceived",
+  "actor": "user_491",
+  "priority": "high",
+  "payload_hash": "6fb9...a1e",
+  "bus_v": "4.02"
+}
+                    </div>
+</div>
+<div class="pt-6 border-t border-outline-variant">
+<button class="w-full bg-primary-fixed-dim text-on-primary-fixed font-label-caps text-label-caps py-3 rounded hover:opacity-90 transition-opacity">
+                        UPDATE BUS SCHEMA
+                    </button>
+<button class="w-full border border-error text-error font-label-caps text-label-caps py-3 rounded mt-3 hover:bg-error/10 transition-colors">
+                        PURGE MESSAGE
+                    </button>
+</div>
+</div>
+</aside>
+</div>
+<!-- Micro-Telemetry HUD (Absolute Bottom) -->
+<div class="fixed bottom-4 left-72 bg-surface-container-highest/80 border border-outline-variant px-4 py-2 rounded flex items-center gap-6 z-50">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+<span class="text-code-xs font-code-xs text-on-surface">SYS_HEALTH: OPTIMAL</span>
+</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant">WORKFLOW_ID:</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">WF-038-AF-2024</span>
+</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant">AUTH_LEVEL:</span>
+<span class="text-code-xs font-code-xs text-tertiary-fixed-dim">LEVEL_04_SENSEI</span>
+</div>
+</div>
+<script>
+        // Micro-interaction for nodes
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('scale-[1.02]');
+                node.style.transition = 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('scale-[1.02]');
+            });
+        });
+
+        // Toggle Drawer logic (simplified)
+        const closeBtn = document.querySelector('[data-icon="close"]');
+        const drawer = document.querySelector('aside.w-80');
+        const settingsBtn = document.querySelector('[data-icon="settings_input_component"]');
+
+        closeBtn.addEventListener('click', () => {
+            drawer.style.transform = 'translateX(100%)';
+            drawer.style.position = 'absolute';
+            drawer.style.right = '0';
+        });
+
+        settingsBtn.addEventListener('click', () => {
+            drawer.style.transform = 'translateX(0)';
+        });
+    </script>
+</body></html>

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aura AI OS - Domain Model WF-038</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#0d1c2d",
+                    "surface-tint": "#00e639",
+                    "on-error-container": "#ffdad6",
+                    "surface-variant": "#273647",
+                    "tertiary-fixed": "#f0dbff",
+                    "tertiary-container": "#ecd3ff",
+                    "on-tertiary": "#490080",
+                    "surface-container-high": "#1c2b3c",
+                    "secondary": "#b8c3ff",
+                    "on-background": "#d4e4fa",
+                    "surface": "#051424",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-dim": "#051424",
+                    "primary-fixed": "#72ff70",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-primary-fixed": "#002203",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "tertiary": "#fff6ff",
+                    "inverse-surface": "#d4e4fa",
+                    "secondary-fixed": "#dde1ff",
+                    "primary-fixed-dim": "#00e639",
+                    "primary": "#ebffe2",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-container-lowest": "#010f1f",
+                    "surface-container": "#122131",
+                    "surface-container-highest": "#273647",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-primary": "#003907",
+                    "inverse-on-surface": "#233143",
+                    "inverse-primary": "#006e16",
+                    "error-container": "#93000a",
+                    "surface-bright": "#2c3a4c",
+                    "secondary-container": "#0043eb",
+                    "on-tertiary-container": "#862ed4",
+                    "on-surface": "#d4e4fa",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "outline": "#84967e",
+                    "on-secondary": "#002388",
+                    "on-primary-container": "#007117",
+                    "background": "#051424",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary-fixed": "#001356",
+                    "error": "#ffb4ab",
+                    "primary-container": "#00ff41",
+                    "on-error": "#690005"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "grid-unit": "8px",
+                    "stack-gap": "4px",
+                    "lane-margin": "32px"
+            },
+            "fontFamily": {
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            stroke: #3b4b37;
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .node-connector-primary {
+            stroke: #00e639;
+            stroke-width: 2;
+        }
+        .node-card {
+            background: #0f0f0f;
+            border: 1px solid #3b4b37;
+            transition: all 0.2s ease;
+        }
+        .node-card:hover {
+            border-color: #00e639;
+            box-shadow: 0 0 12px rgba(0, 230, 57, 0.15);
+        }
+        .lifecycle-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; border-radius: 10px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 h-16 flex justify-between items-center px-lane-margin z-50 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">security</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tight text-primary-fixed-dim">GOV-ENGINE v4.02</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="text-primary-fixed-dim font-bold text-label-caps font-label-caps hover:bg-surface-container-high transition-colors px-2 py-1" href="#">ARCHITECT</a>
+<a class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-container-high transition-colors px-2 py-1" href="#">SCHEMA</a>
+<a class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-container-high transition-colors px-2 py-1" href="#">TRAFFIC</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed-dim">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 bottom-0 w-64 z-40 bg-surface-container border-r border-outline-variant flex flex-col overflow-y-auto">
+<div class="p-4 border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant">ENGINEERING ARTIFACTS</span>
+</div>
+<nav class="flex-1 py-4">
+<div class="space-y-1">
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">dashboard</span>
+<span class="text-code-sm font-code-sm">Executive Overview</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">account_tree</span>
+<span class="text-code-sm font-code-sm">BPMN Swimlane</span>
+</a>
+<a class="bg-surface-container-highest text-primary-fixed-dim border-l-2 border-primary-fixed-dim flex items-center px-4 py-2 scale-[0.99] transition-transform duration-100" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">account_balance</span>
+<span class="text-code-sm font-code-sm">Domain Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">api</span>
+<span class="text-code-sm font-code-sm">API Contract</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">database</span>
+<span class="text-code-sm font-code-sm">Data Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">verified_user</span>
+<span class="text-code-sm font-code-sm">Security Blueprint</span>
+</a>
+<!-- Remaining hidden in small nav drawer for space but present in logic -->
+</div>
+</nav>
+<div class="p-4 border-t border-outline-variant">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></div>
+<span class="text-code-xs font-code-xs text-primary-fixed opacity-70 uppercase tracking-widest">System Active</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pl-64 pt-16 min-h-screen">
+<!-- Sub-header for Artifact Context -->
+<div class="h-12 border-b border-outline-variant flex items-center px-8 justify-between bg-surface-container-low/50 sticky top-16 z-30">
+<div class="flex items-center gap-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant">ARTIFACT ID: WF-038</span>
+<span class="text-on-surface-variant">/</span>
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">DOMAIN_MODEL_AURA_AI</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-code-xs font-code-xs bg-outline-variant/30 hover:bg-outline-variant/50 text-on-surface-variant px-3 py-1 rounded border border-outline-variant transition-colors">EXPORT DDL</button>
+<button class="text-code-xs font-code-xs bg-primary-container text-on-primary-container px-3 py-1 rounded transition-colors font-bold">RE-MAP GRAPH</button>
+</div>
+</div>
+<!-- The Domain Model Visualization Area -->
+<div class="p-lane-margin relative">
+<!-- Connection Layer (SVG Overlay) -->
+<svg class="absolute inset-0 pointer-events-none w-full h-full" style="z-index: 0;">
+<!-- Orthogonal Polylines representing relationships -->
+<path class="node-connector" d="M 400 150 L 500 150 L 500 300"></path>
+<path class="node-connector" d="M 1200 150 L 1100 150 L 1100 450 L 950 450"></path>
+<path class="node-connector-primary" d="M 400 450 L 500 450"></path>
+<path class="node-connector" d="M 850 650 L 850 750"></path>
+<path class="node-connector" d="M 250 550 L 250 650"></path>
+</svg>
+<!-- Grid of Domain Entities (Bento Grid / Custom Layout) -->
+<div class="grid grid-cols-12 gap-node-gutter relative z-10">
+<!-- Cognition_Context Node -->
+<div class="col-span-12 lg:col-span-4">
+<div class="node-card rounded">
+<div class="bg-surface-container-highest px-3 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">COGNITION_CONTEXT</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant opacity-60">UUIDv4</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between items-center text-code-sm font-code-sm">
+<span class="text-on-surface-variant">Namespace_ID</span>
+<span class="text-secondary">string</span>
+</div>
+<div class="flex justify-between items-center text-code-sm font-code-sm">
+<span class="text-on-surface-variant">Focus_Depth</span>
+<span class="text-secondary">int (0-10)</span>
+</div>
+<div class="flex justify-between items-center text-code-sm font-code-sm">
+<span class="text-on-surface-variant">State</span>
+<span class="flex items-center gap-1.5"><span class="lifecycle-dot bg-primary-fixed"></span> ACTIVE</span>
+</div>
+</div>
+<div class="p-2 border-t border-outline-variant flex gap-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant bg-surface-container px-1.5 py-0.5 border border-outline-variant">1:N Agent_Session</span>
+</div>
+</div>
+</div>
+<!-- Agent_Session Node -->
+<div class="col-span-12 lg:col-span-4">
+<div class="node-card rounded border-primary-fixed-dim">
+<div class="bg-surface-container-highest px-3 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">AGENT_SESSION</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">FK_CONTEXT</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between items-center text-code-sm font-code-sm">
+<span class="text-on-surface-variant">Session_Token</span>
+<span class="text-secondary">hash_64</span>
+</div>
+<div class="flex justify-between items-center text-code-sm font-code-sm">
+<span class="text-on-surface-variant">Provider_Target</span>
+<span class="text-secondary">FK_PROV</span>
+</div>
+<div class="flex justify-between items-center text-code-sm font-code-sm">
+<span class="text-on-surface-variant">Status</span>
+<span class="flex items-center gap-1.5"><span class="lifecycle-dot bg-primary-fixed"></span> ACTIVE</span>
+</div>
+<div class="pt-2 border-t border-outline-variant/30">
+<span class="text-code-xs font-code-xs block mb-1 text-on-surface-variant/50">LIFECYCLE</span>
+<div class="flex justify-between gap-1">
+<div class="h-1 flex-1 bg-primary-fixed-dim"></div>
+<div class="h-1 flex-1 bg-primary-fixed-dim"></div>
+<div class="h-1 flex-1 bg-surface-variant"></div>
+<div class="h-1 flex-1 bg-surface-variant"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Provider_Config Node -->
+<div class="col-span-12 lg:col-span-4">
+<div class="node-card rounded">
+<div class="bg-surface-container-highest px-3 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant">PROVIDER_CONFIG</span>
+<span class="material-symbols-outlined text-code-sm">api</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between items-center text-code-sm font-code-sm">
+<span class="text-on-surface-variant">Model_ID</span>
+<span class="text-tertiary-fixed-dim">"gpt-4-pro"</span>
+</div>
+<div class="flex justify-between items-center text-code-sm font-code-sm">
+<span class="text-on-surface-variant">Latency_Policy</span>
+<span class="text-tertiary-fixed-dim">"aggressive"</span>
+</div>
+<div class="flex justify-between items-center text-code-sm font-code-sm">
+<span class="text-on-surface-variant">State</span>
+<span class="flex items-center gap-1.5"><span class="lifecycle-dot bg-surface-variant"></span> DRAFT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Prompt_Template Node -->
+<div class="col-span-12 lg:col-span-3">
+<div class="node-card rounded border-l-4 border-l-tertiary">
+<div class="bg-surface-container-highest px-3 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant">PROMPT_TEMPLATE</span>
+</div>
+<div class="p-3">
+<p class="text-code-xs font-code-xs text-on-surface-variant mb-4 leading-relaxed">
+                                system_persona: "Aura_Architect"<br/>
+                                variables: ["context_id", "user_query"]<br/>
+                                version: 1.2.0-rc
+                            </p>
+<div class="flex items-center justify-between">
+<span class="text-code-xs font-code-xs text-on-surface-variant/60">Modified 2h ago</span>
+<span class="lifecycle-dot bg-primary-fixed"></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Memory_Chunk (Vector) Node -->
+<div class="col-span-12 lg:col-span-6">
+<div class="node-card rounded">
+<div class="bg-surface-container-highest px-3 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">MEMORY_CHUNK (VECTOR)</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">0x3f2...</span>
+</div>
+<div class="grid grid-cols-2 p-3 gap-4">
+<div class="space-y-2">
+<div class="flex flex-col">
+<span class="text-code-xs font-code-xs text-on-surface-variant/50">VECTOR_DIM</span>
+<span class="text-code-sm font-code-sm">1536 (Float32)</span>
+</div>
+<div class="flex flex-col">
+<span class="text-code-xs font-code-xs text-on-surface-variant/50">STORAGE_POD</span>
+<span class="text-code-sm font-code-sm">EU_WEST_1A</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex flex-col">
+<span class="text-code-xs font-code-xs text-on-surface-variant/50">RETENTION</span>
+<span class="text-code-sm font-code-sm">TTL_24H_LRU</span>
+</div>
+<div class="flex flex-col">
+<span class="text-code-xs font-code-xs text-on-surface-variant/50">LIFECYCLE</span>
+<span class="text-code-sm font-code-sm text-error">FAILED</span>
+</div>
+</div>
+</div>
+<div class="px-3 pb-3">
+<div class="w-full bg-surface-container h-12 flex items-end gap-0.5">
+<div class="w-1 bg-primary-fixed-dim h-2 opacity-30"></div>
+<div class="w-1 bg-primary-fixed-dim h-6 opacity-40"></div>
+<div class="w-1 bg-primary-fixed-dim h-4 opacity-30"></div>
+<div class="w-1 bg-error h-10"></div>
+<div class="w-1 bg-error h-8"></div>
+<div class="w-1 bg-primary-fixed-dim h-5 opacity-40"></div>
+<div class="w-1 bg-primary-fixed-dim h-3 opacity-30"></div>
+</div>
+<span class="text-code-xs font-code-xs text-on-surface-variant/40 mt-1 block">EMBEDDING_HISTOGRAM_DRIFT</span>
+</div>
+</div>
+</div>
+<!-- Tool_Definition Node -->
+<div class="col-span-12 lg:col-span-3">
+<div class="node-card rounded border-dashed">
+<div class="bg-surface-container-highest px-3 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant">TOOL_DEFINITION</span>
+</div>
+<div class="p-3">
+<div class="text-code-sm font-code-sm mb-2 text-primary-fixed-dim">GET_AUDIT_STREAM()</div>
+<ul class="text-code-xs font-code-xs space-y-1 text-on-surface-variant">
+<li>• Auth: OAUTH2_PKCE</li>
+<li>• Rate_Limit: 50/sec</li>
+<li>• Response: JSON_STREAM</li>
+</ul>
+<div class="mt-4 flex items-center gap-2">
+<span class="text-code-xs font-code-xs bg-surface-container-highest px-1 border border-outline-variant">TERMINATED</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Safety_Policy Node -->
+<div class="col-span-12 lg:col-span-4">
+<div class="node-card rounded">
+<div class="bg-error-container/20 px-3 py-2 flex justify-between items-center border-b border-error">
+<span class="text-label-caps font-label-caps text-error">SAFETY_POLICY</span>
+<span class="material-symbols-outlined text-error text-[16px]">gpp_maybe</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="text-code-sm font-code-sm flex justify-between">
+<span class="text-on-surface-variant">Block_List_ID</span>
+<span class="text-error font-bold">SEC-0041</span>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant/70 border-l-2 border-outline-variant pl-2 py-1 italic">
+                                "Strict adherence to PII masking protocols in cross-tenant contexts."
+                            </div>
+</div>
+</div>
+</div>
+<!-- Audit_Trace Node -->
+<div class="col-span-12 lg:col-span-4">
+<div class="node-card rounded overflow-hidden">
+<div class="bg-surface-container-highest px-3 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant">AUDIT_TRACE</span>
+<span class="text-code-xs font-code-xs">LOG_SINK</span>
+</div>
+<div class="p-0">
+<table class="w-full text-code-xs font-code-xs">
+<thead class="bg-surface-container text-on-surface-variant/60 uppercase">
+<tr>
+<th class="px-3 py-1 text-left font-normal border-b border-outline-variant">TS</th>
+<th class="px-3 py-1 text-left font-normal border-b border-outline-variant">EVT</th>
+<th class="px-3 py-1 text-left font-normal border-b border-outline-variant">ST</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-outline-variant/30 hover:bg-surface-bright transition-colors">
+<td class="px-3 py-1 text-on-surface-variant/40">14:02:11</td>
+<td class="px-3 py-1 text-on-surface-variant font-medium">SESSION_INIT</td>
+<td class="px-3 py-1"><span class="lifecycle-dot bg-primary-fixed"></span></td>
+</tr>
+<tr class="border-b border-outline-variant/30 hover:bg-surface-bright transition-colors">
+<td class="px-3 py-1 text-on-surface-variant/40">14:02:12</td>
+<td class="px-3 py-1 text-on-surface-variant font-medium">PROVIDER_SYNC</td>
+<td class="px-3 py-1"><span class="lifecycle-dot bg-primary-fixed"></span></td>
+</tr>
+<tr class="hover:bg-surface-bright transition-colors">
+<td class="px-3 py-1 text-on-surface-variant/40">14:02:44</td>
+<td class="px-3 py-1 text-on-surface-variant font-medium">MEM_WRITE_ERR</td>
+<td class="px-3 py-1"><span class="lifecycle-dot bg-error"></span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Performance_Metric Node -->
+<div class="col-span-12 lg:col-span-4">
+<div class="node-card rounded">
+<div class="bg-surface-container-highest px-3 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant">PERFORMANCE_METRIC</span>
+</div>
+<div class="p-4 flex items-center justify-between">
+<div class="space-y-4 flex-1">
+<div>
+<div class="flex justify-between text-code-xs mb-1">
+<span class="text-on-surface-variant/60">INFERENCE_LATENCY</span>
+<span class="text-primary-fixed-dim">442ms</span>
+</div>
+<div class="h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim" style="width: 72%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-code-xs mb-1">
+<span class="text-on-surface-variant/60">TOKEN_CONSUMPTION</span>
+<span class="text-secondary">8.2k/min</span>
+</div>
+<div class="h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 45%"></div>
+</div>
+</div>
+</div>
+<div class="ml-6 flex-shrink-0">
+<div class="w-16 h-16 border-4 border-primary-fixed-dim/20 rounded-full flex items-center justify-center relative">
+<div class="text-code-sm font-bold">98%</div>
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-primary-fixed-dim" cx="32" cy="32" fill="none" r="30" stroke="currentColor" stroke-dasharray="188" stroke-dashoffset="30" stroke-width="4"></circle>
+</svg>
+</div>
+<div class="text-center text-code-xs mt-2 text-on-surface-variant/50">AVAILABILITY</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Micro-Data Cluster -->
+<div class="fixed bottom-8 right-8 z-50 pointer-events-none opacity-60">
+<div class="bg-surface-container/80 backdrop-blur-md p-4 border border-outline-variant rounded shadow-xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[14px]">analytics</span>
+<span class="text-label-caps font-label-caps text-on-surface-variant">ENGINE_TELEMETRY</span>
+</div>
+<div class="space-y-1 font-code-xs text-code-xs">
+<div class="flex justify-between gap-4">
+<span class="text-on-surface-variant/50">OBJECT_COUNT:</span>
+<span class="text-primary-fixed-dim">1.4k</span>
+</div>
+<div class="flex justify-between gap-4">
+<span class="text-on-surface-variant/50">HEAP_UTIL:</span>
+<span class="text-primary-fixed-dim">342.1MB</span>
+</div>
+<div class="flex justify-between gap-4">
+<span class="text-on-surface-variant/50">LAST_GC:</span>
+<span class="text-secondary">41s ago</span>
+</div>
+<div class="flex justify-between gap-4">
+<span class="text-on-surface-variant/50">SYNC_LAG:</span>
+<span class="text-error">0.4ms</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Only for main screens) -->
+<button class="fixed bottom-lane-margin right-lane-margin w-14 h-14 bg-primary-container text-on-primary-container rounded shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined">add</span>
+</button>
+<script>
+        // Simple Interaction logic for "Node Selection"
+        document.querySelectorAll('.node-card').forEach(card => {
+            card.addEventListener('click', () => {
+                // Remove active classes from others
+                document.querySelectorAll('.node-card').forEach(c => {
+                    c.classList.remove('ring-2', 'ring-primary-fixed-dim', 'ring-offset-2', 'ring-offset-background');
+                });
+                // Add to current
+                card.classList.add('ring-2', 'ring-primary-fixed-dim', 'ring-offset-2', 'ring-offset-background');
+                
+                // Trigger a micro-animation or log update (Simulation)
+                console.log(`Focused Entity: ${card.querySelector('.text-label-caps').textContent}`);
+            });
+        });
+    </script>
+</body></html>

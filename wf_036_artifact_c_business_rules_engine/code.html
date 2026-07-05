@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AD_ENGINE_CORE_v2.0 | Business Rules Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-port {
+            width: 8px;
+            height: 8px;
+            background-color: #3b4b37;
+            border: 1px solid #84967e;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#00530e",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-background": "#d4e4fa",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-container-highest": "#273647",
+                        "surface-container-high": "#1c2b3c",
+                        "inverse-on-surface": "#233143",
+                        "surface-dim": "#051424",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "outline": "#84967e",
+                        "on-secondary": "#002388",
+                        "secondary-container": "#0043eb",
+                        "on-primary": "#003907",
+                        "on-secondary-container": "#c6ceff",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface": "#051424",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-error": "#690005",
+                        "primary": "#ebffe2",
+                        "surface-tint": "#00e639",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-secondary-fixed": "#001356",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "surface-variant": "#273647",
+                        "surface-container": "#122131",
+                        "inverse-primary": "#006e16",
+                        "tertiary": "#fff6ff",
+                        "primary-fixed": "#72ff70",
+                        "on-tertiary-container": "#862ed4",
+                        "on-tertiary": "#490080",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary-fixed": "#002203",
+                        "secondary": "#b8c3ff",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-container": "#007117",
+                        "secondary-fixed": "#dde1ff",
+                        "primary-container": "#00ff41",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-fixed-dim": "#00e639",
+                        "background": "#051424",
+                        "surface-container-lowest": "#010f1f",
+                        "outline-variant": "#3b4b37"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-node-gutter h-16 w-full z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">terminal</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim uppercase">AD_ENGINE_CORE_v2.0</span>
+</div>
+<div class="hidden md:flex gap-8 items-center h-full">
+<nav class="flex gap-6 h-full">
+<a class="flex items-center px-2 text-on-surface-variant opacity-70 hover:bg-surface-container-highest transition-colors font-code-sm text-code-sm active:scale-95 duration-75" href="#">DASHBOARD</a>
+<a class="flex items-center px-2 text-primary dark:text-primary-fixed-dim border-b-2 border-primary-fixed-dim font-code-sm text-code-sm active:scale-95 duration-75" href="#">SYSTEM_OPERATIONS</a>
+<a class="flex items-center px-2 text-on-surface-variant opacity-70 hover:bg-surface-container-highest transition-colors font-code-sm text-code-sm active:scale-95 duration-75" href="#">NETWORK_MAP</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right hidden sm:block">
+<div class="font-code-xs text-code-xs text-on-surface-variant">NODE_SYS_01</div>
+<div class="font-code-sm text-code-sm text-primary-fixed-dim">AUTHORIZED</div>
+</div>
+<div class="w-10 h-10 rounded-sm bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A portrait of a futuristic system architect wearing high-tech glasses with a data interface reflection. The lighting is low-key with sharp cyan and lime green rim lights, emphasizing a cyber-authority aesthetic. The background is a dark, clean server room with glowing green status LEDs." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKD_DQquXjzgJoq-ve8c2IaDyqs9sCASa3dWjsbu3u5VWdi1eIbjedQZ0LwAkrGQ2i9cI70CB0CyD-fTDmarVjCQhfZEURVpA6EbKaS5yL1029jCD1aAKYirId35VRi0-aa9FG7U5mUumMd0xnqV4Ho_b_bcYn1d4lxqkM8piPoedxtdlk5whzLEd44IsMvYV4P8XQZf8Feh-z9uIk4bSdDOxboo4rnm8m9Gw5_NP2TfrAnGU0i2GocYwQEtR8PPcuzSfl4i0wY14"/>
+</div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 h-full w-64 bg-surface-container-low border-r border-outline-variant hidden md:flex flex-col gap-stack-gap p-grid-unit z-40">
+<div class="px-4 py-6">
+<h2 class="font-headline-lg text-headline-lg text-primary uppercase">SYSTEM_OPERATIONS</h2>
+<div class="h-1 w-12 bg-primary-fixed-dim mt-2"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="group flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-lg">ads_click</span>
+<span class="font-code-sm text-code-sm uppercase">Campaigns</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-lg">gavel</span>
+<span class="font-code-sm text-code-sm uppercase">Bidding_Logs</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-lg">psychology</span>
+<span class="font-code-sm text-code-sm uppercase">Audience_AI</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-lg">grid_view</span>
+<span class="font-code-sm text-code-sm uppercase">Placements</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-lg">security</span>
+<span class="font-code-sm text-code-sm uppercase">Fraud_Shield</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-lg">monitoring</span>
+<span class="font-code-sm text-code-sm uppercase">Analytics</span>
+</div>
+</div>
+<div class="mt-auto p-4 border-t border-outline-variant opacity-50">
+<div class="font-code-xs text-code-xs">UPTIME: 452:12:09</div>
+<div class="font-code-xs text-code-xs">VERSION: CORE_2.0.4-STABLE</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 mt-16 p-lane-margin mb-12">
+<!-- Header Section -->
+<div class="mb-8 flex flex-col md:flex-row justify-between items-end gap-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<div class="w-2 h-2 bg-primary-fixed-dim"></div>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">SYSTEM_ARTIFACT_WF-036</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">BUSINESS_RULES_ENGINE</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant opacity-80 mt-1 max-w-2xl">
+                    Technical validation matrix for real-time advertising logic execution. High-density orchestration monitor for rule consensus and failure recovery paths.
+                </p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-high p-3 border border-outline-variant flex flex-col items-center min-w-[100px]">
+<span class="font-label-caps text-[9px] text-on-surface-variant">RULES_ENGAGED</span>
+<span class="font-code-sm text-headline-md text-primary">09</span>
+</div>
+<div class="bg-surface-container-high p-3 border border-outline-variant flex flex-col items-center min-w-[100px]">
+<span class="font-label-caps text-[9px] text-on-surface-variant">AVG_LATENCY</span>
+<span class="font-code-sm text-headline-md text-primary-fixed-dim">12ms</span>
+</div>
+</div>
+</div>
+<!-- Validation Matrix Table -->
+<div class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
+<!-- Table Header -->
+<div class="grid grid-cols-12 bg-surface-container border-b border-outline-variant p-3 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+<div class="col-span-2">Rule Identifier</div>
+<div class="col-span-3">Decision Logic (IF/THEN)</div>
+<div class="col-span-2">Responsible Service</div>
+<div class="col-span-1 text-center">Status</div>
+<div class="col-span-2 text-center">Failure Result</div>
+<div class="col-span-2">Recovery Path</div>
+</div>
+<!-- Table Body -->
+<div class="divide-y divide-outline-variant font-code-sm text-code-sm">
+<!-- Rule 1 -->
+<div class="grid grid-cols-12 p-3 hover:bg-surface-container-high transition-colors group">
+<div class="col-span-2 flex items-center gap-2">
+<div class="node-port"></div>
+<span class="text-primary-fixed-dim">Budget Available?</span>
+</div>
+<div class="col-span-3 text-on-surface-variant">IF [Campaign.Balance &gt; Bid.Floor] THEN [EXEC_BID]</div>
+<div class="col-span-2 font-code-xs text-on-surface-variant">FISCAL_VAL_v1.2</div>
+<div class="col-span-1 flex justify-center">
+<span class="bg-on-primary-fixed-variant text-primary-fixed px-2 py-0.5 rounded-sm text-[10px] font-bold">TRUE</span>
+</div>
+<div class="col-span-2 text-center text-error font-code-xs">HTTP_402_PAYMENT_REQ</div>
+<div class="col-span-2 text-on-surface-variant italic">AUTO_PAUSE_CAMPAIGN</div>
+</div>
+<!-- Rule 2 -->
+<div class="grid grid-cols-12 p-3 hover:bg-surface-container-high transition-colors group">
+<div class="col-span-2 flex items-center gap-2">
+<div class="node-port"></div>
+<span class="text-primary-fixed-dim">Bid Valid?</span>
+</div>
+<div class="col-span-3 text-on-surface-variant">IF [Bid.Amount &gt;= Market.Min] THEN [ALLOW]</div>
+<div class="col-span-2 font-code-xs text-on-surface-variant">AUCTION_CORE_SVC</div>
+<div class="col-span-1 flex justify-center">
+<span class="bg-on-primary-fixed-variant text-primary-fixed px-2 py-0.5 rounded-sm text-[10px] font-bold">TRUE</span>
+</div>
+<div class="col-span-2 text-center text-error font-code-xs">HTTP_400_BAD_BID</div>
+<div class="col-span-2 text-on-surface-variant italic">RE_EVAL_DYNAMIC_BID</div>
+</div>
+<!-- Rule 3 -->
+<div class="grid grid-cols-12 p-3 hover:bg-surface-container-high transition-colors group">
+<div class="col-span-2 flex items-center gap-2">
+<div class="node-port"></div>
+<span class="text-primary-fixed-dim">Policy Approved?</span>
+</div>
+<div class="col-span-3 text-on-surface-variant">IF [Content.Category IN WhiteList] THEN [PASS]</div>
+<div class="col-span-2 font-code-xs text-on-surface-variant">COMPLIANCE_AI_MOD</div>
+<div class="col-span-1 flex justify-center">
+<span class="bg-on-primary-fixed-variant text-primary-fixed px-2 py-0.5 rounded-sm text-[10px] font-bold">TRUE</span>
+</div>
+<div class="col-span-2 text-center text-error font-code-xs">HTTP_403_FORBIDDEN</div>
+<div class="col-span-2 text-on-surface-variant italic">QUEUE_MANUAL_REVIEW</div>
+</div>
+<!-- Rule 4 -->
+<div class="grid grid-cols-12 p-3 hover:bg-surface-container-high transition-colors group">
+<div class="col-span-2 flex items-center gap-2">
+<div class="node-port bg-yellow-900 border-yellow-500"></div>
+<span class="text-primary-fixed-dim">Creative Approved?</span>
+</div>
+<div class="col-span-3 text-on-surface-variant">IF [Asset.Hash.Status == "Verified"] THEN [SERVE]</div>
+<div class="col-span-2 font-code-xs text-on-surface-variant">ASSET_MGR_CLOUD</div>
+<div class="col-span-1 flex justify-center">
+<span class="bg-yellow-900 text-yellow-300 px-2 py-0.5 rounded-sm text-[10px] font-bold">DEGRADED</span>
+</div>
+<div class="col-span-2 text-center text-error font-code-xs">HTTP_404_ASSET_MISSING</div>
+<div class="col-span-2 text-on-surface-variant italic">SERVE_FALLBACK_IMG</div>
+</div>
+<!-- Rule 5 -->
+<div class="grid grid-cols-12 p-3 hover:bg-surface-container-high transition-colors group">
+<div class="col-span-2 flex items-center gap-2">
+<div class="node-port"></div>
+<span class="text-primary-fixed-dim">Sponsored Slot?</span>
+</div>
+<div class="col-span-3 text-on-surface-variant">IF [Inventory.Slot.Type == "Premium"] THEN [VAL]</div>
+<div class="col-span-2 font-code-xs text-on-surface-variant">INVENTORY_LOCATOR</div>
+<div class="col-span-1 flex justify-center">
+<span class="bg-on-primary-fixed-variant text-primary-fixed px-2 py-0.5 rounded-sm text-[10px] font-bold">TRUE</span>
+</div>
+<div class="col-span-2 text-center text-error font-code-xs">HTTP_410_GONE</div>
+<div class="col-span-2 text-on-surface-variant italic">SEARCH_SECONDARY_TIER</div>
+</div>
+<!-- Rule 6 -->
+<div class="grid grid-cols-12 p-3 hover:bg-surface-container-high transition-colors group">
+<div class="col-span-2 flex items-center gap-2">
+<div class="node-port"></div>
+<span class="text-primary-fixed-dim">Target Eligible?</span>
+</div>
+<div class="col-span-3 text-on-surface-variant">IF [User.Segment INTERSECTS Rule] THEN [YES]</div>
+<div class="col-span-2 font-code-xs text-on-surface-variant">AUDIENCE_MATCHER</div>
+<div class="col-span-1 flex justify-center">
+<span class="bg-on-primary-fixed-variant text-primary-fixed px-2 py-0.5 rounded-sm text-[10px] font-bold">TRUE</span>
+</div>
+<div class="col-span-2 text-center text-error font-code-xs">HTTP_406_NOT_ACCEPTABLE</div>
+<div class="col-span-2 text-on-surface-variant italic">EXPAND_SEMANTIC_MATCH</div>
+</div>
+<!-- Rule 7 -->
+<div class="grid grid-cols-12 p-3 hover:bg-surface-container-high transition-colors group">
+<div class="col-span-2 flex items-center gap-2">
+<div class="node-port"></div>
+<span class="text-primary-fixed-dim">Trust Threshold?</span>
+</div>
+<div class="col-span-3 text-on-surface-variant">IF [Partner.Reputation &gt; 0.85] THEN [TRUST]</div>
+<div class="col-span-2 font-code-xs text-on-surface-variant">REPUTATION_RANKER</div>
+<div class="col-span-1 flex justify-center">
+<span class="bg-on-primary-fixed-variant text-primary-fixed px-2 py-0.5 rounded-sm text-[10px] font-bold">TRUE</span>
+</div>
+<div class="col-span-2 text-center text-error font-code-xs">HTTP_429_TOO_MANY_REQ</div>
+<div class="col-span-2 text-on-surface-variant italic">RE_AUTHENTICATE_PROXY</div>
+</div>
+<!-- Rule 8 -->
+<div class="grid grid-cols-12 p-3 hover:bg-surface-container-high transition-colors group">
+<div class="col-span-2 flex items-center gap-2">
+<div class="node-port bg-error-container border-error"></div>
+<span class="text-primary-fixed-dim">Fraud Detected?</span>
+</div>
+<div class="col-span-3 text-on-surface-variant">IF [Request.Entropy &gt; 0.95] THEN [DROP]</div>
+<div class="col-span-2 font-code-xs text-on-surface-variant">SENTINEL_SHIELD_PRO</div>
+<div class="col-span-1 flex justify-center">
+<span class="bg-error-container text-error px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase">FALSE</span>
+</div>
+<div class="col-span-2 text-center text-error font-code-xs">HTTP_401_UNAUTHORIZED</div>
+<div class="col-span-2 text-on-surface-variant italic">BLACKLIST_IP_BLOCK_24</div>
+</div>
+<!-- Rule 9 -->
+<div class="grid grid-cols-12 p-3 hover:bg-surface-container-high transition-colors group">
+<div class="col-span-2 flex items-center gap-2">
+<div class="node-port"></div>
+<span class="text-primary-fixed-dim">Campaign Expired?</span>
+</div>
+<div class="col-span-3 text-on-surface-variant">IF [Current.Time &lt; Campaign.End] THEN [RUN]</div>
+<div class="col-span-2 font-code-xs text-on-surface-variant">SCHEDULER_DAEMON</div>
+<div class="col-span-1 flex justify-center">
+<span class="bg-on-primary-fixed-variant text-primary-fixed px-2 py-0.5 rounded-sm text-[10px] font-bold">TRUE</span>
+</div>
+<div class="col-span-2 text-center text-error font-code-xs">HTTP_410_GONE</div>
+<div class="col-span-2 text-on-surface-variant italic">ARCHIVE_METRICS_DUMP</div>
+</div>
+</div>
+</div>
+<!-- Workflow Visualizer Section -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left: Live Telemetry -->
+<div class="lg:col-span-1 space-y-4">
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-label-caps text-label-caps text-on-surface">MICRO-TELEMETRY</h3>
+<span class="animate-pulse w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+</div>
+<div class="space-y-3 font-code-xs text-code-xs">
+<div class="flex justify-between border-b border-outline-variant pb-1">
+<span class="text-on-surface-variant">REQ_PER_SEC</span>
+<span class="text-primary">12,450.00</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-1">
+<span class="text-on-surface-variant">ERROR_RATE</span>
+<span class="text-error">0.02%</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-1">
+<span class="text-on-surface-variant">CONCURRENCY</span>
+<span class="text-primary-fixed-dim">842 Threads</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-1">
+<span class="text-on-surface-variant">MEM_STRESS</span>
+<span class="text-primary">LOW</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 h-64 relative overflow-hidden group">
+<div class="absolute inset-0 bg-black/40 z-10 p-4">
+<h3 class="font-label-caps text-label-caps text-primary mb-2">SYSTEM_TOPOLOGY_PREVIEW</h3>
+<div class="flex items-center gap-2 text-code-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-xs">info</span>
+<span>Visualizing Rule Execution Path</span>
+</div>
+</div>
+<div class="w-full h-full bg-cover bg-center filter grayscale opacity-30 group-hover:opacity-50 transition-opacity" data-alt="A high-density technical diagram of a microservice architecture showing interconnected nodes and data flow lines. The style is a minimalist blueprint with glowing green lines on a deep black background, featuring orthogonal connectors and small labels in a monospace font. The aesthetic is professional, technical, and precise." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCzsOCcwR4fmGdXMOPz8scgINqzqESdRQhz9IUHCN3g6ethWEHZjbV6_X0OtOVtuvLd9TPBHhwJ03YToL98YGu9LKQX4DL4WRoHEZc2KrFw91oYKS5TkCNePuZdYpbnB8bM99IJuOme2JesvU81D0BWlB-07oeqNrJ74_Gul6CS9Mph54IiuhsQvaJ4PiptRB5trITRGm_kJv93iACWAF_LplT1UdhIM7wti3roJcuxYsp55SCwGs_F3tHxlGU5PHj7tqR8NmJIP2s')"></div>
+</div>
+</div>
+<!-- Right: Audit Log Panel -->
+<div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant flex flex-col">
+<div class="p-3 border-b border-outline-variant flex justify-between items-center bg-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">history_edu</span>
+<span class="font-label-caps text-label-caps uppercase">REALTIME_AUDIT_LOG_STUB</span>
+</div>
+<div class="font-code-xs text-on-surface-variant opacity-60">LOGS: 1,288/sec</div>
+</div>
+<div class="flex-1 terminal-scroll overflow-y-auto max-h-[360px] p-4 bg-black/20 font-code-sm text-code-sm leading-relaxed">
+<div class="mb-1"><span class="text-on-surface-variant">[14:22:01.033]</span> <span class="text-primary-fixed-dim">VALIDATION_START</span> -&gt; REQ_ID: 0x9F2E-A1</div>
+<div class="mb-1 pl-4"><span class="text-on-surface-variant">[14:22:01.034]</span> Budget_Check: <span class="text-primary-fixed-dim">PASS</span> (Balance: 4.2k)</div>
+<div class="mb-1 pl-4"><span class="text-on-surface-variant">[14:22:01.035]</span> Audience_Match: <span class="text-primary-fixed-dim">PASS</span> (Score: 0.92)</div>
+<div class="mb-1 pl-4"><span class="text-on-surface-variant">[14:22:01.036]</span> <span class="text-yellow-500">ASSET_MGR</span>: Fetching Remote Source... (Retry: 0)</div>
+<div class="mb-1 pl-4 text-on-surface-variant opacity-50">... 12 redundant checks suppressed ...</div>
+<div class="mb-1"><span class="text-on-surface-variant">[14:22:01.039]</span> <span class="text-primary-fixed-dim">SUCCESS</span> -&gt; BID_COMMITTED TO AD_EXCHANGE_04</div>
+<hr class="my-2 border-outline-variant opacity-20"/>
+<div class="mb-1"><span class="text-on-surface-variant">[14:22:01.042]</span> <span class="text-primary-fixed-dim">VALIDATION_START</span> -&gt; REQ_ID: 0x9F2E-A2</div>
+<div class="mb-1 pl-4"><span class="text-on-surface-variant">[14:22:01.043]</span> <span class="text-error">FRAUD_DETECTION</span>: Entropy &gt; 0.99!!</div>
+<div class="mb-1 pl-4"><span class="text-error">FAILURE</span> -&gt; DROPPING_PACKET (POLICY: BLOCK_IMMEDIATE)</div>
+<div class="mb-1"><span class="text-on-surface-variant">[14:22:01.045]</span> <span class="text-error">TERMINAL_EXIT</span> -&gt; HTTP_401 (Origin: 192.168.1.104)</div>
+<div class="mb-1 text-on-surface-variant opacity-50 mt-4 cursor-default animate-pulse">_</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 w-full h-12 bg-surface-container-highest border-t border-outline-variant flex justify-around items-center px-lane-margin z-50">
+<a class="text-primary-fixed bg-on-primary-fixed-variant p-1 rounded-sm flex items-center justify-center" href="#">
+<span class="material-symbols-outlined">settings_input_component</span>
+</a>
+<a class="text-on-surface-variant opacity-50 flex items-center justify-center" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+</a>
+<a class="text-on-surface-variant opacity-50 flex items-center justify-center" href="#">
+<span class="material-symbols-outlined">hub</span>
+</a>
+<a class="text-on-surface-variant opacity-50 flex items-center justify-center" href="#">
+<span class="material-symbols-outlined">api</span>
+</a>
+</nav>
+<!-- Global Logic Script -->
+<script>
+        // Micro-interaction: Logic Row Selection
+        document.querySelectorAll('.grid.grid-cols-12.p-3').forEach(row => {
+            row.addEventListener('click', () => {
+                // Visual feedback for row selection
+                const wasSelected = row.classList.contains('bg-surface-container-high');
+                document.querySelectorAll('.grid.grid-cols-12.p-3').forEach(r => r.classList.remove('bg-surface-container-high', 'ring-1', 'ring-primary-fixed-dim'));
+                
+                if (!wasSelected) {
+                    row.classList.add('bg-surface-container-high', 'ring-1', 'ring-primary-fixed-dim');
+                }
+            });
+        });
+
+        // Atmospheric terminal scroll effect
+        const terminal = document.querySelector('.terminal-scroll');
+        if (terminal) {
+            setInterval(() => {
+                terminal.scrollTop = terminal.scrollHeight;
+            }, 5000);
+        }
+    </script>
+</body></html>

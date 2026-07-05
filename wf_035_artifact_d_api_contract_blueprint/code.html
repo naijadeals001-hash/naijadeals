@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-035: Artifact D — API Contract Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .node-connector-h {
+            height: 2px;
+            background: repeating-linear-gradient(to right, #00ff41, #00ff41 4px, transparent 4px, transparent 8px);
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(1, 15, 31, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#0043eb",
+                        "primary-container": "#00ff41",
+                        "on-secondary-container": "#c6ceff",
+                        "on-error-container": "#ffdad6",
+                        "tertiary": "#fff6ff",
+                        "error": "#ffb4ab",
+                        "inverse-on-surface": "#233143",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-secondary-fixed": "#001356",
+                        "error-container": "#93000a",
+                        "secondary-fixed": "#dde1ff",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "surface-container": "#122131",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-tertiary-container": "#862ed4",
+                        "surface-container-low": "#0d1c2d",
+                        "outline-variant": "#3b4b37",
+                        "on-primary": "#003907",
+                        "secondary": "#b8c3ff",
+                        "on-surface": "#d4e4fa",
+                        "surface-dim": "#051424",
+                        "surface-container-lowest": "#010f1f",
+                        "on-primary-fixed-variant": "#00530e",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-error": "#690005",
+                        "surface-tint": "#00e639",
+                        "inverse-primary": "#006e16",
+                        "primary-fixed": "#72ff70",
+                        "on-primary-container": "#007117",
+                        "outline": "#84967e",
+                        "on-background": "#d4e4fa",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "primary": "#ebffe2",
+                        "surface-container-highest": "#273647",
+                        "surface-bright": "#2c3a4c",
+                        "on-tertiary": "#490080",
+                        "on-primary-fixed": "#002203",
+                        "primary-fixed-dim": "#00e639",
+                        "background": "#051424",
+                        "surface-container-high": "#1c2b3c",
+                        "surface": "#051424",
+                        "on-secondary": "#002388",
+                        "on-surface-variant": "#b9ccb2",
+                        "surface-variant": "#273647",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "stack-gap": "4px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 h-12 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6">
+<a class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed py-1" href="#">API_CONTRACT</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-primary-fixed transition-colors py-1" href="#">ENDPOINTS</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-primary-fixed transition-colors py-1" href="#">SCHEMA</a>
+</nav>
+<div class="h-4 w-px bg-outline-variant"></div>
+<span class="font-label-caps text-label-caps text-primary-fixed">STATUS: OK</span>
+</div>
+</header>
+<!-- Sidebar / NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px-32px)] w-64 bg-surface-container border-r border-outline-variant flex flex-col z-40">
+<div class="p-4 border-b border-outline-variant">
+<p class="font-label-caps text-label-caps text-primary-fixed">MODULE_INDEX</p>
+</div>
+<nav class="flex-1 py-4 overflow-y-auto custom-scrollbar">
+<div class="px-2 space-y-1">
+<button class="w-full flex items-center gap-3 px-3 py-2 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[18px]" data-icon="account_tree">account_tree</span>
+                    System_Architecture
+                </button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:bg-surface-container-high hover:text-on-surface-variant font-label-caps text-label-caps transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="account_tree">account_tree</span>
+                    Workflow_Engine
+                </button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:bg-surface-container-high hover:text-on-surface-variant font-label-caps text-label-caps transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="grid_view">grid_view</span>
+                    Logic_Matrices
+                </button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:bg-surface-container-high hover:text-on-surface-variant font-label-caps text-label-caps transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="insights">insights</span>
+                    Telemetry_Streams
+                </button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:bg-surface-container-high hover:text-on-surface-variant font-label-caps text-label-caps transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings_input_component">settings_input_component</span>
+                    Node_Registry
+                </button>
+</div>
+<!-- Global Specs -->
+<div class="mt-8 px-4">
+<p class="font-label-caps text-label-caps text-outline mb-4">GLOBAL_SPECS</p>
+<div class="space-y-3">
+<div class="flex flex-col gap-1">
+<span class="font-code-xs text-code-xs text-primary-fixed opacity-60">AUTH_TYPE</span>
+<span class="font-code-sm text-code-sm">Bearer JWT / OAuth2</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-code-xs text-code-xs text-primary-fixed opacity-60">VERSIONING</span>
+<span class="font-code-sm text-code-sm">Header: X-API-Version (v2.4)</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-code-xs text-code-xs text-primary-fixed opacity-60">TIMEOUT_DEFAULT</span>
+<span class="font-code-sm text-code-sm">3000ms [P99]</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-code-xs text-code-xs text-primary-fixed opacity-60">RETRY_POLICY</span>
+<span class="font-code-sm text-code-sm">Exp Backoff [Max 3]</span>
+</div>
+</div>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 h-[calc(100vh-48px-32px)] overflow-hidden relative">
+<!-- Dot Grid Background -->
+<div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: radial-gradient(#00ff41 1px, transparent 1px); background-size: 48px 48px;"></div>
+<!-- Scrollable Flow Container -->
+<div class="h-full overflow-auto p-12 relative custom-scrollbar">
+<div class="flex flex-col gap-16 min-w-max pb-24">
+<!-- Swimlane: IDENTITY & MEMBERSHIP -->
+<div class="flex items-start gap-8">
+<div class="w-48 shrink-0 py-4 sticky left-0 bg-surface/80 backdrop-blur z-10 border-r border-outline-variant h-full">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="person_search">person_search</span>
+<h2 class="font-headline-md text-headline-md">Identity</h2>
+</div>
+<p class="font-code-xs text-code-xs text-outline uppercase tracking-widest">Membership Core</p>
+</div>
+<div class="flex items-center gap-node-gutter">
+<!-- Node 1 -->
+<div class="w-64 shrink-0 bg-surface-container-low border border-primary-container/30 p-4 relative group hover:border-primary-container transition-colors">
+<div class="absolute -top-3 left-3 bg-surface-container px-2 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-container">POST</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">/membership/create</h3>
+<p class="font-code-xs text-code-xs text-outline mb-3">Initialize entity lifecycle</p>
+<div class="flex gap-2">
+<span class="px-1.5 py-0.5 bg-surface-container-highest font-code-xs text-code-xs text-primary-fixed">201_CREATED</span>
+<span class="px-1.5 py-0.5 bg-error-container/20 font-code-xs text-code-xs text-error">409_CONFLICT</span>
+</div>
+</div>
+<div class="w-16 node-connector-h shrink-0 opacity-50"></div>
+<!-- Node 2 -->
+<div class="w-64 shrink-0 bg-surface-container-low border border-outline-variant p-4 relative group hover:border-primary-container transition-colors">
+<div class="absolute -top-3 left-3 bg-surface-container px-2 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-container">POST</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">/membership/renew</h3>
+<p class="font-code-xs text-code-xs text-outline mb-3">Extension of period validity</p>
+<div class="flex gap-2">
+<span class="px-1.5 py-0.5 bg-surface-container-highest font-code-xs text-code-xs text-primary-fixed">200_OK</span>
+<span class="px-1.5 py-0.5 bg-error-container/20 font-code-xs text-code-xs text-error">402_PAYMENT_REQ</span>
+</div>
+</div>
+<div class="w-16 node-connector-h shrink-0 opacity-50"></div>
+<!-- Node 3 -->
+<div class="w-64 shrink-0 bg-surface-container-low border border-outline-variant p-4 relative group hover:border-primary-container transition-colors">
+<div class="absolute -top-3 left-3 bg-surface-container px-2 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-container">POST</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">/membership/upgrade</h3>
+<p class="font-code-xs text-code-xs text-outline mb-3">Tier transition logic</p>
+<div class="flex gap-2">
+<span class="px-1.5 py-0.5 bg-surface-container-highest font-code-xs text-code-xs text-primary-fixed">202_ACCEPTED</span>
+</div>
+</div>
+<div class="w-16 node-connector-h shrink-0 border-dashed border-t-2 border-error opacity-50 bg-none h-0"></div>
+<!-- Node 4 -->
+<div class="w-64 shrink-0 bg-surface-container-low border border-error/30 p-4 relative group hover:border-error transition-colors">
+<div class="absolute -top-3 left-3 bg-surface-container px-2 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-error">POST</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">/membership/cancel</h3>
+<p class="font-code-xs text-code-xs text-outline mb-3">Graceful termination protocol</p>
+<div class="flex gap-2">
+<span class="px-1.5 py-0.5 bg-surface-container-highest font-code-xs text-code-xs text-primary-fixed">200_OK</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: LOYALTY & REWARDS -->
+<div class="flex items-start gap-8">
+<div class="w-48 shrink-0 py-4 sticky left-0 bg-surface/80 backdrop-blur z-10 border-r border-outline-variant h-full">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="star">star</span>
+<h2 class="font-headline-md text-headline-md">Incentives</h2>
+</div>
+<p class="font-code-xs text-code-xs text-outline uppercase tracking-widest">Loyalty Engine</p>
+</div>
+<div class="grid grid-cols-3 gap-node-gutter">
+<!-- Points -->
+<div class="w-64 bg-surface-container-low border border-outline-variant p-4 relative group hover:border-primary-container transition-colors">
+<div class="absolute -top-3 left-3 bg-surface-container px-2 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-container">POST</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">/loyalty/points</h3>
+<p class="font-code-xs text-code-xs text-outline mb-3">Balance adjustment ledger</p>
+<div class="text-[10px] font-code-xs text-primary-fixed mt-2">Latency: 12ms</div>
+</div>
+<!-- Redeem -->
+<div class="w-64 bg-surface-container-low border border-outline-variant p-4 relative group hover:border-primary-container transition-colors">
+<div class="absolute -top-3 left-3 bg-surface-container px-2 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-container">POST</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">/rewards/redeem</h3>
+<p class="font-code-xs text-code-xs text-outline mb-3">Asset exchange execution</p>
+<div class="text-[10px] font-code-xs text-primary-fixed mt-2">Atomic Lock: Enabled</div>
+</div>
+<!-- Cashback -->
+<div class="w-64 bg-surface-container-low border border-outline-variant p-4 relative group hover:border-primary-container transition-colors">
+<div class="absolute -top-3 left-3 bg-surface-container px-2 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-container">POST</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">/cashback/create</h3>
+<p class="font-code-xs text-code-xs text-outline mb-3">Monetary rebate generation</p>
+</div>
+<!-- Referral -->
+<div class="w-64 bg-surface-container-low border border-outline-variant p-4 relative group hover:border-primary-container transition-colors">
+<div class="absolute -top-3 left-3 bg-surface-container px-2 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-container">POST</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-1">/referral/reward</h3>
+<p class="font-code-xs text-code-xs text-outline mb-3">Attribution-based crediting</p>
+</div>
+</div>
+</div>
+<!-- Swimlane: TELEMETRY & AUDIT -->
+<div class="flex items-start gap-8">
+<div class="w-48 shrink-0 py-4 sticky left-0 bg-surface/80 backdrop-blur z-10 border-r border-outline-variant h-full">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="security">security</span>
+<h2 class="font-headline-md text-headline-md">Observability</h2>
+</div>
+<p class="font-code-xs text-code-xs text-outline uppercase tracking-widest">Compliance Stubs</p>
+</div>
+<div class="flex items-center gap-node-gutter">
+<!-- Notification -->
+<div class="w-80 shrink-0 bg-surface-container-lowest border border-outline-variant p-4 flex gap-4">
+<div class="h-12 w-12 shrink-0 bg-surface-container flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="mail">mail</span>
+</div>
+<div>
+<h3 class="font-code-sm text-code-sm text-on-surface">/notification/send</h3>
+<p class="font-code-xs text-code-xs text-outline mt-1">Multi-channel dispatch (Webhook triggered)</p>
+<div class="mt-2 flex items-center gap-4">
+<div class="flex flex-col">
+<span class="text-[9px] uppercase text-outline">Retry</span>
+<span class="text-[10px] text-primary-container">Linear (5m)</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] uppercase text-outline">TTL</span>
+<span class="text-[10px] text-primary-container">24H</span>
+</div>
+</div>
+</div>
+</div>
+<div class="w-8 node-connector-h shrink-0 opacity-30"></div>
+<!-- Audit -->
+<div class="w-80 shrink-0 bg-surface-container-lowest border border-outline-variant p-4 flex gap-4">
+<div class="h-12 w-12 shrink-0 bg-surface-container flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="history_edu">history_edu</span>
+</div>
+<div>
+<h3 class="font-code-sm text-code-sm text-on-surface">/audit/write</h3>
+<p class="font-code-xs text-code-xs text-outline mt-1">Immutable ledger persistence</p>
+<div class="mt-2 text-[10px] font-code-sm text-primary-fixed flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+                                    Writing to BLOCK_STORE_A
+                                </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Sidebar Detail (Glassmorphism) -->
+<div class="fixed right-8 top-24 w-80 glass-panel border border-outline-variant p-6 z-30 shadow-2xl">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-label-caps text-label-caps text-primary-fixed">INSPECTOR_v1</h4>
+<span class="material-symbols-outlined text-outline cursor-pointer" data-icon="close">close</span>
+</div>
+<div class="space-y-6">
+<div>
+<p class="font-code-xs text-code-xs text-outline mb-2 uppercase tracking-tighter">Selected Endpoint</p>
+<h5 class="font-headline-md text-headline-md text-primary-container">POST /loyalty/points</h5>
+</div>
+<div class="p-3 bg-black/40 border border-outline-variant font-code-sm text-code-sm">
+<pre class="text-on-surface-variant overflow-x-auto">{
+  "entity_id": "UUID-789",
+  "points": 500,
+  "reason": "PURCHASE_04X",
+  "metadata": {
+    "node": "region-1"
+  }
+}
+                        </pre>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-code-xs text-code-xs text-outline">Failure Code</span>
+<span class="font-code-sm text-code-sm text-error">ERR_INSUFFICIENT_CREDIT</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-code-xs text-code-xs text-outline">Auth Scopes</span>
+<span class="font-code-sm text-code-sm">loyalty.write, audit.write</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-code-xs text-code-xs text-outline">Webhook Hook</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">POINTS_CREDITED</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between px-8 z-50">
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-outline">SYS_HEALTH: <span class="text-primary-container">NOMINAL</span></span>
+<span class="font-code-xs text-code-xs text-outline">[LATENCY: 14ms]</span>
+<span class="font-code-xs text-code-xs text-outline">[REGION: US-EAST-1]</span>
+</div>
+<div class="flex gap-6">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">LOGS</a>
+</div>
+</footer>
+<!-- Task FAB (Contextual for Developer View) -->
+<button class="fixed bottom-12 right-8 h-12 px-6 bg-primary-container text-on-primary-container rounded-full flex items-center gap-2 shadow-lg font-label-caps text-label-caps transition-transform active:scale-95 z-50">
+<span class="material-symbols-outlined" data-icon="add_circle" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+        DEPLOY_CONTRACT
+    </button>
+<script>
+        // Simple micro-interaction for node selection
+        document.querySelectorAll('.shrink-0.bg-surface-container-low').forEach(node => {
+            node.addEventListener('click', () => {
+                // Highlight logic
+                document.querySelectorAll('.shrink-0.bg-surface-container-low').forEach(n => n.classList.remove('border-primary-container'));
+                node.classList.add('border-primary-container');
+                
+                // Haptic feedback simulation
+                if (window.navigator.vibrate) window.navigator.vibrate(5);
+            });
+        });
+    </script>
+</body></html>

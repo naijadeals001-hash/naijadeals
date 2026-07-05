@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-036: Artifact L — Interaction Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-pulse {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.2);
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; border-color: #00e639; }
+            50% { opacity: 0.7; border-color: #3b4b37; }
+        }
+        .connection-path {
+            stroke-dasharray: 5;
+            animation: dash 10s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+        .latency-badge {
+            backdrop-filter: blur(4px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#00530e",
+                      "error": "#ffb4ab",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-background": "#d4e4fa",
+                      "surface-container-low": "#0d1c2d",
+                      "surface-container-highest": "#273647",
+                      "surface-container-high": "#1c2b3c",
+                      "inverse-on-surface": "#233143",
+                      "surface-dim": "#051424",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "outline": "#84967e",
+                      "on-secondary": "#002388",
+                      "secondary-container": "#0043eb",
+                      "on-primary": "#003907",
+                      "on-secondary-container": "#c6ceff",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "tertiary-fixed": "#f0dbff",
+                      "surface": "#051424",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-error": "#690005",
+                      "primary": "#ebffe2",
+                      "surface-tint": "#00e639",
+                      "on-tertiary-fixed": "#2c0051",
+                      "on-secondary-fixed": "#001356",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-bright": "#2c3a4c",
+                      "surface-variant": "#273647",
+                      "surface-container": "#122131",
+                      "inverse-primary": "#006e16",
+                      "tertiary": "#fff6ff",
+                      "primary-fixed": "#72ff70",
+                      "on-tertiary-container": "#862ed4",
+                      "on-tertiary": "#490080",
+                      "error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary-fixed": "#002203",
+                      "secondary": "#b8c3ff",
+                      "on-surface": "#d4e4fa",
+                      "on-primary-container": "#007117",
+                      "secondary-fixed": "#dde1ff",
+                      "primary-container": "#00ff41",
+                      "inverse-surface": "#d4e4fa",
+                      "primary-fixed-dim": "#00e639",
+                      "background": "#051424",
+                      "surface-container-lowest": "#010f1f",
+                      "outline-variant": "#3b4b37"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-hidden">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full bg-surface-container-lowest text-primary z-50 flex justify-between items-center px-node-gutter h-16 border-b border-outline-variant">
+<div class="flex items-center gap-stack-gap">
+<span class="material-symbols-outlined text-primary-fixed-dim">terminal</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">AD_ENGINE_CORE_v2.0</span>
+</div>
+<nav class="hidden md:flex gap-lane-margin h-full items-center">
+<a class="font-code-sm text-code-sm text-primary border-b-2 border-primary-fixed-dim px-2 h-full flex items-center" href="#">Blueprint</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant opacity-70 hover:bg-surface-container-highest transition-colors px-2 h-full flex items-center" href="#">Architecture</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant opacity-70 hover:bg-surface-container-highest transition-colors px-2 h-full flex items-center" href="#">Logs</a>
+</nav>
+<div class="flex items-center gap-grid-unit">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="fixed left-0 top-16 h-full w-64 bg-surface-container-low border-r border-outline-variant hidden md:flex flex-col p-grid-unit z-40">
+<div class="mb-lane-margin px-2 pt-4">
+<h2 class="font-code-sm text-code-sm text-on-surface-variant uppercase tracking-widest">System_Operations</h2>
+</div>
+<div class="flex flex-col gap-stack-gap">
+<div class="flex items-center gap-grid-unit p-2 bg-on-primary-fixed-variant text-primary-fixed font-bold border-l-4 border-primary-fixed-dim cursor-pointer">
+<span class="material-symbols-outlined">ads_click</span>
+<span class="font-code-sm text-code-sm">Campaigns</span>
+</div>
+<div class="flex items-center gap-grid-unit p-2 text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-code-sm text-code-sm">Bidding_Logs</span>
+</div>
+<div class="flex items-center gap-grid-unit p-2 text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-code-sm text-code-sm">Audience_AI</span>
+</div>
+<div class="flex items-center gap-grid-unit p-2 text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-code-sm text-code-sm">Placements</span>
+</div>
+<div class="flex items-center gap-grid-unit p-2 text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all">
+<span class="material-symbols-outlined">security</span>
+<span class="font-code-sm text-code-sm">Fraud_Shield</span>
+</div>
+<div class="flex items-center gap-grid-unit p-2 text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-code-sm text-code-sm">Analytics</span>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="fixed inset-0 top-16 md:left-64 bg-surface-dim overflow-auto scroll-smooth">
+<!-- Blueprint Viewport -->
+<div class="relative w-full h-[1326px] p-lane-margin">
+<!-- Swimlanes Backdrop -->
+<div class="absolute inset-0 flex">
+<div class="w-1/4 h-full border-r border-outline-variant/30 flex flex-col items-center">
+<div class="sticky top-4 mt-8 bg-surface-container px-3 py-1 rounded-sm border border-outline font-label-caps text-label-caps">CLIENT_UX</div>
+</div>
+<div class="w-1/4 h-full border-r border-outline-variant/30 flex flex-col items-center">
+<div class="sticky top-4 mt-8 bg-surface-container px-3 py-1 rounded-sm border border-outline font-label-caps text-label-caps">EDGE_GATEWAY</div>
+</div>
+<div class="w-1/4 h-full border-r border-outline-variant/30 flex flex-col items-center">
+<div class="sticky top-4 mt-8 bg-surface-container px-3 py-1 rounded-sm border border-outline font-label-caps text-label-caps">CORE_SERVICES</div>
+</div>
+<div class="w-1/4 h-full flex flex-col items-center">
+<div class="sticky top-4 mt-8 bg-surface-container px-3 py-1 rounded-sm border border-outline font-label-caps text-label-caps">DISTRIBUTED_ENGINE</div>
+</div>
+</div>
+<!-- Interaction Graph Layer (SVG) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<!-- Trace paths -->
+<path class="connection-path" d="M 200 150 L 500 150" fill="none" stroke="#00e639" stroke-width="2"></path>
+<path class="connection-path" d="M 500 180 L 800 180" fill="none" stroke="#00e639" stroke-width="2"></path>
+<path class="connection-path" d="M 800 210 L 1100 210" fill="none" stroke="#00e639" stroke-width="2"></path>
+<!-- Return path (Websocket) -->
+<path class="connection-path" d="M 1100 400 L 200 400" fill="none" stroke="#b8c3ff" stroke-dasharray="8 4" stroke-width="1.5"></path>
+<!-- Bidding loop -->
+<path class="connection-path" d="M 800 600 L 1100 600" fill="none" stroke="#00e639" stroke-width="2"></path>
+<path class="connection-path" d="M 1100 640 L 800 640" fill="none" stroke="#00e639" stroke-width="2"></path>
+</svg>
+<!-- Interaction Nodes -->
+<div class="relative z-10 space-y-lane-margin">
+<!-- Phase 1: Campaign Creation -->
+<div class="flex items-start">
+<!-- Client Node -->
+<div class="w-1/4 flex justify-center">
+<div class="bg-surface-container-high border border-primary-fixed-dim p-4 w-48 rounded-sm node-pulse">
+<div class="font-label-caps text-label-caps text-primary mb-2">INIT_CAMPAIGN</div>
+<div class="font-code-sm text-code-sm text-on-surface">POST /v2/create</div>
+<div class="mt-4 flex gap-1">
+<div class="w-full h-1 bg-primary-container"></div>
+<div class="w-1/2 h-1 bg-surface-container"></div>
+</div>
+</div>
+</div>
+<!-- Gateway Node -->
+<div class="w-1/4 flex justify-center mt-8">
+<div class="bg-surface-container-high border border-outline p-4 w-48 rounded-sm">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">AUTH_VALIDATION</div>
+<div class="font-code-sm text-code-sm text-on-surface">JWT Header: OK</div>
+<div class="mt-2 font-code-xs text-code-xs text-primary">Latency: 8ms</div>
+</div>
+</div>
+<!-- Service Node -->
+<div class="w-1/4 flex justify-center mt-16">
+<div class="bg-surface-container-high border border-outline p-4 w-48 rounded-sm">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">DB_WRITE</div>
+<div class="font-code-sm text-code-sm text-on-surface">Commit: TX_8921</div>
+<div class="mt-2 font-code-xs text-code-xs text-primary">Latency: 15ms</div>
+</div>
+</div>
+<!-- Sync Node -->
+<div class="w-1/4 flex justify-center mt-24">
+<div class="bg-surface-container-high border border-secondary p-4 w-48 rounded-sm">
+<div class="font-label-caps text-label-caps text-secondary-fixed-dim mb-2">ELASTIC_INDEX</div>
+<div class="font-code-sm text-code-sm text-on-surface">Replica: Propagating</div>
+<div class="mt-2 font-code-xs text-code-xs text-secondary-fixed-dim">Latency: 112ms</div>
+</div>
+</div>
+</div>
+<!-- Phase 2: Impression Lifecycle -->
+<div class="flex items-start mt-32">
+<div class="w-1/4 flex justify-center">
+<!-- Frontend Update / Socket Feedback -->
+<div class="bg-surface-container-high border border-outline-variant p-4 w-48 rounded-sm">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2">WS_CLIENT_SYNC</div>
+<div class="font-code-sm text-code-sm text-on-surface">Status: LIVE</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+<span class="font-code-xs text-code-xs opacity-60">Push: {id: "cmp_01"}</span>
+</div>
+</div>
+</div>
+<div class="w-1/2 flex flex-col items-center">
+<div class="h-16 w-1 bg-outline-variant/50"></div>
+<div class="px-4 py-2 bg-surface-container-highest border border-outline font-code-xs text-code-xs uppercase tracking-tighter">Event_Bus: KAFKA_CLUSTER_01</div>
+<div class="h-16 w-1 bg-outline-variant/50"></div>
+</div>
+<div class="w-1/4 flex justify-center">
+<!-- Search Engine -->
+<div class="bg-surface-container-high border border-primary p-4 w-48 rounded-sm relative">
+<div class="absolute -top-3 -right-3 px-2 py-1 bg-primary text-on-primary font-code-xs rounded-full">42ms</div>
+<div class="font-label-caps text-label-caps text-primary mb-2">AD_RETRIEVAL</div>
+<div class="font-code-sm text-code-sm text-on-surface">Score: 0.985</div>
+<div class="font-code-xs text-code-xs text-outline mt-2">Placements: Global_Web</div>
+</div>
+</div>
+</div>
+<!-- Phase 3: Budget Real-time -->
+<div class="flex items-start">
+<div class="w-1/2"></div>
+<div class="w-1/4 flex justify-center">
+<div class="bg-surface-container-low border border-error p-4 w-48 rounded-sm">
+<div class="font-label-caps text-label-caps text-error mb-2">BUDGET_DETUCT</div>
+<div class="font-code-sm text-code-sm text-on-surface">-$1.42 (Auction)</div>
+<div class="font-code-xs text-code-xs text-outline mt-1">Remaining: $4,998.58</div>
+</div>
+</div>
+<div class="w-1/4"></div>
+</div>
+</div>
+<!-- Telemetry Overlay (Floating) -->
+<div class="fixed bottom-16 right-4 w-64 bg-surface-container-low/80 backdrop-blur-md border border-outline-variant p-4 z-50">
+<div class="font-label-caps text-label-caps text-primary mb-4 border-b border-outline-variant pb-2">TELEMETRY_STREAM</div>
+<div class="space-y-2">
+<div class="flex justify-between font-code-xs">
+<span class="opacity-60">Avg Response:</span>
+<span class="text-primary">164ms</span>
+</div>
+<div class="flex justify-between font-code-xs">
+<span class="opacity-60">Thruput:</span>
+<span class="text-primary">12.4k req/s</span>
+</div>
+<div class="flex justify-between font-code-xs">
+<span class="opacity-60">Active WS:</span>
+<span class="text-primary">8,102</span>
+</div>
+</div>
+<div class="mt-4 pt-2 border-t border-outline-variant">
+<div class="w-full h-8 flex items-end gap-1">
+<div class="flex-1 bg-primary-fixed-dim" style="height: 40%"></div>
+<div class="flex-1 bg-primary-fixed-dim" style="height: 60%"></div>
+<div class="flex-1 bg-primary-fixed-dim" style="height: 90%"></div>
+<div class="flex-1 bg-primary-fixed-dim" style="height: 75%"></div>
+<div class="flex-1 bg-primary-fixed-dim" style="height: 30%"></div>
+<div class="flex-1 bg-primary-fixed-dim" style="height: 55%"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile) -->
+<footer class="fixed bottom-0 w-full h-12 bg-surface-container-highest flex md:hidden justify-around items-center px-lane-margin border-t border-outline-variant z-50">
+<span class="material-symbols-outlined text-primary-fixed bg-on-primary-fixed-variant p-1 rounded-sm">settings_input_component</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-50">history_edu</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-50">hub</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-50">api</span>
+</footer>
+<!-- Atmosphere Effects -->
+<script>
+        // Micro-telemetry updates simulation
+        setInterval(() => {
+            const latencies = document.querySelectorAll('.latency-badge');
+            latencies.forEach(l => {
+                const base = parseInt(l.innerText);
+                const variance = Math.floor(Math.random() * 5) - 2;
+                l.innerText = (base + variance) + 'ms';
+            });
+        }, 3000);
+
+        // Click interaction for nodes
+        document.querySelectorAll('.bg-surface-container-high').forEach(node => {
+            node.addEventListener('mousedown', () => {
+                node.style.transform = 'scale(0.95)';
+            });
+            node.addEventListener('mouseup', () => {
+                node.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

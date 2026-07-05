@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-035: Artifact J — Test &amp; Acceptance Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2px;
+            background-color: #3b4b37;
+        }
+        .node-card {
+            background-color: #010f1f;
+            transition: all 0.2s ease-in-out;
+        }
+        .node-card:hover {
+            background-color: #0d1c2d;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .connector-line {
+            position: absolute;
+            background-color: #3b4b37;
+            z-index: 0;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .glass-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(1, 15, 31, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#0043eb",
+                      "primary-container": "#00ff41",
+                      "on-secondary-container": "#c6ceff",
+                      "on-error-container": "#ffdad6",
+                      "tertiary": "#fff6ff",
+                      "error": "#ffb4ab",
+                      "inverse-on-surface": "#233143",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-tertiary-fixed": "#2c0051",
+                      "on-secondary-fixed": "#001356",
+                      "error-container": "#93000a",
+                      "secondary-fixed": "#dde1ff",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "surface-container": "#122131",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-tertiary-container": "#862ed4",
+                      "surface-container-low": "#0d1c2d",
+                      "outline-variant": "#3b4b37",
+                      "on-primary": "#003907",
+                      "secondary": "#b8c3ff",
+                      "on-surface": "#d4e4fa",
+                      "surface-dim": "#051424",
+                      "surface-container-lowest": "#010f1f",
+                      "on-primary-fixed-variant": "#00530e",
+                      "tertiary-fixed": "#f0dbff",
+                      "on-error": "#690005",
+                      "surface-tint": "#00e639",
+                      "inverse-primary": "#006e16",
+                      "primary-fixed": "#72ff70",
+                      "on-primary-container": "#007117",
+                      "outline": "#84967e",
+                      "on-background": "#d4e4fa",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "primary": "#ebffe2",
+                      "surface-container-highest": "#273647",
+                      "surface-bright": "#2c3a4c",
+                      "on-tertiary": "#490080",
+                      "on-primary-fixed": "#002203",
+                      "primary-fixed-dim": "#00e639",
+                      "background": "#051424",
+                      "surface-container-high": "#1c2b3c",
+                      "surface": "#051424",
+                      "on-secondary": "#002388",
+                      "on-surface-variant": "#b9ccb2",
+                      "surface-variant": "#273647",
+                      "inverse-surface": "#d4e4fa",
+                      "tertiary-container": "#ecd3ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "stack-gap": "4px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "code-xs": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 w-full h-12 flex justify-between items-center px-grid-unit border-b border-outline-variant bg-surface-container-lowest z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<h1 class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</h1>
+</div>
+<nav class="hidden md:flex gap-6 h-full">
+<a class="flex items-center px-2 font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed" href="#">SYSTEM_ARCHITECTURE</a>
+<a class="flex items-center px-2 font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors" href="#">WORKFLOW_ENGINE</a>
+<a class="flex items-center px-2 font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors" href="#">LOGIC_MATRICES</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-primary-fixed">STATUS: OK</span>
+</div>
+</header>
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 flex flex-col bg-surface-container border-r border-outline-variant z-40">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary-fixed opacity-70">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1 overflow-y-auto terminal-scroll">
+<div class="group cursor-pointer bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed p-4 transition-all duration-150 ease-in-out">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps">System_Architecture</span>
+</div>
+</div>
+<div class="group cursor-pointer text-outline hover:text-on-surface-variant hover:bg-surface-container-high p-4 transition-all duration-150 ease-in-out">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps">Workflow_Engine</span>
+</div>
+</div>
+<div class="group cursor-pointer text-outline hover:text-on-surface-variant hover:bg-surface-container-high p-4 transition-all duration-150 ease-in-out">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-code-sm text-code-sm font-label-caps">Logic_Matrices</span>
+</div>
+</div>
+<div class="group cursor-pointer text-outline hover:text-on-surface-variant hover:bg-surface-container-high p-4 transition-all duration-150 ease-in-out">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-code-sm text-code-sm font-label-caps">Telemetry_Streams</span>
+</div>
+</div>
+<div class="group cursor-pointer text-outline hover:text-on-surface-variant hover:bg-surface-container-high p-4 transition-all duration-150 ease-in-out">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-code-sm text-code-sm font-label-caps">Node_Registry</span>
+</div>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-xs text-code-xs opacity-50">LATENCY</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">14ms</span>
+</div>
+<div class="w-full bg-outline-variant h-1 overflow-hidden">
+<div class="bg-primary-fixed h-full w-[14%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 mb-8 flex-1 p-8">
+<!-- Header Section -->
+<div class="mb-lane-margin flex justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary-fixed mb-1 uppercase">Artifact J: Test &amp; Acceptance Blueprint</h2>
+<p class="font-code-sm text-code-sm text-outline">CRITICAL_PATH_VALIDATION // BUILD_VER: 035_STABLE</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-surface-container-high border border-outline-variant font-label-caps text-label-caps hover:bg-primary-fixed hover:text-on-primary transition-colors cursor-pointer">EXPORT_SCHEMA</button>
+<button class="px-4 py-2 bg-primary-fixed text-on-primary font-label-caps text-label-caps hover:opacity-80 transition-colors cursor-pointer">EXECUTE_SUITE</button>
+</div>
+</div>
+<!-- Global Status Bar -->
+<div class="grid grid-cols-4 gap-4 mb-lane-margin">
+<div class="p-4 bg-surface-container border border-outline-variant flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-outline">TOTAL_TESTS</span>
+<span class="font-code-sm text-code-sm text-headline-md text-primary-fixed">1,402</span>
+</div>
+<div class="p-4 bg-surface-container border border-outline-variant flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-outline">PASSED</span>
+<span class="font-code-sm text-code-sm text-headline-md text-primary-fixed">1,398</span>
+</div>
+<div class="p-4 bg-surface-container border border-outline-variant flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-outline">FAILED</span>
+<span class="font-code-sm text-code-sm text-headline-md text-error">4</span>
+</div>
+<div class="p-4 bg-surface-container border border-outline-variant flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-outline">COVERAGE</span>
+<span class="font-code-sm text-code-sm text-headline-md text-secondary">99.2%</span>
+</div>
+</div>
+<!-- Matrix Layout -->
+<div class="matrix-grid border border-outline-variant">
+<!-- Acceptance Criteria -->
+<section class="node-card p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<h3 class="font-label-caps text-label-caps text-primary-fixed">ACCEPTANCE_CRITERIA</h3>
+<span class="material-symbols-outlined text-outline">check_circle</span>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex gap-3 items-start">
+<span class="status-dot mt-1.5 bg-primary-fixed"></span>
+<p class="font-code-sm text-code-sm">REQ_001: Subscription idempotency verified via UUID-v4 anchoring.</p>
+</div>
+<div class="flex gap-3 items-start">
+<span class="status-dot mt-1.5 bg-primary-fixed"></span>
+<p class="font-code-sm text-code-sm">REQ_002: Cashback reconciliation matches ledger sum precisely.</p>
+</div>
+<div class="flex gap-3 items-start">
+<span class="status-dot mt-1.5 bg-primary-fixed"></span>
+<p class="font-code-sm text-code-sm">REQ_003: Referral cycles terminate after Tier-4 depth.</p>
+</div>
+</div>
+<div class="mt-auto pt-4 flex justify-between items-center border-t border-outline-variant opacity-50">
+<span class="font-code-xs text-code-xs">COMPLIANCE: 100%</span>
+<span class="font-code-xs text-code-xs">AUDIT: OK</span>
+</div>
+</section>
+<!-- Subscription Tests -->
+<section class="node-card p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<h3 class="font-label-caps text-label-caps text-secondary">SUBSCRIPTION_TESTS</h3>
+<span class="material-symbols-outlined text-outline">jump_to_element</span>
+</div>
+<div class="space-y-2">
+<div class="p-2 border border-outline-variant bg-surface-container-low flex justify-between items-center">
+<span class="font-code-xs text-code-xs">T-SUB-01: INIT_FLOW</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">PASS</span>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low flex justify-between items-center">
+<span class="font-code-xs text-code-xs">T-SUB-02: CANCEL_GRACE</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">PASS</span>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low flex justify-between items-center">
+<span class="font-code-xs text-code-xs">T-SUB-03: UPGRADE_PRORATA</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">PASS</span>
+</div>
+</div>
+<div class="mt-auto">
+<div class="h-1 w-full bg-outline-variant">
+<div class="h-full bg-secondary w-full"></div>
+</div>
+</div>
+</section>
+<!-- Renewal Tests -->
+<section class="node-card p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<h3 class="font-label-caps text-label-caps text-secondary">RENEWAL_TESTS</h3>
+<span class="material-symbols-outlined text-outline">history</span>
+</div>
+<div class="space-y-2">
+<div class="p-2 border border-outline-variant bg-surface-container-low flex justify-between items-center">
+<span class="font-code-xs text-code-xs">T-REN-01: AUTO_REBILL</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">PASS</span>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low flex justify-between items-center border-l-4 border-l-error">
+<span class="font-code-xs text-code-xs">T-REN-02: EXP_HANDLING</span>
+<span class="font-code-xs text-code-xs text-error">FAIL [402]</span>
+</div>
+</div>
+<div class="text-error font-code-xs text-code-xs mt-2 italic bg-error-container/20 p-2">
+                    WARN: Stripe webhook timeout on retry cycle 3.
+                </div>
+</section>
+<!-- Reward Tests -->
+<section class="node-card p-6 flex flex-col gap-4 border-l-2 border-l-primary-fixed">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<h3 class="font-label-caps text-label-caps text-primary-fixed">REWARD_TESTS</h3>
+<span class="material-symbols-outlined text-outline">redeem</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="aspect-square border border-outline-variant flex flex-col items-center justify-center gap-1">
+<span class="font-code-xs text-code-xs text-outline">LOYALTY</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">VAL</span>
+</div>
+<div class="aspect-square border border-outline-variant flex flex-col items-center justify-center gap-1">
+<span class="font-code-xs text-code-xs text-outline">STREAK</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">VAL</span>
+</div>
+<div class="aspect-square border border-outline-variant flex flex-col items-center justify-center gap-1">
+<span class="font-code-xs text-code-xs text-outline">BADGE</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">VAL</span>
+</div>
+<div class="aspect-square border border-outline-variant flex flex-col items-center justify-center gap-1">
+<span class="font-code-xs text-code-xs text-outline">XP_CALC</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">VAL</span>
+</div>
+</div>
+</section>
+<!-- Cashback & Wallet -->
+<section class="node-card p-6 flex flex-col gap-4 col-span-1 md:col-span-2">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<h3 class="font-label-caps text-label-caps text-primary-fixed">FINANCIAL_INTEGRITY: CASHBACK / WALLET</h3>
+<span class="material-symbols-outlined text-outline">account_balance_wallet</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-3">
+<h4 class="font-code-sm text-code-sm text-outline border-b border-outline-variant/30">CASHBACK_LOGIC</h4>
+<ul class="space-y-2">
+<li class="flex justify-between font-code-xs text-code-xs"><span class="text-on-surface-variant">Round-up Logic Validation</span><span class="text-primary-fixed">SYNCED</span></li>
+<li class="flex justify-between font-code-xs text-code-xs"><span class="text-on-surface-variant">Floating Point Precision Test</span><span class="text-primary-fixed">SYNCED</span></li>
+<li class="flex justify-between font-code-xs text-code-xs"><span class="text-on-surface-variant">Multi-Currency Conversion</span><span class="text-primary-fixed">SYNCED</span></li>
+</ul>
+</div>
+<div class="space-y-3">
+<h4 class="font-code-sm text-code-sm text-outline border-b border-outline-variant/30">WALLET_LEDGER</h4>
+<div class="p-3 bg-surface-container-highest/30 font-code-xs text-code-xs leading-relaxed text-on-surface-variant">
+                            EXEC::LEDGER_VERIFY --input_tx: 4.8k<br/>
+                            CHECK::DOUBLE_ENTRY_CONSISTENCY --result: 1.0000<br/>
+                            STATE::LOCKED_ASSETS_RELEASE --mode: AUTO
+                        </div>
+</div>
+</div>
+</section>
+<!-- Database & API Tests -->
+<section class="node-card p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<h3 class="font-label-caps text-label-caps text-primary-fixed">CORE_INFRA_VALIDATION</h3>
+<span class="material-symbols-outlined text-outline">database</span>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-code-xs text-code-xs">API_LATENCY_P99</span>
+<span class="font-code-xs text-code-xs">84ms</span>
+</div>
+<div class="h-1 w-full bg-outline-variant"><div class="h-full bg-primary-fixed w-[84%]"></div></div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-code-xs text-code-xs">DB_QUERY_EFFICIENCY</span>
+<span class="font-code-xs text-code-xs">96%</span>
+</div>
+<div class="h-1 w-full bg-outline-variant"><div class="h-full bg-primary-fixed w-[96%]"></div></div>
+</div>
+<div class="mt-4 p-2 border border-outline-variant/50 font-code-xs text-code-xs">
+<div class="text-primary-fixed">✓ ACID compliant storage verified.</div>
+<div class="text-primary-fixed">✓ GraphQL schema introspected.</div>
+<div class="text-primary-fixed">✓ Redis cache-hit: 92%.</div>
+</div>
+</div>
+</section>
+<!-- Checklists -->
+<section class="node-card p-6 flex flex-col gap-4 border-t-2 border-t-secondary">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<h3 class="font-label-caps text-label-caps text-secondary">RELEASE_CHECKLISTS</h3>
+<span class="material-symbols-outlined text-outline">fact_check</span>
+</div>
+<div class="flex flex-col gap-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-4 h-4 border border-outline-variant flex items-center justify-center group-hover:border-primary-fixed">
+<span class="material-symbols-outlined text-[12px] text-primary-fixed">check</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Developer Unit Review</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-4 h-4 border border-outline-variant flex items-center justify-center group-hover:border-primary-fixed">
+<span class="material-symbols-outlined text-[12px] text-primary-fixed">check</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">QA Regression Suite [Gold]</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-4 h-4 border border-outline-variant flex items-center justify-center"></div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Staging Hot-Swap Protocol</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-4 h-4 border border-outline-variant flex items-center justify-center"></div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Post-Release Telemetry Handshake</span>
+</label>
+</div>
+</section>
+</div>
+<!-- Telemetry Graph Section -->
+<div class="mt-lane-margin grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="col-span-2 bg-surface-container border border-outline-variant p-6 relative overflow-hidden">
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-4">REALTIME_EXECUTION_STREAMS</h3>
+<div class="h-48 w-full border-b border-l border-outline-variant relative">
+<!-- Simulated Graph Lines -->
+<svg class="absolute inset-0 w-full h-full">
+<polyline fill="none" points="0,150 50,140 100,160 150,130 200,155 250,110 300,120 350,90 400,115 450,85 500,105 550,70 600,95 650,60" stroke="#00ff41" stroke-width="2"></polyline>
+<polyline fill="none" points="0,180 50,175 100,182 150,170 200,178 250,165 300,172 350,160 400,168 450,155 500,162 550,150 600,158 650,145" stroke="#b8c3ff" stroke-dasharray="4" stroke-width="1"></polyline>
+</svg>
+<!-- Grid Lines -->
+<div class="absolute top-0 left-0 w-full h-full pointer-events-none border-t border-outline-variant/10"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="font-code-xs text-code-xs text-outline">T-minus 60s</span>
+<span class="font-code-xs text-code-xs text-outline">Live Output</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-4">AUDIT_STUBS</h3>
+<div class="space-y-4 max-h-48 overflow-y-auto terminal-scroll pr-2">
+<div class="border-l-2 border-primary-fixed pl-3">
+<div class="font-code-xs text-code-xs text-outline">12:04:15.021</div>
+<div class="font-code-sm text-code-sm">SYNC_SUCCESS: Ledger partition 0x442</div>
+</div>
+<div class="border-l-2 border-primary-fixed pl-3">
+<div class="font-code-xs text-code-xs text-outline">12:04:14.992</div>
+<div class="font-code-sm text-code-sm">AUTH_HANDSHAKE: Token validated</div>
+</div>
+<div class="border-l-2 border-error pl-3">
+<div class="font-code-xs text-code-xs text-outline">12:04:14.500</div>
+<div class="font-code-sm text-code-sm">WARN: Node_3 latency spike (150ms)</div>
+</div>
+<div class="border-l-2 border-primary-fixed pl-3">
+<div class="font-code-xs text-code-xs text-outline">12:04:13.112</div>
+<div class="font-code-sm text-code-sm">CRON_JOB: Daily cashback recalc finished</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Global Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-grid-unit z-50 bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<nav class="flex gap-4">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">LOGS</a>
+</nav>
+</footer>
+<!-- FAB for Task Alignment -->
+<button class="fixed bottom-12 right-6 w-12 h-12 bg-primary-fixed text-on-primary flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:opacity-80 z-50">
+<span class="material-symbols-outlined">add_task</span>
+</button>
+<script>
+        // Simple interactive element: Status toggle simulation
+        document.querySelectorAll('.node-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const headline = card.querySelector('h3');
+                console.log(`Inspecting Node: ${headline ? headline.innerText : 'Unknown'}`);
+            });
+        });
+
+        // Dynamic terminal clock update (optional micro-interaction)
+        function updateAuditLogs() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
+                            now.getMinutes().toString().padStart(2, '0') + ":" + 
+                            now.getSeconds().toString().padStart(2, '0');
+            // Logic to append logs could go here for "realtime" effect
+        }
+        setInterval(updateAuditLogs, 1000);
+    </script>
+</body></html>

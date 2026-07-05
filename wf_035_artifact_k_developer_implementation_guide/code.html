@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-035: Artifact K — Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#0043eb",
+                    "primary-container": "#00ff41",
+                    "on-secondary-container": "#c6ceff",
+                    "on-error-container": "#ffdad6",
+                    "tertiary": "#fff6ff",
+                    "error": "#ffb4ab",
+                    "inverse-on-surface": "#233143",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-secondary-fixed": "#001356",
+                    "error-container": "#93000a",
+                    "secondary-fixed": "#dde1ff",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "surface-container": "#122131",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-tertiary-container": "#862ed4",
+                    "surface-container-low": "#0d1c2d",
+                    "outline-variant": "#3b4b37",
+                    "on-primary": "#003907",
+                    "secondary": "#b8c3ff",
+                    "on-surface": "#d4e4fa",
+                    "surface-dim": "#051424",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary-fixed-variant": "#00530e",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-error": "#690005",
+                    "surface-tint": "#00e639",
+                    "inverse-primary": "#006e16",
+                    "primary-fixed": "#72ff70",
+                    "on-primary-container": "#007117",
+                    "outline": "#84967e",
+                    "on-background": "#d4e4fa",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "primary": "#ebffe2",
+                    "surface-container-highest": "#273647",
+                    "surface-bright": "#2c3a4c",
+                    "on-tertiary": "#490080",
+                    "on-primary-fixed": "#002203",
+                    "primary-fixed-dim": "#00e639",
+                    "background": "#051424",
+                    "surface-container-high": "#1c2b3c",
+                    "surface": "#051424",
+                    "on-secondary": "#002388",
+                    "on-surface-variant": "#b9ccb2",
+                    "surface-variant": "#273647",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary-container": "#ecd3ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "stack-gap": "4px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, #122131 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background-color: #3b4b37;
+        }
+        .flow-line-h::after {
+            height: 1px;
+            width: 24px;
+            top: 50%;
+            right: -24px;
+        }
+        .flow-line-v::after {
+            width: 1px;
+            height: 24px;
+            left: 50%;
+            bottom: -24px;
+        }
+        .terminal-glow {
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-[60] w-full h-12 bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-grid-unit">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<h1 class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</h1>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden md:flex items-center gap-4">
+<a class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed px-2 py-1" href="#">IMPLEMENTATION_GUIDE</a>
+<a class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors px-2 py-1" href="#">API_DOCS</a>
+<a class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors px-2 py-1" href="#">DEBUG_LOGS</a>
+</nav>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded border border-outline-variant">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-label-caps text-label-caps text-primary">STATUS: OK</span>
+</div>
+</div>
+</header>
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container border-r border-outline-variant flex flex-col z-50">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary-fixed opacity-70">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1 overflow-y-auto py-2">
+<div class="px-2 mb-4">
+<button class="w-full flex items-center gap-3 px-3 py-2 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all duration-150">
+<span class="material-symbols-outlined text-sm">account_tree</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150">
+<span class="material-symbols-outlined text-sm">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow_Engine</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150">
+<span class="material-symbols-outlined text-sm">grid_view</span>
+<span class="font-label-caps text-label-caps">Logic_Matrices</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150">
+<span class="material-symbols-outlined text-sm">insights</span>
+<span class="font-label-caps text-label-caps">Telemetry_Streams</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150">
+<span class="material-symbols-outlined text-sm">settings_input_component</span>
+<span class="font-label-caps text-label-caps">Node_Registry</span>
+</button>
+</div>
+<div class="px-4 py-2 mt-4 border-t border-outline-variant">
+<p class="font-code-xs text-code-xs text-outline mb-2 uppercase">Current Context</p>
+<div class="p-2 bg-surface-container-low border border-outline-variant rounded">
+<p class="font-code-sm text-code-sm text-primary-fixed">ARTIFACT-K-WF035</p>
+<p class="font-code-xs text-code-xs text-outline">Priority: Critical</p>
+</div>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 mb-8 p-8 min-h-screen">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-8 border-b border-outline-variant pb-4">
+<div>
+<p class="font-label-caps text-label-caps text-primary-fixed mb-1">SYSTEM_DOC_v3</p>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">WF-035: Artifact K Implementation</h2>
+</div>
+<div class="text-right">
+<p class="font-code-xs text-code-xs text-outline uppercase">Handover Status</p>
+<p class="font-headline-md text-headline-md text-primary-container terminal-glow">READY_FOR_SPRINT</p>
+</div>
+</div>
+<!-- Bento Grid: Microservices Logic Map -->
+<div class="grid grid-cols-12 gap-4 mb-12">
+<!-- Swimlane: Owning Microservices -->
+<div class="col-span-12 lg:col-span-8 grid grid-cols-3 gap-4">
+<div class="col-span-3 mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">hub</span>
+<h3 class="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Core Microservices</h3>
+</div>
+<!-- Service Node: Membership -->
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-primary-container transition-colors group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-secondary-container/20 text-secondary-fixed px-1 border border-secondary-container">MEM-01</span>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Membership_Service</h4>
+<p class="font-code-xs text-code-xs text-outline mb-4">Tier management &amp; identity validation.</p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">AUTH</span>
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">TIERS</span>
+</div>
+</div>
+<!-- Service Node: Loyalty -->
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-primary-container transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-secondary-container/20 text-secondary-fixed px-1 border border-secondary-container">LOY-02</span>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Loyalty_Engine</h4>
+<p class="font-code-xs text-code-xs text-outline mb-4">Point accrual &amp; ledger calculation.</p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">LEDGER</span>
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">ACCRUAL</span>
+</div>
+</div>
+<!-- Service Node: Rewards -->
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-primary-container transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-secondary-container/20 text-secondary-fixed px-1 border border-secondary-container">REW-03</span>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Rewards_Voucher</h4>
+<p class="font-code-xs text-code-xs text-outline mb-4">Inventory &amp; redemption handlers.</p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">REDEM</span>
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">STOCK</span>
+</div>
+</div>
+<!-- Service Node: Referral -->
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-primary-container transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-secondary-container/20 text-secondary-fixed px-1 border border-secondary-container">REF-04</span>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Referral_Network</h4>
+<p class="font-code-xs text-code-xs text-outline mb-4">Attribution graph &amp; viral growth.</p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">GRAPH</span>
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">INVITES</span>
+</div>
+</div>
+<!-- Service Node: Wallet -->
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-primary-container transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-secondary-container/20 text-secondary-fixed px-1 border border-secondary-container">WAL-05</span>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Wallet_Gateway</h4>
+<p class="font-code-xs text-code-xs text-outline mb-4">Financial settlement &amp; currency.</p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">TRANX</span>
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">BAL</span>
+</div>
+</div>
+<!-- Service Node: Notification -->
+<div class="bg-surface-container-low border border-outline-variant p-4 hover:border-primary-container transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] bg-secondary-container/20 text-secondary-fixed px-1 border border-secondary-container">NOT-06</span>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Notification_Dispatcher</h4>
+<p class="font-code-xs text-code-xs text-outline mb-4">Push, Email, and SMS queuing.</p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">EVENT</span>
+<span class="text-[8px] font-code-xs bg-surface-container-highest px-1">QUEUE</span>
+</div>
+</div>
+</div>
+<!-- Side Card: Workflow IDs & Telemetry -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container border border-outline-variant p-6 flex flex-col">
+<div class="mb-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-4">n8n_WORKFLOW_IDS</h3>
+<ul class="space-y-3">
+<li class="flex items-center justify-between font-code-sm text-code-sm">
+<span class="text-outline">Sync_Member_Data</span>
+<span class="bg-surface-container-high px-2 border border-outline-variant">#W-8231</span>
+</li>
+<li class="flex items-center justify-between font-code-sm text-code-sm">
+<span class="text-outline">Trigger_Reward_Hook</span>
+<span class="bg-surface-container-high px-2 border border-outline-variant">#W-4490</span>
+</li>
+<li class="flex items-center justify-between font-code-sm text-code-sm">
+<span class="text-outline">Audit_Ledger_Log</span>
+<span class="bg-surface-container-high px-2 border border-outline-variant">#W-1102</span>
+</li>
+</ul>
+</div>
+<div class="mt-auto">
+<div class="bg-surface-container-lowest p-4 border border-outline-variant rounded">
+<p class="font-code-xs text-code-xs text-primary-fixed mb-2 uppercase">Execution Metrics</p>
+<div class="flex justify-between items-center mb-1">
+<span class="font-code-xs text-code-xs text-outline">Latency Target</span>
+<span class="font-code-sm text-code-sm">140ms</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 mb-3">
+<div class="bg-primary-container h-1 w-[85%]"></div>
+</div>
+<p class="font-code-xs text-code-xs text-outline italic">Optimal clustering detected in US-EAST-1</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Technical Specification Sections -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+<!-- Dependencies & APIs -->
+<div class="space-y-6">
+<div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-4 border-l-4 border-primary-container pl-3">REQUIRED_APIs</h3>
+<div class="space-y-2">
+<div class="bg-surface-container-low p-3 flex items-center gap-4">
+<span class="font-code-sm text-code-sm text-primary-container px-2 bg-primary-container/10">POST</span>
+<code class="font-code-sm text-code-sm text-on-surface">/v1/loyalty/accrue</code>
+<span class="ml-auto material-symbols-outlined text-outline text-sm">link</span>
+</div>
+<div class="bg-surface-container-low p-3 flex items-center gap-4">
+<span class="font-code-sm text-code-sm text-on-secondary-container px-2 bg-secondary-container/10">GET</span>
+<code class="font-code-sm text-code-sm text-on-surface">/v1/member/profile/{id}</code>
+<span class="ml-auto material-symbols-outlined text-outline text-sm">link</span>
+</div>
+<div class="bg-surface-container-low p-3 flex items-center gap-4">
+<span class="font-code-sm text-code-sm text-primary-container px-2 bg-primary-container/10">POST</span>
+<code class="font-code-sm text-code-sm text-on-surface">/v2/wallet/charge</code>
+<span class="ml-auto material-symbols-outlined text-outline text-sm">link</span>
+</div>
+</div>
+</div>
+<div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-4 border-l-4 border-primary-container pl-3">DATABASE_DEPENDENCIES</h3>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container-low p-4 border border-outline-variant">
+<p class="font-label-caps text-[10px] text-outline mb-1 uppercase">Primary Store</p>
+<p class="font-code-sm text-code-sm text-on-surface">PostgreSQL Cluster-B</p>
+<p class="font-code-xs text-code-xs text-primary-fixed mt-2">Sharded by UID</p>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant">
+<p class="font-label-caps text-[10px] text-outline mb-1 uppercase">Cache Layer</p>
+<p class="font-code-sm text-code-sm text-on-surface">Redis Instance_09</p>
+<p class="font-code-xs text-code-xs text-primary-fixed mt-2">TTL: 3600s</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Testing & Deployment -->
+<div class="bg-surface-container p-6 border border-outline-variant relative overflow-hidden">
+<!-- Decorative Grid Overlay -->
+<div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: linear-gradient(to right, #84967e 1px, transparent 1px), linear-gradient(to bottom, #84967e 1px, transparent 1px); background-size: 8px 8px;"></div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined">rocket_launch</span>
+                    DEPLOYMENT_PROTOCOL
+                </h3>
+<div class="space-y-4 relative z-10">
+<div class="flex items-start gap-4">
+<div class="w-6 h-6 rounded-full border border-primary-container flex items-center justify-center text-[10px] font-bold text-primary-container shrink-0">01</div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface mb-1">Staging Verification</p>
+<p class="font-code-xs text-code-xs text-outline">Pass all E2E integration tests in Cluster-Sandbox.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="w-6 h-6 rounded-full border border-primary-container flex items-center justify-center text-[10px] font-bold text-primary-container shrink-0">02</div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface mb-1">Canary Rollout (5%)</p>
+<p class="font-code-xs text-code-xs text-outline">Deploy to Node_Group_Alpha; monitor latency spikes.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="w-6 h-6 rounded-full border border-primary-container flex items-center justify-center text-[10px] font-bold text-primary-container shrink-0">03</div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface mb-1">Global Traffic Switch</p>
+<p class="font-code-xs text-code-xs text-outline">Point LoadBalancer to Artifact-K binary.</p>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-on-surface mb-3 uppercase">Completion Criteria</h4>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer">
+<input checked="" class="rounded-none bg-surface-container border-outline-variant text-primary-container focus:ring-0" type="checkbox"/>
+<span class="font-code-xs text-code-xs text-on-surface">Unit Test Coverage &gt; 92%</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input class="rounded-none bg-surface-container border-outline-variant text-primary-container focus:ring-0" type="checkbox"/>
+<span class="font-code-xs text-code-xs text-on-surface">Security Audit Cleared (Artifact-K Scope)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input class="rounded-none bg-surface-container border-outline-variant text-primary-container focus:ring-0" type="checkbox"/>
+<span class="font-code-xs text-code-xs text-on-surface">Documentation Sync with API Gateway</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Infrastructure Visual Asset (Procedural Simulation) -->
+<div class="mb-12 relative w-full h-80 bg-surface-container-low border border-outline-variant flex items-center justify-center overflow-hidden">
+
+<div class="relative z-10 text-center">
+<p class="font-label-caps text-label-caps text-primary-fixed mb-2">NETWORK_TOPOLOGY_SIMULATION</p>
+<div class="flex gap-4 items-center">
+<div class="px-3 py-1 border border-primary-container bg-primary-container/10">
+<p class="font-code-sm text-code-sm text-primary-container">MESH: ACTIVE</p>
+</div>
+<div class="px-3 py-1 border border-outline bg-surface-container">
+<p class="font-code-sm text-code-sm text-on-surface">NODES: 412/412</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Shared Components Inventory -->
+<section class="mb-12">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-6">Shared Component Library</h3>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="p-4 border border-outline-variant bg-surface-container-low">
+<p class="font-label-caps text-[10px] text-primary-fixed mb-2 uppercase">UI_KIT_01</p>
+<h5 class="font-code-sm text-code-sm text-on-surface mb-2">MemberCard_React</h5>
+<div class="w-full h-12 bg-surface-container-highest mb-2"></div>
+<p class="font-code-xs text-code-xs text-outline">Responsive profile display with tier icons.</p>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-low">
+<p class="font-label-caps text-[10px] text-primary-fixed mb-2 uppercase">UI_KIT_02</p>
+<h5 class="font-code-sm text-code-sm text-on-surface mb-2">Points_Progress</h5>
+<div class="w-full h-12 bg-surface-container-highest mb-2 flex items-center px-4">
+<div class="w-full h-1 bg-primary-container/30 overflow-hidden"><div class="w-2/3 h-full bg-primary-container"></div></div>
+</div>
+<p class="font-code-xs text-code-xs text-outline">Dynamic SVG progress ring for loyalty metrics.</p>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-low">
+<p class="font-label-caps text-[10px] text-primary-fixed mb-2 uppercase">UI_KIT_03</p>
+<h5 class="font-code-sm text-code-sm text-on-surface mb-2">Voucher_Selector</h5>
+<div class="w-full h-12 bg-surface-container-highest mb-2"></div>
+<p class="font-code-xs text-code-xs text-outline">Modal-based selection for reward fulfillment.</p>
+</div>
+<div class="p-4 border border-outline-variant bg-surface-container-low">
+<p class="font-label-caps text-[10px] text-primary-fixed mb-2 uppercase">UTIL_01</p>
+<h5 class="font-code-sm text-code-sm text-on-surface mb-2">Audit_Logger</h5>
+<div class="w-full h-12 bg-surface-container-highest mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-outline">history</span>
+</div>
+<p class="font-code-xs text-code-xs text-outline">Low-latency logging hook for transaction auditing.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between px-grid-unit z-50">
+<div class="flex items-center gap-4">
+<p class="font-code-xs text-code-xs text-outline uppercase">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</p>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">LOGS</a>
+</div>
+<p class="font-code-xs text-code-xs text-outline border-l border-outline-variant pl-4">v2.4.1.0922</p>
+</div>
+</footer>
+<!-- Interactive Layer: Audit Stub Animation -->
+<script>
+        // Simple micro-interaction for the nodes
+        document.querySelectorAll('.bg-surface-container-low').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('translate-x-1', 'transition-transform');
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('translate-x-1');
+            });
+        });
+
+        // Dynamic system clock for the footer health check
+        function updateLatency() {
+            const latencyEl = document.querySelector('footer p');
+            const newLatency = Math.floor(Math.random() * 5) + 10;
+            latencyEl.textContent = `SYS_HEALTH: NOMINAL [LATENCY: ${newLatency}ms] [REGION: US-EAST-1]`;
+        }
+        setInterval(updateLatency, 5000);
+    </script>
+</body></html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GOV-ENGINE v4.02 | Operational Monitoring</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ebffe2",
+                    "tertiary": "#fff6ff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-error": "#690005",
+                    "surface-container-highest": "#273647",
+                    "on-background": "#d4e4fa",
+                    "surface-container-high": "#1c2b3c",
+                    "primary-fixed-dim": "#00e639",
+                    "error": "#ffb4ab",
+                    "surface-bright": "#2c3a4c",
+                    "outline-variant": "#3b4b37",
+                    "outline": "#84967e",
+                    "on-primary-container": "#007117",
+                    "on-error-container": "#ffdad6",
+                    "secondary-container": "#0043eb",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-primary-fixed": "#002203",
+                    "on-primary": "#003907",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-dim": "#051424",
+                    "primary-container": "#00ff41",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-secondary": "#002388",
+                    "surface-variant": "#273647",
+                    "surface-container": "#122131",
+                    "error-container": "#93000a",
+                    "on-secondary-fixed": "#001356",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-container-lowest": "#010f1f",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-secondary-container": "#c6ceff",
+                    "background": "#051424",
+                    "on-tertiary-container": "#862ed4",
+                    "on-surface": "#d4e4fa",
+                    "secondary-fixed": "#dde1ff",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary": "#490080",
+                    "surface-container-low": "#0d1c2d",
+                    "surface": "#051424",
+                    "inverse-primary": "#006e16",
+                    "inverse-on-surface": "#233143",
+                    "primary-fixed": "#72ff70",
+                    "surface-tint": "#00e639",
+                    "inverse-surface": "#d4e4fa"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "node-gutter": "24px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .node-border {
+            border: 1px solid #3b4b37;
+        }
+        .node-border-active {
+            border: 1px solid #00e639;
+        }
+        .node-border-error {
+            border: 1px solid #ffb4ab;
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(15, 15, 15, 0.8);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+            font-size: 18px;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface antialiased overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-lane-margin h-16 z-50 border-b border-outline-variant bg-surface docked full-width top-0">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="security">security</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tight text-primary-fixed-dim">GOV-ENGINE v4.02</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-end">
+<span class="text-label-caps font-label-caps text-on-surface-variant">SLA STATUS</span>
+<span class="text-primary-fixed-dim font-code-sm flex items-center gap-1">
+<span class="w-2 h-2 bg-primary-fixed-dim rounded-full animate-pulse"></span>
+                    NOMINAL
+                </span>
+</div>
+<button class="hover:bg-surface-container-high p-2 transition-colors duration-150 opacity-80 active:opacity-100">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings_input_component">settings_input_component</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 bottom-0 z-40 flex flex-col overflow-y-auto border-r border-outline-variant bg-surface-container docked h-full left-0 w-64 scrollbar-hide">
+<div class="p-6">
+<span class="text-label-caps font-label-caps text-on-surface-variant">ENGINEERING ARTIFACTS</span>
+</div>
+<nav class="flex-1">
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+<span class="text-label-caps font-label-caps">Executive Overview</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="account_tree">account_tree</span>
+<span class="text-label-caps font-label-caps">BPMN Swimlane</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="rule">rule</span>
+<span class="text-label-caps font-label-caps">Business Rules</span>
+</a>
+<a class="bg-surface-container-highest text-primary-fixed-dim border-l-2 border-primary-fixed-dim flex items-center px-4 py-2 scale-[0.99] transition-transform duration-100" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="analytics">analytics</span>
+<span class="text-label-caps font-label-caps font-bold">Monitoring</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="api">api</span>
+<span class="text-label-caps font-label-caps">API Contract</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="database">database</span>
+<span class="text-label-caps font-label-caps">Data Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="hub">hub</span>
+<span class="text-label-caps font-label-caps">Event Bus</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="verified_user">verified_user</span>
+<span class="text-label-caps font-label-caps">Security Blueprint</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="report_problem">report_problem</span>
+<span class="text-label-caps font-label-caps">Exception Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="biotech">biotech</span>
+<span class="text-label-caps font-label-caps">Test Blueprint</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="terminal">terminal</span>
+<span class="text-label-caps font-label-caps">Dev Guide</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="sync_alt">sync_alt</span>
+<span class="text-label-caps font-label-caps">UX/BE Interaction</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="schema">schema</span>
+<span class="text-label-caps font-label-caps">UML Sequence</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="account_balance">account_balance</span>
+<span class="text-label-caps font-label-caps">Domain Model</span>
+</a>
+</nav>
+<div class="p-4 mt-auto border-t border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-code-sm" data-icon="memory">memory</span>
+</div>
+<div>
+<p class="text-code-xs font-code-xs text-on-surface">SYS_Uptime</p>
+<p class="text-code-xs font-code-xs text-primary-fixed-dim">99.998%</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 flex-1 overflow-y-auto p-grid-unit relative">
+<div class="max-w-[1400px] mx-auto space-y-node-gutter">
+<!-- TOP TELEMETRY STRIP -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-stack-gap">
+<div class="bg-surface-container-low p-4 node-border border-primary-fixed-dim/20 flex flex-col">
+<span class="text-label-caps font-label-caps text-on-surface-variant">MODERATION QUEUE</span>
+<div class="flex justify-between items-baseline mt-2">
+<span class="text-headline-lg font-headline-lg text-primary">1,242</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">+4.2% Δ</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 node-border border-primary-fixed-dim/20 flex flex-col">
+<span class="text-label-caps font-label-caps text-on-surface-variant">APPEAL QUEUE</span>
+<div class="flex justify-between items-baseline mt-2">
+<span class="text-headline-lg font-headline-lg text-primary">84</span>
+<span class="text-code-xs font-code-xs text-on-error">URGENT</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 node-border border-primary-fixed-dim/20 flex flex-col">
+<span class="text-label-caps font-label-caps text-on-surface-variant">POLICY VIOLATIONS (24H)</span>
+<div class="flex justify-between items-baseline mt-2">
+<span class="text-headline-lg font-headline-lg text-error">312</span>
+<span class="text-code-xs font-code-xs text-error-container">HIGH_RISK</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 node-border border-primary-fixed-dim/20 flex flex-col">
+<span class="text-label-caps font-label-caps text-on-surface-variant">APPROVAL RATE</span>
+<div class="flex justify-between items-baseline mt-2">
+<span class="text-headline-lg font-headline-lg text-primary-fixed-dim">94.2%</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">OPTIMAL</span>
+</div>
+</div>
+</div>
+<!-- OPERATIONAL DASHBOARD BENTO -->
+<div class="grid grid-cols-12 gap-node-gutter h-[600px]">
+<!-- REAL-TIME EVENT STREAM -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container border border-outline-variant flex flex-col relative overflow-hidden">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-high">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="broadcast_on_personal">broadcast_on_personal</span>
+<span class="text-label-caps font-label-caps">LIVE GOVERNANCE TELEMETRY [STREAM_ID: 0x4F22]</span>
+</div>
+<div class="flex gap-2">
+<span class="text-code-xs font-code-xs px-2 py-0.5 bg-primary-container text-on-primary-container rounded">LIVE</span>
+</div>
+</div>
+<div class="flex-1 p-4 font-code-sm text-on-surface-variant overflow-y-auto space-y-1 scrollbar-hide" id="log-container">
+<!-- JS injected logs -->
+</div>
+<!-- Micro Telemetry Overlay -->
+<div class="absolute bottom-4 right-4 p-3 glass-panel border border-primary-fixed-dim/30 rounded flex flex-col gap-1">
+<div class="flex justify-between gap-8">
+<span class="text-code-xs font-code-xs opacity-50">LATENCY</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">12ms AI</span>
+</div>
+<div class="flex justify-between gap-8">
+<span class="text-code-xs font-code-xs opacity-50">THROUGHPUT</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">450 TPS</span>
+</div>
+</div>
+</div>
+<!-- RISK & ALERTS COLUMN -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-node-gutter">
+<div class="flex-1 bg-surface-container border border-error/30 flex flex-col overflow-hidden">
+<div class="p-4 border-b border-error/30 bg-error-container/10 flex items-center gap-2">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+<span class="text-label-caps font-label-caps text-error">CRITICAL FRAUD ALERTS</span>
+</div>
+<div class="p-4 space-y-4">
+<div class="bg-surface-container-high p-3 node-border border-error/40">
+<div class="flex justify-between items-start mb-2">
+<span class="text-code-xs font-code-xs text-error px-1.5 py-0.5 border border-error/40">AUTH_FAILURE</span>
+<span class="text-code-xs font-code-xs opacity-50">14:22:01</span>
+</div>
+<p class="text-code-sm font-code-sm">Multiple bypass attempts detected on Node_722 [IP: 192.168.1.104]</p>
+</div>
+<div class="bg-surface-container-high p-3 node-border border-error/40">
+<div class="flex justify-between items-start mb-2">
+<span class="text-code-xs font-code-xs text-error px-1.5 py-0.5 border border-error/40">CONTENT_INJECTION</span>
+<span class="text-code-xs font-code-xs opacity-50">14:21:45</span>
+</div>
+<p class="text-code-sm font-code-sm">Malicious payload blocked in Moderation Buffer 4.</p>
+</div>
+</div>
+</div>
+<div class="flex-1 bg-surface-container border border-secondary/30 flex flex-col overflow-hidden">
+<div class="p-4 border-b border-secondary/30 bg-secondary-container/10 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="verified">verified</span>
+<span class="text-label-caps font-label-caps text-secondary">TRUST &amp; SAFETY METRICS</span>
+</div>
+<div class="p-4 grid grid-cols-2 gap-4">
+<div class="text-center p-2 bg-surface-container-lowest">
+<span class="text-code-xs font-code-xs opacity-60">CHURN RATE</span>
+<p class="text-headline-md font-headline-md text-secondary">0.02%</p>
+</div>
+<div class="text-center p-2 bg-surface-container-lowest">
+<span class="text-code-xs font-code-xs opacity-60">REPUTATION</span>
+<p class="text-headline-md font-headline-md text-secondary">99.8</p>
+</div>
+<div class="col-span-2 p-2 bg-surface-container-lowest flex justify-between items-center">
+<span class="text-code-xs font-code-xs opacity-60">HUMAN REVIEW TIME</span>
+<p class="text-code-sm font-code-sm">42m <span class="text-error">↑ 4%</span></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- BOTTOM LAYER: SYSTEM INFRASTRUCTURE -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-node-gutter">
+<div class="col-span-2 bg-surface-container border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="hub">hub</span>
+<span class="text-label-caps font-label-caps">DISTRIBUTED NODE HEALTH</span>
+</div>
+<div class="grid grid-cols-8 gap-2">
+<!-- Visualizing 24 Nodes -->
+<script>
+                                for(let i=0; i<24; i++) {
+                                    const statusClass = Math.random() > 0.05 ? 'bg-primary-fixed-dim/30 border-primary-fixed-dim' : 'bg-error/30 border-error animate-pulse';
+                                    document.write(`<div class="aspect-square border flex flex-col items-center justify-center ${statusClass}">
+                                        <span class="text-code-xs font-code-xs opacity-60">N${String(i).padStart(2, '0')}</span>
+                                    </div>`);
+                                }
+                            </script>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-col justify-between">
+<div class="space-y-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="query_stats">query_stats</span>
+<span class="text-label-caps font-label-caps">ANALYTIC STUBS</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center border-b border-outline-variant pb-1">
+<span class="text-code-xs font-code-xs opacity-50">API_LATENCY_P99</span>
+<span class="text-code-xs font-code-xs">88ms</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-1">
+<span class="text-code-xs font-code-xs opacity-50">DB_LOAD</span>
+<span class="text-code-xs font-code-xs">24%</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-1">
+<span class="text-code-xs font-code-xs opacity-50">WORKER_THREADS</span>
+<span class="text-code-xs font-code-xs">12/16</span>
+</div>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full bg-primary-fixed-dim text-on-primary-fixed py-2 text-label-caps font-label-caps hover:bg-primary-container transition-colors">
+                                GENERATE INCIDENT REPORT
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Background Grid Accent -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-20">
+
+</div>
+</main>
+</div>
+<!-- Right Side Audit Log Tooltip (Absolute) -->
+<div class="fixed right-8 bottom-8 z-50 w-80 glass-panel border border-outline-variant p-4 transform transition-transform hover:scale-105 duration-300 shadow-xl">
+<div class="flex items-center justify-between mb-3">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">AUDIT LOG STUB</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="close">close</span>
+</div>
+<div class="space-y-2">
+<div class="flex gap-3 items-start">
+<span class="text-code-xs font-code-xs text-on-surface-variant mt-0.5">14:25:33</span>
+<p class="text-code-xs font-code-xs">User: sys_admin_v4 <br/>Action: Update Policy_v12</p>
+</div>
+<div class="flex gap-3 items-start">
+<span class="text-code-xs font-code-xs text-on-surface-variant mt-0.5">14:24:12</span>
+<p class="text-code-xs font-code-xs">System: Triggered AI Moderation for Queue Item #49221</p>
+</div>
+</div>
+</div>
+<script>
+        // Log stream simulation
+        const logs = [
+            "[INFO] Governance Layer initialized.",
+            "[DBUG] Connecting to node sync_bus_04...",
+            "[INFO] Policy check passed for payload [REQUEST_ID: 994a]",
+            "[WARN] Latency spike detected on US-EAST-1 (24ms)",
+            "[CRIT] Blocked unauthorized access attempt from [IP: 45.33.22.11]",
+            "[INFO] Moderation Queue #1242 processed by AI-Core-Delta.",
+            "[INFO] Heartbeat 0x334 status: OK",
+            "[DBUG] Memory flush complete. Recovered 2.4MB.",
+            "[INFO] Fraud Alert: Pattern Match found in User Transaction TX-882",
+            "[INFO] SLA Monitoring: 99.998% Uptime confirmed.",
+            "[INFO] New Appeal received: ITEM_ID_091 (Reason: False Positive)",
+            "[DBUG] Re-indexing trust vectors for 142 entities..."
+        ];
+
+        const container = document.getElementById('log-container');
+        let index = 0;
+
+        function addLog() {
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const logEntry = document.createElement('div');
+            logEntry.className = 'flex gap-4 opacity-0 transition-opacity duration-500';
+            logEntry.innerHTML = `
+                <span class="text-primary-fixed-dim whitespace-nowrap">[${time}]</span>
+                <span class="flex-1">${logs[index % logs.length]}</span>
+            `;
+            container.appendChild(logEntry);
+            
+            // Animation feel
+            requestAnimationFrame(() => {
+                logEntry.classList.remove('opacity-0');
+            });
+
+            if (container.children.length > 25) {
+                container.removeChild(container.firstChild);
+            }
+            container.scrollTop = container.scrollHeight;
+            index++;
+            
+            setTimeout(addLog, Math.random() * 2000 + 500);
+        }
+
+        addLog();
+    </script>
+</body></html>

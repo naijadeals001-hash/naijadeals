@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-035: Artifact F — Event Bus &amp; n8n Automation Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#0043eb",
+                    "primary-container": "#00ff41",
+                    "on-secondary-container": "#c6ceff",
+                    "on-error-container": "#ffdad6",
+                    "tertiary": "#fff6ff",
+                    "error": "#ffb4ab",
+                    "inverse-on-surface": "#233143",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-secondary-fixed": "#001356",
+                    "error-container": "#93000a",
+                    "secondary-fixed": "#dde1ff",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "surface-container": "#122131",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-tertiary-container": "#862ed4",
+                    "surface-container-low": "#0d1c2d",
+                    "outline-variant": "#3b4b37",
+                    "on-primary": "#003907",
+                    "secondary": "#b8c3ff",
+                    "on-surface": "#d4e4fa",
+                    "surface-dim": "#051424",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary-fixed-variant": "#00530e",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-error": "#690005",
+                    "surface-tint": "#00e639",
+                    "inverse-primary": "#006e16",
+                    "primary-fixed": "#72ff70",
+                    "on-primary-container": "#007117",
+                    "outline": "#84967e",
+                    "on-background": "#d4e4fa",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "primary": "#ebffe2",
+                    "surface-container-highest": "#273647",
+                    "surface-bright": "#2c3a4c",
+                    "on-tertiary": "#490080",
+                    "on-primary-fixed": "#002203",
+                    "primary-fixed-dim": "#00e639",
+                    "background": "#051424",
+                    "surface-container-high": "#1c2b3c",
+                    "surface": "#051424",
+                    "on-secondary": "#002388",
+                    "on-surface-variant": "#b9ccb2",
+                    "surface-variant": "#273647",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary-container": "#ecd3ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "stack-gap": "4px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(rgba(59, 75, 55, 0.2) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-line {
+            position: absolute;
+            background: #84967e;
+            z-index: 0;
+        }
+        .flow-glow {
+            filter: drop-shadow(0 0 4px #00ff41);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #010f1f; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b4b37; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-body-md overflow-hidden flex flex-col h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-grid-unit h-12 w-full top-0 border-b border-outline-variant bg-surface-container-lowest z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<span class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4 items-center h-full">
+<a class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed h-12 flex items-center px-2 cursor-pointer transition-colors">Logic_Matrices</a>
+<a class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed h-12 flex items-center px-2 cursor-pointer transition-colors">Telemetry_Streams</a>
+</nav>
+<span class="font-label-caps text-label-caps font-bold text-primary-fixed bg-primary-container/10 px-2 py-0.5 rounded border border-primary-container/30">STATUS: OK</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] flex flex-col h-screen w-64 border-r border-outline-variant bg-surface-container transition-all duration-150 ease-in-out z-40">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary-fixed">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1 py-2">
+<div class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">System_Architecture</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Workflow_Engine</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Logic_Matrices</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Telemetry_Streams</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Node_Registry</span>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-xs text-code-xs text-outline">MEM_USAGE</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">42%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[42%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content (Workflow Canvas) -->
+<main class="flex-1 ml-64 mb-8 overflow-auto relative custom-scrollbar bg-surface-dim">
+<!-- Swimlane Labels -->
+<div class="sticky top-0 left-0 w-full flex h-10 bg-surface-container-low border-b border-outline-variant z-30 shadow-md">
+<div class="flex-none w-1/4 flex items-center px-4 border-r border-outline-variant">
+<span class="material-symbols-outlined text-sm mr-2 text-primary-fixed">input</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">EVENT_INGRESS</span>
+</div>
+<div class="flex-none w-1/4 flex items-center px-4 border-r border-outline-variant">
+<span class="material-symbols-outlined text-sm mr-2 text-primary-fixed">hub</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">N8N_ORCHESTRATOR</span>
+</div>
+<div class="flex-none w-1/4 flex items-center px-4 border-r border-outline-variant">
+<span class="material-symbols-outlined text-sm mr-2 text-primary-fixed">storage</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">QUEUE_STRATA</span>
+</div>
+<div class="flex-none w-1/4 flex items-center px-4">
+<span class="material-symbols-outlined text-sm mr-2 text-primary-fixed">output</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">ACTION_EMISSION</span>
+</div>
+</div>
+<!-- Canvas Grid -->
+<div class="p-12 min-w-[1200px] relative">
+<!-- ROW 1: MEMBERSHIP FLOW -->
+<div class="flex items-center mb-16 relative">
+<!-- Event Node -->
+<div class="flex-none w-1/4 px-4 flex justify-center">
+<div class="w-full max-w-[220px] bg-surface-container-lowest border border-outline p-3 relative group hover:border-primary-container transition-all">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-code-xs text-outline">EV_TYPE</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container flow-glow"></span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">MembershipCreated</h3>
+<div class="bg-surface-container-high p-1.5 rounded-sm">
+<span class="font-code-xs text-code-xs text-outline-variant">ID: 9942-MB-INIT</span>
+</div>
+</div>
+</div>
+<!-- Connectors -->
+<div class="flex-none w-1/4 px-4 flex flex-col gap-6 justify-center">
+<div class="w-full max-w-[220px] bg-surface-container border border-primary-container/40 p-3 relative hover:bg-surface-container-high cursor-pointer transition-all">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-code-xs text-primary-fixed">N8N_WF</span>
+<span class="font-code-xs text-code-xs text-outline">ID: f23-a1</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">MemberProvisioning</h3>
+<div class="mt-2 flex items-center gap-2">
+<span class="font-code-xs text-code-xs bg-secondary-container/20 text-secondary-fixed px-1 border border-secondary-container/50">HOOK: PROVISION</span>
+</div>
+</div>
+</div>
+<!-- Queue Node -->
+<div class="flex-none w-1/4 px-4 flex justify-center">
+<div class="w-full max-w-[220px] bg-surface-container-low border border-outline-variant p-3 relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-code-xs text-outline">BULL_MQ</span>
+<span class="text-secondary-fixed font-code-xs">RETRIES: 3</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">ProvisioningQueue</h3>
+<div class="mt-2 flex gap-1 items-center">
+<span class="w-full bg-surface-container-highest h-1 flex gap-0.5">
+<div class="h-full w-1/3 bg-primary-container"></div>
+<div class="h-full w-1/3 bg-primary-container"></div>
+<div class="h-full w-1/6 bg-outline"></div>
+</span>
+</div>
+</div>
+</div>
+<!-- Action Node -->
+<div class="flex-none w-1/4 px-4 flex justify-center">
+<div class="w-full max-w-[220px] bg-surface-container-lowest border border-outline-variant p-3">
+<span class="font-label-caps text-code-xs text-outline block mb-1">EMIT_ACT</span>
+<h3 class="font-code-sm text-code-sm text-on-surface">WelcomeNotification</h3>
+<div class="mt-2 text-right">
+<span class="font-code-xs text-code-xs text-primary-fixed">STATUS: SENT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 2: POINTS & REWARDS FLOW -->
+<div class="flex items-center mb-16 relative">
+<div class="flex-none w-1/4 px-4 flex flex-col gap-3 items-center">
+<div class="w-full max-w-[220px] bg-surface-container-lowest border border-outline p-3">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-code-xs text-outline">EV_TYPE</span>
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed flow-glow"></span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">PointsEarned</h3>
+</div>
+<div class="w-full max-w-[220px] bg-surface-container-lowest border border-outline p-3 opacity-60">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-code-xs text-outline">EV_TYPE</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">CashbackIssued</h3>
+</div>
+</div>
+<div class="flex-none w-1/4 px-4 flex justify-center">
+<div class="w-full max-w-[220px] bg-surface-container border border-primary-container/40 p-3">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-code-xs text-primary-fixed">N8N_WF</span>
+<span class="font-code-xs text-code-xs text-outline">ID: l8z-b4</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">LedgerUpdateFlow</h3>
+<div class="mt-2 flex items-center justify-between">
+<span class="font-code-xs text-code-xs text-outline">JOB: SYNC</span>
+<span class="material-symbols-outlined text-primary-fixed text-sm">settings</span>
+</div>
+</div>
+</div>
+<div class="flex-none w-1/4 px-4 flex flex-col gap-3 items-center">
+<div class="w-full max-w-[220px] bg-surface-container-low border border-outline-variant p-3 border-l-4 border-l-error">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-code-xs text-error">DLQ_ACTIVE</span>
+<span class="material-symbols-outlined text-error text-sm">warning</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">DeadLetterQueue</h3>
+<div class="mt-1 font-code-xs text-code-xs text-outline">PENDING_REVIEW: 14</div>
+</div>
+</div>
+<div class="flex-none w-1/4 px-4 flex justify-center">
+<div class="w-full max-w-[220px] bg-surface-container-lowest border border-outline-variant p-3">
+<span class="font-label-caps text-code-xs text-outline block mb-1">EMIT_ACT</span>
+<h3 class="font-code-sm text-code-sm text-on-surface">RewardIssued</h3>
+<div class="mt-2 flex gap-1">
+<div class="w-2 h-2 bg-primary-fixed rounded-full animate-pulse"></div>
+<div class="w-2 h-2 bg-primary-fixed/40 rounded-full"></div>
+<div class="w-2 h-2 bg-primary-fixed/40 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 3: REFERRAL & MISC -->
+<div class="flex items-center relative">
+<div class="flex-none w-1/4 px-4 flex justify-center">
+<div class="w-full max-w-[220px] bg-surface-container-lowest border border-outline p-3">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-code-xs text-outline">EV_TYPE</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">ReferralCompleted</h3>
+<div class="mt-2 text-xs font-code-xs text-outline-variant">LATENCY: 8ms</div>
+</div>
+</div>
+<div class="flex-none w-1/4 px-4 flex justify-center">
+<div class="w-full max-w-[220px] bg-surface-container border border-primary-container/40 p-3">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-caps text-code-xs text-primary-fixed">N8N_WF</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">ReferralBonusDistributor</h3>
+<div class="mt-2 bg-surface-container-highest/50 h-8 flex items-center px-2">
+<div class="text-[8px] font-mono overflow-hidden text-outline-variant leading-tight">
+                                    IF (REF_VAL &gt; 10) { EMIT_REWARD }
+                                </div>
+</div>
+</div>
+</div>
+<div class="flex-none w-1/4 px-4 flex justify-center">
+<div class="w-full max-w-[220px] bg-surface-container-low border border-outline-variant p-3">
+<h3 class="font-code-sm text-code-sm text-on-surface">RewardQueue</h3>
+<div class="mt-2 font-code-xs text-code-xs text-outline flex items-center justify-between">
+<span>TYPE: PRIORITY</span>
+<span class="text-primary-fixed">ACTIVE</span>
+</div>
+</div>
+</div>
+<div class="flex-none w-1/4 px-4 flex justify-center">
+<div class="w-full max-w-[220px] bg-surface-container-lowest border border-outline-variant p-3">
+<span class="font-label-caps text-code-xs text-outline block mb-1">EMIT_ACT</span>
+<h3 class="font-code-sm text-code-sm text-on-surface">Redeemed</h3>
+<div class="flex justify-end mt-2">
+<span class="material-symbols-outlined text-outline text-lg">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Abstract Layer: Telemetry -->
+<div class="absolute bottom-4 right-4 pointer-events-none opacity-40">
+
+</div>
+</div>
+</main>
+</div>
+<!-- Right Configuration Drawer (Contextual) -->
+<div class="fixed right-0 top-12 h-[calc(100vh-48px)] w-80 bg-surface-container-high border-l border-outline-variant z-50 transform translate-x-full transition-transform duration-300" id="inspector">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-highest">
+<h3 class="font-label-caps text-label-caps text-primary-fixed">NODE_INSPECTOR</h3>
+<button class="material-symbols-outlined text-outline hover:text-primary-fixed" onclick="toggleInspector()">close</button>
+</div>
+<div class="p-6 overflow-y-auto h-full space-y-6 pb-20">
+<div>
+<label class="font-label-caps text-[10px] text-outline block mb-2 uppercase">Workflow ID</label>
+<div class="font-code-sm text-code-sm text-primary-fixed bg-surface-dim p-2 border border-outline-variant">
+                    N8N_PROV_00492_A
+                </div>
+</div>
+<div>
+<label class="font-label-caps text-[10px] text-outline block mb-2 uppercase">Automation Mapping</label>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-2 border border-outline-variant text-code-xs">
+<span>Trigger: Webhook</span>
+<span class="material-symbols-outlined text-xs">link</span>
+</div>
+<div class="flex items-center justify-between p-2 border border-outline-variant text-code-xs">
+<span>Logic: Transform JSON</span>
+<span class="material-symbols-outlined text-xs">code</span>
+</div>
+<div class="flex items-center justify-between p-2 border border-outline-variant text-code-xs">
+<span>Output: Event Bus</span>
+<span class="material-symbols-outlined text-xs">rss_feed</span>
+</div>
+</div>
+</div>
+<div>
+<label class="font-label-caps text-[10px] text-outline block mb-2 uppercase">Runtime Parameters</label>
+<div class="grid grid-cols-2 gap-2 text-code-xs">
+<div class="p-2 bg-surface-container-low border border-outline-variant">
+<div class="text-outline-variant mb-1">TIMEOUT</div>
+<div class="text-on-surface">30,000ms</div>
+</div>
+<div class="p-2 bg-surface-container-low border border-outline-variant">
+<div class="text-outline-variant mb-1">CONCURRENCY</div>
+<div class="text-on-surface">5</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-l-2 border-primary-container bg-primary-container/5">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed text-sm">analytics</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">PERFORMANCE</span>
+</div>
+<div class="text-code-sm text-on-surface">Success Rate: 99.8%</div>
+<div class="text-code-sm text-outline mt-1">Avg Execution: 142ms</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-grid-unit z-50 border-t border-outline-variant bg-surface-container-lowest font-code-xs text-code-xs text-primary-fixed">
+<div class="flex items-center gap-4">
+<span class="text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<div class="flex gap-4 items-center">
+<a class="text-outline hover:text-primary-fixed transition-colors cursor-pointer">DOCS</a>
+<a class="text-outline hover:text-primary-fixed transition-colors cursor-pointer">API</a>
+<a class="text-outline hover:text-primary-fixed transition-colors cursor-pointer">LOGS</a>
+<div class="flex items-center gap-1 border-l border-outline-variant pl-4">
+<span class="material-symbols-outlined text-xs">database</span>
+<span>DB_CONNECTED</span>
+</div>
+</div>
+</footer>
+<!-- Node Click Interactivity -->
+<script>
+        function toggleInspector() {
+            const inspector = document.getElementById('inspector');
+            inspector.classList.toggle('translate-x-full');
+        }
+
+        // Add event listeners to all nodes
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('click', () => {
+                const inspector = document.getElementById('inspector');
+                inspector.classList.remove('translate-x-full');
+            });
+        });
+
+        // Atmospheric Pulsing effect on connectors
+        function updateConnectors() {
+            // Simplified logic: drawing lines could be complex without canvas, 
+            // so we're using visual indicators in the nodes themselves.
+        }
+    </script>
+</body></html>

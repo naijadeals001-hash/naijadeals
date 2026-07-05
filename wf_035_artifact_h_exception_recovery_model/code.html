@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CORE_OS_v2.4.1-STABLE | Exception &amp; Recovery Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#0043eb",
+                        "primary-container": "#00ff41",
+                        "on-secondary-container": "#c6ceff",
+                        "on-error-container": "#ffdad6",
+                        "tertiary": "#fff6ff",
+                        "error": "#ffb4ab",
+                        "inverse-on-surface": "#233143",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-secondary-fixed": "#001356",
+                        "error-container": "#93000a",
+                        "secondary-fixed": "#dde1ff",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "surface-container": "#122131",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-tertiary-container": "#862ed4",
+                        "surface-container-low": "#0d1c2d",
+                        "outline-variant": "#3b4b37",
+                        "on-primary": "#003907",
+                        "secondary": "#b8c3ff",
+                        "on-surface": "#d4e4fa",
+                        "surface-dim": "#051424",
+                        "surface-container-lowest": "#010f1f",
+                        "on-primary-fixed-variant": "#00530e",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-error": "#690005",
+                        "surface-tint": "#00e639",
+                        "inverse-primary": "#006e16",
+                        "primary-fixed": "#72ff70",
+                        "on-primary-container": "#007117",
+                        "outline": "#84967e",
+                        "on-background": "#d4e4fa",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "primary": "#ebffe2",
+                        "surface-container-highest": "#273647",
+                        "surface-bright": "#2c3a4c",
+                        "on-tertiary": "#490080",
+                        "on-primary-fixed": "#002203",
+                        "primary-fixed-dim": "#00e639",
+                        "background": "#051424",
+                        "surface-container-high": "#1c2b3c",
+                        "surface": "#051424",
+                        "on-secondary": "#002388",
+                        "on-surface-variant": "#b9ccb2",
+                        "surface-variant": "#273647",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "stack-gap": "4px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .connector-line {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .node-pulse {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0% { border-color: rgba(0, 255, 65, 0.3); }
+            50% { border-color: rgba(0, 255, 65, 1); }
+            100% { border-color: rgba(0, 255, 65, 0.3); }
+        }
+        .workflow-canvas {
+            min-height: calc(100vh - 80px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 flex justify-between items-center px-grid-unit h-12 w-full border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<h1 class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<a class="font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed py-1" href="#">EXCEPTION_FLOW</a>
+<a class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors py-1" href="#">MONITOR</a>
+<a class="font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors py-1" href="#">ARCHIVE</a>
+</nav>
+<span class="font-label-caps text-label-caps text-primary-fixed">STATUS: OK</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 border-r border-outline-variant bg-surface-container flex flex-col z-40">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary-fixed opacity-70">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1 overflow-y-auto">
+<div class="flex items-center px-4 py-3 gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</div>
+<div class="flex items-center px-4 py-3 gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow_Engine</span>
+</div>
+<div class="flex items-center px-4 py-3 gap-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-label-caps text-label-caps">Logic_Matrices</span>
+</div>
+<div class="flex items-center px-4 py-3 gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-label-caps text-label-caps">Telemetry_Streams</span>
+</div>
+<div class="flex items-center px-4 py-3 gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-label-caps text-label-caps">Node_Registry</span>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low">
+<div class="flex flex-col gap-2">
+<div class="h-1 bg-outline-variant w-full rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[74%]"></div>
+</div>
+<span class="font-code-xs text-code-xs text-outline">RESOURCE_ALLOC: 74.2%</span>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 pt-12 pb-8 px-8 workflow-canvas relative overflow-x-auto">
+<!-- Header Info -->
+<div class="mb-10 flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-1">Exception &amp; Recovery Model</h2>
+<p class="font-code-sm text-code-sm text-outline uppercase tracking-widest">Protocol: ARTIFACT_H_TRANSITION_MAP</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-high border border-outline-variant">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+<span class="font-label-caps text-label-caps">LIVE_STREAM</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-high border border-outline-variant">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="font-label-caps text-label-caps">HIGH_PRIORITY_INTERCEPT</span>
+</div>
+</div>
+</div>
+<!-- Workflow Grid -->
+<div class="relative space-y-12">
+<!-- Lane 01: Payment Failures -->
+<div class="flex items-start gap-12">
+<div class="w-40 flex-shrink-0 pt-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-outline" style="font-size: 16px;">payments</span>
+<span class="font-label-caps text-label-caps text-outline">FINANCE_LANE</span>
+</div>
+<div class="h-[1px] bg-outline-variant w-full"></div>
+</div>
+<div class="flex items-center gap-16 relative">
+<!-- Node: Payment Failed -->
+<div class="w-64 bg-[#0F0F0F] border border-error p-3 flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-error">EXCEPTION</span>
+<span class="font-code-xs text-code-xs text-outline">ERR_402</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Payment Failed</h3>
+<div class="flex justify-between items-center mt-2 border-t border-outline-variant pt-2">
+<span class="font-code-xs text-code-xs text-outline">Lat: 12ms</span>
+<div class="w-1.5 h-1.5 rounded-full bg-error"></div>
+</div>
+</div>
+<!-- Connector 1 -->
+<div class="h-[2px] w-16 bg-dashed border-t-2 border-error border-dashed"></div>
+<!-- Node: Retry Strategy -->
+<div class="w-64 bg-[#0F0F0F] border border-secondary p-3 flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-secondary">RECOVERY</span>
+<span class="font-code-xs text-code-xs text-outline">SEQ_01</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Retry Logic (Exponential)</h3>
+<div class="mt-2 space-y-1">
+<div class="flex justify-between text-code-xs text-outline">
+<span>T+5m</span>
+<span>Attempt 1</span>
+</div>
+<div class="flex justify-between text-code-xs text-outline">
+<span>T+1h</span>
+<span>Attempt 2</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Lane 02: Membership Lifecycle -->
+<div class="flex items-start gap-12">
+<div class="w-40 flex-shrink-0 pt-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-outline" style="font-size: 16px;">badge</span>
+<span class="font-label-caps text-label-caps text-outline">USER_LANE</span>
+</div>
+<div class="h-[1px] bg-outline-variant w-full"></div>
+</div>
+<div class="flex items-center gap-16 relative">
+<!-- Node: Expired Membership -->
+<div class="w-64 bg-[#0F0F0F] border border-outline p-3 flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-outline">STATUS</span>
+<span class="font-code-xs text-code-xs text-outline">LIFECYCLE</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Expired Membership</h3>
+<div class="flex justify-between items-center mt-2 border-t border-outline-variant pt-2">
+<span class="font-code-xs text-code-xs text-outline">UID: 99x-77</span>
+<div class="w-1.5 h-1.5 rounded-full bg-outline"></div>
+</div>
+</div>
+<!-- Connector -->
+<div class="h-[2px] w-16 bg-primary-container"></div>
+<!-- Node: Grace Period -->
+<div class="w-64 bg-[#0F0F0F] border border-primary-container p-3 flex flex-col gap-2 relative z-10 node-pulse">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary-container">ACTIVE_REC</span>
+<span class="font-code-xs text-code-xs text-outline">DUR: 7D</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Grace Period Allocation</h3>
+<div class="bg-primary-container/10 p-2 mt-1">
+<p class="text-code-xs text-primary-container">Limited access enabled. Automated nudge sent via SMTP.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Lane 03: Security & Fraud -->
+<div class="flex items-start gap-12">
+<div class="w-40 flex-shrink-0 pt-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-outline" style="font-size: 16px;">security</span>
+<span class="font-label-caps text-label-caps text-outline">FRAUD_LANE</span>
+</div>
+<div class="h-[1px] bg-outline-variant w-full"></div>
+</div>
+<div class="flex flex-col gap-12">
+<!-- Path 1: Reward Abuse -->
+<div class="flex items-center gap-16 relative">
+<div class="w-64 bg-[#0F0F0F] border border-error-container p-3 flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-error">ALERT</span>
+<span class="font-code-xs text-error">SIG: HIGH</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Reward Abuse Detected</h3>
+</div>
+<div class="h-[2px] w-16 bg-error"></div>
+<div class="w-64 bg-[#0F0F0F] border border-tertiary-fixed-dim p-3 flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">ANALYSIS</span>
+<span class="font-code-xs text-outline">ML_V4</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Investigation Queue</h3>
+</div>
+<div class="h-[2px] w-16 bg-error"></div>
+<div class="w-64 bg-error-container border border-error p-3 flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-error-container">TERMINAL</span>
+<span class="material-symbols-outlined text-on-error-container" style="font-size: 14px;">block</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-error-container">Suspension Issued</h3>
+</div>
+</div>
+<!-- Path 2: Referral Fraud -->
+<div class="flex items-center gap-16 relative">
+<div class="w-64 bg-[#0F0F0F] border border-error-container p-3 flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-error">ALERT</span>
+<span class="font-code-xs text-error">SIG: MED</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Referral Fraud Cluster</h3>
+</div>
+<div class="h-[2px] w-16 bg-outline"></div>
+<div class="w-64 bg-[#0F0F0F] border border-outline p-3 flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-outline">REVIEW</span>
+<span class="font-code-xs text-outline">MANUAL</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Peer Review Loop</h3>
+</div>
+<div class="h-[2px] w-16 bg-outline"></div>
+<div class="w-64 bg-surface-container-highest border border-outline-variant p-3 flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-outline">OUTCOME</span>
+<span class="font-code-xs text-outline">PENDING</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface">Final Decision</h3>
+<div class="flex gap-2 mt-1">
+<button class="flex-1 text-code-xs py-1 border border-primary-container text-primary-container hover:bg-primary-container hover:text-on-primary transition-colors">APPROVE</button>
+<button class="flex-1 text-code-xs py-1 border border-error text-error hover:bg-error hover:text-on-error transition-colors">REJECT</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- System Atmospheric Element -->
+<div class="fixed bottom-12 right-8 w-80 pointer-events-none opacity-40">
+<div class="bg-surface-container border border-outline-variant p-4 space-y-4">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed">CORE_OS_TELEMETRY</span>
+<span class="material-symbols-outlined text-primary-fixed" style="font-size: 16px;">monitoring</span>
+</div>
+<div class="h-24 flex items-end gap-1">
+<div class="w-2 bg-primary-container/40 h-[20%]"></div>
+<div class="w-2 bg-primary-container/40 h-[45%]"></div>
+<div class="w-2 bg-primary-container/40 h-[30%]"></div>
+<div class="w-2 bg-error/40 h-[80%]"></div>
+<div class="w-2 bg-primary-container/40 h-[10%]"></div>
+<div class="w-2 bg-primary-container/40 h-[50%]"></div>
+<div class="w-2 bg-primary-container/40 h-[60%]"></div>
+<div class="w-2 bg-primary-container/40 h-[40%]"></div>
+<div class="w-2 bg-error/40 h-[95%]"></div>
+<div class="w-2 bg-primary-container/40 h-[20%]"></div>
+</div>
+<p class="font-code-xs text-code-xs text-outline italic">Real-time throughput for recovery nodes.</p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-grid-unit z-50 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<div class="flex items-center gap-4">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-opacity opacity-90" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-opacity opacity-90" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-opacity opacity-90" href="#">LOGS</a>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Randomly pulse telemetry bars
+        setInterval(() => {
+            const bars = document.querySelectorAll('.fixed.bottom-12 .h-24 div');
+            const randomBar = bars[Math.floor(Math.random() * bars.length)];
+            const currentHeight = parseInt(randomBar.style.height) || 20;
+            const newHeight = Math.max(10, Math.min(100, currentHeight + (Math.random() * 40 - 20)));
+            randomBar.style.height = `${newHeight}%`;
+        }, 800);
+
+        // Simple interactive hover effect for nodes
+        document.querySelectorAll('.bg-\\[\\#0F0F0F\\]').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.boxShadow = '0 0 15px rgba(0, 255, 65, 0.1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body></html>

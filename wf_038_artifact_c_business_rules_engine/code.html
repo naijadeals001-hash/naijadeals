@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GOV-ENGINE v4.02 | Business Rules Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+            border-radius: 2px;
+        }
+        .node-connector-line {
+            position: relative;
+        }
+        .node-connector-line::after {
+            content: '';
+            position: absolute;
+            background-color: #3b4b37;
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(1000%); }
+        }
+        .scanline-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 230, 57, 0.05), transparent);
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+            z-index: 100;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#0d1c2d",
+                      "surface-tint": "#00e639",
+                      "on-error-container": "#ffdad6",
+                      "surface-variant": "#273647",
+                      "tertiary-fixed": "#f0dbff",
+                      "tertiary-container": "#ecd3ff",
+                      "on-tertiary": "#490080",
+                      "surface-container-high": "#1c2b3c",
+                      "secondary": "#b8c3ff",
+                      "on-background": "#d4e4fa",
+                      "surface": "#051424",
+                      "on-secondary-container": "#c6ceff",
+                      "surface-dim": "#051424",
+                      "primary-fixed": "#72ff70",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "tertiary": "#fff6ff",
+                      "inverse-surface": "#d4e4fa",
+                      "secondary-fixed": "#dde1ff",
+                      "primary-fixed-dim": "#00e639",
+                      "primary": "#ebffe2",
+                      "on-tertiary-fixed": "#2c0051",
+                      "surface-container-lowest": "#010f1f",
+                      "surface-container": "#122131",
+                      "surface-container-highest": "#273647",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-primary": "#003907",
+                      "inverse-on-surface": "#233143",
+                      "inverse-primary": "#006e16",
+                      "error-container": "#93000a",
+                      "surface-bright": "#2c3a4c",
+                      "secondary-container": "#0043eb",
+                      "on-tertiary-container": "#862ed4",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "outline": "#84967e",
+                      "on-secondary": "#002388",
+                      "on-primary-container": "#007117",
+                      "background": "#051424",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary-fixed": "#001356",
+                      "error": "#ffb4ab",
+                      "primary-container": "#00ff41",
+                      "on-error": "#690005"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "grid-unit": "8px",
+                      "stack-gap": "4px",
+                      "lane-margin": "32px"
+              },
+              "fontFamily": {
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface select-none custom-scrollbar">
+<div class="scanline-effect"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 h-16 flex justify-between items-center px-lane-margin z-50 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="security">security</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tight text-primary-fixed-dim">GOV-ENGINE v4.02</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+<span class="text-label-caps font-label-caps text-on-surface-variant">KERNEL_STATUS: OPTIMAL</span>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded" data-icon="settings_input_component">settings_input_component</button>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 bottom-0 w-64 z-40 flex flex-col overflow-y-auto bg-surface-container border-r border-outline-variant custom-scrollbar">
+<div class="p-4 border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant">ENGINEERING ARTIFACTS</span>
+</div>
+<nav class="flex-1 py-4">
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="dashboard">dashboard</span>
+<span class="text-label-caps font-label-caps">Executive Overview</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="account_tree">account_tree</span>
+<span class="text-label-caps font-label-caps">BPMN Swimlane</span>
+</a>
+<a class="bg-surface-container-highest text-primary-fixed-dim border-l-2 border-primary-fixed-dim flex items-center px-4 py-2 scale-[0.99] transition-transform duration-100" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="rule">rule</span>
+<span class="text-label-caps font-label-caps">Business Rules</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="api">api</span>
+<span class="text-label-caps font-label-caps">API Contract</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="database">database</span>
+<span class="text-label-caps font-label-caps">Data Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="hub">hub</span>
+<span class="text-label-caps font-label-caps">Event Bus</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="verified_user">verified_user</span>
+<span class="text-label-caps font-label-caps">Security Blueprint</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="report_problem">report_problem</span>
+<span class="text-label-caps font-label-caps">Exception Model</span>
+</a>
+<div class="mt-4 px-4 pb-2 border-b border-outline-variant/30">
+<span class="text-[10px] text-outline font-bold tracking-widest">SYSTEM MONITORING</span>
+</div>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="analytics">analytics</span>
+<span class="text-label-caps font-label-caps">Monitoring</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="biotech">biotech</span>
+<span class="text-label-caps font-label-caps">Test Blueprint</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 p-8 min-h-screen">
+<!-- Header Section -->
+<div class="mb-8 flex justify-between items-end">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-label-caps font-label-caps text-outline">ARTIFACT_TYPE /</span>
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">DECISION_LOGIC_MATRIX</span>
+</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">Aura AI Business Rules Engine</h2>
+</div>
+<div class="text-right">
+<div class="text-code-xs font-code-xs text-outline">LAST_DEPLOY: 2024-05-22.0942Z</div>
+<div class="text-code-sm font-code-sm text-primary-fixed-dim">REVISION: WF-038-C-V4</div>
+</div>
+</div>
+<!-- Telemetry Stats Bar -->
+<div class="grid grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-container-low border border-outline-variant p-3 flex flex-col">
+<span class="text-label-caps font-label-caps text-outline">ACTIVE_RULES</span>
+<span class="text-headline-md font-headline-md text-primary-fixed-dim">12,842</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-3 flex flex-col">
+<span class="text-label-caps font-label-caps text-outline">AVG_LATENCY</span>
+<span class="text-headline-md font-headline-md text-on-surface">14.2ms</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-3 flex flex-col">
+<span class="text-label-caps font-label-caps text-outline">SAFETY_INTERCEPTS</span>
+<span class="text-headline-md font-headline-md text-error">0.04%</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-3 flex flex-col">
+<span class="text-label-caps font-label-caps text-outline">ORCHESTRATION_LOAD</span>
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md text-on-surface">42%</span>
+<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[42%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Business Rules High-Density Table -->
+<div class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse min-w-[1200px]">
+<thead class="bg-surface-container-high">
+<tr>
+<th class="px-4 py-3 border-b border-outline-variant text-label-caps font-label-caps text-on-surface-variant">RULE_ID</th>
+<th class="px-4 py-3 border-b border-outline-variant text-label-caps font-label-caps text-on-surface-variant">DECISION_LOGIC (IF/THEN)</th>
+<th class="px-4 py-3 border-b border-outline-variant text-label-caps font-label-caps text-on-surface-variant">RESPONSIBLE_SERVICE</th>
+<th class="px-4 py-3 border-b border-outline-variant text-label-caps font-label-caps text-on-surface-variant">FAILURE_RESULT</th>
+<th class="px-4 py-3 border-b border-outline-variant text-label-caps font-label-caps text-on-surface-variant">RECOVERY_PATH</th>
+<th class="px-4 py-3 border-b border-outline-variant text-label-caps font-label-caps text-on-surface-variant">ST_VAL</th>
+</tr>
+</thead>
+<tbody class="text-code-sm font-code-sm divide-y divide-outline-variant/30">
+<!-- Rule 1: Provider Choice -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-4 py-4 align-top text-primary-fixed-dim">AUR-PRV-001</td>
+<td class="px-4 py-4 align-top max-w-md">
+<span class="text-outline">IF</span> cost_limit &lt; threshold <span class="text-outline">THEN</span> use_commodity_model 
+                                <br/><span class="text-outline">ELSE</span> route_to_high_fidelity_cluster
+                            </td>
+<td class="px-4 py-4 align-top">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="settings_ethernet">settings_ethernet</span>
+                                    Broker.RouteService
+                                </div>
+</td>
+<td class="px-4 py-4 align-top text-error">ERR_TIMEOUT_ROUTING</td>
+<td class="px-4 py-4 align-top">Fallback: Cache.PriorResult</td>
+<td class="px-4 py-4 align-top"><span class="px-2 py-0.5 bg-primary-container/20 text-on-primary-container rounded border border-primary-container/30">PASS</span></td>
+</tr>
+<!-- Rule 2: Safety Pass -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-4 py-4 align-top text-primary-fixed-dim">AUR-SFT-002</td>
+<td class="px-4 py-4 align-top max-w-md">
+<span class="text-outline">IF</span> content.toxicity &gt; 0.4 <span class="text-outline">OR</span> regex_match(PII_PATTERN) 
+                                <br/><span class="text-outline">THEN</span> drop_payload_with_alert
+                            </td>
+<td class="px-4 py-4 align-top">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="gpp_maybe">gpp_maybe</span>
+                                    Guardrail.Scanner
+                                </div>
+</td>
+<td class="px-4 py-4 align-top text-error">REJECT_MALICIOUS_INPUT</td>
+<td class="px-4 py-4 align-top">Audit.LogEvent + UI.SanitizeMsg</td>
+<td class="px-4 py-4 align-top"><span class="px-2 py-0.5 bg-surface-container-highest text-outline rounded border border-outline-variant">IDLE</span></td>
+</tr>
+<!-- Rule 3: Hallucination -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-4 py-4 align-top text-primary-fixed-dim">AUR-HAL-003</td>
+<td class="px-4 py-4 align-top max-w-md">
+<span class="text-outline">IF</span> vector_sim &lt; 0.85 <span class="text-outline">AND</span> fact_check == false 
+                                <br/><span class="text-outline">THEN</span> flag_hallucination_low_confidence
+                            </td>
+<td class="px-4 py-4 align-top">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="psychology">psychology</span>
+                                    Inference.Verifier
+                                </div>
+</td>
+<td class="px-4 py-4 align-top text-error">FLAG_LOW_CONFIDENCE</td>
+<td class="px-4 py-4 align-top">Exec.SelfCorrect_Step2</td>
+<td class="px-4 py-4 align-top"><span class="px-2 py-0.5 bg-primary-container/20 text-on-primary-container rounded border border-primary-container/30">PASS</span></td>
+</tr>
+<!-- Rule 4: Context Limit -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-4 py-4 align-top text-primary-fixed-dim">AUR-CTX-004</td>
+<td class="px-4 py-4 align-top max-w-md">
+<span class="text-outline">IF</span> token_count &gt; model.max_window 
+                                <br/><span class="text-outline">THEN</span> apply_sliding_window_summarization
+                            </td>
+<td class="px-4 py-4 align-top">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="summarize">summarize</span>
+                                    Ctx.Manager
+                                </div>
+</td>
+<td class="px-4 py-4 align-top text-error">CTX_OVERFLOW_CRITICAL</td>
+<td class="px-4 py-4 align-top">Truncate.Earliest_Entries</td>
+<td class="px-4 py-4 align-top"><span class="px-2 py-0.5 bg-primary-container/20 text-on-primary-container rounded border border-primary-container/30">PASS</span></td>
+</tr>
+<!-- Rule 5: Local Model -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-4 py-4 align-top text-primary-fixed-dim">AUR-LOC-005</td>
+<td class="px-4 py-4 align-top max-w-md">
+<span class="text-outline">IF</span> edge_device == active <span class="text-outline">AND</span> latency_req &lt; 50ms 
+                                <br/><span class="text-outline">THEN</span> invoke_tiny_llama_local
+                            </td>
+<td class="px-4 py-4 align-top">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="router">router</span>
+                                    Edge.Orchestrator
+                                </div>
+</td>
+<td class="px-4 py-4 align-top text-error">EDGE_OOM_FAILURE</td>
+<td class="px-4 py-4 align-top">Route.CloudSecondary</td>
+<td class="px-4 py-4 align-top"><span class="px-2 py-0.5 bg-error-container/20 text-error rounded border border-error/30">FAIL</span></td>
+</tr>
+<!-- Rule 6: Tool Calling -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-4 py-4 align-top text-primary-fixed-dim">AUR-TOL-006</td>
+<td class="px-4 py-4 align-top max-w-md">
+<span class="text-outline">IF</span> tool.scope == write_access <span class="text-outline">AND</span> user.level &lt; level_3 
+                                <br/><span class="text-outline">THEN</span> block_execution + log_violation
+                            </td>
+<td class="px-4 py-4 align-top">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="build">build</span>
+                                    Perm.Validator
+                                </div>
+</td>
+<td class="px-4 py-4 align-top text-error">PERMISSION_DENIED</td>
+<td class="px-4 py-4 align-top">Request.EscalationFlow</td>
+<td class="px-4 py-4 align-top"><span class="px-2 py-0.5 bg-primary-container/20 text-on-primary-container rounded border border-primary-container/30">PASS</span></td>
+</tr>
+<!-- Rule 7: Human Handoff -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-4 py-4 align-top text-primary-fixed-dim">AUR-HND-007</td>
+<td class="px-4 py-4 align-top max-w-md">
+<span class="text-outline">IF</span> sentiment == critical_distress <span class="text-outline">OR</span> complex_query == true 
+                                <br/><span class="text-outline">THEN</span> switch_to_human_agent_id_24
+                            </td>
+<td class="px-4 py-4 align-top">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="support_agent">support_agent</span>
+                                    Human.Connector
+                                </div>
+</td>
+<td class="px-4 py-4 align-top text-error">AGENT_QUEUE_FULL</td>
+<td class="px-4 py-4 align-top">AI.HoldPattern_Loop</td>
+<td class="px-4 py-4 align-top"><span class="px-2 py-0.5 bg-surface-container-highest text-outline rounded border border-outline-variant">IDLE</span></td>
+</tr>
+<!-- Rule 8: Rate Limit -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-4 py-4 align-top text-primary-fixed-dim">AUR-RAT-008</td>
+<td class="px-4 py-4 align-top max-w-md">
+<span class="text-outline">IF</span> requests_per_sec &gt; plan_limit 
+                                <br/><span class="text-outline">THEN</span> throttle_delay_exponential(2x)
+                            </td>
+<td class="px-4 py-4 align-top">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="speed">speed</span>
+                                    Gateway.Traffic
+                                </div>
+</td>
+<td class="px-4 py-4 align-top text-error">HTTP_429_TOO_MANY</td>
+<td class="px-4 py-4 align-top">Backoff.JitterFlow</td>
+<td class="px-4 py-4 align-top"><span class="px-2 py-0.5 bg-primary-container/20 text-on-primary-container rounded border border-primary-container/30">PASS</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Logic Node Visualization (Lower Section) -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 bg-surface-container border border-outline-variant p-6 relative overflow-hidden h-[400px]">
+<div class="flex justify-between items-center mb-6">
+<span class="text-label-caps font-label-caps text-on-surface-variant">ACTIVE_EXECUTION_GRAPH</span>
+<div class="flex gap-4 text-code-xs">
+<span class="flex items-center gap-1"><span class="w-2 h-2 bg-primary-fixed-dim rounded-full"></span> SUCCESS</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 bg-error rounded-full"></span> FAILURE</span>
+</div>
+</div>
+<!-- Simple SVG node diagram representation -->
+<div class="flex items-center justify-around h-full">
+<div class="flex flex-col items-center gap-12 w-full max-w-2xl relative">
+<!-- Connecting Line SVG -->
+<svg class="absolute top-1/2 left-0 w-full h-1 -translate-y-1/2 -z-0" viewbox="0 0 800 4">
+<path d="M0 2 L800 2" stroke="#3b4b37" stroke-dasharray="8 4" stroke-width="2"></path>
+</svg>
+<div class="flex justify-between w-full relative z-10">
+<!-- Node 1 -->
+<div class="w-32 bg-surface-container-highest border border-primary-fixed-dim p-2 flex flex-col items-center text-center">
+<span class="text-code-xs font-bold text-primary-fixed-dim">INPUT_GATE</span>
+<span class="text-code-sm mt-1">Payload Rcvd</span>
+<div class="mt-2 text-[8px] text-outline">LATENCY: 0.2ms</div>
+</div>
+<!-- Node 2 -->
+<div class="w-32 bg-surface-container-highest border border-primary-fixed-dim p-2 flex flex-col items-center text-center">
+<span class="text-code-xs font-bold text-primary-fixed-dim">SFT_VALIDATE</span>
+<span class="text-code-sm mt-1">Safety Check</span>
+<div class="mt-2 text-[8px] text-outline">ST: SECURE</div>
+</div>
+<!-- Node 3 -->
+<div class="w-32 bg-surface-container-highest border border-error p-2 flex flex-col items-center text-center">
+<span class="text-code-xs font-bold text-error">MODEL_ROUTE</span>
+<span class="text-code-sm mt-1">Select Prov.</span>
+<div class="mt-2 text-[8px] text-error">TIMEOUT: 5s</div>
+</div>
+<!-- Node 4 -->
+<div class="w-32 bg-surface-container-highest border border-outline p-2 flex flex-col items-center text-center opacity-50">
+<span class="text-code-xs font-bold">STREAM_OUT</span>
+<span class="text-code-sm mt-1">Tokenize</span>
+<div class="mt-2 text-[8px] text-outline">WAITING...</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Inspector / Context Panel -->
+<div class="bg-surface-container border border-outline-variant p-6 flex flex-col">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-4">NODE_INSPECTOR</span>
+<div class="flex-1 space-y-4">
+<div class="p-3 bg-surface-container-low border border-outline-variant rounded">
+<div class="text-code-xs text-outline mb-1">SELECTED_RULE</div>
+<div class="text-code-sm text-primary-fixed-dim">AUR-LOC-005 (Edge_Routing)</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-code-xs">
+<span class="text-outline">AVAILABILITY</span>
+<span class="text-on-surface">99.98%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full">
+<div class="bg-primary-fixed-dim h-full w-[99%]"></div>
+</div>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded font-code-sm">
+<div class="text-on-surface-variant text-[10px] mb-2 uppercase">Telemetrics Cluster</div>
+<div class="grid grid-cols-2 gap-2 text-[11px]">
+<div class="text-outline">CPU_USAGE</div><div class="text-right">12.4%</div>
+<div class="text-outline">MEM_USAGE</div><div class="text-right">4.2GB</div>
+<div class="text-outline">IO_WAIT</div><div class="text-right">1.2ms</div>
+<div class="text-outline">ERR_COUNT</div><div class="text-right text-error">12</div>
+</div>
+</div>
+<button class="w-full py-3 bg-primary-fixed-dim text-on-primary-fixed font-label-caps text-center uppercase tracking-widest hover:opacity-90 transition-opacity">
+                        TRIGGER_MANUAL_OVERRIDE
+                    </button>
+</div>
+</div>
+</div>
+<!-- Audit Log Stub Footer -->
+<div class="mt-8 bg-surface-container-lowest border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-sm text-outline" data-icon="terminal">terminal</span>
+<span class="text-label-caps font-label-caps text-outline">REAL_TIME_AUDIT_STUB</span>
+</div>
+<div class="space-y-1 font-code-xs">
+<div class="flex gap-4">
+<span class="text-outline">[2024-05-22 14:22:01]</span>
+<span class="text-on-surface">INF: Evaluated AUR-PRV-001 -&gt; PASS (Model: GPT-4o)</span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline">[2024-05-22 14:22:02]</span>
+<span class="text-error">ERR: AUR-LOC-005 Execution Failed -&gt; Signal: SIGTERM</span>
+</div>
+<div class="flex gap-4">
+<span class="text-outline">[2024-05-22 14:22:03]</span>
+<span class="text-on-surface">INF: Initiating Recovery AUR-LOC-005.REC_PATH</span>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interactions for the high-density table
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                // Flash effect on selection
+                row.classList.add('bg-primary-container/10');
+                setTimeout(() => {
+                    row.classList.remove('bg-primary-container/10');
+                }, 300);
+            });
+        });
+    </script>
+</body></html>

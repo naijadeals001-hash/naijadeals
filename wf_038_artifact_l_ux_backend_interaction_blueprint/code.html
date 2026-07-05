@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-038: Artifact L — UX ↔ Backend Interaction Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#0d1c2d",
+                        "surface-tint": "#00e639",
+                        "on-error-container": "#ffdad6",
+                        "surface-variant": "#273647",
+                        "tertiary-fixed": "#f0dbff",
+                        "tertiary-container": "#ecd3ff",
+                        "on-tertiary": "#490080",
+                        "surface-container-high": "#1c2b3c",
+                        "secondary": "#b8c3ff",
+                        "on-background": "#d4e4fa",
+                        "surface": "#051424",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-dim": "#051424",
+                        "primary-fixed": "#72ff70",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "tertiary": "#fff6ff",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary-fixed": "#dde1ff",
+                        "primary-fixed-dim": "#00e639",
+                        "primary": "#ebffe2",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-container": "#122131",
+                        "surface-container-highest": "#273647",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-primary": "#003907",
+                        "inverse-on-surface": "#233143",
+                        "inverse-primary": "#006e16",
+                        "error-container": "#93000a",
+                        "surface-bright": "#2c3a4c",
+                        "secondary-container": "#0043eb",
+                        "on-tertiary-container": "#862ed4",
+                        "on-surface": "#d4e4fa",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "outline": "#84967e",
+                        "on-secondary": "#002388",
+                        "on-primary-container": "#007117",
+                        "background": "#051424",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-fixed": "#001356",
+                        "error": "#ffb4ab",
+                        "primary-container": "#00ff41",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "stack-gap": "4px",
+                        "lane-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-line {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .node-pulse {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0px transparent; }
+            50% { box-shadow: 0 0 10px rgba(0, 230, 57, 0.3); }
+        }
+        .active-path {
+            stroke-dasharray: 5;
+            animation: dash 1s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -10; }
+        }
+        /* Custom scrollbar for drawer */
+        .overflow-y-auto::-webkit-scrollbar {
+            width: 4px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #273647;
+            border-radius: 2px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-lane-margin z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">security</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tight text-primary-fixed-dim">GOV-ENGINE v4.02</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end">
+<span class="text-label-caps font-label-caps text-on-surface-variant">SYSTEM STATUS</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">OPERATIONAL // L-9</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">settings_input_component</span>
+</button>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 bottom-0 w-64 bg-surface-container border-r border-outline-variant flex flex-col z-40 overflow-y-auto">
+<div class="p-4 border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant tracking-widest">ENGINEERING ARTIFACTS</span>
+</div>
+<nav class="flex-1 py-2">
+<!-- Render Nav Items -->
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">dashboard</span>
+<span class="text-label-caps font-label-caps">Executive Overview</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">account_tree</span>
+<span class="text-label-caps font-label-caps">BPMN Swimlane</span>
+</a>
+<a class="bg-surface-container-highest text-primary-fixed-dim border-l-2 border-primary-fixed-dim flex items-center px-4 py-2 scale-[0.99] transition-transform" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">sync_alt</span>
+<span class="text-label-caps font-label-caps">UX/BE Interaction</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">rule</span>
+<span class="text-label-caps font-label-caps">Business Rules</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">api</span>
+<span class="text-label-caps font-label-caps">API Contract</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">database</span>
+<span class="text-label-caps font-label-caps">Data Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">hub</span>
+<span class="text-label-caps font-label-caps">Event Bus</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">verified_user</span>
+<span class="text-label-caps font-label-caps">Security Blueprint</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">report_problem</span>
+<span class="text-label-caps font-label-caps">Exception Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">analytics</span>
+<span class="text-label-caps font-label-caps">Monitoring</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">biotech</span>
+<span class="text-label-caps font-label-caps">Test Blueprint</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">terminal</span>
+<span class="text-label-caps font-label-caps">Dev Guide</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">schema</span>
+<span class="text-label-caps font-label-caps">UML Sequence</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">account_balance</span>
+<span class="text-label-caps font-label-caps">Domain Model</span>
+</a>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-sm">terminal</span>
+</div>
+<div>
+<p class="text-code-xs font-code-xs text-on-surface">BUILD_4.02.9</p>
+<p class="text-code-xs font-code-xs text-on-surface-variant">AURA_OS_KERNEL</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 mt-16 p-lane-margin min-h-screen relative overflow-hidden">
+<!-- Header Info -->
+<div class="mb-12 max-w-4xl">
+<div class="flex items-center gap-4 mb-2">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim bg-primary-container/20 px-2 py-1 border border-primary-fixed-dim/30">ARTIFACT_L</span>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">UX ↔ Backend Interaction Blueprint</h2>
+</div>
+<p class="text-body-md text-on-surface-variant max-w-2xl">
+                High-fidelity visualization of the Aura AI feedback loop. Mapping asynchronous streaming pathways, cognitive routing, and secondary tool execution cycles.
+            </p>
+</div>
+<!-- Interaction Map Section -->
+<div class="grid grid-cols-12 gap-node-gutter relative">
+<!-- Swimlane: CLIENT LAYER -->
+<div class="col-span-3 flex flex-col gap-8 relative">
+<div class="border-l-2 border-primary-fixed-dim/50 pl-4 mb-4">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">CLIENT LAYER (UX)</span>
+</div>
+<!-- User Node -->
+<div class="bg-surface-container-highest border border-outline-variant p-4 relative z-10 node-pulse" id="node-user">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps font-label-caps text-secondary-fixed-dim">ACTOR_01</span>
+<span class="material-symbols-outlined text-secondary-fixed-dim text-sm">person</span>
+</div>
+<h3 class="text-code-sm font-code-sm text-on-surface">User Request</h3>
+<div class="mt-4 pt-4 border-t border-outline-variant">
+<div class="text-code-xs font-code-xs text-on-surface-variant mb-1">PAYLOAD</div>
+<div class="bg-black/40 p-2 rounded text-code-xs text-primary-fixed-dim font-code-xs">
+                            { "prompt": "Gen analysis report..." }
+                        </div>
+</div>
+</div>
+<!-- Frontend Stream Node -->
+<div class="bg-surface-container-highest border border-outline-variant p-4 relative z-10" id="node-fe">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">COMPONENT_FE</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">dataset</span>
+</div>
+<h3 class="text-code-sm font-code-sm text-on-surface">Streaming UI Context</h3>
+<div class="flex gap-2 mt-3">
+<div class="h-1 w-1/4 bg-primary-fixed-dim"></div>
+<div class="h-1 w-1/4 bg-primary-fixed-dim opacity-50"></div>
+<div class="h-1 w-1/4 bg-primary-fixed-dim opacity-30"></div>
+</div>
+</div>
+</div>
+<!-- Swimlane: GATEWAY & ROUTING -->
+<div class="col-span-3 flex flex-col gap-8 relative">
+<div class="border-l-2 border-secondary/50 pl-4 mb-4">
+<span class="text-label-caps font-label-caps text-secondary">INFRASTRUCTURE LAYER</span>
+</div>
+<!-- Gateway Node -->
+<div class="bg-surface-container border border-outline p-4 relative z-10" id="node-gateway">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps font-label-caps text-secondary">AURA_GW</span>
+<span class="material-symbols-outlined text-secondary text-sm">lock_person</span>
+</div>
+<h3 class="text-code-sm font-code-sm text-on-surface">Gateway Policy</h3>
+<ul class="mt-3 space-y-1 text-code-xs text-on-surface-variant">
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-secondary rounded-full"></span> Auth Validate</li>
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-secondary rounded-full"></span> Rate Limit Check</li>
+</ul>
+</div>
+<!-- Router Node -->
+<div class="bg-surface-container border border-outline p-4 relative z-10" id="node-router">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps font-label-caps text-secondary">DYNAMIC_ROUTER</span>
+<span class="material-symbols-outlined text-secondary text-sm">alt_route</span>
+</div>
+<h3 class="text-code-sm font-code-sm text-on-surface">Intent Router</h3>
+<div class="mt-3 text-code-xs text-on-secondary-container bg-secondary-container/20 p-2 border border-secondary/20">
+                        ROUTING TO COGNITION...
+                    </div>
+</div>
+</div>
+<!-- Swimlane: COGNITION ENGINE -->
+<div class="col-span-3 flex flex-col gap-8 relative">
+<div class="border-l-2 border-tertiary-fixed-dim/50 pl-4 mb-4">
+<span class="text-label-caps font-label-caps text-tertiary-fixed-dim">COGNITIVE LAYER</span>
+</div>
+<!-- Cognition Engine Node -->
+<div class="bg-surface-container-high border border-tertiary-container/30 p-4 relative z-10" id="node-cognition">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps font-label-caps text-tertiary-fixed-dim">AURA_CORE</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-sm">psychology</span>
+</div>
+<h3 class="text-code-sm font-code-sm text-on-surface">Cognition Engine</h3>
+<div class="mt-2 h-16 flex flex-col justify-center gap-1">
+<div class="w-full bg-surface-container-lowest h-1 rounded overflow-hidden">
+<div class="bg-tertiary-fixed-dim h-full" style="width: 75%;"></div>
+</div>
+<span class="text-[9px] font-code-xs text-tertiary-fixed-dim">PARSING INPUT...</span>
+</div>
+</div>
+<!-- Safety Check Node -->
+<div class="bg-surface-container-high border border-error/30 p-4 relative z-10" id="node-safety">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps font-label-caps text-error">SAFETY_SENTINEL</span>
+<span class="material-symbols-outlined text-error text-sm">gpp_maybe</span>
+</div>
+<h3 class="text-code-sm font-code-sm text-on-surface">Compliance Filter</h3>
+<div class="mt-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-xs">check_circle</span>
+<span class="text-code-xs text-on-surface-variant">Validated Output</span>
+</div>
+</div>
+</div>
+<!-- Swimlane: PROVIDERS & TOOLS -->
+<div class="col-span-3 flex flex-col gap-8 relative">
+<div class="border-l-2 border-on-surface-variant/50 pl-4 mb-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant">EXECUTION LAYER</span>
+</div>
+<!-- AI Provider Node -->
+<div class="bg-surface-container-lowest border border-outline-variant p-4 relative z-10" id="node-ai">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">LLM_PROVIDER</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">cloud</span>
+</div>
+<h3 class="text-code-sm font-code-sm text-on-surface">Model Provider</h3>
+<p class="text-code-xs text-on-surface-variant mt-2">Latency: 142ms</p>
+</div>
+<!-- Tool Node (n8n) -->
+<div class="bg-surface-container-lowest border border-primary-fixed-dim/40 p-4 relative z-10" id="node-tool">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">TOOL_ENV</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">settings_suggest</span>
+</div>
+<h3 class="text-code-sm font-code-sm text-on-surface">n8n Execution</h3>
+<div class="mt-4 flex flex-col gap-1">
+<div class="flex justify-between text-code-xs">
+<span class="text-on-surface-variant">Wflow ID:</span>
+<span class="text-primary-fixed-dim">#WF-90</span>
+</div>
+<div class="flex justify-center mt-2">
+<span class="material-symbols-outlined text-primary-fixed-dim animate-spin">refresh</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Background SVG for Arrows -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible" id="flow-svg">
+<defs>
+<marker id="arrowhead" markerheight="4" markerwidth="6" orient="auto" refx="5" refy="2">
+<polygon class="text-outline-variant" fill="currentColor" points="0 0, 6 2, 0 4"></polygon>
+</marker></defs>
+<marker id="arrowhead-primary" markerheight="4" markerwidth="6" orient="auto" refx="5" refy="2">
+<polygon fill="#00e639" points="0 0, 6 2, 0 4"></polygon>
+</marker>
+<marker id="arrowhead-error" markerheight="4" markerwidth="6" orient="auto" refx="5" refy="2">
+<polygon fill="#ffb4ab" points="0 0, 6 2, 0 4"></polygon>
+</marker>
+<!-- 1. User -> Gateway -->
+<path d="M 280,150 L 330,150" fill="none" marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2"></path>
+<!-- 2. Gateway -> Cognition -->
+<path d="M 580,150 L 630,150" fill="none" marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2"></path>
+<!-- 3. Cognition -> Router -->
+<path d="M 750,230 L 750,280 L 580,330" fill="none" marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-dasharray="4" stroke-width="2"></path>
+<!-- 4. Router -> Provider -->
+<path d="M 580,360 L 930,160" fill="none" marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="1.5"></path>
+<!-- 5. Provider -> Safety -->
+<path d="M 930,200 L 780,410" fill="none" marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="1.5"></path>
+<!-- 6. Safety -> FE Update (Return Path) -->
+<path class="active-path" d="M 630,450 L 280,360" fill="none" marker-end="url(#arrowhead-primary)" stroke="#00e639" stroke-width="2"></path>
+<!-- 7. Tool Loop: Cognition -> Tool -> Cognition -->
+<path d="M 880,190 Q 1100,280 930,480" fill="none" marker-end="url(#arrowhead-primary)" stroke="#00e639" stroke-dasharray="4" stroke-width="2"></path>
+<path d="M 930,520 Q 1150,550 880,230" fill="none" marker-end="url(#arrowhead-primary)" stroke="#00e639" stroke-dasharray="2" stroke-width="1"></path>
+</svg>
+</div>
+<!-- Telemetry Bottom Bar (Bento style) -->
+<div class="mt-16 grid grid-cols-4 gap-4">
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-2 block">LATENCY_MAP</span>
+<div class="flex items-end gap-1 h-8">
+<div class="w-1 bg-primary-fixed-dim h-4"></div>
+<div class="w-1 bg-primary-fixed-dim h-6"></div>
+<div class="w-1 bg-primary-fixed-dim h-3"></div>
+<div class="w-1 bg-primary-fixed-dim h-8"></div>
+<div class="w-1 bg-primary-fixed-dim h-5"></div>
+</div>
+<p class="text-code-xs font-code-xs mt-2 text-primary-fixed-dim">AVG: 42.5ms</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-2 block">WS_STATE</span>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></div>
+<span class="text-code-sm font-code-sm text-on-surface">CONNECTED_SOCKET_STREAM</span>
+</div>
+<p class="text-code-xs font-code-xs mt-2 text-on-surface-variant">ACTIVE_SESSION: 0x99F...2A</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-2 block">AI_COST_TELEMETRY</span>
+<div class="text-headline-md font-headline-md text-on-surface">$0.0031<span class="text-code-xs text-on-surface-variant ml-1">/req</span></div>
+<div class="w-full bg-surface-variant h-1 mt-2">
+<div class="bg-secondary-fixed-dim h-full w-[12%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-2 block">SYSTEM_LOG_STUB</span>
+<div class="flex flex-col gap-1">
+<div class="text-[9px] font-code-xs text-on-surface-variant">[14:22:01] INFO: ROUTE_SUCCESS</div>
+<div class="text-[9px] font-code-xs text-on-surface-variant">[14:22:03] WARN: SLIGHT_LATENCY_LLM</div>
+<div class="text-[9px] font-code-xs text-primary-fixed-dim">[14:22:05] EXEC: TOOL_N8N_INIT</div>
+</div>
+</div>
+</div>
+<!-- Floating Detail Drawer (Right side) -->
+<div class="absolute top-lane-margin right-lane-margin w-72 h-fit bg-surface-container-high/80 backdrop-blur-md border border-outline-variant p-6 hidden lg:block">
+<h4 class="text-label-caps font-label-caps text-on-surface border-b border-outline-variant pb-2 mb-4 flex items-center justify-between">
+                ARTIFACT DETAILS
+                <span class="material-symbols-outlined text-sm">info</span>
+</h4>
+<div class="space-y-6">
+<section>
+<span class="text-code-xs font-code-xs text-on-surface-variant uppercase">Stream Protocol</span>
+<p class="text-body-md text-on-surface mt-1">WebSocket Full Duplex + Server-Sent Events (SSE) fallback for edge stability.</p>
+</section>
+<section>
+<span class="text-code-xs font-code-xs text-on-surface-variant uppercase">Logic Branching</span>
+<p class="text-body-md text-on-surface mt-1">Engine evaluates tool requirement (n8n) based on prompt semantic density.</p>
+</section>
+<div class="p-3 bg-primary-container/10 border border-primary-fixed-dim/20 rounded">
+<p class="text-code-xs font-code-xs text-primary-fixed-dim leading-relaxed">
+                        // PROD_READY_v4.02<br/>
+                        // Blueprint validated by Architecture Council
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Micro-Telemetry Interactions -->
+<script>
+        // Simple visual interaction to simulate data flow
+        document.addEventListener('DOMContentLoaded', () => {
+            const nodes = document.querySelectorAll('.bg-surface-container-highest, .bg-surface-container-high, .bg-surface-container');
+            
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', () => {
+                    node.style.borderColor = '#00e639';
+                    node.style.transition = 'border-color 0.2s ease';
+                });
+                node.addEventListener('mouseleave', () => {
+                    node.style.borderColor = '';
+                });
+            });
+
+            // Random log generation
+            const logContainer = document.querySelector('.flex.flex-col.gap-1');
+            setInterval(() => {
+                const logs = [
+                    "INFO: HEARTBEAT_OK",
+                    "INFO: STREAMING_CHUNK_442",
+                    "DEBUG: MEMORY_USAGE_OPTIMAL",
+                    "TRACE: GW_PASS_661"
+                ];
+                const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+                const newLog = document.createElement('div');
+                newLog.className = 'text-[9px] font-code-xs text-on-surface-variant opacity-0 transform translate-x-2 transition-all duration-300';
+                newLog.innerText = `[${time}] ${logs[Math.floor(Math.random() * logs.length)]}`;
+                
+                if (logContainer.children.length > 4) {
+                    logContainer.removeChild(logContainer.children[0]);
+                }
+                logContainer.appendChild(newLog);
+                
+                setTimeout(() => {
+                    newLog.classList.remove('opacity-0', 'translate-x-2');
+                }, 10);
+            }, 3000);
+        });
+    </script>
+</body></html>

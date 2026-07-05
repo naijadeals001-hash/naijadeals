@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GOV-ENGINE v4.02 | BPMN Process Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .bpmn-connector {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .swimlane-row:nth-child(even) {
+            background-color: rgba(18, 33, 49, 0.4);
+        }
+        .node-active {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.2);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1c2b3c;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b4b37;
+        }
+        .diamond {
+            width: 48px;
+            height: 48px;
+            transform: rotate(45deg);
+            border-width: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .diamond > span {
+            transform: rotate(-45deg);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ebffe2",
+                        "tertiary": "#fff6ff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-error": "#690005",
+                        "surface-container-highest": "#273647",
+                        "on-background": "#d4e4fa",
+                        "surface-container-high": "#1c2b3c",
+                        "primary-fixed-dim": "#00e639",
+                        "error": "#ffb4ab",
+                        "surface-bright": "#2c3a4c",
+                        "outline-variant": "#3b4b37",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "outline": "#84967e",
+                        "on-primary-container": "#007117",
+                        "on-error-container": "#ffdad6",
+                        "secondary-container": "#0043eb",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-primary-fixed": "#002203",
+                        "on-primary": "#003907",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-dim": "#051424",
+                        "primary-container": "#00ff41",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-secondary": "#002388",
+                        "surface-variant": "#273647",
+                        "surface-container": "#122131",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#001356",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-lowest": "#010f1f",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-secondary-container": "#c6ceff",
+                        "background": "#051424",
+                        "on-tertiary-container": "#862ed4",
+                        "on-surface": "#d4e4fa",
+                        "secondary-fixed": "#dde1ff",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary": "#490080",
+                        "surface-container-low": "#0d1c2d",
+                        "surface": "#051424",
+                        "inverse-primary": "#006e16",
+                        "inverse-on-surface": "#233143",
+                        "primary-fixed": "#72ff70",
+                        "surface-tint": "#00e639",
+                        "inverse-surface": "#d4e4fa"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col h-screen overflow-hidden text-on-surface">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-lane-margin h-16 z-50 border-b border-outline-variant bg-surface shrink-0">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="security">security</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tight text-primary-fixed-dim">GOV-ENGINE v4.02</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-primary-fixed-dim font-bold transition-opacity hover:opacity-80" href="#">Process Map</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary-fixed-dim transition-colors" href="#">Audit Trail</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary-fixed-dim transition-colors" href="#">Node Config</a>
+</nav>
+<button class="p-2 hover:bg-surface-container-high transition-colors rounded">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings_input_component">settings_input_component</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 bottom-0 z-40 flex flex-col overflow-y-auto border-r border-outline-variant bg-surface-container w-64 shrink-0 hidden lg:flex">
+<div class="p-6 border-b border-outline-variant">
+<p class="text-label-caps font-label-caps text-on-surface-variant">ENGINEERING ARTIFACTS</p>
+</div>
+<nav class="flex-1 py-4">
+<!-- BPMN Swimlane active -->
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="dashboard">dashboard</span>
+<span class="text-label-caps font-label-caps uppercase">Executive Overview</span>
+</a>
+<a class="bg-surface-container-highest text-primary-fixed-dim border-l-2 border-primary-fixed-dim flex items-center px-4 py-2 scale-[0.99] transition-transform duration-100" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="account_tree">account_tree</span>
+<span class="text-label-caps font-label-caps uppercase">BPMN Swimlane</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="rule">rule</span>
+<span class="text-label-caps font-label-caps uppercase">Business Rules</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="api">api</span>
+<span class="text-label-caps font-label-caps uppercase">API Contract</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="database">database</span>
+<span class="text-label-caps font-label-caps uppercase">Data Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="hub">hub</span>
+<span class="text-label-caps font-label-caps uppercase">Event Bus</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="verified_user">verified_user</span>
+<span class="text-label-caps font-label-caps uppercase">Security Blueprint</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="report_problem">report_problem</span>
+<span class="text-label-caps font-label-caps uppercase">Exception Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="analytics">analytics</span>
+<span class="text-label-caps font-label-caps uppercase">Monitoring</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="biotech">biotech</span>
+<span class="text-label-caps font-label-caps uppercase">Test Blueprint</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors" href="#">
+<span class="material-symbols-outlined mr-3 text-sm" data-icon="terminal">terminal</span>
+<span class="text-label-caps font-label-caps uppercase">Dev Guide</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content (BPMN Canvas) -->
+<main class="flex-1 ml-0 lg:ml-64 relative overflow-auto p-4 md:p-8 bg-background">
+<!-- Telemetry Overlay -->
+<div class="fixed bottom-8 right-8 z-50 flex flex-col gap-2 p-3 bg-surface-container-highest border border-outline-variant text-code-xs font-code-xs text-primary-fixed-dim">
+<div class="flex justify-between gap-4"><span>LATENCY</span> <span>14.2ms</span></div>
+<div class="flex justify-between gap-4"><span>ACTIVE_PROCS</span> <span>1,204</span></div>
+<div class="flex justify-between gap-4"><span>AI_CONFIDENCE</span> <span>0.982</span></div>
+</div>
+<!-- BPMN Diagram Layout -->
+<div class="min-w-[1800px] flex flex-col border border-outline-variant bg-surface relative">
+<!-- Swimlane Rows -->
+<!-- USER -->
+<div class="flex swimlane-row border-b border-outline-variant min-h-[140px]">
+<div class="w-16 border-r border-outline-variant flex items-center justify-center bg-surface-container-low shrink-0">
+<span class="vertical-text transform -rotate-90 text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="person">person</span> USER
+                        </span>
+</div>
+<div class="flex-1 relative p-8 flex items-center gap-16">
+<!-- Node: Start -->
+<div class="w-12 h-12 rounded-full border-2 border-primary-fixed-dim flex items-center justify-center bg-primary/10">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="play_arrow">play_arrow</span>
+</div>
+<!-- Connector -->
+<div class="h-0.5 w-12 bg-primary-fixed-dim relative">
+<div class="absolute -right-1 -top-[3px] border-t-4 border-b-4 border-l-[6px] border-t-transparent border-b-transparent border-l-primary-fixed-dim"></div>
+</div>
+<!-- Node: Submit Artifact -->
+<div class="w-48 bg-surface-dim border border-primary-fixed-dim p-3 node-active">
+<div class="text-label-caps font-label-caps text-primary-fixed-dim mb-1 opacity-60">USR-TR-01</div>
+<div class="text-code-sm font-code-sm uppercase">SUBMIT ARTIFACT B</div>
+<div class="mt-2 text-[8px] font-code-xs text-on-surface-variant flex justify-between">
+<span>v4.02.1</span>
+<span>AUDIT: READY</span>
+</div>
+</div>
+</div>
+</div>
+<!-- CONTENT SVC -->
+<div class="flex swimlane-row border-b border-outline-variant min-h-[140px]">
+<div class="w-16 border-r border-outline-variant flex items-center justify-center bg-surface-container-low shrink-0">
+<span class="vertical-text transform -rotate-90 text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="cloud_upload">cloud_upload</span> CONTENT SVC
+                        </span>
+</div>
+<div class="flex-1 relative p-8 flex items-center gap-16">
+<div class="w-48 invisible"></div> <!-- Spacer -->
+<div class="w-48 bg-surface-dim border border-outline p-3">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-1 opacity-60">CSV-PR-02</div>
+<div class="text-code-sm font-code-sm uppercase">INGEST &amp; NORMALIZE</div>
+</div>
+</div>
+</div>
+<!-- AURA AI -->
+<div class="flex swimlane-row border-b border-outline-variant min-h-[160px]">
+<div class="w-16 border-r border-outline-variant flex items-center justify-center bg-surface-container-low shrink-0">
+<span class="vertical-text transform -rotate-90 text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="psychology">psychology</span> AURA AI
+                        </span>
+</div>
+<div class="flex-1 relative p-8 flex items-center gap-16">
+<div class="w-96 invisible"></div> <!-- Spacer -->
+<!-- AI Process -->
+<div class="w-48 bg-surface-dim border border-secondary p-3">
+<div class="text-label-caps font-label-caps text-secondary mb-1 opacity-60">AI-INF-03</div>
+<div class="text-code-sm font-code-sm uppercase">SEMANTIC SCORING</div>
+</div>
+<!-- AI Gateway -->
+<div class="diamond border-secondary bg-secondary/5">
+<span class="material-symbols-outlined text-secondary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="text-code-xs font-code-xs text-secondary absolute left-[860px] top-6">
+                            IF CONF &lt; 0.85
+                        </div>
+</div>
+</div>
+<!-- MODERATION SVC -->
+<div class="flex swimlane-row border-b border-outline-variant min-h-[140px]">
+<div class="w-16 border-r border-outline-variant flex items-center justify-center bg-surface-container-low shrink-0">
+<span class="vertical-text transform -rotate-90 text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="gavel">gavel</span> MODERATION
+                        </span>
+</div>
+<div class="flex-1 relative p-8 flex items-center gap-16">
+<div class="w-[900px] invisible"></div> <!-- Spacer -->
+<div class="w-48 bg-surface-dim border border-outline-variant p-3 opacity-50">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-1">MOD-MN-04</div>
+<div class="text-code-sm font-code-sm uppercase">MANUAL ESCALATION</div>
+</div>
+</div>
+</div>
+<!-- TRUST ENGINE -->
+<div class="flex swimlane-row border-b border-outline-variant min-h-[140px]">
+<div class="w-16 border-r border-outline-variant flex items-center justify-center bg-surface-container-low shrink-0">
+<span class="vertical-text transform -rotate-90 text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="verified">verified</span> TRUST ENGINE
+                        </span>
+</div>
+<div class="flex-1 relative p-8 flex items-center gap-16">
+<div class="w-64 invisible"></div>
+<div class="w-48 bg-surface-dim border border-tertiary p-3">
+<div class="text-label-caps font-label-caps text-tertiary mb-1 opacity-60">TR-VLD-05</div>
+<div class="text-code-sm font-code-sm uppercase">ENTITY VALIDATION</div>
+</div>
+</div>
+</div>
+<!-- FRAUD ENGINE -->
+<div class="flex swimlane-row border-b border-outline-variant min-h-[140px]">
+<div class="w-16 border-r border-outline-variant flex items-center justify-center bg-surface-container-low shrink-0">
+<span class="vertical-text transform -rotate-90 text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span> FRAUD ENGINE
+                        </span>
+</div>
+<div class="flex-1 relative p-8 flex items-center gap-16">
+<div class="w-64 invisible"></div>
+<div class="w-48 bg-surface-dim border border-error p-3">
+<div class="text-label-caps font-label-caps text-error mb-1 opacity-60">FR-AN-06</div>
+<div class="text-code-sm font-code-sm uppercase">SIGNAL CORRELATION</div>
+</div>
+</div>
+</div>
+<!-- COMPLIANCE -->
+<div class="flex swimlane-row border-b border-outline-variant min-h-[140px]">
+<div class="w-16 border-r border-outline-variant flex items-center justify-center bg-surface-container-low shrink-0">
+<span class="vertical-text transform -rotate-90 text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="policy">policy</span> COMPLIANCE
+                        </span>
+</div>
+<div class="flex-1 relative p-8 flex items-center gap-16">
+<div class="w-[1200px] invisible"></div>
+<div class="w-48 bg-surface-dim border border-outline p-3">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-1 opacity-60">CMP-GT-07</div>
+<div class="text-code-sm font-code-sm uppercase">REGULATORY GATE</div>
+</div>
+</div>
+</div>
+<!-- AUDIT -->
+<div class="flex swimlane-row border-b border-outline-variant min-h-[140px]">
+<div class="w-16 border-r border-outline-variant flex items-center justify-center bg-surface-container-low shrink-0">
+<span class="vertical-text transform -rotate-90 text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="history_edu">history_edu</span> AUDIT
+                        </span>
+</div>
+<div class="flex-1 relative p-8 flex items-center gap-16">
+<div class="w-[1400px] invisible"></div>
+<div class="w-48 bg-surface-dim border border-primary-fixed-dim p-3">
+<div class="text-label-caps font-label-caps text-primary-fixed-dim mb-1 opacity-60">AUD-L-08</div>
+<div class="text-code-sm font-code-sm uppercase">FINAL IMMUTABLE LOG</div>
+</div>
+<div class="w-12 h-12 rounded-full border-4 border-primary-fixed-dim bg-primary/20 flex items-center justify-center shadow-[0_0_10px_rgba(0,230,57,0.3)]">
+<div class="w-6 h-6 rounded-full bg-primary-fixed-dim"></div>
+</div>
+</div>
+</div>
+<!-- ADMIN -->
+<div class="flex swimlane-row min-h-[100px]">
+<div class="w-16 border-r border-outline-variant flex items-center justify-center bg-surface-container-low shrink-0">
+<span class="vertical-text transform -rotate-90 text-label-caps font-label-caps whitespace-nowrap text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="admin_panel_settings">admin_panel_settings</span> ADMIN
+                        </span>
+</div>
+<div class="flex-1 p-4 bg-surface-container-lowest">
+<div class="flex gap-4 items-center h-full text-code-xs text-on-surface-variant/50">
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span>
+<span>ADMIN OVERRIDE ACTIVE</span>
+<div class="h-2 w-2 rounded-full bg-error animate-pulse"></div>
+<span class="ml-auto">LAST ACCESS: 2023-11-24 14:02:11</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Contextual Right Sidebar: Node Config -->
+<div class="fixed right-0 top-16 bottom-0 w-80 bg-surface-container-high border-l border-outline-variant z-30 translate-x-full lg:translate-x-0 transition-transform p-6 flex flex-col gap-6 overflow-y-auto">
+<div class="flex items-center justify-between">
+<h2 class="text-label-caps font-label-caps text-primary-fixed-dim">NODE CONFIGURATION</h2>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="close">close</span>
+</div>
+<div class="space-y-4">
+<div class="p-4 bg-surface-dim border border-outline-variant">
+<div class="text-code-xs text-on-surface-variant mb-2">ID: USR-TR-01</div>
+<div class="text-headline-md font-headline-md">Submit Artifact</div>
+<div class="mt-4 space-y-3">
+<label class="block">
+<span class="text-label-caps font-label-caps text-on-surface-variant/60 block mb-1">PAYLOAD SCHEME</span>
+<div class="px-3 py-2 border border-outline-variant text-code-sm font-code-sm bg-surface">JSON_SCHEMA_V2</div>
+</label>
+<label class="block">
+<span class="text-label-caps font-label-caps text-on-surface-variant/60 block mb-1">AUTH TOKEN</span>
+<div class="px-3 py-2 border border-outline-variant text-code-sm font-code-sm bg-surface">Bearer **************</div>
+</label>
+</div>
+</div>
+<div class="p-4 bg-surface-dim border border-outline-variant">
+<h3 class="text-label-caps font-label-caps text-primary mb-3">EXECUTION METRICS</h3>
+<div class="space-y-2">
+<div class="flex justify-between text-code-xs">
+<span>THROUGHPUT</span>
+<span class="text-primary-fixed-dim">240 req/min</span>
+</div>
+<div class="w-full bg-surface-container h-1">
+<div class="bg-primary-fixed-dim w-[70%] h-full"></div>
+</div>
+<div class="flex justify-between text-code-xs mt-2">
+<span>ERROR RATE</span>
+<span class="text-error">0.02%</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-outline-variant">
+<button class="w-full py-3 bg-primary-fixed-dim text-on-primary-fixed font-label-caps text-label-caps hover:opacity-90 transition-opacity">
+                        REDEPLOY INSTANCE
+                    </button>
+<div class="mt-4 flex gap-2">
+<button class="flex-1 py-2 border border-outline-variant text-on-surface text-code-xs hover:bg-surface-bright">CLONE</button>
+<button class="flex-1 py-2 border border-outline-variant text-on-surface text-code-xs hover:bg-surface-bright">EXPORT</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Background Decoration / Shader Placeholder -->
+<div class="fixed inset-0 pointer-events-none z-0 opacity-20">
+<!-- Technical Mesh Grid Overlay simulated by CSS -->
+</div>
+<script>
+        // Simple micro-interaction for node selection
+        document.querySelectorAll('.node-active, .w-48').forEach(node => {
+            node.addEventListener('click', () => {
+                // Toggle visual state
+                document.querySelectorAll('.node-active').forEach(n => n.classList.remove('node-active', 'border-primary-fixed-dim'));
+                node.classList.add('node-active', 'border-primary-fixed-dim');
+            });
+        });
+    </script>
+</body></html>
