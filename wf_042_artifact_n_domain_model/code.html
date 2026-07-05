@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ENGINEERING ATLAS | LOGIC-OS - Domain Model WF-042</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-glow-primary { box-shadow: 0 0 15px rgba(0, 230, 57, 0.2); }
+        .node-glow-secondary { box-shadow: 0 0 15px rgba(0, 67, 235, 0.2); }
+        .connector-line { stroke: #3b4b37; stroke-width: 2; fill: none; }
+        .connector-arrow { fill: #3b4b37; }
+        .grid-bg {
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .matrix-cell:hover { background-color: rgba(0, 230, 57, 0.05); }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#051424",
+                        "background": "#051424",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-lowest": "#010f1f",
+                        "on-tertiary-fixed": "#2c0051",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary-fixed": "#dde1ff",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#0043eb",
+                        "on-surface": "#d4e4fa",
+                        "surface-tint": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "on-error-container": "#ffdad6",
+                        "tertiary": "#fff6ff",
+                        "outline": "#84967e",
+                        "on-tertiary": "#490080",
+                        "outline-variant": "#3b4b37",
+                        "on-primary-container": "#007117",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "primary-container": "#00ff41",
+                        "on-surface-variant": "#b9ccb2",
+                        "surface-dim": "#051424",
+                        "inverse-primary": "#006e16",
+                        "primary-fixed": "#72ff70",
+                        "on-secondary-fixed": "#001356",
+                        "on-secondary-container": "#c6ceff",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "primary": "#ebffe2",
+                        "surface-variant": "#273647",
+                        "on-error": "#690005",
+                        "surface-container-low": "#0d1c2d",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary": "#002388",
+                        "surface-container-high": "#1c2b3c",
+                        "on-primary": "#003907",
+                        "primary-fixed-dim": "#00e639",
+                        "on-primary-fixed-variant": "#00530e",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "inverse-on-surface": "#233143",
+                        "surface-container": "#122131",
+                        "surface-bright": "#2c3a4c",
+                        "on-primary-fixed": "#002203",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-background": "#d4e4fa",
+                        "error-container": "#93000a",
+                        "secondary": "#b8c3ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex items-center justify-between px-lane-margin h-16 w-full bg-surface dark:bg-surface border-b border-outline-variant z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="memory">memory</span>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ENGINEERING ATLAS | LOGIC-OS</span>
+<span class="font-label-caps text-label-caps text-surface-tint tracking-tighter">DOMAIN_MODEL::WF-042</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-surface-tint animate-pulse"></div>
+<span class="font-code-sm text-code-sm text-primary">SYS: ACTIVE</span>
+</div>
+<button class="p-2 hover:bg-surface-container-highest transition-colors active:scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- NavigationDrawer (SideNav) -->
+<aside class="flex flex-col h-full py-grid-unit bg-surface-container-low dark:bg-surface-container-low h-screen w-64 border-r border-outline-variant shrink-0 overflow-y-auto scrollbar-hide">
+<div class="px-6 py-4 mb-2">
+<span class="font-label-caps text-label-caps text-surface-tint">KNOWLEDGE_GRAPH_INDEX</span>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active Item: Artifact N -->
+<a class="flex items-center gap-3 px-6 py-3 font-code-sm text-code-sm bg-secondary-container text-on-secondary-container border-l-2 border-surface-tint transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+<span>Artifact N</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 font-code-sm text-code-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span>Artifact A</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 font-code-sm text-code-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span>Artifact B</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 font-code-sm text-code-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span>Artifact C</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 font-code-sm text-code-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span>Artifact D</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 font-code-sm text-code-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="grain">grain</span>
+<span>Artifact E</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 font-code-sm text-code-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span>Artifact F</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 font-code-sm text-code-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span>Artifact G</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 font-code-sm text-code-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="polyline">polyline</span>
+<span>Artifact H</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area (Canvas) -->
+<main class="flex-1 relative overflow-hidden grid-bg">
+<!-- Canvas Toolbar -->
+<div class="absolute top-4 left-4 z-40 flex gap-2">
+<div class="bg-surface-container-high border border-outline-variant p-1 flex gap-1 rounded-sm shadow-xl">
+<button class="p-1.5 hover:bg-surface-container-highest text-on-surface-variant"><span class="material-symbols-outlined text-[18px]" data-icon="zoom_in">zoom_in</span></button>
+<button class="p-1.5 hover:bg-surface-container-highest text-on-surface-variant"><span class="material-symbols-outlined text-[18px]" data-icon="zoom_out">zoom_out</span></button>
+<div class="w-px bg-outline-variant mx-1"></div>
+<button class="p-1.5 hover:bg-surface-container-highest text-surface-tint"><span class="material-symbols-outlined text-[18px]" data-icon="pan_tool">pan_tool</span></button>
+<button class="p-1.5 hover:bg-surface-container-highest text-on-surface-variant"><span class="material-symbols-outlined text-[18px]" data-icon="near_me">near_me</span></button>
+</div>
+</div>
+<!-- SVG Connectors Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-10">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon class="connector-arrow" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Bezier/Polyline paths connecting nodes -->
+<path class="connector-line" d="M 420 180 L 580 180" marker-end="url(#arrowhead)"></path>
+<path class="connector-line" d="M 780 180 L 920 180" marker-end="url(#arrowhead)"></path>
+<path class="connector-line" d="M 680 250 L 680 340" marker-end="url(#arrowhead)"></path>
+<path class="connector-line" d="M 320 250 L 320 450 L 480 450" marker-end="url(#arrowhead)"></path>
+<!-- Cardinality Labels -->
+<text class="font-code-xs text-code-xs fill-outline" font-size="10" x="440" y="170">1:N</text>
+<text class="font-code-xs text-code-xs fill-outline" font-size="10" x="820" y="170">M:N</text>
+<text class="font-code-xs text-code-xs fill-outline" font-size="10" x="690" y="290">1:1</text>
+</svg>
+<!-- Interactive Workspace -->
+<div class="absolute inset-0 p-lane-margin overflow-auto z-20">
+<div class="relative min-w-[1200px] min-h-[800px]">
+<!-- Node: UserPreference -->
+<div class="absolute top-80 left-20 w-64 bg-surface-container border border-surface-tint/50 node-glow-primary rounded-sm transition-transform hover:scale-[1.02] cursor-grab">
+<div class="bg-surface-tint/10 px-3 py-1 border-b border-surface-tint/30 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-surface-tint">CLASS_NODE</span>
+<span class="material-symbols-outlined text-[12px] text-surface-tint" data-icon="person_search">person_search</span>
+</div>
+<div class="p-3">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">UserPreference</h3>
+<div class="space-y-1">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="font-code-sm text-code-sm text-on-surface-variant">guid:</span>
+<span class="font-code-sm text-code-sm text-surface-tint">UUID_v4</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="font-code-sm text-code-sm text-on-surface-variant">latency_threshold:</span>
+<span class="font-code-sm text-code-sm text-secondary">int64</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="font-code-sm text-code-sm text-on-surface-variant">active_schema:</span>
+<span class="font-code-sm text-code-sm text-secondary">string</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-highest px-3 py-1 flex justify-end">
+<span class="font-code-xs text-code-xs text-outline">v2.1.0-stable</span>
+</div>
+</div>
+<!-- Node: ConversationThread -->
+<div class="absolute top-20 left-[580px] w-64 bg-surface-container border border-secondary/50 node-glow-secondary rounded-sm transition-transform hover:scale-[1.02] cursor-grab">
+<div class="bg-secondary/10 px-3 py-1 border-b border-secondary/30 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-secondary">STREAM_NODE</span>
+<span class="material-symbols-outlined text-[12px] text-secondary" data-icon="forum">forum</span>
+</div>
+<div class="p-3">
+<h3 class="font-headline-md text-headline-md text-secondary-fixed-dim mb-2">ConversationThread</h3>
+<div class="space-y-1">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="font-code-sm text-code-sm text-on-surface-variant">thread_id:</span>
+<span class="font-code-sm text-code-sm text-secondary">hash_sha256</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="font-code-sm text-code-sm text-on-surface-variant">context_window:</span>
+<span class="font-code-sm text-code-sm text-secondary">token_limit</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="font-code-sm text-code-sm text-on-surface-variant">persistence:</span>
+<span class="font-code-sm text-code-sm text-secondary">BOOLEAN</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-highest px-3 py-1 flex justify-end">
+<span class="font-code-xs text-code-xs text-outline">TTL: 48h</span>
+</div>
+</div>
+<!-- Node: EntityNode -->
+<div class="absolute top-20 left-[920px] w-64 bg-surface-container border border-outline-variant rounded-sm transition-transform hover:scale-[1.02] cursor-grab">
+<div class="bg-outline-variant/10 px-3 py-1 border-b border-outline-variant flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">GRAPH_LEAF</span>
+<span class="material-symbols-outlined text-[12px] text-on-surface-variant" data-icon="mediation">mediation</span>
+</div>
+<div class="p-3">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">EntityNode</h3>
+<div class="space-y-1 text-on-surface-variant">
+<p class="font-code-sm text-code-sm">+ node_type: Enum</p>
+<p class="font-code-sm text-code-sm">+ vector_embed: float[]</p>
+<p class="font-code-sm text-code-sm">+ metadata: Map&lt;K,V&gt;</p>
+</div>
+<div class="mt-4 pt-2 border-t border-outline-variant/30">
+<p class="font-code-xs text-code-xs text-surface-tint">fn compute_affinity()</p>
+<p class="font-code-xs text-code-xs text-surface-tint">fn update_vector()</p>
+</div>
+</div>
+</div>
+<!-- Memory State Matrix -->
+<div class="absolute top-[350px] left-[500px] w-[600px] bg-surface-container-high border border-outline-variant rounded-lg overflow-hidden shadow-2xl">
+<div class="p-4 border-b border-outline-variant bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-surface-tint" data-icon="grid_view">grid_view</span>
+<h2 class="font-headline-md text-headline-md text-primary">MEMORY_STATE_MATRIX</h2>
+</div>
+<span class="font-code-xs text-code-xs bg-outline-variant/30 px-2 py-1 rounded">WF-042.v3</span>
+</div>
+<table class="w-full border-collapse font-code-sm text-code-sm">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant">
+<th class="p-3 text-left border-r border-outline-variant">DIMENSION</th>
+<th class="p-3 text-left border-r border-outline-variant">EPISODIC</th>
+<th class="p-3 text-left border-r border-outline-variant">SEMANTIC</th>
+<th class="p-3 text-left">PROCEDURAL</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-t border-outline-variant/50 matrix-cell">
+<td class="p-3 font-bold border-r border-outline-variant">Latency</td>
+<td class="p-3 border-r border-outline-variant">~12ms</td>
+<td class="p-3 border-r border-outline-variant">~45ms</td>
+<td class="p-3">~2ms</td>
+</tr>
+<tr class="border-t border-outline-variant/50 matrix-cell bg-surface-container-lowest/30">
+<td class="p-3 font-bold border-r border-outline-variant">Persistence</td>
+<td class="p-3 border-r border-outline-variant text-error">Volatile</td>
+<td class="p-3 border-r border-outline-variant text-surface-tint">Durable</td>
+<td class="p-3 text-surface-tint">Durable</td>
+</tr>
+<tr class="border-t border-outline-variant/50 matrix-cell">
+<td class="p-3 font-bold border-r border-outline-variant">Storage Hub</td>
+<td class="p-3 border-r border-outline-variant">Redis_Cache</td>
+<td class="p-3 border-r border-outline-variant">Neo4j_Graph</td>
+<td class="p-3">Wasm_Runtime</td>
+</tr>
+<tr class="border-t border-outline-variant/50 matrix-cell">
+<td class="p-3 font-bold border-r border-outline-variant">Search Key</td>
+<td class="p-3 border-r border-outline-variant">SessionID</td>
+<td class="p-3 border-r border-outline-variant">EntityUID</td>
+<td class="p-3">OpCode</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Telemetry Data points (Micro-telemetry) -->
+<div class="absolute bottom-20 right-20 flex flex-col gap-2">
+<div class="bg-surface-container border-l-2 border-surface-tint p-2 flex flex-col gap-1 w-48 shadow-lg">
+<span class="font-label-caps text-[9px] text-outline uppercase tracking-widest">IO_THROUGHPUT</span>
+<div class="flex justify-between items-end">
+<span class="font-headline-md text-headline-md text-surface-tint leading-none">98.2<span class="text-xs">%</span></span>
+<div class="flex gap-1 h-4 items-end">
+<div class="w-1 bg-surface-tint h-1/2"></div>
+<div class="w-1 bg-surface-tint h-3/4"></div>
+<div class="w-1 bg-surface-tint h-full animate-pulse"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border-l-2 border-secondary p-2 flex flex-col gap-1 w-48 shadow-lg">
+<span class="font-label-caps text-[9px] text-outline uppercase tracking-widest">MEMORY_PRESSURE</span>
+<div class="flex justify-between items-end">
+<span class="font-headline-md text-headline-md text-secondary leading-none">1.2<span class="text-xs">GB</span></span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">STABLE</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Background Atmosphere -->
+<div class="absolute inset-0 pointer-events-none">
+
+</div>
+</main>
+<!-- Right Inspector Panel (Audit Log Stubs) -->
+<aside class="w-72 bg-surface-container-low border-l border-outline-variant flex flex-col hidden lg:flex">
+<div class="p-4 border-b border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps text-on-surface">AUDIT_LOG_TELEMETRY</span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4">
+<div class="space-y-1">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-surface-tint">14:20:05.123</span>
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-1">TRACE</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Handshake with UserPreference confirmed.</p>
+</div>
+<div class="space-y-1 opacity-80">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-surface-tint">14:19:58.841</span>
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-1">INFO</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Episodic memory committed to Redis cluster B.</p>
+</div>
+<div class="space-y-1 opacity-60">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-surface-tint">14:19:42.110</span>
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-1">DEBUG</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Schema migration for ConversationThread completed.</p>
+</div>
+<div class="space-y-1 opacity-40">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-surface-tint">14:18:12.004</span>
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-1">INFO</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface-variant">System start sequence initiated.</p>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-[10px] text-outline">RESOURCE_UTILIZATION</span>
+<span class="font-code-xs text-code-xs text-surface-tint">OPTIMAL</span>
+</div>
+<div class="w-full bg-outline-variant h-1 rounded-full overflow-hidden">
+<div class="bg-surface-tint h-full w-[45%]"></div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Footer -->
+<footer class="flex justify-between items-center px-lane-margin py-stack-gap w-full z-50 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant fixed bottom-0">
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps text-on-surface">LOGIC-OS</span>
+<span class="text-outline-variant">|</span>
+<span class="font-code-xs text-code-xs text-surface-tint">SYSTEM_TELEMETRY_V2.4</span>
+</div>
+<div class="flex gap-8">
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary cursor-crosshair transition-colors">LATENCY: 45ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary cursor-crosshair transition-colors">HIT_RATE: 98.2%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary cursor-crosshair transition-colors">EMBED_DEPTH: 1536</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-outline">UPTIME: 14d 02h 11m</span>
+<span class="material-symbols-outlined text-[14px] text-surface-tint animate-pulse" data-icon="cloud_done">cloud_done</span>
+</div>
+</footer>
+<script>
+        // Simple micro-interactions for node dragging simulation
+        document.querySelectorAll('.cursor-grab').forEach(node => {
+            node.addEventListener('mousedown', function() {
+                this.classList.replace('cursor-grab', 'cursor-grabbing');
+                this.style.zIndex = '100';
+            });
+            node.addEventListener('mouseup', function() {
+                this.classList.replace('cursor-grabbing', 'cursor-grab');
+                this.style.zIndex = '20';
+            });
+        });
+
+        // Toggle Right Panel visibility (simulated)
+        const inspectorBtn = document.querySelector('[data-icon="settings"]');
+        const inspectorPanel = document.querySelector('.lg\\:flex');
+        
+        inspectorBtn.addEventListener('click', () => {
+            // Logic to toggle panel if mobile/needed
+        });
+    </script>
+</body></html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DT-ENGINE_v4.2.0 | Artifact-H Exception &amp; Recovery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .glow-red { box-shadow: 0 0 15px rgba(255, 180, 171, 0.2); }
+        .glow-green { box-shadow: 0 0 15px rgba(0, 230, 57, 0.2); }
+        
+        /* Custom scrollbar for technical density */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #0d1c2d; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; border-radius: 2px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#003907",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#001356",
+                        "surface-container-high": "#1c2b3c",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-background": "#d4e4fa",
+                        "surface-container-lowest": "#010f1f",
+                        "surface-container-low": "#0d1c2d",
+                        "primary-fixed-dim": "#00e639",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "on-secondary-container": "#c6ceff",
+                        "error-container": "#93000a",
+                        "surface-dim": "#051424",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "secondary-fixed": "#dde1ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-secondary": "#002388",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006e16",
+                        "on-primary-container": "#007117",
+                        "surface-container": "#122131",
+                        "surface-tint": "#00e639",
+                        "secondary-container": "#0043eb",
+                        "on-tertiary-container": "#862ed4",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-primary-fixed": "#002203",
+                        "outline-variant": "#3b4b37",
+                        "error": "#ffb4ab",
+                        "surface-variant": "#273647",
+                        "tertiary": "#fff6ff",
+                        "tertiary-container": "#ecd3ff",
+                        "outline": "#84967e",
+                        "on-surface": "#d4e4fa",
+                        "background": "#051424",
+                        "surface": "#051424",
+                        "on-primary-fixed-variant": "#00530e",
+                        "inverse-on-surface": "#233143",
+                        "on-tertiary": "#490080",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container-highest": "#273647",
+                        "primary": "#ebffe2"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "lane-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TOP APP BAR (Shared Component) -->
+<header class="fixed top-0 left-0 right-0 h-16 flex justify-between items-center px-node-gutter z-50 bg-surface-dim border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="hub">hub</span>
+<h1 class="text-headline-md font-headline-md font-extrabold text-primary-container tracking-tighter">DT-ENGINE_v4.2.0</h1>
+<div class="h-4 w-[1px] bg-outline-variant mx-2"></div>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-variant/50 rounded border border-outline-variant">
+<span class="text-code-sm font-code-sm text-primary-fixed-dim">WF-043_RESOLVER</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end">
+<span class="text-code-xs font-code-xs text-on-surface-variant opacity-60">SYSTEM_UPTIME</span>
+<span class="text-code-sm font-code-sm text-primary-fixed-dim">12,442:04:11</span>
+</div>
+<button class="p-2 hover:bg-surface-variant transition-colors duration-150 rounded cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings_input_component">settings_input_component</span>
+</button>
+</div>
+</header>
+<!-- NAVIGATION DRAWER (Shared Component) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-low border-r border-outline-variant z-40 hidden md:flex flex-col gap-stack-gap overflow-y-auto">
+<div class="p-4 border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant tracking-widest">CORE_REGISTRY</span>
+</div>
+<nav class="flex-1 py-4">
+<!-- Artifact-H Active -->
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container border-l-4 border-primary-fixed-dim transition-all duration-75" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="database">database</span>
+<span class="text-label-caps font-label-caps">Artifact-H</span>
+</a>
+<!-- Inactive items -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-fixed-dim transition-all duration-75" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="memory">memory</span>
+<span class="text-label-caps font-label-caps">Artifact-A</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-fixed-dim transition-all duration-75" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="schema">schema</span>
+<span class="text-label-caps font-label-caps">Artifact-B</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-fixed-dim transition-all duration-75" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="analytics">analytics</span>
+<span class="text-label-caps font-label-caps">Artifact-C</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-fixed-dim transition-all duration-75" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="query_stats">query_stats</span>
+<span class="text-label-caps font-label-caps">Artifact-D</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-fixed-dim transition-all duration-75" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="developer_mode">developer_mode</span>
+<span class="text-label-caps font-label-caps">Artifact-K</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-fixed-dim transition-all duration-75" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="insights">insights</span>
+<span class="text-label-caps font-label-caps">Artifact-M</span>
+</a>
+</nav>
+<div class="p-4 border-t border-outline-variant">
+<div class="flex items-center justify-between mb-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant">CORE_TEMP</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">38°C</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full w-[38%]"></div>
+</div>
+</div>
+</aside>
+<!-- MAIN CONTENT CANVAS -->
+<main class="md:ml-64 pt-16 min-h-screen relative overflow-hidden">
+<!-- SWIMLANE HEADERS -->
+<div class="sticky top-16 z-30 flex bg-surface-dim/80 backdrop-blur-sm border-b border-outline-variant">
+<div class="w-80 flex-shrink-0 p-4 border-r border-outline-variant">
+<div class="flex items-center gap-2 text-error">
+<span class="material-symbols-outlined" data-icon="report">report</span>
+<span class="text-headline-md font-headline-md">EXCEPTION_STATE</span>
+</div>
+</div>
+<div class="flex-1 p-4">
+<div class="flex items-center gap-2 text-primary-fixed-dim">
+<span class="material-symbols-outlined" data-icon="healing">healing</span>
+<span class="text-headline-md font-headline-md">RECOVERY_ACTION</span>
+</div>
+</div>
+</div>
+<!-- FLOW CONTAINER -->
+<div class="p-node-gutter flex flex-col gap-12 relative pb-32">
+<!-- EXCEPTION ROW 1: Simulation Failed -->
+<div class="flex gap-node-gutter group">
+<!-- Node: Exception -->
+<div class="w-80 flex-shrink-0 bg-surface-container-lowest border border-error p-stack-gap rounded relative glow-red transition-transform hover:scale-[1.02]">
+<div class="bg-error/10 p-2 flex justify-between items-center border-b border-error/30">
+<span class="text-label-caps font-label-caps text-error">SIM_ERR_01</span>
+<span class="material-symbols-outlined text-error scale-75" data-icon="error">error</span>
+</div>
+<div class="p-3">
+<p class="text-code-sm font-code-sm text-on-surface mb-2">Simulation Failed</p>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-xs font-code-xs opacity-60">
+<span>TYPE:</span>
+<span>COMPUTE_TIMEOUT</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs opacity-60">
+<span>ID:</span>
+<span>WF-043-X1</span>
+</div>
+</div>
+</div>
+<!-- Connector Port -->
+<div class="absolute top-1/2 -right-1 w-2 h-2 bg-error rounded-full translate-y-[-50%]"></div>
+</div>
+<!-- Recovery Arrow (Visual Path) -->
+<div class="flex-1 flex items-center justify-center relative">
+<div class="w-full h-px bg-gradient-to-r from-error to-primary-fixed-dim opacity-30"></div>
+<div class="absolute px-4 py-1 bg-surface-container border border-outline-variant rounded flex items-center gap-3">
+<div class="flex flex-col items-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">TTL</span>
+<span class="text-code-sm font-code-sm text-primary">300ms</span>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant"></div>
+<div class="flex flex-col items-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">MTTR</span>
+<span class="text-code-sm font-code-sm text-primary">1.2s</span>
+</div>
+</div>
+</div>
+<!-- Node: Recovery -->
+<div class="w-80 flex-shrink-0 bg-surface-container-lowest border border-primary-fixed-dim p-stack-gap rounded relative glow-green transition-transform hover:scale-[1.02]">
+<div class="bg-primary-fixed-dim/10 p-2 flex justify-between items-center border-b border-primary-fixed-dim/30">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">REC_CMD_A</span>
+<span class="material-symbols-outlined text-primary-fixed-dim scale-75" data-icon="replay">replay</span>
+</div>
+<div class="p-3">
+<p class="text-code-sm font-code-sm text-on-surface mb-2">Retry Execution</p>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-xs font-code-xs text-primary-fixed-dim">
+<span>STRATEGY:</span>
+<span>EXP_BACKOFF</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs text-primary-fixed-dim">
+<span>MAX_TRIES:</span>
+<span>3</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- EXCEPTION ROW 2: Scenario Conflict -->
+<div class="flex gap-node-gutter group">
+<div class="w-80 flex-shrink-0 bg-surface-container-lowest border border-error p-stack-gap rounded relative glow-red transition-transform hover:scale-[1.02]">
+<div class="bg-error/10 p-2 flex justify-between items-center border-b border-error/30">
+<span class="text-label-caps font-label-caps text-error">LOGIC_CONFLICT</span>
+<span class="material-symbols-outlined text-error scale-75" data-icon="fork_right">fork_right</span>
+</div>
+<div class="p-3">
+<p class="text-code-sm font-code-sm text-on-surface mb-2">Scenario Conflict</p>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-xs font-code-xs opacity-60">
+<span>ENTROPY:</span>
+<span>0.84 HIGH</span>
+</div>
+</div>
+</div>
+<div class="absolute top-1/2 -right-1 w-2 h-2 bg-error rounded-full translate-y-[-50%]"></div>
+</div>
+<div class="flex-1 flex items-center justify-center relative">
+<div class="w-full h-px bg-gradient-to-r from-error to-primary-fixed-dim opacity-30"></div>
+<div class="absolute px-4 py-1 bg-surface-container border border-outline-variant rounded flex items-center gap-3">
+<div class="flex flex-col items-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">TTL</span>
+<span class="text-code-sm font-code-sm text-primary">850ms</span>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant"></div>
+<div class="flex flex-col items-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">MTTR</span>
+<span class="text-code-sm font-code-sm text-primary">4.5s</span>
+</div>
+</div>
+</div>
+<div class="w-80 flex-shrink-0 bg-surface-container-lowest border border-primary-fixed-dim p-stack-gap rounded relative glow-green transition-transform hover:scale-[1.02]">
+<div class="bg-primary-fixed-dim/10 p-2 flex justify-between items-center border-b border-primary-fixed-dim/30">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">REC_CMD_B</span>
+<span class="material-symbols-outlined text-primary-fixed-dim scale-75" data-icon="call_merge">call_merge</span>
+</div>
+<div class="p-3">
+<p class="text-code-sm font-code-sm text-on-surface mb-2">Merge States</p>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-xs font-code-xs text-primary-fixed-dim">
+<span>RESOLVER:</span>
+<span>LATEST_WIN</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- EXCEPTION ROW 3: Optimization Failure -->
+<div class="flex gap-node-gutter group">
+<div class="w-80 flex-shrink-0 bg-surface-container-lowest border border-error p-stack-gap rounded relative glow-red transition-transform hover:scale-[1.02]">
+<div class="bg-error/10 p-2 flex justify-between items-center border-b border-error/30">
+<span class="text-label-caps font-label-caps text-error">OPT_ERROR</span>
+<span class="material-symbols-outlined text-error scale-75" data-icon="trending_down">trending_down</span>
+</div>
+<div class="p-3">
+<p class="text-code-sm font-code-sm text-on-surface mb-2">Optimization Failure</p>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-xs font-code-xs opacity-60">
+<span>PARALLEL:</span>
+<span>THREAD_LOCK</span>
+</div>
+</div>
+</div>
+<div class="absolute top-1/2 -right-1 w-2 h-2 bg-error rounded-full translate-y-[-50%]"></div>
+</div>
+<div class="flex-1 flex items-center justify-center relative">
+<div class="w-full h-px bg-gradient-to-r from-error to-primary-fixed-dim opacity-30"></div>
+<div class="absolute px-4 py-1 bg-surface-container border border-outline-variant rounded flex items-center gap-3">
+<div class="flex flex-col items-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">TTL</span>
+<span class="text-code-sm font-code-sm text-primary">120ms</span>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant"></div>
+<div class="flex flex-col items-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">MTTR</span>
+<span class="text-code-sm font-code-sm text-primary">0.5s</span>
+</div>
+</div>
+</div>
+<div class="w-80 flex-shrink-0 bg-surface-container-lowest border border-primary-fixed-dim p-stack-gap rounded relative glow-green transition-transform hover:scale-[1.02]">
+<div class="bg-primary-fixed-dim/10 p-2 flex justify-between items-center border-b border-primary-fixed-dim/30">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">REC_CMD_C</span>
+<span class="material-symbols-outlined text-primary-fixed-dim scale-75" data-icon="history">history</span>
+</div>
+<div class="p-3">
+<p class="text-code-sm font-code-sm text-on-surface mb-2">Rollback State</p>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-xs font-code-xs text-primary-fixed-dim">
+<span>VERSION:</span>
+<span>v3.8.9-STABLE</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- EXCEPTION ROW 4: Digital Twin Drift -->
+<div class="flex gap-node-gutter group">
+<div class="w-80 flex-shrink-0 bg-surface-container-lowest border border-error p-stack-gap rounded relative glow-red transition-transform hover:scale-[1.02]">
+<div class="bg-error/10 p-2 flex justify-between items-center border-b border-error/30">
+<span class="text-label-caps font-label-caps text-error">TWIN_DRIFT</span>
+<span class="material-symbols-outlined text-error scale-75" data-icon="waves">waves</span>
+</div>
+<div class="p-3">
+<p class="text-code-sm font-code-sm text-on-surface mb-2">Digital Twin Drift</p>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-xs font-code-xs opacity-60">
+<span>DELTA:</span>
+<span>&gt; 12.5%</span>
+</div>
+</div>
+</div>
+<div class="absolute top-1/2 -right-1 w-2 h-2 bg-error rounded-full translate-y-[-50%]"></div>
+</div>
+<div class="flex-1 flex items-center justify-center relative">
+<div class="w-full h-px bg-gradient-to-r from-error to-primary-fixed-dim opacity-30"></div>
+<div class="absolute px-4 py-1 bg-surface-container border border-outline-variant rounded flex items-center gap-3">
+<div class="flex flex-col items-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">TTL</span>
+<span class="text-code-sm font-code-sm text-primary">2.4s</span>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant"></div>
+<div class="flex flex-col items-center">
+<span class="text-code-xs font-code-xs text-on-surface-variant">MTTR</span>
+<span class="text-code-sm font-code-sm text-primary">18.2s</span>
+</div>
+</div>
+</div>
+<div class="w-80 flex-shrink-0 bg-surface-container-lowest border border-primary-fixed-dim p-stack-gap rounded relative glow-green transition-transform hover:scale-[1.02]">
+<div class="bg-primary-fixed-dim/10 p-2 flex justify-between items-center border-b border-primary-fixed-dim/30">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">REC_CMD_D</span>
+<span class="material-symbols-outlined text-primary-fixed-dim scale-75" data-icon="construction">construction</span>
+</div>
+<div class="p-3">
+<p class="text-code-sm font-code-sm text-on-surface mb-2">Rebuild Instance</p>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-code-xs font-code-xs text-primary-fixed-dim">
+<span>SEED:</span>
+<span>0xFA32_ROOT</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- TELEMETRY SIDEBAR (RIGHT) -->
+<div class="fixed right-6 bottom-6 w-72 flex flex-col gap-4 z-50">
+<div class="bg-surface-container-high border border-outline-variant p-4 rounded-lg shadow-xl">
+<div class="flex items-center justify-between mb-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant">REAL-TIME_AUDIT</span>
+<span class="w-2 h-2 bg-error rounded-full animate-ping"></span>
+</div>
+<div class="space-y-3">
+<div class="flex gap-3">
+<span class="text-code-xs font-code-xs text-on-surface-variant opacity-40">14:22:01</span>
+<span class="text-code-xs font-code-xs text-error">ERR_SIM</span>
+<span class="text-code-xs font-code-xs text-on-surface">RETRY_TRIGGERED...</span>
+</div>
+<div class="flex gap-3">
+<span class="text-code-xs font-code-xs text-on-surface-variant opacity-40">14:21:55</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">SYS_REC</span>
+<span class="text-code-xs font-code-xs text-on-surface">REBUILD_SUCCESS [WF-042]</span>
+</div>
+<div class="flex gap-3">
+<span class="text-code-xs font-code-xs text-on-surface-variant opacity-40">14:21:49</span>
+<span class="text-code-xs font-code-xs text-on-tertiary-container">WAIT_TTL</span>
+<span class="text-code-xs font-code-xs text-on-surface">SCENARIO_PENDING</span>
+</div>
+</div>
+</div>
+<!-- GLOBAL METRICS BENTO -->
+<div class="bg-surface-container-lowest border border-primary-fixed-dim/20 p-4 rounded-lg grid grid-cols-2 gap-4">
+<div>
+<span class="text-code-xs font-code-xs text-on-surface-variant">AVG_MTTR</span>
+<p class="text-headline-md font-headline-md text-primary-fixed-dim">2.41s</p>
+</div>
+<div>
+<span class="text-code-xs font-code-xs text-on-surface-variant">SUCCESS_RT</span>
+<p class="text-headline-md font-headline-md text-primary-fixed-dim">99.2%</p>
+</div>
+</div>
+</div>
+<!-- BACKGROUND ATMOSPHERE -->
+<div class="absolute inset-0 pointer-events-none opacity-20">
+
+</div>
+</main>
+<!-- FAB (Suppressed on Details per instructions - but logic-wise this is the dashboard of Artifact H) -->
+<!-- The instructions say suppress on Details. Artifact-H is a registry item, so we omit for focus. -->
+<script>
+        // Micro-interaction: Update timestamps and simulated logs
+        setInterval(() => {
+            const logs = document.querySelector('.space-y-3');
+            const newLog = document.createElement('div');
+            newLog.className = 'flex gap-3 animate-pulse';
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            newLog.innerHTML = `
+                <span class="text-code-xs font-code-xs text-on-surface-variant opacity-40">${time}</span>
+                <span class="text-code-xs font-code-xs text-primary-fixed-dim">HEARTBEAT</span>
+                <span class="text-code-xs font-code-xs text-on-surface">NOMINAL_STATE</span>
+            `;
+            logs.prepend(newLog);
+            if (logs.children.length > 5) logs.lastElementChild.remove();
+            
+            setTimeout(() => newLog.classList.remove('animate-pulse'), 1000);
+        }, 5000);
+    </script>
+</body></html>
