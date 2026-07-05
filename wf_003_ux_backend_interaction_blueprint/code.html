@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artifact L — UX ↔ Backend Interaction Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-low": "#0d1c2d",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#dde1ff",
+                        "tertiary": "#fff6ff",
+                        "surface-bright": "#2c3a4c",
+                        "surface-dim": "#051424",
+                        "secondary-container": "#0043eb",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-container": "#00ff41",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container": "#122131",
+                        "surface": "#051424",
+                        "on-surface": "#d4e4fa",
+                        "on-secondary-fixed": "#001356",
+                        "on-error-container": "#ffdad6",
+                        "surface-variant": "#273647",
+                        "secondary": "#b8c3ff",
+                        "surface-tint": "#00e639",
+                        "on-primary-container": "#007117",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary-fixed-dim": "#00e639",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-container-high": "#1c2b3c",
+                        "on-tertiary": "#490080",
+                        "outline": "#84967e",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-highest": "#273647",
+                        "on-error": "#690005",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-secondary-container": "#c6ceff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#002203",
+                        "surface-container-lowest": "#010f1f",
+                        "primary-fixed": "#72ff70",
+                        "primary": "#ebffe2",
+                        "on-primary": "#003907",
+                        "on-background": "#d4e4fa",
+                        "inverse-primary": "#006e16",
+                        "outline-variant": "#3b4b37",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-secondary": "#002388",
+                        "inverse-on-surface": "#233143",
+                        "background": "#051424",
+                        "on-tertiary-fixed-variant": "#6900b3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(rgba(0, 230, 57, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .orthogonal-line {
+            position: relative;
+        }
+        .orthogonal-line::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            width: 2px;
+            height: 24px;
+            background-color: #00e639;
+        }
+        .dashed-line::after {
+            background-image: linear-gradient(to bottom, #00e639 50%, transparent 50%);
+            background-size: 2px 8px;
+            background-color: transparent;
+        }
+        .node-accent {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md min-h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-lane-margin h-16 w-full z-50 bg-surface-container-lowest border-b border-outline-variant fixed top-0 left-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-on-surface">NaijaDeals | Core Systems</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim bg-primary-container/10 px-2 py-1 border border-primary-container/20">v2.4.1-STABLE</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 h-screen w-64 border-r border-outline-variant bg-surface-container-low z-40">
+<div class="px-6 py-4">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant opacity-60">MODULES</h2>
+</div>
+<nav class="flex flex-col">
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="memory">memory</span>
+<span class="font-code-sm text-code-sm">System Architecture</span>
+</a>
+<a class="text-primary-fixed-dim bg-secondary-container/20 border-l-4 border-primary-fixed-dim flex items-center gap-3 px-4 py-3 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-code-sm text-code-sm">Logic Flow</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-code-sm text-code-sm">Data Mapping</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-code-sm text-code-sm">API Specs</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-code-sm text-code-sm">Audit Logs</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
+<span class="font-code-sm text-code-sm">Deployment</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pl-64 pt-16 min-h-screen">
+<div class="p-lane-margin max-w-6xl mx-auto">
+<!-- Header Section -->
+<div class="mb-12 border-l-4 border-primary-fixed-dim pl-6">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 font-label-caps text-[9px] uppercase tracking-widest">Blueprint Artifact L</span>
+<span class="text-on-surface-variant font-code-xs text-code-xs">REF: WF-003-IDV-KYC</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Identity Verification / KYC Flow</h2>
+<p class="text-on-surface-variant font-body-md mt-2 max-w-2xl">
+                    Detailed sequence of UX interactions and backend system events during the KYC onboarding phase. High-density execution spec for engineering teams.
+                </p>
+</div>
+<!-- Interaction Blueprint (Swimlanes) -->
+<div class="grid grid-cols-1 gap-0 bg-surface-container-low border border-outline-variant rounded-lg overflow-hidden mb-12">
+<!-- Swimlane Header -->
+<div class="grid grid-cols-4 border-b border-outline-variant bg-surface-container-highest">
+<div class="p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps uppercase">Actor: User</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="web">web</span>
+<span class="font-label-caps text-label-caps uppercase">Frontend / UI</span>
+</div>
+<div class="p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="dns">dns</span>
+<span class="font-label-caps text-label-caps uppercase">Backend / API</span>
+</div>
+<div class="p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+<span class="font-label-caps text-label-caps uppercase">Integrations / AI</span>
+</div>
+</div>
+<!-- Sequence Flow Content -->
+<div class="p-8 space-y-12 relative">
+<!-- Central Vertical Guide (Visual Only) -->
+<div class="absolute left-1/2 top-0 bottom-0 w-px bg-outline-variant/30 -translate-x-1/2 hidden md:block"></div>
+<!-- Step 1: User uploads ID -->
+<div class="flex flex-col items-center">
+<div class="w-full grid grid-cols-4 items-center">
+<div class="col-span-1 flex flex-col items-center">
+<div class="bg-surface border border-primary-fixed-dim p-4 w-48 node-accent rounded orthogonal-line">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">01 ACTION</div>
+<div class="font-code-sm text-code-sm">User uploads ID Photo</div>
+<div class="mt-2 text-on-surface-variant font-code-xs text-code-xs opacity-60">Input: file[] (JPEG, PNG)</div>
+</div>
+</div>
+<div class="col-span-3"></div>
+</div>
+</div>
+<!-- Step 2: KYC Upload Component -->
+<div class="flex flex-col items-center">
+<div class="w-full grid grid-cols-4 items-center">
+<div class="col-span-1"></div>
+<div class="col-span-1 flex flex-col items-center">
+<div class="bg-surface border border-secondary p-4 w-48 node-accent rounded orthogonal-line">
+<div class="font-label-caps text-label-caps text-secondary mb-1">02 COMPONENT</div>
+<div class="font-code-sm text-code-sm">KYC Upload Component</div>
+<div class="mt-2 space-y-1">
+<div class="h-1 bg-surface-variant w-full rounded overflow-hidden">
+<div class="h-full bg-secondary w-2/3"></div>
+</div>
+<div class="text-on-surface-variant font-code-xs text-code-xs opacity-60">State: 'UPLOADING'</div>
+</div>
+</div>
+</div>
+<div class="col-span-2"></div>
+</div>
+</div>
+<!-- Step 3: API Request -->
+<div class="flex flex-col items-center">
+<div class="w-full grid grid-cols-4 items-center">
+<div class="col-span-2"></div>
+<div class="col-span-1 flex flex-col items-center">
+<div class="bg-surface border border-tertiary-fixed-dim p-4 w-48 node-accent rounded orthogonal-line">
+<div class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-1">03 API REQUEST</div>
+<div class="font-code-sm text-code-sm">POST /documents/upload</div>
+<div class="mt-2 text-on-surface-variant font-code-xs text-code-xs bg-surface-container-highest p-1 rounded">
+                                        payload: { type: 'NIN' }
+                                    </div>
+</div>
+</div>
+<div class="col-span-1"></div>
+</div>
+</div>
+<!-- Step 4: Backend Service -->
+<div class="flex flex-col items-center">
+<div class="w-full grid grid-cols-4 items-center">
+<div class="col-span-2"></div>
+<div class="col-span-1 flex flex-col items-center">
+<div class="bg-surface border border-tertiary-fixed-dim p-4 w-48 node-accent rounded orthogonal-line">
+<div class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-1">04 SERVICE</div>
+<div class="font-code-sm text-code-sm">KYC Service Orchestrator</div>
+<div class="mt-2 text-on-surface-variant font-code-xs text-code-xs opacity-60">Role: Validating Payload</div>
+</div>
+</div>
+<div class="col-span-1"></div>
+</div>
+</div>
+<!-- Step 5: Database Update -->
+<div class="flex flex-col items-center">
+<div class="w-full grid grid-cols-4 items-center">
+<div class="col-span-2"></div>
+<div class="col-span-1 flex flex-col items-center">
+<div class="bg-surface border border-primary-fixed-dim p-4 w-48 node-accent rounded orthogonal-line dashed-line">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">05 DATABASE</div>
+<div class="font-code-sm text-code-sm">INSERT verification_requests</div>
+<div class="mt-2 flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-primary-container rounded-full"></span>
+<span class="text-on-surface-variant font-code-xs text-code-xs opacity-60">Status: 'pending'</span>
+</div>
+</div>
+</div>
+<div class="col-span-1"></div>
+</div>
+</div>
+<!-- Step 6: Event Bus -->
+<div class="flex flex-col items-center">
+<div class="w-full grid grid-cols-4 items-center">
+<div class="col-span-2"></div>
+<div class="col-span-1 flex flex-col items-center">
+<div class="bg-surface border border-tertiary-fixed-dim p-4 w-48 node-accent rounded orthogonal-line">
+<div class="font-label-caps text-label-caps text-tertiary-fixed-dim mb-1">06 EVENT BUS</div>
+<div class="font-code-sm text-code-sm">DocumentsUploaded</div>
+<div class="mt-2 text-on-surface-variant font-code-xs text-code-xs opacity-60">Topic: 'kyc.ingest.v1'</div>
+</div>
+</div>
+<div class="col-span-1"></div>
+</div>
+</div>
+<!-- Step 7: n8n Automation -->
+<div class="flex flex-col items-center">
+<div class="w-full grid grid-cols-4 items-center">
+<div class="col-span-3"></div>
+<div class="col-span-1 flex flex-col items-center">
+<div class="bg-surface border border-primary p-4 w-48 node-accent rounded orthogonal-line">
+<div class="font-label-caps text-label-caps text-primary mb-1">07 AUTOMATION</div>
+<div class="font-code-sm text-code-sm">N8N-WF-AI-Check</div>
+<div class="mt-2 text-on-surface-variant font-code-xs text-code-xs opacity-60">Trigger: Webhook Call</div>
+<div class="flex gap-1 mt-1">
+<span class="w-1 h-3 bg-primary opacity-40"></span>
+<span class="w-1 h-3 bg-primary opacity-60"></span>
+<span class="w-1 h-3 bg-primary opacity-80"></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Step 8: Final UI State -->
+<div class="flex flex-col items-center">
+<div class="w-full grid grid-cols-4 items-center">
+<div class="col-span-1"></div>
+<div class="col-span-1 flex flex-col items-center">
+<div class="bg-surface border-2 border-primary-fixed-dim p-5 w-48 node-accent rounded-lg shadow-lg shadow-primary-container/5 ring-1 ring-primary-container/10">
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-2 flex items-center justify-between">
+<span>08 FINAL UI</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="font-code-sm text-code-sm font-bold">Verification Pending</div>
+<div class="mt-3 p-2 bg-surface-container-high rounded text-center">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">ETA: 2-5 Minutes</span>
+</div>
+</div>
+</div>
+<div class="col-span-2"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento Info Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Development Readiness Checklist -->
+<div class="md:col-span-2 bg-surface-container-low border border-outline-variant p-6 rounded-lg">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface">Development Readiness Checklist</h3>
+<div class="flex items-center gap-2 bg-primary-container/10 border border-primary-container/20 px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[16px]" data-icon="verified">verified</span>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">Ready For Development</span>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="flex items-start gap-3 p-3 bg-surface-container rounded border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_box">check_box</span>
+<div>
+<div class="font-code-sm text-code-sm font-bold">Frontend Models</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">KYCDocumentSchema defined in Zod.</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-surface-container rounded border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_box">check_box</span>
+<div>
+<div class="font-code-sm text-code-sm font-bold">API Endpoints</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">Postman collection v1.2 exported.</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-surface-container rounded border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_box">check_box</span>
+<div>
+<div class="font-code-sm text-code-sm font-bold">Event Handlers</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">RabbitMQ fanout exchange verified.</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-surface-container rounded border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="check_box">check_box</span>
+<div>
+<div class="font-code-sm text-code-sm font-bold">n8n Logic</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant">OCR/AI processing nodes staged.</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Technical Metadata Card -->
+<div class="bg-surface-container-high border border-outline-variant p-6 rounded-lg flex flex-col justify-between">
+<div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4">FLOW TELEMETRY</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs opacity-60">Est. Latency (P95)</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">1.2s - 4.5s</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs opacity-60">Data Persistence</span>
+<span class="font-code-sm text-code-sm">Postgres + S3</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs opacity-60">Security Layer</span>
+<span class="font-code-sm text-code-sm">OAuth2 + mTLS</span>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-4 border-t border-outline-variant/30">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 bg-primary-fixed-dim rounded-full animate-pulse"></span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Active Instance: i-0f9c2e11</span>
+</div>
+<button class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface py-2 rounded font-code-sm text-code-sm hover:bg-surface transition-colors">
+                            View API Definition
+                        </button>
+</div>
+</div>
+</div>
+<!-- Micro-Telemetry Cluster -->
+<div class="mt-8 flex flex-wrap gap-4 justify-center opacity-40">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="bolt">bolt</span>
+<span class="font-code-xs text-code-xs uppercase tracking-tighter">Throughput: 850 req/s</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="warning">warning</span>
+<span class="font-code-xs text-code-xs uppercase tracking-tighter">Error Rate: 0.04%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="dns">dns</span>
+<span class="font-code-xs text-code-xs uppercase tracking-tighter">Regions: Lagos-01, London-01</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Tooltip Context (Interactions) -->
+<script>
+        // Micro-interactions for node hovering
+        const nodes = document.querySelectorAll('.node-accent');
+        nodes.forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px)';
+                node.style.borderColor = 'white';
+                node.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0px)';
+                node.style.borderColor = '';
+            });
+        });
+    </script>
+</body></html>

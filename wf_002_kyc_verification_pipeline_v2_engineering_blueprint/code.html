@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-002: KYC &amp; VERIFICATION ECOSYSTEM - V2 ENTERPRISE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#1c2b3c",
+                    "surface": "#051424",
+                    "inverse-on-surface": "#233143",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-primary": "#003907",
+                    "surface-dim": "#051424",
+                    "outline": "#84967e",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-container": "#122131",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-primary-fixed": "#002203",
+                    "tertiary": "#fff6ff",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary-fixed": "#001356",
+                    "surface-tint": "#00e639",
+                    "on-background": "#d4e4fa",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-tertiary": "#490080",
+                    "primary": "#ebffe2",
+                    "surface-variant": "#273647",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "secondary": "#b8c3ff",
+                    "on-primary-container": "#007117",
+                    "surface-container-highest": "#273647",
+                    "background": "#051424",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "primary-fixed-dim": "#00e639",
+                    "secondary-container": "#0043eb",
+                    "on-tertiary-container": "#862ed4",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "inverse-primary": "#006e16",
+                    "primary-container": "#00ff41",
+                    "on-secondary-container": "#c6ceff",
+                    "on-tertiary-fixed": "#2c0051",
+                    "tertiary-fixed": "#f0dbff",
+                    "error": "#ffb4ab",
+                    "error-container": "#93000a",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#002388",
+                    "inverse-surface": "#d4e4fa",
+                    "on-error": "#690005",
+                    "on-surface": "#d4e4fa",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "primary-fixed": "#72ff70"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "node-gutter": "24px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(#1c2b3c 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .workflow-canvas {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            min-height: calc(100vh - 80px);
+        }
+        .swimlane {
+            border-bottom: 1px solid #3b4b37;
+            min-height: 200px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .lane-header {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            border-right: 1px solid #3b4b37;
+            background: #0d1c2d;
+            height: 200px;
+        }
+        .node {
+            background: #0F0F0F;
+            border: 1px solid #84967e;
+            transition: all 0.2s ease;
+            position: absolute;
+            z-index: 10;
+        }
+        .node:hover {
+            border-color: #00e639;
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.2);
+        }
+        .connector-h { height: 2px; background: #3b4b37; position: absolute; z-index: 5; }
+        .connector-v { width: 2px; background: #3b4b37; position: absolute; z-index: 5; }
+        .connector-primary { background: #00e639; }
+        .connector-error { border-top: 1px dashed #ffb4ab; height: 0; background: transparent; }
+        .connector-api { border-top: 2px dotted #b8c3ff; height: 0; background: transparent; }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .security-badge {
+            background: rgba(0, 67, 235, 0.1);
+            border: 1px solid #0043eb;
+            color: #b8c3ff;
+        }
+    </style>
+</head>
+<body class="font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface text-primary docked full-width top-0 border-b border-outline-variant flex justify-between items-center w-full px-lane-margin h-16 fixed z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-002: KYC_ECOSYSTEM_V2</h1>
+</div>
+<div class="flex gap-8 h-full items-center">
+<nav class="hidden md:flex gap-6 h-full items-center">
+<a class="text-on-surface-variant hover:bg-surface-container-high px-2 py-1 transition-colors text-label-caps font-label-caps" href="#">DASHBOARD</a>
+<a class="text-primary border-b-2 border-primary h-full flex items-center px-2 text-label-caps font-label-caps" href="#">ENTERPRISE_BLUEPRINT</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high px-2 py-1 transition-colors text-label-caps font-label-caps" href="#">REGISTRY</a>
+</nav>
+<div class="bg-surface-variant px-3 py-1 text-code-xs font-code-xs border border-outline-variant rounded">
+            v2.1.0_PROD
+        </div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container docked left-0 h-full w-64 border-r border-outline-variant">
+<div class="px-6 py-4 flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">settings_input_component</span>
+</div>
+<nav class="flex-1 overflow-y-auto">
+<div class="space-y-1">
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 cursor-pointer">
+<span class="material-symbols-outlined text-sm">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</div>
+<div class="bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 translate-x-1 transition-transform flex items-center gap-3">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+<span class="text-code-sm font-code-sm">WF-002: KYC_CORE</span>
+</div>
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 cursor-pointer">
+<span class="material-symbols-outlined text-sm">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</div>
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3 cursor-pointer">
+<span class="material-symbols-outlined text-sm">database</span>
+<span class="text-code-sm font-code-sm">WF-005: DATA</span>
+</div>
+</div>
+<!-- Legend Component -->
+<div class="mt-8 px-6 py-4 border-t border-outline-variant">
+<span class="text-label-caps font-label-caps text-on-surface-variant block mb-4">SYSTEM_LEGEND</span>
+<div class="space-y-3">
+<div class="flex items-center gap-3 text-code-xs font-code-xs">
+<div class="w-3 h-3 bg-primary rounded-full"></div>
+<span>SYNC_FLOW</span>
+</div>
+<div class="flex items-center gap-3 text-code-xs font-code-xs">
+<div class="w-3 h-[2px] border-t-2 border-dotted border-secondary"></div>
+<span>API_HANDSHAKE</span>
+</div>
+<div class="flex items-center gap-3 text-code-xs font-code-xs">
+<div class="w-3 h-[2px] border-t-2 border-dashed border-error"></div>
+<span>EXCEPTION_PATH</span>
+</div>
+<div class="flex items-center gap-3 text-code-xs font-code-xs">
+<span class="material-symbols-outlined text-[14px] text-secondary">database</span>
+<span>DB_UPDATE</span>
+</div>
+</div>
+</div>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 pt-16 pb-12">
+<!-- Header Info -->
+<div class="px-lane-margin py-8 border-b border-outline-variant bg-surface-container-low">
+<div class="flex justify-between items-end">
+<div>
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-2">SERVICE_LOGIC_MAP // ENTERPRISE_V2</div>
+<h2 class="text-headline-lg font-headline-lg text-primary uppercase tracking-tight">KYC &amp; Identity Verification Pipeline</h2>
+</div>
+<div class="flex gap-12 text-right">
+<div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">NODE_LATENCY</div>
+<div class="text-headline-md font-headline-md text-on-primary-container">1,420ms</div>
+</div>
+<div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">SYSTEM_INTEGRITY</div>
+<div class="text-headline-md font-headline-md text-primary">99.98%</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Workflow Diagram -->
+<div class="workflow-canvas overflow-x-auto">
+<!-- Swimlanes Headers -->
+<div class="flex flex-col border-r border-outline-variant w-20">
+<div class="lane-header flex items-center justify-center text-label-caps font-label-caps text-on-surface-variant">USER_ACTOR</div>
+<div class="lane-header flex items-center justify-center text-label-caps font-label-caps text-on-surface-variant border-t border-outline-variant">IDENTITY_SRV</div>
+<div class="lane-header flex items-center justify-center text-label-caps font-label-caps text-on-surface-variant border-t border-outline-variant">AURA_AI</div>
+<div class="lane-header flex items-center justify-center text-label-caps font-label-caps text-on-surface-variant border-t border-outline-variant">ADMIN_NODE</div>
+<div class="lane-header flex items-center justify-center text-label-caps font-label-caps text-on-surface-variant border-t border-outline-variant">N8N_ORCH</div>
+</div>
+<!-- Nodes and Connections Area -->
+<div class="relative bg-black/20 p-8 min-w-[1400px] h-[1000px]">
+<!-- LANE 1: USER_ACTOR -->
+<div class="absolute left-10 top-20 node w-52 p-3" id="node-start">
+<div class="text-label-caps font-label-caps text-primary-fixed-dim mb-1 flex justify-between">
+<span>EVT-101</span>
+<span class="material-symbols-outlined text-[12px]">touch_app</span>
+</div>
+<div class="text-code-sm font-code-sm uppercase font-bold">Initiate Verification</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Trigger: Mobile SDK / Web</div>
+</div>
+<!-- Connector: Start -> Upload -->
+<div class="connector-h connector-primary" style="left: 248px; top: 245px; width: 60px;"></div>
+<!-- LANE 1: USER_ACTOR -->
+<div class="absolute left-[308px] top-32 node w-52 p-3" id="node-upload">
+<div class="text-label-caps font-label-caps text-secondary mb-1 flex justify-between">
+<span>DATA-IN</span>
+<span class="material-symbols-outlined text-[12px]">upload_file</span>
+</div>
+<div class="text-code-sm font-code-sm uppercase font-bold">Document Upload</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">ID / Passport / BVN_Blob</div>
+</div>
+<!-- API Handshake: Upload -> Identity_Srv (OCR) -->
+<div class="connector-v connector-api" style="left: 412px; top: 300px; height: 120px;"></div>
+<div class="absolute left-[420px] top-[340px] text-code-xs font-code-xs text-secondary-container bg-surface-container px-2 border border-outline-variant">API_HANDSHAKE: OCR_PARSING</div>
+<!-- LANE 2: IDENTITY_SRV -->
+<div class="absolute left-[308px] top-[420px] node w-52 p-3" id="node-ocr">
+<div class="text-label-caps font-label-caps text-secondary-container mb-1 flex justify-between">
+<span>SRV-01</span>
+<span class="material-symbols-outlined text-[12px]">document_scanner</span>
+</div>
+<div class="text-code-sm font-code-sm uppercase font-bold">OCR Data Extraction</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Parsing PII Fields...</div>
+</div>
+<!-- LANE 3: AURA_AI (Liveness & Fraud) -->
+<div class="connector-v connector-primary" style="left: 412px; top: 510px; height: 110px;"></div>
+<div class="absolute left-[308px] top-[620px] node w-52 p-3 border-secondary-container" id="node-liveness">
+<div class="text-label-caps font-label-caps text-secondary-container mb-1 flex justify-between">
+<span>AI-SEC-01</span>
+<span class="material-symbols-outlined text-[12px] fill-1 text-primary">verified_user</span>
+</div>
+<div class="text-code-sm font-code-sm uppercase font-bold">Liveness Check</div>
+<div class="mt-1 flex items-center gap-1 security-badge px-2 py-0.5 rounded text-[9px] w-fit">
+<span class="material-symbols-outlined text-[10px]">lock</span> SECURITY_LABEL: HIGH
+                </div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Biometric Parity: 0.998</div>
+</div>
+<!-- Connector: Liveness -> Fraud Scan -->
+<div class="connector-h connector-primary" style="left: 516px; top: 680px; width: 60px;"></div>
+<div class="absolute left-[576px] top-[620px] node w-52 p-3 border-secondary-container" id="node-fraud">
+<div class="text-label-caps font-label-caps text-secondary-container mb-1 flex justify-between">
+<span>AI-SEC-02</span>
+<span class="material-symbols-outlined text-[12px] fill-1 text-primary">shield</span>
+</div>
+<div class="text-code-sm font-code-sm uppercase font-bold">Fraud Scan</div>
+<div class="mt-1 flex items-center gap-1 security-badge px-2 py-0.5 rounded text-[9px] w-fit">
+<span class="material-symbols-outlined text-[10px]">lock</span> SECURITY_LABEL: HIGH
+                </div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Pattern Matching Check</div>
+</div>
+<!-- Decision Diamond -->
+<div class="absolute left-[860px] top-[600px] border-2 border-outline rotate-45 w-24 h-24 bg-surface-container flex items-center justify-center z-20" id="node-decision">
+<div class="-rotate-45 text-center px-2">
+<div class="text-label-caps font-label-caps text-on-surface-variant">MATCH?</div>
+<div class="text-code-xs font-code-xs font-bold text-primary">&gt;0.90</div>
+</div>
+</div>
+<div class="connector-h connector-primary" style="left: 784px; top: 680px; width: 76px;"></div>
+<!-- Path YES: to n8n Approval -->
+<div class="connector-v connector-primary" style="left: 908px; top: 724px; height: 116px;"></div>
+<div class="absolute left-[920px] top-[760px] text-code-xs font-code-xs text-primary font-bold">YES [AUTO]</div>
+<!-- Path NO/LOW_CONF: to Manual Review (Admin_Node) -->
+<div class="connector-v connector-error" style="left: 908px; top: 600px; height: -180px; border-left: 1px dashed #ffb4ab;"></div>
+<div class="absolute left-[920px] top-[500px] text-code-xs font-code-xs text-error font-bold">LOW_CONF / EXCEPTION</div>
+<!-- LANE 4: ADMIN_NODE -->
+<div class="absolute left-[804px] top-[420px] node w-52 p-3 border-error" id="node-manual">
+<div class="text-label-caps font-label-caps text-error mb-1 flex justify-between">
+<span>TASK-M</span>
+<span class="material-symbols-outlined text-[12px]">engineering</span>
+</div>
+<div class="text-code-sm font-code-sm uppercase font-bold">Manual Review</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Agent: L2_Verification</div>
+</div>
+<!-- Connector: Manual Review -> n8n Approval -->
+<div class="connector-h connector-api" style="left: 1012px; top: 480px; width: 88px;"></div>
+<div class="connector-v connector-api" style="left: 1100px; top: 480px; height: 360px;"></div>
+<!-- LANE 5: N8N_ORCH -->
+<div class="absolute left-[804px] top-[840px] node w-52 p-3 border-primary" id="node-n8n">
+<div class="text-label-caps font-label-caps text-primary mb-1 flex justify-between">
+<span>WEBHOOK</span>
+<span class="material-symbols-outlined text-[12px]">lan</span>
+</div>
+<div class="text-code-sm font-code-sm uppercase font-bold">n8n: 'KYC_COMMIT'</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant">Consensus: APPROVED</div>
+</div>
+<!-- DB UPDATES -->
+<div class="absolute left-[1080px] top-[830px] flex flex-col gap-3">
+<div class="bg-surface-container border border-outline-variant p-3 rounded flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">database</span>
+<div>
+<div class="text-label-caps font-label-caps text-[10px]">UPDATE: VERIFICATION_STATUS</div>
+<div class="text-code-sm font-code-sm text-primary">STATUS: 'VERIFIED'</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-3 rounded flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">database</span>
+<div>
+<div class="text-label-caps font-label-caps text-[10px]">UPDATE: TRUST_SCORE_DELTA</div>
+<div class="text-code-sm font-code-sm text-primary">+120pts</div>
+</div>
+</div>
+</div>
+<div class="connector-h connector-primary" style="left: 1012px; top: 875px; width: 68px;"></div>
+<!-- FINAL EVENT NOTIFICATION -->
+<div class="absolute left-[1080px] top-[700px] bg-primary-container text-on-primary-container p-4 border border-primary rounded-lg flex flex-col items-center gap-2 shadow-[0_0_20px_rgba(0,255,65,0.3)] animate-pulse">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">stars</span>
+<div class="text-label-caps font-label-caps font-extrabold text-center">TRUST SCORE BOOSTED</div>
+<div class="text-code-sm font-code-sm">+120pts APPLIED</div>
+</div>
+<div class="connector-v connector-primary" style="left: 1200px; top: 780px; height: 50px;"></div>
+<!-- Telemetry Data Overlay -->
+<div class="absolute right-10 top-10 flex flex-col gap-2">
+<div class="bg-surface-container border border-outline-variant p-2 text-code-xs font-code-xs flex justify-between w-48">
+<span class="text-on-surface-variant">SYS_LOAD:</span>
+<span class="text-primary font-bold">12%</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-2 text-code-xs font-code-xs flex justify-between w-48">
+<span class="text-on-surface-variant">Uptime:</span>
+<span class="text-primary font-bold">99.999%</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low text-primary docked bottom-0 full-width fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2 border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<div class="text-code-sm font-code-sm text-primary uppercase">Engine: V4.2.0-STABLE</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div class="text-code-sm font-code-sm text-on-surface-variant">SCHEMA: ENTERPRISE_BLUEPRINT_V2</div>
+</div>
+<div class="flex gap-6">
+<span class="text-on-surface-variant text-code-xs font-code-xs hover:text-primary transition-colors cursor-pointer flex items-center gap-1">
+<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> AUDIT_TRAIL: ACTIVE
+        </span>
+<span class="text-on-surface-variant text-code-xs font-code-xs hover:text-primary transition-colors cursor-pointer">N8N_SYNC: OK</span>
+<span class="text-on-surface-variant text-code-xs font-code-xs hover:text-primary transition-colors cursor-pointer">GLOBAL_LATENCY: 12ms</span>
+</div>
+</footer>
+<!-- Audit Log Drawer -->
+<div class="fixed right-0 top-16 h-[calc(100vh-80px)] w-80 bg-surface-container-highest/95 backdrop-blur-md border-l border-outline-variant transform translate-x-full transition-transform duration-300 z-30" id="audit-drawer">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps">SYSTEM_LOG_v2</span>
+<button class="material-symbols-outlined" onclick="toggleAudit()">close</button>
+</div>
+<div class="p-4 space-y-4 overflow-y-auto h-full pb-24">
+<div class="border-l-2 border-primary pl-3 py-1">
+<div class="text-code-xs font-code-xs text-on-surface-variant">2023-10-24 14:22:01.442</div>
+<div class="text-code-sm font-code-sm uppercase">[DB] TRUST_SCORE +120 (USR-9921)</div>
+</div>
+<div class="border-l-2 border-primary pl-3 py-1">
+<div class="text-code-xs font-code-xs text-on-surface-variant">2023-10-24 14:22:00.810</div>
+<div class="text-code-sm font-code-sm uppercase">[SEC] FRAUD_SCAN_PASSED</div>
+</div>
+<div class="border-l-2 border-primary pl-3 py-1">
+<div class="text-code-xs font-code-xs text-on-surface-variant">2023-10-24 14:21:58.210</div>
+<div class="text-code-sm font-code-sm uppercase">[API] OCR_HANDSHAKE_SUCCESS</div>
+</div>
+<div class="border-l-2 border-error pl-3 py-1">
+<div class="text-code-xs font-code-xs text-on-surface-variant">2023-10-24 14:20:12.001</div>
+<div class="text-code-sm font-code-sm uppercase text-error">[EXC] LOW_CONF_ROUTED_TO_ADMIN</div>
+</div>
+</div>
+</div>
+<button class="fixed right-6 bottom-12 bg-primary text-on-primary w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform z-50" onclick="toggleAudit()">
+<span class="material-symbols-outlined">analytics</span>
+</button>
+<script>
+    function toggleAudit() {
+        const drawer = document.getElementById('audit-drawer');
+        drawer.classList.toggle('translate-x-full');
+    }
+
+    // Dynamic background grid follow
+    document.addEventListener('mousemove', (e) => {
+        const canvas = document.querySelector('.workflow-canvas');
+        if (!canvas) return;
+        const x = (e.clientX / window.innerWidth) * 5;
+        const y = (e.clientY / window.innerHeight) * 5;
+        // canvas.style.backgroundPosition = `${x}px ${y}px`;
+    });
+</script>
+</body></html>

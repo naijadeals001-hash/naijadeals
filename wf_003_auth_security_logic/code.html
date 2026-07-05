@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-003: AUTHENTICATION_ENGINE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dot-grid {
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .flow-line {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .flow-line-active {
+            background: #00e639;
+            box-shadow: 0 0 8px #00e639;
+        }
+        .flow-line-error {
+            background: #ffb4ab;
+            border-style: dashed;
+        }
+        .node-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        /* Custom scrollbar for enterprise density */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #051424; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; }
+        ::-webkit-scrollbar-thumb:hover { background: #84967e; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#1c2b3c",
+                        "surface": "#051424",
+                        "inverse-on-surface": "#233143",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-primary": "#003907",
+                        "surface-dim": "#051424",
+                        "outline": "#84967e",
+                        "secondary-fixed": "#dde1ff",
+                        "surface-container": "#122131",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-primary-fixed": "#002203",
+                        "tertiary": "#fff6ff",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-fixed": "#001356",
+                        "surface-tint": "#00e639",
+                        "on-background": "#d4e4fa",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-tertiary": "#490080",
+                        "primary": "#ebffe2",
+                        "surface-variant": "#273647",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "secondary": "#b8c3ff",
+                        "on-primary-container": "#007117",
+                        "surface-container-highest": "#273647",
+                        "background": "#051424",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "primary-fixed-dim": "#00e639",
+                        "secondary-container": "#0043eb",
+                        "on-tertiary-container": "#862ed4",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "inverse-primary": "#006e16",
+                        "primary-container": "#00ff41",
+                        "on-secondary-container": "#c6ceff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "tertiary-fixed": "#f0dbff",
+                        "error": "#ffb4ab",
+                        "error-container": "#93000a",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#002388",
+                        "inverse-surface": "#d4e4fa",
+                        "on-error": "#690005",
+                        "on-surface": "#d4e4fa",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-bright": "#2c3a4c",
+                        "primary-fixed": "#72ff70"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lane-margin": "32px",
+                        "grid-unit": "8px",
+                        "node-gutter": "24px",
+                        "stack-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant fixed top-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary dark:text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary dark:text-primary border-b-2 border-primary font-label-caps text-label-caps h-16 flex items-center px-2" href="#">WF-003: AUTH</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps h-16 flex items-center px-2 transition-colors" href="#">WF-002: PAY</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps h-16 flex items-center px-2 transition-colors" href="#">WF-003: RISK</a>
+</nav>
+<span class="text-label-caps font-label-caps text-primary border border-primary/30 px-2 py-1 rounded">v4.2.0 LIVE</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant w-64 transition-transform">
+<div class="px-6 py-4">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant opacity-60">WORKFLOW_INDEX</h2>
+</div>
+<nav class="flex-1 overflow-y-auto">
+<div class="flex flex-col">
+<a class="flex items-center gap-3 bg-surface-variant dark:bg-surface-variant text-primary border-l-4 border-primary px-4 py-3 translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+<span class="text-code-sm font-code-sm">WF-004: NOTIF</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="text-code-sm font-code-sm">WF-005: DATA</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="sync">sync</span>
+<span class="text-code-sm font-code-sm">WF-006: SYNC</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 pb-12 h-screen w-[calc(100%-16rem)] relative overflow-hidden dot-grid">
+<!-- Workflow Background Animation -->
+
+<!-- Swimlanes Overlay -->
+<div class="absolute inset-0 flex">
+<div class="w-1/3 border-r border-outline-variant/30 flex flex-col items-center pt-8">
+<div class="text-label-caps font-label-caps text-on-surface-variant/40 flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-[14px]" data-icon="person">person</span> USER_AGENT
+                </div>
+</div>
+<div class="w-1/3 border-r border-outline-variant/30 flex flex-col items-center pt-8">
+<div class="text-label-caps font-label-caps text-on-surface-variant/40 flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-[14px]" data-icon="smart_toy">smart_toy</span> CORE_ENGINE
+                </div>
+</div>
+<div class="w-1/3 flex flex-col items-center pt-8">
+<div class="text-label-caps font-label-caps text-on-surface-variant/40 flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-[14px]" data-icon="shield">shield</span> SECURITY_LAYER
+                </div>
+</div>
+</div>
+<!-- Workflow Diagram Container -->
+<div class="relative z-10 p-lane-margin w-full h-full overflow-auto">
+<div class="flex flex-col items-center gap-12 min-w-[800px]">
+<!-- START: USER LOGIN -->
+<div class="flex items-center justify-center w-full">
+<div class="w-[200px] bg-surface-container-lowest border border-primary p-grid-unit text-center relative">
+<div class="text-label-caps font-label-caps text-primary mb-1">01_START</div>
+<div class="text-code-sm font-code-sm">USER_LOGIN_REQUEST</div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 w-px h-6 bg-primary"></div>
+</div>
+</div>
+<!-- DECISION: PASSWORD VALID -->
+<div class="flex items-center justify-center w-full mt-6">
+<div class="w-[220px] h-[100px] flex items-center justify-center relative rotate-45 border border-outline bg-surface-container">
+<div class="-rotate-45 text-center px-4">
+<div class="text-label-caps font-label-caps text-outline mb-1">02_QUERY</div>
+<div class="text-code-sm font-code-sm">PW_HASH_MATCH?</div>
+</div>
+<!-- Fail Path -->
+<div class="absolute top-0 right-0 -translate-y-full flex flex-col items-end pointer-events-none">
+<div class="h-1 w-24 border-t-2 border-dashed border-error"></div>
+<div class="text-code-xs font-code-xs text-error mt-2">FAIL (401)</div>
+</div>
+</div>
+</div>
+<!-- TASK: MFA CHALLENGE -->
+<div class="flex w-full justify-between items-start max-w-4xl mx-auto mt-8">
+<!-- Path Connector -->
+<div class="flex-1 flex flex-col items-center relative">
+<div class="w-[240px] bg-surface-container-high border border-secondary p-3 relative group">
+<div class="text-label-caps font-label-caps text-secondary mb-1">03_TASK</div>
+<div class="text-code-sm font-code-sm">MFA_VERIFICATION_SYNC</div>
+<div class="mt-2 flex gap-1">
+<span class="w-1 h-1 bg-secondary rounded-full"></span>
+<span class="w-1 h-1 bg-secondary rounded-full"></span>
+<span class="w-1 h-1 bg-secondary/30 rounded-full"></span>
+</div>
+<div class="absolute -right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant/40">LATENCY: 142ms</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AI ACTION: RISK ANALYSIS -->
+<div class="flex items-center justify-center w-full mt-4">
+<div class="w-[300px] bg-surface-container-highest border-2 border-primary-container p-4 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-primary-container/10 -rotate-45 translate-x-8 -translate-y-8"></div>
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary-container node-pulse" data-icon="psychology">psychology</span>
+<div class="text-label-caps font-label-caps text-primary-container">04_AI_ORCHESTRATOR</div>
+</div>
+<div class="text-code-sm font-code-sm mb-3">AURA_AI: RISK_ANALYSIS</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="text-code-xs font-code-xs text-on-surface-variant bg-surface/50 p-1">IP_GEO: 192.168.1.1</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant bg-surface/50 p-1">DEV_ID: 0x82FA</div>
+</div>
+</div>
+</div>
+<!-- DECISION: SUSPICIOUS ACTIVITY -->
+<div class="flex items-center justify-center w-full mt-6">
+<div class="w-[220px] h-[100px] flex items-center justify-center relative rotate-45 border border-outline bg-surface-container">
+<div class="-rotate-45 text-center px-4">
+<div class="text-label-caps font-label-caps text-outline mb-1">05_DECISION</div>
+<div class="text-code-sm font-code-sm">THREAT_LEVEL_OK?</div>
+</div>
+<!-- Alert Path -->
+<div class="absolute bottom-0 right-0 translate-y-full translate-x-12">
+<div class="bg-error-container text-on-error-container p-2 border border-error">
+<div class="text-label-caps font-label-caps">LOCK_EVENT_09</div>
+<div class="text-code-xs font-code-xs">RESET_REQUIRED</div>
+</div>
+</div>
+</div>
+</div>
+<!-- HORIZONTAL FLOW: CREATE SESSION & ACL -->
+<div class="flex items-center justify-center gap-12 w-full mt-12">
+<!-- TASK: LOAD PERMISSIONS -->
+<div class="w-[220px] bg-surface-container border border-on-surface-variant/40 p-3">
+<div class="text-label-caps font-label-caps text-on-surface-variant/60 mb-1">06_TASK</div>
+<div class="text-code-sm font-code-sm">LOAD_ACL_ROLES</div>
+<div class="mt-2 space-y-1">
+<div class="h-1 bg-outline-variant w-full"></div>
+<div class="h-1 bg-outline-variant w-3/4"></div>
+</div>
+</div>
+<div class="w-12 h-px bg-outline-variant"></div>
+<!-- AUDIT: LOGGING -->
+<div class="w-[220px] bg-surface-container-low border border-outline-variant p-3 relative">
+<div class="text-label-caps font-label-caps text-outline-variant mb-1">07_AUDIT</div>
+<div class="text-code-sm font-code-sm">EMIT_SESSION_LOG</div>
+<div class="text-code-xs font-code-xs text-primary-fixed-dim mt-2 font-bold tracking-widest">&gt;&gt;&gt; SENT_TO_LOGS</div>
+</div>
+<div class="w-12 h-px bg-outline-variant"></div>
+<!-- END: ACCESS GRANTED -->
+<div class="w-[200px] bg-primary/10 border-2 border-primary-container p-4 text-center ring-4 ring-primary-container/10">
+<div class="text-label-caps font-label-caps text-primary-container mb-1">08_TERMINATE</div>
+<div class="text-code-sm font-code-sm font-bold">ACCESS_GRANTED</div>
+<div class="mt-2 text-code-xs font-code-xs text-primary-container">SESSION_ID: SF-9921-X</div>
+</div>
+</div>
+</div>
+<!-- Failure States Floating Panel -->
+<div class="fixed top-24 right-8 w-64 bg-surface-container-highest/80 backdrop-blur-md border border-error/30 p-4">
+<div class="flex items-center gap-2 text-error mb-3">
+<span class="material-symbols-outlined text-[18px]" data-icon="warning">warning</span>
+<span class="text-label-caps font-label-caps">EXCEPT_HANDLERS</span>
+</div>
+<div class="space-y-4">
+<div class="group border-l-2 border-error/50 pl-3 py-1">
+<div class="text-code-sm font-code-sm text-on-surface">SESSION_EXPIRED</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">TTL_VAL: 0ms</div>
+<div class="text-code-xs font-code-xs text-error opacity-0 group-hover:opacity-100 transition-opacity">RETRY_TRIGGERED</div>
+</div>
+<div class="group border-l-2 border-error/50 pl-3 py-1">
+<div class="text-code-sm font-code-sm text-on-surface">MFA_TIMEOUT</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">60s WINDOW_EXCEED</div>
+</div>
+<div class="group border-l-2 border-error/50 pl-3 py-1">
+<div class="text-code-sm font-code-sm text-on-surface">AUTH_SYNC_FAIL</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">GATEWAY_504</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Cluster -->
+<div class="fixed bottom-20 right-8 flex flex-col gap-2 items-end pointer-events-none">
+<div class="text-code-xs font-code-xs text-primary/40 bg-surface/80 px-2 py-1">TOTAL_RUN_TIME: 1.242s</div>
+<div class="text-code-xs font-code-xs text-primary/40 bg-surface/80 px-2 py-1">PEAK_CPU: 12.4%</div>
+<div class="text-code-xs font-code-xs text-primary/40 bg-surface/80 px-2 py-1">MEMORY_BUFFER: 4.2MB</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-surface-container-low border-t border-outline-variant dark:border-outline-variant fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<span class="h-4 w-px bg-outline-variant"></span>
+<div class="flex gap-4">
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">AUDIT_TRAIL: ACTIVE</a>
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">N8N_SYNC: OK</a>
+<a class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors" href="#">LATENCY: 12ms</a>
+</div>
+</div>
+<div class="text-label-caps font-label-caps text-on-surface-variant/40">
+            © 2024 SYSTEM_ORCHESTRATOR // SECURED_BY_AURA_AI
+        </div>
+</footer>
+<!-- Interaction Script -->
+<script>
+        // Simple micro-interactions for the "Live" feel
+        document.querySelectorAll('.group').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                const logs = document.querySelector('.fixed.bottom-20');
+                const log = document.createElement('div');
+                log.className = 'text-code-xs font-code-xs text-primary bg-primary/10 px-2 py-1 animate-pulse';
+                log.innerText = `DEBUG: INSPECTING_NODE_${Math.random().toString(16).slice(2, 6).toUpperCase()}`;
+                logs.prepend(log);
+                setTimeout(() => log.remove(), 2000);
+            });
+        });
+    </script>
+</body></html>

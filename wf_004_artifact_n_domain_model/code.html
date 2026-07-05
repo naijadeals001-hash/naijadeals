@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --dot-color: rgba(132, 150, 126, 0.1);
+            --grid-size: 24px;
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: var(--grid-size) var(--grid-size);
+            color: #d4e4fa;
+        }
+        .workflow-canvas {
+            min-height: 100vh;
+            padding-bottom: 80px; /* Space for footer */
+        }
+        .connector-line {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .glass-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+        .node-port {
+            width: 8px;
+            height: 8px;
+            background: #00ff41;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .port-right { right: -4px; top: 50%; transform: translateY(-50%); }
+        .port-left { left: -4px; top: 50%; transform: translateY(-50%); }
+        .port-top { top: -4px; left: 50%; transform: translateX(-50%); }
+        .port-bottom { bottom: -4px; left: 50%; transform: translateX(-50%); }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#c6ceff",
+                        "inverse-on-surface": "#233143",
+                        "tertiary": "#fff6ff",
+                        "surface-container-low": "#0d1c2d",
+                        "primary": "#ebffe2",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary": "#490080",
+                        "on-primary": "#003907",
+                        "secondary-fixed": "#dde1ff",
+                        "on-error": "#690005",
+                        "outline": "#84967e",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary-container": "#00ff41",
+                        "on-secondary": "#002388",
+                        "on-background": "#d4e4fa",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container-high": "#1c2b3c",
+                        "surface-variant": "#273647",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#001356",
+                        "outline-variant": "#3b4b37",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container": "#122131",
+                        "on-tertiary-fixed": "#2c0051",
+                        "primary-fixed": "#72ff70",
+                        "on-surface-variant": "#b9ccb2",
+                        "surface-tint": "#00e639",
+                        "surface-container-lowest": "#010f1f",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "primary-fixed-dim": "#00e639",
+                        "background": "#051424",
+                        "on-tertiary-container": "#862ed4",
+                        "error": "#ffb4ab",
+                        "on-primary-container": "#007117",
+                        "surface-container-highest": "#273647",
+                        "surface": "#051424",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-bright": "#2c3a4c",
+                        "inverse-primary": "#006e16",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-surface": "#d4e4fa",
+                        "surface-dim": "#051424",
+                        "secondary-container": "#0043eb",
+                        "secondary": "#b8c3ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "lane-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 flex justify-between items-center w-full px-lane-margin h-16 bg-surface border-b border-outline-variant text-primary">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<span class="text-primary border-b-2 border-primary text-label-caps font-label-caps cursor-pointer">DIAGRAM_MODE</span>
+<span class="text-on-surface-variant hover:bg-surface-container-high text-label-caps font-label-caps cursor-pointer transition-opacity">SCHEMA_EXPORT</span>
+</nav>
+<div class="px-3 py-1 border border-outline-variant rounded text-code-xs font-code-xs">v4.2.0 LIVE</div>
+</div>
+</header>
+<!-- NavigationDrawer (Vertical Context) -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container border-r border-outline-variant w-64">
+<div class="px-4 mb-6">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant opacity-50">WORKFLOW_INDEX</h2>
+</div>
+<nav class="flex flex-col">
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</div>
+<div class="bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 translate-x-1 transition-transform flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="payments">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</div>
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="security">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</div>
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="mail">mail</span>
+<span class="text-code-sm font-code-sm">WF-004: NOTIF</span>
+</div>
+<div class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined text-sm" data-icon="database">database</span>
+<span class="text-code-sm font-code-sm">WF-005: DATA</span>
+</div>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<span class="text-code-xs font-code-xs text-primary">SYSTEM_OPERATIONAL</span>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">NODE_CLUSTER: 04_ALPHA</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 pt-24 workflow-canvas px-lane-margin">
+<header class="mb-12">
+<div class="flex items-center gap-3 mb-2">
+<span class="px-2 py-0.5 bg-primary-container text-on-primary-container text-code-xs font-code-xs rounded">ENTITY_RELATIONSHIP</span>
+<span class="text-code-xs font-code-xs text-outline">/ ARTIFACT_N / CORE_DOMAIN</span>
+</div>
+<h2 class="text-headline-lg font-headline-lg text-primary tracking-tight">WF-004: Wallet Funding Domain Model</h2>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-2xl mt-2">
+                High-fidelity architectural mapping of the Wallet Funding domain. This model defines the strict ownership, cardinality, and ledgering requirements for financial integrity.
+            </p>
+</header>
+<!-- Diagram Canvas -->
+<div class="relative grid grid-cols-12 gap-8 min-h-[600px]">
+<!-- Swimlane: Core Identity -->
+<div class="col-span-3 space-y-node-gutter relative">
+<div class="absolute -left-4 top-0 bottom-0 border-l border-outline-variant border-dashed"></div>
+<h3 class="text-label-caps font-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs" data-icon="person">person</span>
+                    IDENTITY_LAYER
+                </h3>
+<!-- User Node -->
+<div class="bg-surface-container-highest border border-primary p-3 relative group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps font-label-caps text-primary">USER</span>
+<span class="text-code-xs font-code-xs text-outline">PK: UUID</span>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">identity_id</span>
+<span class="text-on-surface">STRING</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">kyc_status</span>
+<span class="text-primary">ENUM</span>
+</div>
+</div>
+<div class="node-port port-right"></div>
+<div class="absolute -right-16 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+<div class="h-[1px] w-16 bg-primary opacity-50"></div>
+<div class="text-code-xs font-code-xs bg-surface-container px-1 text-primary">1:1</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: Financial Core -->
+<div class="col-span-6 space-y-node-gutter relative">
+<h3 class="text-label-caps font-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs" data-icon="account_balance_wallet">account_balance_wallet</span>
+                    FINANCIAL_CORE
+                </h3>
+<div class="grid grid-cols-2 gap-8">
+<!-- Wallet Node -->
+<div class="bg-surface-container-highest border border-primary p-3 relative group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps font-label-caps text-primary">WALLET</span>
+<span class="text-code-xs font-code-xs text-outline">PK: UUID</span>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">user_id</span>
+<span class="text-outline">FK</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">balance</span>
+<span class="text-on-surface">DECIMAL</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">currency</span>
+<span class="text-on-surface">ISO_3</span>
+</div>
+</div>
+<div class="node-port port-left"></div>
+<div class="node-port port-bottom"></div>
+<div class="node-port port-right"></div>
+</div>
+<!-- Bank Account Node -->
+<div class="bg-surface-container-highest border border-outline p-3 relative group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps font-label-caps text-on-surface">BANK_ACCOUNT</span>
+<span class="text-code-xs font-code-xs text-outline">PK: UUID</span>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">provider_ref</span>
+<span class="text-on-surface">STR</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">verified</span>
+<span class="text-primary">BOOL</span>
+</div>
+</div>
+<div class="node-port port-left"></div>
+<div class="node-port port-bottom"></div>
+<div class="absolute -left-8 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+<div class="h-[1px] w-8 bg-outline opacity-50"></div>
+<div class="text-code-xs font-code-xs bg-surface-container px-1 text-on-surface">N:1</div>
+</div>
+</div>
+</div>
+<!-- Transaction Node (Centerpiece) -->
+<div class="mt-12 bg-surface-container-highest border-2 border-primary-container p-4 relative shadow-[0_0_15px_rgba(0,255,65,0.1)]">
+<div class="flex justify-between items-start mb-3">
+<div class="flex flex-col">
+<span class="text-label-caps font-label-caps text-primary-container">TRANSACTION</span>
+<span class="text-code-xs font-code-xs text-on-primary-container">CORE_LOGIC_UNIT</span>
+</div>
+<span class="text-code-xs font-code-xs text-outline">PK: TXID_UUID</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">wallet_id</span>
+<span class="text-outline">FK</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">source_id</span>
+<span class="text-outline">FK</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">amount</span>
+<span class="text-on-primary-container font-bold">+VAL</span>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">status</span>
+<span class="text-primary">ENUM</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">type</span>
+<span class="text-on-surface">FUNDING</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">created_at</span>
+<span class="text-on-surface">TS_UTC</span>
+</div>
+</div>
+</div>
+<div class="node-port port-top"></div>
+<div class="node-port port-right"></div>
+<div class="node-port port-bottom"></div>
+<!-- Connection Arrows -->
+<svg class="absolute -top-16 left-1/4 w-0.5 h-16 pointer-events-none">
+<line class="text-primary" stroke="currentColor" stroke-dasharray="2 2" x1="0" x2="0" y1="0" y2="100%"></line>
+</svg>
+<svg class="absolute -top-16 right-1/4 w-0.5 h-16 pointer-events-none">
+<line class="text-outline" stroke="currentColor" stroke-dasharray="2 2" x1="0" x2="0" y1="0" y2="100%"></line>
+</svg>
+</div>
+</div>
+<!-- Swimlane: Immutable Ledger & Audit -->
+<div class="col-span-3 space-y-node-gutter relative">
+<div class="absolute -right-4 top-0 bottom-0 border-r border-outline-variant border-dashed"></div>
+<h3 class="text-label-caps font-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs" data-icon="history">history</span>
+                    AUDIT_APPEND_ONLY
+                </h3>
+<!-- Ledger Node -->
+<div class="bg-surface-container-low border border-outline-variant p-3 relative group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps font-label-caps text-on-surface">LEDGER</span>
+<span class="text-code-xs font-code-xs text-outline">PK: SEQ_ID</span>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">tx_id</span>
+<span class="text-outline">FK</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">balance_snapshot</span>
+<span class="text-on-surface">DEC</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">checksum</span>
+<span class="text-primary">SHA256</span>
+</div>
+</div>
+<div class="node-port port-left"></div>
+<div class="absolute -left-12 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+<div class="h-[1px] w-12 bg-outline opacity-50"></div>
+<div class="text-code-xs font-code-xs bg-surface-container px-1 text-on-surface">1:1</div>
+</div>
+</div>
+<!-- Audit Log Node -->
+<div class="bg-surface-container-low border border-error p-3 relative group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-caps font-label-caps text-error">AUDIT_LOG</span>
+<span class="text-code-xs font-code-xs text-outline">PK: LOG_ID</span>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">entity_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">event</span>
+<span class="text-error font-bold">STATE_CHG</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface-variant">actor_id</span>
+<span class="text-on-surface">SYS_OR_USR</span>
+</div>
+</div>
+<div class="node-port port-left"></div>
+</div>
+</div>
+</div>
+<!-- System Telemetry Section -->
+<section class="mt-20 border-t border-outline-variant pt-8">
+<div class="grid grid-cols-4 gap-6">
+<div class="bg-surface-container p-4 rounded border border-outline-variant">
+<div class="text-label-caps font-label-caps text-outline mb-2">THROUGHPUT_EFFICIENCY</div>
+<div class="flex items-end gap-2">
+<span class="text-headline-md font-headline-md text-primary">99.98%</span>
+<span class="text-code-xs font-code-xs text-primary pb-1">SUCCESS</span>
+</div>
+<div class="mt-4 h-1 w-full bg-surface-variant rounded overflow-hidden">
+<div class="h-full bg-primary w-[99.98%]"></div>
+</div>
+</div>
+<div class="bg-surface-container p-4 rounded border border-outline-variant">
+<div class="text-label-caps font-label-caps text-outline mb-2">DOMAIN_CONSISTENCY</div>
+<div class="flex items-end gap-2">
+<span class="text-headline-md font-headline-md text-on-surface">SYNCED</span>
+<span class="text-code-xs font-code-xs text-primary pb-1">LATENCY: 4ms</span>
+</div>
+<div class="mt-4 flex gap-1">
+<div class="h-2 w-full bg-primary opacity-20"></div>
+<div class="h-2 w-full bg-primary opacity-40"></div>
+<div class="h-2 w-full bg-primary opacity-60"></div>
+<div class="h-2 w-full bg-primary opacity-100"></div>
+</div>
+</div>
+<div class="bg-surface-container p-4 rounded border border-outline-variant">
+<div class="text-label-caps font-label-caps text-outline mb-2">LEDGER_INTEGRITY</div>
+<div class="flex items-end gap-2">
+<span class="text-headline-md font-headline-md text-primary">VERIFIED</span>
+</div>
+<div class="mt-4 text-code-xs font-code-xs text-on-surface-variant">
+                        LAST_CHECK: 2023-11-24T14:22:01Z
+                    </div>
+</div>
+<div class="bg-surface-container p-4 rounded border border-outline-variant">
+<div class="text-label-caps font-label-caps text-outline mb-2">ACTIVE_RELATIONS</div>
+<div class="flex items-end gap-2">
+<span class="text-headline-md font-headline-md text-on-surface">1,402,941</span>
+</div>
+<div class="mt-4 text-code-xs font-code-xs text-on-surface-variant">
+                        OBJECT_MEMORY_LOAD: 12.4GB
+                    </div>
+</div>
+</div>
+</section>
+<!-- Bento Documentation -->
+<section class="mt-12 grid grid-cols-3 gap-6 mb-16">
+<div class="col-span-2 bg-surface-container-high p-6 border border-outline-variant">
+<h4 class="text-headline-md font-headline-md text-primary mb-4">Ownership Protocol</h4>
+<div class="grid grid-cols-2 gap-8">
+<div class="space-y-4">
+<p class="text-body-md font-body-md text-on-surface-variant">
+                            All Wallet entities must be bound to a single User via a strict 1:1 relationship. Orphaned wallets are flagged by the Risk Engine (WF-003) within 5ms of creation.
+                        </p>
+<ul class="text-code-sm font-code-sm space-y-2">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="check_circle">check_circle</span>
+                                CAS_LOCK_ON_WALLET_UPDATE
+                            </li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="check_circle">check_circle</span>
+                                IDEMPOTENCY_KEY_ENFORCEMENT
+                            </li>
+</ul>
+</div>
+<div class="bg-surface p-4 border border-outline-variant">
+<div class="text-label-caps font-label-caps text-outline mb-2">RELATIONSHIP_CODE</div>
+<code class="text-code-sm font-code-sm text-primary block whitespace-pre">
+User {
+  id: uuid [PK]
+  wallet: Wallet [1:1]
+  accounts: List&lt;Bank&gt; [1:N]
+}
+
+Transaction {
+  source: Bank_Account
+  target: Wallet
+  ledger: Ledger [1:1]
+}
+                        </code>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-high p-6 border border-outline-variant flex flex-col">
+<h4 class="text-headline-md font-headline-md text-primary mb-4">Integrity Guard</h4>
+<div class="flex-grow flex items-center justify-center relative">
+<!-- Symbolic visualization of the chain -->
+<div class="w-full space-y-2">
+<div class="h-3 bg-primary opacity-10 w-full rounded"></div>
+<div class="h-3 bg-primary opacity-30 w-full rounded"></div>
+<div class="h-3 bg-primary-container w-full rounded flex items-center justify-center">
+<span class="text-code-xs font-code-xs text-on-primary-container font-bold">BLOCK_VERIFIED</span>
+</div>
+<div class="h-3 bg-primary opacity-30 w-full rounded"></div>
+<div class="h-3 bg-primary opacity-10 w-full rounded"></div>
+</div>
+</div>
+<p class="mt-6 text-code-xs font-code-xs text-on-surface-variant">
+                    Append-only ledger logic ensures that every transaction state transition is captured with a SHA256 cryptographic signature.
+                </p>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2 bg-surface-container-low border-t border-outline-variant text-primary">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-4">
+<span class="text-on-surface-variant hover:text-primary transition-colors text-label-caps font-label-caps cursor-pointer">AUDIT_TRAIL: ACTIVE</span>
+<span class="text-on-surface-variant hover:text-primary transition-colors text-label-caps font-label-caps cursor-pointer">N8N_SYNC: OK</span>
+<span class="text-on-surface-variant hover:text-primary transition-colors text-label-caps font-label-caps cursor-pointer">LATENCY: 12ms</span>
+</div>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">
+            © 2023 ECOSYSTEM_ORCHESTRATOR // SECURE_DOMAIN_ENVIRONMENT
+        </div>
+</footer>
+<!-- Interactive micro-interactions -->
+<script>
+        document.querySelectorAll('.group').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('scale-[1.02]');
+                node.style.transition = 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('scale-[1.02]');
+            });
+        });
+
+        // Simple terminal cursor effect for some labels
+        const labels = document.querySelectorAll('.text-label-caps');
+        labels.forEach(label => {
+            if (Math.random() > 0.8) {
+                const text = label.innerText;
+                label.innerHTML = text + '<span class="animate-pulse">_</span>';
+            }
+        });
+    </script>
+</body></html>

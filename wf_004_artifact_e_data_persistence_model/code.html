@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ARTIFACT E: Data Persistence Model | WF-004</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#c6ceff",
+                    "inverse-on-surface": "#233143",
+                    "tertiary": "#fff6ff",
+                    "surface-container-low": "#0d1c2d",
+                    "primary": "#ebffe2",
+                    "on-primary-fixed": "#002203",
+                    "on-tertiary": "#490080",
+                    "on-primary": "#003907",
+                    "secondary-fixed": "#dde1ff",
+                    "on-error": "#690005",
+                    "outline": "#84967e",
+                    "on-primary-fixed-variant": "#00530e",
+                    "primary-container": "#00ff41",
+                    "on-secondary": "#002388",
+                    "on-background": "#d4e4fa",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-variant": "#273647",
+                    "error-container": "#93000a",
+                    "on-secondary-fixed": "#001356",
+                    "outline-variant": "#3b4b37",
+                    "on-error-container": "#ffdad6",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-container": "#122131",
+                    "on-tertiary-fixed": "#2c0051",
+                    "primary-fixed": "#72ff70",
+                    "on-surface-variant": "#b9ccb2",
+                    "surface-tint": "#00e639",
+                    "surface-container-lowest": "#010f1f",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "primary-fixed-dim": "#00e639",
+                    "background": "#051424",
+                    "on-tertiary-container": "#862ed4",
+                    "error": "#ffb4ab",
+                    "on-primary-container": "#007117",
+                    "surface-container-highest": "#273647",
+                    "surface": "#051424",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-bright": "#2c3a4c",
+                    "inverse-primary": "#006e16",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-surface": "#d4e4fa",
+                    "surface-dim": "#051424",
+                    "secondary-container": "#0043eb",
+                    "secondary": "#b8c3ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "grid-unit": "8px",
+                    "lane-margin": "32px"
+            },
+            "fontFamily": {
+                    "code-sm": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-border { border: 1px solid #3b4b37; }
+        .connector-line { stroke: #3b4b37; stroke-width: 2; fill: none; }
+        .connector-arrow { fill: #3b4b37; }
+        .active-path { stroke: #00ff41; stroke-dasharray: 4; animation: dash 20s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: -1000; } }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface fixed top-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin h-16 border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary border-b-2 border-primary text-label-caps font-label-caps h-16 flex items-center px-2" href="#">SCHEMA_VIEW</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high text-label-caps font-label-caps h-16 flex items-center px-2 transition-opacity active:opacity-80" href="#">QUERY_ENGINE</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high text-label-caps font-label-caps h-16 flex items-center px-2 transition-opacity active:opacity-80" href="#">MIGRATIONS</a>
+</nav>
+<span class="text-label-caps font-label-caps text-primary px-3 py-1 border border-primary-container rounded bg-primary-container/10">v4.2.0 LIVE</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-surface-container flex flex-col pt-20 border-r border-outline-variant hidden lg:flex">
+<div class="px-4 py-4 mb-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant">WORKFLOW_INDEX</span>
+</div>
+<nav class="flex-1 overflow-y-auto">
+<div class="flex flex-col gap-1">
+<a class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="payments">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="security">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</a>
+<div class="bg-surface-variant text-primary border-l-4 border-primary px-4 py-2 flex items-center gap-3 translate-x-1 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="mail">mail</span>
+<span class="text-code-sm font-code-sm">WF-004: NOTIF</span>
+</div>
+<a class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="database">database</span>
+<span class="text-code-sm font-code-sm">WF-005: DATA</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="sync">sync</span>
+<span class="text-code-sm font-code-sm">WF-006: SYNC</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+<span class="text-code-sm font-code-sm">WF-007: LOGS</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="psychology">psychology</span>
+<span class="text-code-sm font-code-sm">WF-008: AI_INF</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="lan">lan</span>
+<span class="text-code-sm font-code-sm">WF-009: EDGE</span>
+</a>
+<a class="text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest flex items-center gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="text-code-sm font-code-sm">WF-010: CORE</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-24 pb-20 px-8">
+<div class="max-w-6xl mx-auto">
+<!-- Header Section -->
+<div class="mb-12 flex justify-between items-end">
+<div>
+<span class="text-label-caps font-label-caps text-primary mb-2 block">ARTIFACT E // DATA_PERSISTENCE_MODEL</span>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">WF-004: Wallet Funding Persistence</h2>
+<p class="text-on-surface-variant text-body-md mt-2 max-w-2xl">High-integrity relational schema for idempotent wallet capitalization and multi-state ledger synchronization. Engineered for ACID compliance and eventual consistency audits.</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<div class="flex gap-2">
+<span class="bg-primary/10 text-primary text-code-xs font-code-xs px-2 py-1 rounded border border-primary/20">ISOLATION: REPEATABLE_READ</span>
+<span class="bg-secondary/10 text-secondary text-code-xs font-code-xs px-2 py-1 rounded border border-secondary/20">ENGINE: POSTGRES_BDR</span>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">NODE_ID: DB-CLSTR-09 // DC: EU-WEST-1</div>
+</div>
+</div>
+<!-- Database Architecture Visualizer -->
+<div class="relative min-h-[600px] bg-surface-container-lowest border border-outline-variant rounded-lg p-12 overflow-hidden">
+<!-- SVG Connectors Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon class="connector-arrow" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Wallets to Transactions -->
+<path class="connector-line" d="M 320 180 L 480 180" marker-end="url(#arrowhead)"></path>
+<!-- Transactions to Ledger_Entries -->
+<path class="connector-line" d="M 680 180 L 780 180 L 780 340 L 680 340" marker-end="url(#arrowhead)"></path>
+<!-- Transactions to Audit_Logs -->
+<path class="connector-line" d="M 580 280 L 580 400" marker-end="url(#arrowhead)"></path>
+<!-- Wallets to Ledger_Entries -->
+<path class="connector-line" d="M 220 280 L 220 340 L 480 340" marker-end="url(#arrowhead)"></path>
+<!-- Animated Active Transaction Flow -->
+<path class="connector-line active-path" d="M 480 180 L 580 180 L 580 400"></path>
+</svg>
+<div class="grid grid-cols-2 gap-x-48 gap-y-24 relative z-10">
+<!-- Entity: Wallets -->
+<div class="bg-surface-container node-border rounded shadow-sm w-80">
+<div class="bg-surface-variant px-3 py-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-primary">WALLETS</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface"><span class="text-primary font-bold">PK</span> id</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">user_id</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-primary">balance</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">DECIMAL(20,8)</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">currency</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">VARCHAR(3)</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">updated_at</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">TIMESTAMP</span>
+</div>
+</div>
+<div class="p-2 border-t border-outline-variant">
+<div class="text-code-xs font-code-xs text-on-surface-variant uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span> ACID: ATOMIC_UPDATE
+                            </div>
+</div>
+</div>
+<!-- Entity: Transactions -->
+<div class="bg-surface-container node-border rounded shadow-sm w-80">
+<div class="bg-surface-variant px-3 py-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-secondary">TRANSACTIONS</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="swap_horiz">swap_horiz</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface"><span class="text-secondary font-bold">PK</span> id</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface"><span class="text-on-secondary font-bold">FK</span> wallet_id</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">tx_hash</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">CHAR(64)</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">status</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">ENUM_TX</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">metadata</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">JSONB</span>
+</div>
+</div>
+<div class="p-2 border-t border-outline-variant">
+<div class="text-code-xs font-code-xs text-on-surface-variant uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span> ISOLATION: REPEATABLE_READ
+                            </div>
+</div>
+</div>
+<!-- Entity: Ledger_Entries -->
+<div class="bg-surface-container node-border rounded shadow-sm w-80">
+<div class="bg-surface-variant px-3 py-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-on-surface">LEDGER_ENTRIES</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="menu_book">menu_book</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface"><span class="font-bold">PK</span> entry_id</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">BIGSERIAL</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface"><span class="text-on-secondary font-bold">FK</span> tx_id</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface"><span class="text-on-secondary font-bold">FK</span> wallet_id</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">debit_credit</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">ENUM_DC</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-primary">amount</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">DECIMAL(20,8)</span>
+</div>
+</div>
+<div class="p-2 border-t border-outline-variant">
+<div class="text-code-xs font-code-xs text-on-surface-variant uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> CONSISTENCY: DOUBLE_ENTRY_CHECK
+                            </div>
+</div>
+</div>
+<!-- Entity: Audit_Logs -->
+<div class="bg-surface-container node-border rounded shadow-sm w-80">
+<div class="bg-surface-variant px-3 py-2 border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-error">AUDIT_LOGS</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="history">history</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface"><span class="text-error font-bold">PK</span> log_id</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">event_type</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">VARCHAR(50)</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">actor_id</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">snapshot_pre</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">JSONB</span>
+</div>
+<div class="flex justify-between items-center hover:bg-surface-container-high px-1">
+<span class="text-code-sm font-code-sm text-on-surface">snapshot_post</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant">JSONB</span>
+</div>
+</div>
+<div class="p-2 border-t border-outline-variant">
+<div class="text-code-xs font-code-xs text-on-surface-variant uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> IMMUTABILITY: WORM_STORAGE
+                            </div>
+</div>
+</div>
+</div>
+<!-- Technical Specs Overlays -->
+<div class="absolute bottom-4 right-4 bg-surface-container-highest/80 backdrop-blur-md p-4 border border-outline-variant rounded max-w-sm">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-base" data-icon="info">info</span>
+<span class="text-label-caps font-label-caps text-primary">TRANSACTION_PROTOCOL</span>
+</div>
+<ul class="text-code-xs font-code-xs space-y-2 text-on-surface-variant">
+<li><span class="text-on-surface font-bold">ISOLATION:</span> Repeatable Read prevents non-repeatable reads during balance recalculation.</li>
+<li><span class="text-on-surface font-bold">ATOMICITY:</span> Use of <code class="bg-surface px-1">BEGIN/COMMIT</code> blocks spanning Wallet Update + Transaction Log.</li>
+<li><span class="text-on-surface font-bold">DURABILITY:</span> Synchronous WAL (Write Ahead Logging) enabled for financial integrity.</li>
+</ul>
+</div>
+</div>
+<!-- Telemetry Data Grid -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="bg-surface-container p-4 border border-outline-variant rounded">
+<div class="text-code-xs font-code-xs text-on-surface-variant mb-1">TX_THROUGHPUT</div>
+<div class="text-headline-md font-headline-md text-primary">1,240 <span class="text-code-xs">TPS</span></div>
+<div class="w-full bg-surface-container-lowest h-1 mt-2">
+<div class="bg-primary h-full w-[65%] shadow-[0_0_8px_rgba(235,255,226,0.5)]"></div>
+</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant rounded">
+<div class="text-code-xs font-code-xs text-on-surface-variant mb-1">QUERY_LATENCY</div>
+<div class="text-headline-md font-headline-md text-secondary">12ms <span class="text-code-xs">AVG</span></div>
+<div class="w-full bg-surface-container-lowest h-1 mt-2">
+<div class="bg-secondary h-full w-[15%] shadow-[0_0_8px_rgba(184,195,255,0.5)]"></div>
+</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant rounded">
+<div class="text-code-xs font-code-xs text-on-surface-variant mb-1">LOCK_CONTENTION</div>
+<div class="text-headline-md font-headline-md text-on-surface">0.04%</div>
+<div class="w-full bg-surface-container-lowest h-1 mt-2">
+<div class="bg-on-surface h-full w-[4%] shadow-[0_0_8px_rgba(212,228,250,0.5)]"></div>
+</div>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant rounded">
+<div class="text-code-xs font-code-xs text-on-surface-variant mb-1">DATA_DENSITY</div>
+<div class="text-headline-md font-headline-md text-tertiary">4.2 TB</div>
+<div class="w-full bg-surface-container-lowest h-1 mt-2">
+<div class="bg-tertiary h-full w-[82%] shadow-[0_0_8px_rgba(255,246,255,0.5)]"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin py-2 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-4">
+<a class="text-on-surface-variant hover:text-primary text-label-caps font-label-caps transition-colors duration-150" href="#">AUDIT_TRAIL: ACTIVE</a>
+<a class="text-on-surface-variant hover:text-primary text-label-caps font-label-caps transition-colors duration-150" href="#">N8N_SYNC: OK</a>
+<a class="text-on-surface-variant hover:text-primary text-label-caps font-label-caps transition-colors duration-150" href="#">LATENCY: 12ms</a>
+</div>
+</div>
+<div class="text-code-xs font-code-xs text-on-surface-variant">
+            © 2024 ECOSYSTEM_ORCHESTRATOR // SYSTEM_CORE
+        </div>
+</footer>
+<script>
+        // Micro-interaction for entity highlights
+        document.querySelectorAll('.bg-surface-container.node-border').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.borderColor = '#ebffe2';
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s ease';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.borderColor = '#3b4b37';
+                node.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Simple animation logic for connectors can be added here if needed, 
+        // although SVG CSS animation handles most of it.
+    </script>
+</body></html>

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-003 API + Database Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#273647",
+                    "outline-variant": "#3b4b37",
+                    "outline": "#84967e",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-primary": "#003907",
+                    "on-background": "#d4e4fa",
+                    "error": "#ffb4ab",
+                    "on-primary-fixed": "#002203",
+                    "secondary-fixed": "#dde1ff",
+                    "on-primary-container": "#007117",
+                    "primary-fixed-dim": "#00e639",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-error": "#690005",
+                    "surface-tint": "#00e639",
+                    "on-secondary": "#002388",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-tertiary": "#490080",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "surface-dim": "#051424",
+                    "secondary": "#b8c3ff",
+                    "on-surface": "#d4e4fa",
+                    "surface-container-low": "#0d1c2d",
+                    "on-secondary-container": "#c6ceff",
+                    "primary-container": "#00ff41",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-surface-variant": "#b9ccb2",
+                    "inverse-primary": "#006e16",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-container": "#122131",
+                    "secondary-container": "#0043eb",
+                    "tertiary": "#fff6ff",
+                    "surface-variant": "#273647",
+                    "on-tertiary-container": "#862ed4",
+                    "on-primary-fixed-variant": "#00530e",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-container-lowest": "#010f1f",
+                    "surface": "#051424",
+                    "on-error-container": "#ffdad6",
+                    "error-container": "#93000a",
+                    "background": "#051424",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-container": "#ecd3ff",
+                    "primary": "#ebffe2",
+                    "on-secondary-fixed": "#001356",
+                    "primary-fixed": "#72ff70",
+                    "tertiary-fixed": "#f0dbff",
+                    "inverse-on-surface": "#233143"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "stack-gap": "4px",
+                    "grid-unit": "8px",
+                    "lane-margin": "32px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle at 1px 1px, #1a1a1a 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .flow-connector {
+            position: relative;
+        }
+        .flow-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+        }
+        .connector-h::after { height: 2px; width: 40px; top: 50%; right: -40px; }
+        .connector-v::after { width: 2px; height: 24px; bottom: -24px; left: 50%; }
+        
+        .node-glow-primary { border-color: #00e639; box-shadow: 0 0 10px rgba(0, 230, 57, 0.1); }
+        .node-glow-secondary { border-color: #b8c3ff; box-shadow: 0 0 10px rgba(184, 195, 255, 0.1); }
+        .node-glow-error { border-color: #ffb4ab; border-style: dashed; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-[100] w-full h-12 bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-grid-unit">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">terminal</span>
+<span class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</span>
+</div>
+<nav class="hidden md:flex gap-6 items-center h-full">
+<a class="h-full flex items-center px-2 font-label-caps text-label-caps text-primary-fixed border-b-2 border-primary-fixed cursor-pointer transition-colors" href="#">WORKFLOW_MAP</a>
+<a class="h-full flex items-center px-2 font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed cursor-pointer transition-colors" href="#">API_RESOURCES</a>
+<a class="h-full flex items-center px-2 font-label-caps text-label-caps text-outline hover:bg-surface-container-highest hover:text-primary-fixed cursor-pointer transition-colors" href="#">DB_SCHEMA</a>
+</nav>
+<div class="font-label-caps text-label-caps text-primary cursor-pointer active:opacity-80">
+            STATUS: OK
+        </div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container border-r border-outline-variant flex flex-col z-[90] hidden md:flex">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed">MODULE_INDEX</span>
+</div>
+<div class="flex-1 py-2">
+<div class="group flex items-center gap-3 px-4 py-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow_Engine</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-label-caps text-label-caps">Logic_Matrices</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-label-caps text-label-caps">Telemetry_Streams</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-label-caps text-label-caps">Node_Registry</span>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-4">
+<div class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-outline">AUTO_SYNC: ON</span>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 pt-12 pb-8 min-h-screen relative">
+<div class="p-lane-margin">
+<!-- Swimlane: API LAYER -->
+<section class="mb-12">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-primary-fixed text-4xl" style="font-variation-settings: 'FILL' 1;">api</span>
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">API_ORCHESTRATION_LAYER</h2>
+<p class="font-code-sm text-code-sm text-outline">Identity &amp; Trust Verification Flow [WF-003]</p>
+</div>
+</div>
+<!-- API Nodes Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-node-gutter">
+<!-- Node: KYC Start -->
+<div class="bg-[#0F0F0F] border node-glow-primary p-grid-unit relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed bg-on-primary-container px-1">POST</span>
+<span class="font-code-xs text-code-xs text-outline">v1.2.0</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-4">/kyc/start</h3>
+<div class="space-y-stack-gap">
+<div class="flex justify-between items-center bg-surface-container-low p-1">
+<span class="font-code-xs text-code-xs text-outline">Latency</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">12ms</span>
+</div>
+<div class="flex justify-between items-center bg-surface-container-low p-1">
+<span class="font-code-xs text-code-xs text-outline">Atomicity</span>
+<span class="material-symbols-outlined text-primary-fixed text-[14px]">lock</span>
+</div>
+</div>
+<div class="absolute -right-2 top-1/2 w-4 h-4 bg-[#0F0F0F] border border-primary-fixed rotate-45 flex items-center justify-center">
+<div class="w-1 h-1 bg-primary-fixed rounded-full"></div>
+</div>
+</div>
+<!-- Node: Doc Upload -->
+<div class="bg-[#0F0F0F] border node-glow-primary p-grid-unit relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed bg-on-primary-container px-1">POST</span>
+<span class="font-code-xs text-code-xs text-outline">v1.2.0</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-4">/documents/upload</h3>
+<div class="space-y-stack-gap">
+<div class="flex justify-between items-center bg-surface-container-low p-1">
+<span class="font-code-xs text-code-xs text-outline">Throughput</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">1.2GB/s</span>
+</div>
+<div class="flex justify-between items-center bg-surface-container-low p-1">
+<span class="font-code-xs text-code-xs text-outline">Encryption</span>
+<span class="font-code-xs text-code-xs text-secondary-fixed">AES-256</span>
+</div>
+</div>
+</div>
+<!-- Node: Liveness -->
+<div class="bg-[#0F0F0F] border node-glow-primary p-grid-unit relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed bg-on-primary-container px-1">POST</span>
+<span class="font-code-xs text-code-xs text-outline">v1.2.0</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-4">/liveness/check</h3>
+<div class="space-y-stack-gap">
+<div class="flex justify-between items-center bg-surface-container-low p-1">
+<span class="font-code-xs text-code-xs text-outline">AI_MODEL</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">VISION_V4</span>
+</div>
+</div>
+</div>
+<!-- Node: Identity -->
+<div class="bg-[#0F0F0F] border node-glow-secondary p-grid-unit relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-secondary-fixed bg-secondary-container px-1">POST</span>
+<span class="font-code-xs text-code-xs text-outline">v2.1.0</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-4">/identity/verify</h3>
+<div class="p-1 border border-outline-variant bg-surface-container-lowest">
+<code class="font-code-xs text-code-xs text-outline">req.body.id_hash</code>
+</div>
+</div>
+<!-- Node: Fraud -->
+<div class="bg-[#0F0F0F] border node-glow-error p-grid-unit relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-error bg-error-container px-1">POST</span>
+<span class="font-code-xs text-code-xs text-outline">v2.1.0</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-4">/fraud/scan</h3>
+<div class="space-y-stack-gap">
+<div class="flex justify-between items-center bg-surface-container-low p-1">
+<span class="font-code-xs text-code-xs text-error">CRITICAL_PATH</span>
+<span class="material-symbols-outlined text-error text-[14px]">warning</span>
+</div>
+</div>
+</div>
+<!-- Node: Trust -->
+<div class="bg-[#0F0F0F] border node-glow-primary p-grid-unit relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed bg-on-primary-container px-1">POST</span>
+<span class="font-code-xs text-code-xs text-outline">v1.2.0</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-4">/trust/update</h3>
+<div class="flex gap-2 mt-4">
+<div class="h-1 flex-1 bg-primary-fixed"></div>
+<div class="h-1 flex-1 bg-primary-fixed"></div>
+<div class="h-1 flex-1 bg-outline"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Swimlane: DATABASE PERSISTENCE -->
+<section class="mb-12">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-secondary-fixed text-4xl" style="font-variation-settings: 'FILL' 1;">database</span>
+<div>
+<h2 class="font-headline-lg text-headline-lg text-secondary">DATA_PERSISTENCE_LAYER</h2>
+<p class="font-code-sm text-code-sm text-outline">PostgreSQL Master Cluster [Replica-L3]</p>
+</div>
+</div>
+<!-- DB Tables/Schema Bento -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-stack-gap h-96">
+<!-- Table: Identity Profiles -->
+<div class="col-span-1 md:col-span-2 row-span-2 bg-[#0F0F0F] border border-outline-variant p-4 overflow-hidden relative group">
+<div class="flex items-center justify-between mb-4">
+<h4 class="font-label-caps text-label-caps text-secondary-fixed flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">table_chart</span> identity_profiles
+                            </h4>
+<span class="font-code-xs text-code-xs px-1 bg-surface-container-highest text-outline">PK: UUID</span>
+</div>
+<pre class="font-code-xs text-code-xs text-on-surface-variant bg-surface-container-lowest p-3 border border-outline-variant rounded">id: uuid NOT NULL,
+user_ref: varchar(64),
+full_name_cipher: text,
+dob_encrypted: bytea,
+created_at: timestamp_tz,
+verified_at: timestamp_tz,
+mfa_status: boolean
+                        </pre>
+<div class="mt-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed text-sm">check_circle</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">ACID Compliance: VERIFIED</span>
+</div>
+</div>
+<!-- Table: Verification Requests -->
+<div class="col-span-1 md:col-span-2 bg-[#0F0F0F] border border-outline-variant p-4">
+<div class="flex items-center justify-between mb-2">
+<h4 class="font-label-caps text-label-caps text-secondary-fixed">verification_requests</h4>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container p-2 border border-outline-variant">
+<div class="font-code-xs text-code-xs text-outline mb-1">Status Mapping</div>
+<div class="flex gap-1">
+<div class="w-2 h-2 bg-primary-fixed"></div>
+<div class="w-2 h-2 bg-error"></div>
+<div class="w-2 h-2 bg-secondary"></div>
+</div>
+</div>
+<div class="bg-surface-container p-2 border border-outline-variant">
+<div class="font-code-xs text-code-xs text-outline mb-1">Sharding</div>
+<div class="font-code-xs text-code-xs text-on-surface">hash(req_id)</div>
+</div>
+</div>
+</div>
+<!-- Table: Trust Profiles -->
+<div class="bg-[#0F0F0F] border border-outline-variant p-4 flex flex-col justify-between">
+<h4 class="font-label-caps text-label-caps text-secondary-fixed">trust_profiles</h4>
+<div class="h-20 w-full relative">
+<svg class="absolute inset-0 w-full h-full" viewbox="0 0 100 40">
+<path d="M0 35 L20 25 L40 30 L60 10 L80 15 L100 5" fill="none" stroke="#b8c3ff" stroke-width="2"></path>
+</svg>
+</div>
+<span class="font-code-xs text-code-xs text-outline">Telemetry: 99.99% Consistency</span>
+</div>
+<!-- Table: Risk Scores -->
+<div class="bg-[#0F0F0F] border border-outline-variant p-4 flex flex-col justify-between">
+<h4 class="font-label-caps text-label-caps text-error">risk_scores</h4>
+<div class="space-y-1">
+<div class="flex justify-between items-center text-code-xs">
+<span class="text-outline">SCAN_DEPTH</span>
+<span class="text-on-surface">DEEP</span>
+</div>
+<div class="flex justify-between items-center text-code-xs">
+<span class="text-outline">TTL</span>
+<span class="text-on-surface">3600s</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Telemetry Overlay / Bottom Section -->
+<section class="bg-surface-container-low border border-outline-variant p-4">
+<div class="flex flex-col md:flex-row justify-between gap-8">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed">query_stats</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">ATOMICITY_MONITOR</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="border-l-2 border-primary-fixed pl-3">
+<div class="font-code-xs text-code-xs text-outline">Isolation</div>
+<div class="font-headline-md text-headline-md text-on-surface">LEVEL_RR</div>
+</div>
+<div class="border-l-2 border-primary-fixed pl-3">
+<div class="font-code-xs text-code-xs text-outline">Commit Rate</div>
+<div class="font-headline-md text-headline-md text-on-surface">942/sec</div>
+</div>
+<div class="border-l-2 border-secondary-fixed pl-3">
+<div class="font-code-xs text-code-xs text-outline">Deadlocks</div>
+<div class="font-headline-md text-headline-md text-on-surface">0.00%</div>
+</div>
+<div class="border-l-2 border-secondary-fixed pl-3">
+<div class="font-code-xs text-code-xs text-outline">Checkpoint</div>
+<div class="font-headline-md text-headline-md text-on-surface">45s ago</div>
+</div>
+</div>
+</div>
+<div class="w-full md:w-64">
+<div class="bg-[#050505] p-3 border border-outline-variant h-full">
+<div class="font-code-xs text-code-xs text-primary-fixed mb-2 flex justify-between">
+<span>LIVE_LOGS</span>
+<span class="animate-pulse">●</span>
+</div>
+<div class="space-y-1 overflow-hidden h-24">
+<p class="font-code-xs text-code-xs text-outline truncate">&gt; TXN_START [0x9f22]</p>
+<p class="font-code-xs text-code-xs text-primary-fixed truncate">&gt; WRITE identity_profiles SUCCESS</p>
+<p class="font-code-xs text-code-xs text-outline truncate">&gt; CALL /fraud/scan OK [24ms]</p>
+<p class="font-code-xs text-code-xs text-outline truncate">&gt; TXN_COMMIT [0x9f22]</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Decorative UI Element -->
+<div class="fixed right-8 top-24 pointer-events-none opacity-20">
+<div class="w-48 h-48 border border-outline-variant rounded-full flex items-center justify-center animate-[spin_60s_linear_infinite]">
+<div class="w-32 h-32 border border-outline-variant rounded-full border-dashed"></div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between px-grid-unit z-50">
+<div class="flex gap-4 items-center h-full">
+<span class="font-code-xs text-code-xs text-outline uppercase">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<div class="flex gap-4 items-center h-full">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">LOGS</a>
+<div class="h-3 w-px bg-outline-variant mx-2"></div>
+<span class="font-code-xs text-code-xs text-primary-fixed">ALPHA_0.4.1</span>
+</div>
+</footer>
+<script>
+        // Micro-interactions
+        document.querySelectorAll('.bg-[#0F0F0F]').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Simulating log scroll
+        const logs = document.querySelector('.space-y-1');
+        if(logs) {
+            setInterval(() => {
+                const p = document.createElement('p');
+                p.className = 'font-code-xs text-code-xs text-outline truncate opacity-0 transition-opacity duration-300';
+                p.textContent = `> TRACE: [${new Date().toLocaleTimeString()}] PING_ACK_${Math.random().toString(36).substring(7)}`;
+                logs.prepend(p);
+                setTimeout(() => p.classList.remove('opacity-0'), 10);
+                if(logs.children.length > 6) logs.lastElementChild.remove();
+            }, 3000);
+        }
+    </script>
+</body></html>

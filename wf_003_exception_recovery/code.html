@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-003 Exception &amp; Recovery Matrix</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#273647",
+                    "outline-variant": "#3b4b37",
+                    "outline": "#84967e",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-primary": "#003907",
+                    "on-background": "#d4e4fa",
+                    "error": "#ffb4ab",
+                    "on-primary-fixed": "#002203",
+                    "secondary-fixed": "#dde1ff",
+                    "on-primary-container": "#007117",
+                    "primary-fixed-dim": "#00e639",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-error": "#690005",
+                    "surface-tint": "#00e639",
+                    "on-secondary": "#002388",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-tertiary": "#490080",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "surface-dim": "#051424",
+                    "secondary": "#b8c3ff",
+                    "on-surface": "#d4e4fa",
+                    "surface-container-low": "#0d1c2d",
+                    "on-secondary-container": "#c6ceff",
+                    "primary-container": "#00ff41",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-surface-variant": "#b9ccb2",
+                    "inverse-primary": "#006e16",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-container": "#122131",
+                    "secondary-container": "#0043eb",
+                    "tertiary": "#fff6ff",
+                    "surface-variant": "#273647",
+                    "on-tertiary-container": "#862ed4",
+                    "on-primary-fixed-variant": "#00530e",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-container-lowest": "#010f1f",
+                    "surface": "#051424",
+                    "on-error-container": "#ffdad6",
+                    "error-container": "#93000a",
+                    "background": "#051424",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-container": "#ecd3ff",
+                    "primary": "#ebffe2",
+                    "on-secondary-fixed": "#001356",
+                    "primary-fixed": "#72ff70",
+                    "tertiary-fixed": "#f0dbff",
+                    "inverse-on-surface": "#233143"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "stack-gap": "4px",
+                    "grid-unit": "8px",
+                    "lane-margin": "32px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: 
+                radial-gradient(circle, #1a2a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .flow-connector-h {
+            height: 2px;
+            background: #3b4b37;
+            position: relative;
+        }
+        .flow-connector-h::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: -4px;
+            border-left: 6px solid #3b4b37;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        .flow-connector-v {
+            width: 2px;
+            background: #3b4b37;
+            position: relative;
+        }
+        .flow-connector-dashed {
+            background-image: linear-gradient(to bottom, #93000a 50%, transparent 50%);
+            background-size: 2px 10px;
+            background-repeat: repeat-y;
+        }
+        .node-port {
+            width: 6px;
+            height: 6px;
+            background: #00ff41;
+            border-radius: 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface-container-lowest dark:bg-surface-container-lowest text-primary dark:text-primary-fixed border-b border-outline-variant flex justify-between items-center px-grid-unit h-12">
+<div class="flex items-center gap-2 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<span class="text-primary-fixed border-b-2 border-primary-fixed font-label-caps text-label-caps h-12 flex items-center px-2">LOGIC_MATRICES</span>
+<span class="text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors font-label-caps text-label-caps h-12 flex items-center px-2 cursor-pointer">TELEMETRY</span>
+<span class="text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors font-label-caps text-label-caps h-12 flex items-center px-2 cursor-pointer">REGISTRY</span>
+</nav>
+<div class="font-label-caps text-label-caps text-primary-fixed bg-surface-container-high px-2 py-1 rounded">STATUS: OK</div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container dark:bg-surface-container border-r border-outline-variant flex flex-col z-40 hidden md:flex">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed">MODULE_INDEX</span>
+</div>
+<nav class="flex-1 overflow-y-auto">
+<div class="flex items-center gap-3 px-4 py-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">System_Architecture</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Workflow_Engine</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Logic_Matrices</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Telemetry_Streams</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Node_Registry</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 mt-12 pb-24 min-h-screen">
+<!-- Workflow Header -->
+<section class="p-lane-margin border-b border-outline-variant bg-surface-dim/80 backdrop-blur-sm">
+<div class="flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-outline">DOCUMENT_ID: WF-003</span>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Exception &amp; Recovery Matrix</h1>
+<p class="font-body-md text-outline-variant max-w-2xl">High-density logic map defining "The Unhappy Path" for user verification. Orchestrating fail-safes, escalation thresholds, and manual intervention triggers.</p>
+</div>
+</section>
+<!-- Process Flowchart Container -->
+<section class="p-grid-unit md:p-lane-margin relative overflow-x-auto">
+<div class="min-w-[1200px] flex flex-col gap-12">
+<!-- Lane 01: Client Side Failures -->
+<div class="flex items-start gap-12">
+<div class="w-48 sticky left-0 bg-surface-dim py-4 border-r border-outline-variant flex flex-col gap-2">
+<span class="material-symbols-outlined text-primary-fixed">person</span>
+<span class="font-headline-md text-headline-md">CLIENT_LAYER</span>
+<span class="font-code-xs text-code-xs text-outline">User Interaction Stubs</span>
+</div>
+<div class="flex-1 flex items-center gap-node-gutter">
+<!-- Node: Unreadable Document -->
+<div class="w-64 bg-surface-container-low border border-outline-variant p-stack-gap group hover:border-primary-fixed transition-colors">
+<div class="flex justify-between items-center px-2 py-1 bg-surface-container-highest">
+<span class="font-label-caps text-label-caps text-error">ERR_OCR_01</span>
+<div class="node-port"></div>
+</div>
+<div class="p-3">
+<span class="font-code-sm text-code-sm block mb-1">Unreadable Document</span>
+<div class="font-code-xs text-outline">Cause: Blur, Glare, or Low Resolution detected by OCR engine.</div>
+</div>
+<div class="border-t border-outline-variant p-2 flex justify-between bg-black/20">
+<span class="font-label-caps text-label-caps text-primary-fixed">RECOVERY: RE-UPLOAD</span>
+<span class="font-code-xs text-outline">T_LMT: 3</span>
+</div>
+</div>
+<div class="w-12 flow-connector-h"></div>
+<!-- Node: Liveness Failed -->
+<div class="w-64 bg-surface-container-low border border-outline-variant p-stack-gap hover:border-primary-fixed transition-colors">
+<div class="flex justify-between items-center px-2 py-1 bg-surface-container-highest">
+<span class="font-label-caps text-label-caps text-error">ERR_BIO_04</span>
+<div class="node-port"></div>
+</div>
+<div class="p-3">
+<span class="font-code-sm text-code-sm block mb-1">Liveness Failed</span>
+<div class="font-code-xs text-outline">Cause: Anti-spoofing logic mismatch or face not detected.</div>
+</div>
+<div class="border-t border-outline-variant p-2 flex justify-between bg-black/20">
+<span class="font-label-caps text-label-caps text-primary-fixed">RECOVERY: RETRY</span>
+<span class="font-code-xs text-outline">T_LMT: 5</span>
+</div>
+</div>
+<div class="w-12 flow-connector-h"></div>
+<!-- Node: Verification Timeout -->
+<div class="w-64 bg-surface-container-low border border-outline-variant p-stack-gap hover:border-error transition-colors">
+<div class="flex justify-between items-center px-2 py-1 bg-surface-container-highest">
+<span class="font-label-caps text-label-caps text-error">ERR_TMO_99</span>
+<div class="node-port"></div>
+</div>
+<div class="p-3">
+<span class="font-code-sm text-code-sm block mb-1">Session Timeout</span>
+<div class="font-code-xs text-outline">Cause: No activity detected for &gt; 600s in secure context.</div>
+</div>
+<div class="border-t border-outline-variant p-2 flex justify-between bg-black/20">
+<span class="font-label-caps text-label-caps text-error">ACTION: SUPPORT</span>
+<span class="font-code-xs text-outline">T_LMT: 0</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Connectors between lanes -->
+<div class="ml-60 flex gap-[280px]">
+<div class="h-12 w-0.5 bg-outline-variant"></div>
+<div class="h-12 w-0.5 bg-error-container"></div>
+</div>
+<!-- Lane 02: Logic Engine / Fraud -->
+<div class="flex items-start gap-12">
+<div class="w-48 sticky left-0 bg-surface-dim py-4 border-r border-outline-variant flex flex-col gap-2">
+<span class="material-symbols-outlined text-primary-fixed">memory</span>
+<span class="font-headline-md text-headline-md">CORE_ENGINE</span>
+<span class="font-code-xs text-code-xs text-outline">Logic Matrices &amp; Fraud</span>
+</div>
+<div class="flex-1 flex items-center gap-node-gutter">
+<!-- Node: Duplicate Identity -->
+<div class="w-64 bg-surface-container-low border border-primary-container p-stack-gap shadow-[0_0_15px_rgba(0,255,65,0.1)]">
+<div class="flex justify-between items-center px-2 py-1 bg-primary-container/20">
+<span class="font-label-caps text-label-caps text-primary-container">SYS_DUP_MATCH</span>
+<div class="node-port !bg-primary-container"></div>
+</div>
+<div class="p-3">
+<span class="font-code-sm text-code-sm block mb-1">Duplicate Identity</span>
+<div class="font-code-xs text-outline">Conflict: PII data matches existing registry node 0xBF32.</div>
+</div>
+<div class="border-t border-outline-variant p-2 bg-black/20">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">ESCALATE: MANUAL</span>
+<span class="font-code-xs text-outline">PRIORITY: HIGH</span>
+</div>
+</div>
+</div>
+<div class="w-24 h-0.5 bg-error border-dashed"></div>
+<!-- Node: Fraud Detected -->
+<div class="w-64 bg-error-container border border-error p-stack-gap">
+<div class="flex justify-between items-center px-2 py-1 bg-black/40">
+<span class="font-label-caps text-label-caps text-error">SYS_FRAUD_ALERT</span>
+<div class="w-2 h-2 bg-error rounded-full animate-pulse"></div>
+</div>
+<div class="p-3">
+<span class="font-code-sm text-code-sm block mb-1">High-Risk Fraud</span>
+<div class="font-code-xs text-on-error-container">Signal: Known malicious device fingerprint or VPN bypass.</div>
+</div>
+<div class="border-t border-black/20 p-2 bg-black/20">
+<span class="font-label-caps text-label-caps text-on-error-container">STATE: ACCOUNT HOLD</span>
+</div>
+</div>
+<!-- Telemetry Snippet -->
+<div class="ml-12 p-3 bg-surface-container-high border border-outline-variant rounded">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-1.5 h-1.5 bg-primary-fixed rounded-full"></span>
+<span class="font-label-caps text-label-caps">LIVE_METRICS</span>
+</div>
+<div class="grid grid-cols-2 gap-x-4 gap-y-1">
+<span class="font-code-xs text-outline">LATENCY:</span>
+<span class="font-code-xs text-primary-fixed">14ms</span>
+<span class="font-code-xs text-outline">ERR_RATE:</span>
+<span class="font-code-xs text-error">0.04%</span>
+<span class="font-code-xs text-outline">QUEUE:</span>
+<span class="font-code-xs text-on-surface">1,204</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Connectors to Final Lane -->
+<div class="ml-[450px]">
+<svg class="overflow-visible" height="100" width="400">
+<path d="M 0 0 L 0 50 L 350 50 L 350 100" fill="none" stroke="#3b4b37" stroke-dasharray="4 4" stroke-width="2"></path>
+<circle cx="350" cy="100" fill="#00ff41" r="3"></circle>
+</svg>
+</div>
+<!-- Lane 03: Administrative Layer -->
+<div class="flex items-start gap-12">
+<div class="w-48 sticky left-0 bg-surface-dim py-4 border-r border-outline-variant flex flex-col gap-2">
+<span class="material-symbols-outlined text-secondary">admin_panel_settings</span>
+<span class="font-headline-md text-headline-md">ADMIN_LAYER</span>
+<span class="font-code-xs text-code-xs text-outline">Human-in-the-loop</span>
+</div>
+<div class="flex-1 flex items-center gap-node-gutter">
+<!-- Node: Admin Review -->
+<div class="w-80 bg-surface-container-highest border border-outline p-grid-unit relative">
+<div class="absolute -top-3 right-4 bg-primary px-2 py-0.5 rounded text-black font-label-caps text-[9px]">AWAITING_INPUT</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-outline">visibility</span>
+<span class="font-code-sm text-code-sm">Manual Investigation Node</span>
+</div>
+<div class="space-y-2">
+<div class="bg-black/30 p-2 rounded">
+<div class="font-code-xs text-outline mb-1">MATCH_PROBABILITY</div>
+<div class="w-full bg-outline-variant h-1 rounded overflow-hidden">
+<div class="bg-primary-fixed w-[84%] h-full"></div>
+</div>
+<div class="text-right font-code-xs text-primary-fixed mt-1">84.2%</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-1 bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:brightness-110">APPROVE</button>
+<button class="flex-1 py-1 border border-error text-error font-label-caps text-label-caps hover:bg-error/10">REJECT</button>
+</div>
+</div>
+</div>
+<div class="w-24 flow-connector-h"></div>
+<!-- Node: Support Ticket -->
+<div class="w-64 bg-surface-container-low border border-outline-variant p-stack-gap">
+<div class="flex justify-between items-center px-2 py-1 bg-surface-container-highest">
+<span class="font-label-caps text-label-caps">SUP_TKT_GEN</span>
+</div>
+<div class="p-3">
+<span class="font-code-sm text-code-sm block mb-1">External Escalation</span>
+<div class="font-code-xs text-outline">Path: Zendesk API Hook -&gt; Triage Queue -&gt; Agent Assignment.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid for Threshold Telemetry -->
+<section class="mt-lane-margin p-lane-margin">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-grid-unit">
+<div class="md:col-span-2 bg-surface-container-low border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-outline mb-4 block">EXCEPTION_DISTRIBUTION [24H]</span>
+<div class="h-32 flex items-end gap-1 px-2">
+<!-- Bar chart dummy -->
+<div class="flex-1 bg-primary-container/20 border-t-2 border-primary-container h-1/2"></div>
+<div class="flex-1 bg-primary-container/20 border-t-2 border-primary-container h-2/3"></div>
+<div class="flex-1 bg-error-container/40 border-t-2 border-error h-[90%]"></div>
+<div class="flex-1 bg-primary-container/20 border-t-2 border-primary-container h-1/3"></div>
+<div class="flex-1 bg-primary-container/20 border-t-2 border-primary-container h-3/4"></div>
+<div class="flex-1 bg-primary-container/20 border-t-2 border-primary-container h-1/2"></div>
+<div class="flex-1 bg-primary-container/20 border-t-2 border-primary-container h-[40%]"></div>
+</div>
+<div class="flex justify-between mt-2 font-code-xs text-outline">
+<span>00:00</span>
+<span>06:00</span>
+<span>12:00</span>
+<span>18:00</span>
+<span>NOW</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
+<div>
+<span class="font-label-caps text-label-caps text-outline mb-1 block">AVG_RECOVERY_TIME</span>
+<div class="font-headline-lg text-headline-lg text-primary-fixed">142s</div>
+</div>
+<div class="font-code-xs text-outline-variant">Sigma: ±12.4s</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
+<div>
+<span class="font-label-caps text-label-caps text-outline mb-1 block">ESCALATION_THRES</span>
+<div class="font-headline-lg text-headline-lg text-error">7.2%</div>
+</div>
+<div class="font-code-xs text-outline-variant">Threshold: 10.0% (CRITICAL)</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between px-grid-unit z-50">
+<div class="font-code-xs text-code-xs text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</div>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-outline hover:text-primary-fixed cursor-pointer transition-opacity opacity-90 hover:opacity-100">DOCS</span>
+<span class="font-code-xs text-code-xs text-outline hover:text-primary-fixed cursor-pointer transition-opacity opacity-90 hover:opacity-100">API</span>
+<span class="font-code-xs text-code-xs text-outline hover:text-primary-fixed cursor-pointer transition-opacity opacity-90 hover:opacity-100">LOGS</span>
+</div>
+</footer>
+<!-- Micro-Telemetry Interactions -->
+<script>
+        document.querySelectorAll('.group').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                console.log('Telemetry stream activated for node');
+            });
+        });
+        
+        // Simple ambient "grid scanning" effect
+        const canvas = document.createElement('canvas');
+        canvas.className = 'fixed inset-0 pointer-events-none opacity-[0.03] z-[100]';
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        let y = 0;
+        function draw() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff41';
+            ctx.fillRect(0, y, canvas.width, 2);
+            y = (y + 1) % canvas.height;
+            requestAnimationFrame(draw);
+        }
+        draw();
+    </script>
+</body></html>

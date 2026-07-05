@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-002: EXCEPTION &amp; RECOVERY FLOW</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .orthogonal-connector {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-glow-error { box-shadow: 0 0 15px rgba(255, 180, 171, 0.1); }
+        .node-glow-recovery { box-shadow: 0 0 15px rgba(0, 230, 57, 0.1); }
+        
+        /* Custom scrollbar for technical density */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #010f1f; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#c6ceff",
+                        "on-background": "#d4e4fa",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-container": "#ecd3ff",
+                        "primary": "#ebffe2",
+                        "on-primary-fixed": "#002203",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "secondary-container": "#0043eb",
+                        "inverse-primary": "#006e16",
+                        "inverse-on-surface": "#233143",
+                        "tertiary": "#fff6ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "primary-fixed-dim": "#00e639",
+                        "on-error": "#690005",
+                        "outline": "#84967e",
+                        "on-tertiary": "#490080",
+                        "surface-tint": "#00e639",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-secondary-fixed": "#001356",
+                        "secondary-fixed": "#dde1ff",
+                        "inverse-surface": "#d4e4fa",
+                        "primary-container": "#00ff41",
+                        "surface": "#051424",
+                        "surface-variant": "#273647",
+                        "error-container": "#93000a",
+                        "surface-container-lowest": "#010f1f",
+                        "on-primary": "#003907",
+                        "surface-container-high": "#1c2b3c",
+                        "on-tertiary-container": "#862ed4",
+                        "primary-fixed": "#72ff70",
+                        "secondary": "#b8c3ff",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-highest": "#273647",
+                        "outline-variant": "#3b4b37",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container": "#122131",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-dim": "#051424",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "background": "#051424",
+                        "on-primary-fixed-variant": "#00530e",
+                        "error": "#ffb4ab",
+                        "on-secondary": "#002388",
+                        "on-primary-container": "#007117",
+                        "on-surface": "#d4e4fa",
+                        "surface-container-low": "#0d1c2d"
+                    },
+                    "spacing": {
+                        "lane-margin": "32px",
+                        "stack-gap": "4px",
+                        "grid-unit": "8px",
+                        "node-gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background font-body-md overflow-x-hidden">
+<!-- Top Navigation -->
+<header class="bg-surface sticky top-0 z-[60] border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="font-label-caps text-label-caps text-primary uppercase tracking-widest">NAIJADEALS ATLAS</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6 items-center">
+<span class="font-label-caps text-label-caps text-primary font-bold cursor-pointer transition-colors">WF-002: EXCEPTIONS</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors">DIAGNOSTICS</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors">LOGS</span>
+</nav>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-high px-2 py-1 rounded">v2.4.1-STABLE</span>
+</div>
+</header>
+<!-- Sidebar Navigation -->
+<aside class="h-full w-64 fixed left-0 top-0 pt-16 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col gap-stack-gap py-grid-unit hidden md:flex">
+<div class="px-6 py-4">
+<h2 class="font-label-caps text-label-caps text-on-surface uppercase opacity-50">WORKFLOW MODULES</h2>
+</div>
+<div class="flex flex-col">
+<!-- Navigation Items -->
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-high text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-code-sm text-code-sm">Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out bg-secondary-container text-on-secondary-container border-l-2 border-primary-container" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-code-sm text-code-sm">Logic</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-high text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-code-sm text-code-sm">Data</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-high text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+<span class="font-code-sm text-code-sm">API</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-high text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="dynamic_feed">dynamic_feed</span>
+<span class="font-code-sm text-code-sm">Events</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 transition-all duration-150 ease-in-out hover:bg-surface-container-high text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-code-sm text-code-sm">Security</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 p-lane-margin min-h-screen relative">
+<!-- Header & Telemetry -->
+<section class="mb-12 flex justify-between items-end">
+<div>
+<span class="font-code-xs text-code-xs text-error uppercase tracking-widest mb-2 block">Fault-Tolerance Mapping</span>
+<h2 class="font-headline-lg text-headline-lg text-on-background">WF-002: Exception &amp; Recovery Flow</h2>
+<p class="text-on-surface-variant max-w-2xl mt-2 font-body-md">
+                    Visualization of non-linear "Unhappy Paths" for critical authentication events. System auto-resolves L1 failures, escalating L2/L3 to human intervention.
+                </p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container p-3 border border-outline-variant">
+<span class="font-code-xs text-code-xs block opacity-60">ACTIVE EXCEPTIONS</span>
+<span class="font-headline-md text-headline-md text-error">14</span>
+</div>
+<div class="bg-surface-container p-3 border border-outline-variant">
+<span class="font-code-xs text-code-xs block opacity-60">MTTR (AVG)</span>
+<span class="font-headline-md text-headline-md text-primary-fixed-dim">142s</span>
+</div>
+</div>
+</section>
+<!-- Flow Diagram Container -->
+<div class="relative w-full overflow-x-auto min-h-[800px] border border-outline-variant bg-surface-container-low p-12">
+<!-- Swimlane Labels -->
+<div class="absolute left-0 top-0 bottom-0 w-12 border-r border-outline-variant flex flex-col justify-around py-24 bg-surface-container-lowest">
+<div class="rotate-[-90deg] whitespace-nowrap font-label-caps text-label-caps text-on-surface-variant">USER LAYER</div>
+<div class="rotate-[-90deg] whitespace-nowrap font-label-caps text-label-caps text-on-surface-variant">SYSTEM LOGIC</div>
+<div class="rotate-[-90deg] whitespace-nowrap font-label-caps text-label-caps text-on-surface-variant">ADMIN / AI</div>
+</div>
+<!-- THE UNHAPPY PATH FLOW -->
+<div class="grid grid-cols-4 gap-x-32 gap-y-24 relative z-10">
+<!-- PATH 1: AUTH FAILURES -->
+<div class="col-start-1 row-start-1">
+<!-- Trigger Node -->
+<div class="bg-surface border-l-4 border-error p-4 node-glow-error mb-12">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-error px-1 border border-error">ERR_AUTH_001</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="lock">lock</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">Wrong Password Input</h4>
+<div class="mt-3 font-code-xs text-code-xs text-on-surface-variant flex gap-2">
+<span>Count: 1</span>
+<span class="text-error">Status: Retry</span>
+</div>
+</div>
+<!-- Flow Line Down -->
+<div class="h-12 w-px bg-error-container mx-auto"></div>
+<!-- Logic Node -->
+<div class="bg-surface-container-high border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="replay">replay</span>
+<span class="font-label-caps text-[9px] text-on-surface-variant">LOGIC_RETRY_VAL</span>
+</div>
+<p class="font-code-sm text-code-sm">Retry Limit Monitor</p>
+<div class="mt-2 h-1 w-full bg-outline-variant">
+<div class="bg-error h-full" style="width: 66%"></div>
+</div>
+</div>
+<div class="h-12 w-px bg-error-container mx-auto border-dashed border-l"></div>
+<!-- Critical Error Node -->
+<div class="bg-error-container/20 border border-error p-4 node-glow-error">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-error px-1 bg-error/20">LOCKED</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="gpp_bad">gpp_bad</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface font-bold uppercase">Account Locked</h4>
+<p class="font-code-xs text-code-xs mt-1 text-on-surface-variant">Attempt Limit Exceeded (3/3)</p>
+</div>
+</div>
+<!-- Recovery Connectors (Horizontal) -->
+<div class="col-start-2 row-start-1 flex items-center justify-center relative">
+<div class="w-full h-px bg-primary-container relative">
+<div class="absolute right-0 -top-1 w-2 h-2 bg-primary-container rotate-45"></div>
+</div>
+<div class="absolute -top-6 px-3 py-1 bg-surface-container border border-outline-variant rounded-full">
+<span class="font-code-xs text-code-xs text-primary">ESCALATE TO SUPPORT</span>
+</div>
+</div>
+<!-- Recovery Node (Support) -->
+<div class="col-start-3 row-start-1">
+<div class="bg-surface border-l-4 border-primary-container p-4 node-glow-recovery">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-primary-container px-1 border border-primary-container">RECOVERY_PATH</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="support_agent">support_agent</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">Identity Verification</h4>
+<div class="mt-3 flex flex-col gap-1">
+<div class="flex justify-between items-center bg-surface-container-lowest p-1">
+<span class="font-code-xs text-code-xs">Knowledge Base</span>
+<span class="material-symbols-outlined text-[12px] text-primary" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex justify-between items-center bg-surface-container-lowest p-1">
+<span class="font-code-xs text-code-xs">SMS Challenge</span>
+<span class="material-symbols-outlined text-[12px] text-on-surface-variant" data-icon="pending">pending</span>
+</div>
+</div>
+</div>
+<div class="h-12 w-px bg-primary-container mx-auto"></div>
+<div class="bg-surface-container p-4 border border-primary text-center">
+<span class="material-symbols-outlined text-primary mb-1" data-icon="restart_alt">restart_alt</span>
+<p class="font-code-sm text-code-sm font-bold text-primary uppercase">Password Reset</p>
+</div>
+</div>
+<!-- PATH 2: OTP FAILURE -->
+<div class="col-start-1 row-start-2">
+<div class="bg-surface border-l-4 border-error p-4 node-glow-error">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-error px-1 border border-error">ERR_OTP_404</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="sms_failed">sms_failed</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">OTP Delivery Failure</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-1">Provider: SMS_GATEWAY_01</p>
+</div>
+</div>
+<div class="col-start-2 row-start-2 flex items-center justify-center relative">
+<div class="w-full h-px border-t border-dashed border-primary-container relative">
+<div class="absolute right-0 -top-1 border-t-4 border-b-4 border-l-8 border-transparent border-l-primary-container"></div>
+</div>
+<div class="absolute -top-6 px-3 py-1 bg-surface-container border border-outline-variant rounded-full">
+<span class="font-code-xs text-code-xs text-primary">FALLBACK TRIGGERED</span>
+</div>
+</div>
+<div class="col-start-3 row-start-2">
+<div class="bg-surface border-l-4 border-primary-container p-4 node-glow-recovery">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-primary-container px-1 border border-primary-container">MANUAL_FLOW</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="verified">verified</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">Manual Verification</h4>
+<div class="mt-4 flex gap-2">
+<div class="flex-1 h-1 bg-primary-container"></div>
+<div class="flex-1 h-1 bg-primary-container"></div>
+<div class="flex-1 h-1 bg-outline-variant"></div>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-2 text-right italic">Awaiting document upload...</p>
+</div>
+</div>
+<!-- PATH 3: SUSPICIOUS LOGIN -->
+<div class="col-start-1 row-start-3">
+<div class="bg-error-container/40 border border-error p-4 node-glow-error relative overflow-hidden">
+<div class="absolute top-0 right-0 w-8 h-8 bg-error/20 rotate-45 translate-x-4 -translate-y-4"></div>
+<div class="flex justify-between items-center mb-2 relative">
+<span class="font-label-caps text-[9px] text-error font-bold">CRITICAL_THREAT</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="warning">warning</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">Suspicious Login Path</h4>
+<p class="font-code-xs text-code-xs text-on-surface mt-2 bg-error/10 px-2 py-1">Origin: Untrusted IP (Lagos, NG)</p>
+</div>
+</div>
+<div class="col-start-2 row-start-3 flex items-center justify-center relative">
+<div class="w-full h-px border-t border-error relative"></div>
+<div class="absolute -top-6 px-3 py-1 bg-surface-container border border-error rounded-full animate-pulse">
+<span class="font-code-xs text-code-xs text-error font-bold">AURA AI REVIEWING...</span>
+</div>
+</div>
+<div class="col-start-3 row-start-3">
+<div class="bg-surface-container-highest border-l-4 border-secondary p-4 relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-secondary px-1 border border-secondary">AI_AGENT_AURA</span>
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="psychology">psychology</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">Aura AI Risk Assessment</h4>
+<div class="mt-3 flex items-center gap-3">
+<div class="flex-1 h-2 bg-outline-variant rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 88%"></div>
+</div>
+<span class="font-code-xs text-code-xs text-secondary">88%</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-2">Recommended Action: Temporary Lock</p>
+</div>
+</div>
+<div class="col-start-4 row-start-3">
+<div class="bg-surface-variant border border-on-secondary-fixed-variant p-4">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-on-secondary-fixed-variant px-1 bg-secondary text-on-secondary">ADMIN_OVERRIDE</span>
+<span class="material-symbols-outlined text-on-secondary-fixed-variant text-sm" data-icon="shield_person">shield_person</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface">Final Admin Review</h4>
+<div class="mt-4 flex gap-2">
+<button class="flex-1 py-1 bg-error-container text-on-error-container font-code-xs text-code-xs uppercase">Deny</button>
+<button class="flex-1 py-1 bg-primary-container text-on-primary-container font-code-xs text-code-xs uppercase">Approve</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Orthogonal Polylines (Background Decorative) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-20" xmlns="http://www.w3.org/2000/svg">
+<path class="text-outline" d="M 400 150 L 550 150 L 550 450 L 700 450" fill="none" stroke="currentColor" stroke-dasharray="4 4" stroke-width="1"></path>
+<path class="text-error" d="M 400 700 L 550 700 L 550 900 L 1100 900" fill="none" stroke="currentColor" stroke-width="1"></path>
+</svg>
+</div>
+<!-- Audit Log Panel (Floating Right) -->
+<section class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-node-gutter">
+<div class="lg:col-span-2 bg-surface-container border border-outline-variant">
+<div class="flex justify-between items-center p-4 border-b border-outline-variant">
+<h3 class="font-label-caps text-label-caps uppercase">System Recovery Logs</h3>
+<div class="flex gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-code-xs text-code-xs text-primary uppercase">Live Audit Stream</span>
+</div>
+</div>
+<div class="divide-y divide-outline-variant max-h-64 overflow-y-auto">
+<!-- Log Item -->
+<div class="p-3 flex justify-between items-center hover:bg-surface-variant transition-colors cursor-help">
+<div class="flex gap-4 items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:22:04:11</span>
+<span class="font-code-sm text-code-sm text-error">EXC_L3_LOCKDOWN</span>
+<span class="font-code-xs text-code-xs opacity-50">Node: Auth-API-West</span>
+</div>
+<span class="material-symbols-outlined text-sm opacity-40" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="p-3 flex justify-between items-center hover:bg-surface-variant transition-colors cursor-help">
+<div class="flex gap-4 items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:21:55:02</span>
+<span class="font-code-sm text-code-sm text-primary">REC_OTP_RESEND</span>
+<span class="font-code-xs text-code-xs opacity-50">Node: Comms-Router</span>
+</div>
+<span class="material-symbols-outlined text-sm opacity-40" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="p-3 flex justify-between items-center hover:bg-surface-variant transition-colors cursor-help">
+<div class="flex gap-4 items-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:21:32:88</span>
+<span class="font-code-sm text-code-sm text-secondary">AURA_SCORING_COMPLETE</span>
+<span class="font-code-xs text-code-xs opacity-50">Score: 0.12 (High Risk)</span>
+</div>
+<span class="material-symbols-outlined text-sm opacity-40" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Telemetry Graph Placeholder -->
+<div class="bg-surface-container border border-outline-variant p-6 relative flex flex-col justify-center">
+<h3 class="font-label-caps text-label-caps uppercase mb-4 opacity-60">Successive Recovery Ratio</h3>
+<div class="flex-1 flex items-end gap-1">
+<div class="bg-primary w-full h-[40%] opacity-20"></div>
+<div class="bg-primary w-full h-[60%] opacity-40"></div>
+<div class="bg-primary w-full h-[55%] opacity-60"></div>
+<div class="bg-primary w-full h-[85%] opacity-80"></div>
+<div class="bg-primary w-full h-[95%]"></div>
+<div class="bg-error w-full h-[30%]"></div>
+<div class="bg-primary w-full h-[70%]"></div>
+</div>
+<div class="mt-4 flex justify-between font-code-xs text-code-xs">
+<span>T-24H</span>
+<span class="text-primary">89.4% RECOVERY SUCCESS</span>
+<span>NOW</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Global Footer Bar -->
+<footer class="w-full fixed bottom-0 left-0 bg-surface-container-high border-t border-outline-variant z-[70] flex justify-between items-center px-lane-margin h-8">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs font-bold text-primary">WF-ENGINE: V2</span>
+<span class="w-px h-3 bg-outline-variant"></span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">SYSTEM HEALTH: OPTIMAL | LATENCY: 24ms | NODE: NG-Lagos-01</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-help" href="#">Documentation</a>
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-help" href="#">Support</a>
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-help" href="#">Telemetry</a>
+</div>
+</footer>
+<script>
+        // Micro-interactions for technical feel
+        document.querySelectorAll('.bg-surface').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'scale(1.02) translateY(-2px)';
+                node.style.transition = 'all 0.2s cubic-bezier(0.17, 0.55, 0.55, 1)';
+                node.style.zIndex = '50';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'scale(1) translateY(0)';
+                node.style.zIndex = '10';
+            });
+        });
+
+        // Simulating telemetry update
+        setInterval(() => {
+            const latencies = ['22ms', '24ms', '28ms', '21ms', '45ms'];
+            const footerText = document.querySelector('footer span.text-on-surface-variant');
+            const randomLat = latencies[Math.floor(Math.random() * latencies.length)];
+            footerText.innerHTML = `SYSTEM HEALTH: OPTIMAL | LATENCY: ${randomLat} | NODE: NG-Lagos-01`;
+        }, 3000);
+    </script>
+</body></html>

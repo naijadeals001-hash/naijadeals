@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artifact L — UX ↔ Backend Interaction Blueprint (WF-002)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "tertiary-fixed-dim": "#ddb7ff",
+                "surface-container-low": "#0d1c2d",
+                "error": "#ffb4ab",
+                "secondary-fixed": "#dde1ff",
+                "tertiary": "#fff6ff",
+                "surface-bright": "#2c3a4c",
+                "surface-dim": "#051424",
+                "secondary-container": "#0043eb",
+                "inverse-surface": "#d4e4fa",
+                "primary-container": "#00ff41",
+                "tertiary-fixed": "#f0dbff",
+                "surface-container": "#122131",
+                "surface": "#051424",
+                "on-surface": "#d4e4fa",
+                "on-secondary-fixed": "#001356",
+                "on-error-container": "#ffdad6",
+                "surface-variant": "#273647",
+                "secondary": "#b8c3ff",
+                "surface-tint": "#00e639",
+                "on-primary-container": "#007117",
+                "on-primary-fixed-variant": "#00530e",
+                "primary-fixed-dim": "#00e639",
+                "on-tertiary-fixed": "#2c0051",
+                "surface-container-high": "#1c2b3c",
+                "on-tertiary": "#490080",
+                "outline": "#84967e",
+                "on-tertiary-container": "#862ed4",
+                "on-secondary-fixed-variant": "#0035be",
+                "tertiary-container": "#ecd3ff",
+                "surface-container-highest": "#273647",
+                "on-error": "#690005",
+                "secondary-fixed-dim": "#b8c3ff",
+                "on-secondary-container": "#c6ceff",
+                "error-container": "#93000a",
+                "on-primary-fixed": "#002203",
+                "surface-container-lowest": "#010f1f",
+                "primary-fixed": "#72ff70",
+                "primary": "#ebffe2",
+                "on-primary": "#003907",
+                "on-background": "#d4e4fa",
+                "inverse-primary": "#006e16",
+                "outline-variant": "#3b4b37",
+                "on-surface-variant": "#b9ccb2",
+                "on-secondary": "#002388",
+                "inverse-on-surface": "#233143",
+                "background": "#051424",
+                "on-tertiary-fixed-variant": "#6900b3"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "stack-gap": "4px",
+                "lane-margin": "32px",
+                "node-gutter": "24px",
+                "grid-unit": "8px"
+            },
+            "fontFamily": {
+                "code-xs": ["JetBrains Mono"],
+                "headline-md": ["Plus Jakarta Sans"],
+                "label-caps": ["JetBrains Mono"],
+                "body-md": ["Plus Jakarta Sans"],
+                "headline-lg": ["Plus Jakarta Sans"],
+                "code-sm": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, #122131 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-line {
+            background: repeating-linear-gradient(to bottom, #00e639, #00e639 4px, transparent 4px, transparent 8px);
+            width: 2px;
+        }
+        .node-pulse {
+            animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(0, 230, 57, 0.3); }
+            50% { border-color: rgba(0, 230, 57, 1); }
+        }
+        .scroll-hide::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md antialiased">
+<!-- Top Navigation Anchor -->
+<header class="flex justify-between items-center px-lane-margin h-16 w-full z-50 fixed top-0 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-on-surface">NaijaDeals | Core Systems</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim font-bold cursor-pointer">Logic Flow</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">API Specs</span>
+</nav>
+<div class="bg-surface-container-high px-3 py-1 rounded border border-outline-variant">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">v2.4.1-STABLE</span>
+</div>
+</div>
+</header>
+<!-- Side Navigation Drawer -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 w-64 bg-surface-container-low border-r border-outline-variant z-40 hidden lg:flex">
+<div class="px-6 py-8">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant mb-6 uppercase tracking-widest">Modules</h2>
+<nav class="space-y-1">
+<div class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined">memory</span>
+<span class="font-code-sm text-code-sm">System Architecture</span>
+</div>
+<div class="text-primary-fixed-dim bg-secondary-container/20 border-l-4 border-primary-fixed-dim flex items-center gap-3 px-4 py-3 cursor-default">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-code-sm text-code-sm">Logic Flow</span>
+</div>
+<div class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined">database</span>
+<span class="font-code-sm text-code-sm">Data Mapping</span>
+</div>
+<div class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined">settings_ethernet</span>
+<span class="font-code-sm text-code-sm">API Specs</span>
+</div>
+<div class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-code-sm text-code-sm">Audit Logs</span>
+</div>
+<div class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined">rocket_launch</span>
+<span class="font-code-sm text-code-sm">Deployment</span>
+</div>
+</nav>
+</div>
+<div class="mt-auto p-6">
+<div class="bg-surface-container-highest rounded p-4 border border-outline-variant">
+<p class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">AUTH CONTEXT</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">WF-002 Login Workflow</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:pl-64 pt-16 min-h-screen">
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Page Header -->
+<div class="mb-12 flex justify-between items-end">
+<div>
+<div class="inline-flex items-center gap-2 px-2 py-1 rounded bg-secondary-container/30 border border-secondary-container mb-4">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+<span class="font-code-xs text-code-xs text-secondary-fixed">LIVE ARCHITECTURE MAP</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Artifact L — UX ↔ Backend Interaction Blueprint</h1>
+<p class="text-on-surface-variant font-code-sm mt-2">TECHNICAL TRACE: WF-002 Login &amp; Authentication Flow</p>
+</div>
+<div class="hidden sm:block text-right">
+<p class="font-label-caps text-label-caps text-on-surface-variant">STATUS</p>
+<p class="font-headline-md text-headline-md text-primary-fixed-dim font-bold">READY FOR DEVELOPMENT</p>
+</div>
+</div>
+<!-- Blueprint Sequence Diagram Area -->
+<div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+<!-- Interaction Flow Column -->
+<div class="xl:col-span-3 bg-surface-container-lowest p-8 rounded-xl border border-outline-variant relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 font-code-xs text-on-surface-variant opacity-20 pointer-events-none">
+                        SYSTEM_INTERACTION_LAYER_v2.0
+                    </div>
+<!-- Flow Container -->
+<div class="flex flex-col items-center space-y-0">
+<!-- 1. User Action -->
+<div class="w-full flex flex-col items-center">
+<div class="group relative w-full max-w-md bg-[#0F0F0F] border border-outline-variant p-4 rounded hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">01 | User Action</span>
+<span class="material-symbols-outlined text-secondary text-sm">touch_app</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">User enters credentials</p>
+<div class="mt-3 flex gap-2">
+<span class="font-code-xs text-code-xs bg-surface-container px-1.5 py-0.5 rounded text-on-surface-variant">Input: Email/Pass</span>
+<span class="font-code-xs text-code-xs bg-surface-container px-1.5 py-0.5 rounded text-on-surface-variant">Event: onSubmit</span>
+</div>
+</div>
+<div class="h-12 w-0.5 connector-line"></div>
+</div>
+<!-- 2. Frontend Component -->
+<div class="w-full flex flex-col items-center">
+<div class="group relative w-full max-w-md bg-[#0F0F0F] border border-outline-variant p-4 rounded hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">02 | Frontend Component</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">web_asset</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Login Screen [View_Auth]</p>
+<div class="mt-3 flex flex-wrap gap-2">
+<span class="font-code-xs text-code-xs bg-primary-container/10 border border-primary-container/20 px-1.5 py-0.5 rounded text-primary-fixed-dim">Validation: Local</span>
+<span class="font-code-xs text-code-xs bg-primary-container/10 border border-primary-container/20 px-1.5 py-0.5 rounded text-primary-fixed-dim">State: Loading</span>
+</div>
+</div>
+<div class="h-12 w-0.5 connector-line"></div>
+</div>
+<!-- 3. API Request -->
+<div class="w-full flex flex-col items-center">
+<div class="group relative w-full max-w-md bg-surface-container-high border-2 border-primary-fixed-dim p-4 rounded shadow-[0_0_15px_rgba(0,230,57,0.1)]">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim uppercase">03 | API Request</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">swap_horiz</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface font-bold">POST /v1/auth/login</p>
+<div class="mt-3 bg-surface-container-lowest p-2 rounded border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant leading-relaxed">
+<span class="text-tertiary-fixed-dim">headers:</span> { "Content-Type": "application/json" }<br/>
+<span class="text-tertiary-fixed-dim">body:</span> { "id": "user_hash", "sig": "..." }
+                                    </p>
+</div>
+</div>
+<div class="h-12 w-0.5 connector-line"></div>
+</div>
+<!-- 4. Backend Service -->
+<div class="w-full flex flex-col items-center">
+<div class="group relative w-full max-w-md bg-[#0F0F0F] border border-outline-variant p-4 rounded hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">04 | Backend Service</span>
+<span class="material-symbols-outlined text-secondary text-sm">dns</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Auth Service [Node.js/Micro]</p>
+<div class="mt-3 flex gap-2">
+<span class="font-code-xs text-code-xs bg-surface-container px-1.5 py-0.5 rounded text-on-surface-variant">Bcrypt Verify</span>
+<span class="font-code-xs text-code-xs bg-surface-container px-1.5 py-0.5 rounded text-on-surface-variant">JWT Sign</span>
+</div>
+</div>
+<div class="h-12 w-0.5 connector-line"></div>
+</div>
+<!-- 5. Database -->
+<div class="w-full flex flex-col items-center">
+<div class="group relative w-full max-w-md bg-[#0F0F0F] border border-outline-variant p-4 rounded hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">05 | Database Update</span>
+<span class="material-symbols-outlined text-secondary text-sm">storage</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">INSERT login_history</p>
+<div class="mt-2 text-right">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SQL_COMMIT: 12ms</span>
+</div>
+</div>
+<div class="h-12 w-0.5 connector-line"></div>
+</div>
+<!-- 6. Event Bus -->
+<div class="w-full flex flex-col items-center">
+<div class="group relative w-full max-w-md bg-[#0F0F0F] border-dashed border-2 border-outline-variant p-4 rounded">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">06 | Event Bus</span>
+<span class="material-symbols-outlined text-secondary text-sm">hub</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Emit: LoginSuccessful</p>
+<div class="absolute -right-12 top-1/2 -translate-y-1/2 flex items-center">
+<div class="w-12 h-0.5 bg-outline-variant"></div>
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+</div>
+</div>
+<div class="h-12 w-0.5 connector-line"></div>
+</div>
+<!-- 7. Automation -->
+<div class="w-full flex flex-col items-center">
+<div class="group relative w-full max-w-md bg-[#0F0F0F] border border-outline-variant p-4 rounded hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">07 | n8n Automation</span>
+<span class="material-symbols-outlined text-secondary text-sm">settings_input_component</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">N8N-WF-Audit (Sync to Slack/Logs)</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-2 italic">Low-priority background task</p>
+</div>
+<div class="h-12 w-0.5 connector-line"></div>
+</div>
+<!-- 8. Final State -->
+<div class="w-full flex flex-col items-center">
+<div class="group relative w-full max-w-md bg-primary-container p-6 rounded-lg shadow-xl node-pulse">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-primary font-bold uppercase">08 | Final UI State</span>
+<span class="material-symbols-outlined text-on-primary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-primary-container font-extrabold text-lg">Session Created</p>
+<p class="font-code-xs text-code-xs text-on-primary-container mt-1">Redirect -&gt; /dashboard</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Development Readiness Checklist -->
+<div class="space-y-6">
+<div class="bg-surface-container p-6 rounded-xl border border-outline-variant">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary-fixed-dim">task_alt</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Readiness Checklist</h3>
+</div>
+<div class="space-y-4">
+<!-- Checklist Item -->
+<div class="flex items-start gap-3 p-3 bg-surface-container-lowest rounded border border-outline-variant">
+<div class="w-5 h-5 rounded bg-primary-fixed-dim flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary text-[14px] font-bold">check</span>
+</div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">API Documentation</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Swagger v2.1 synced</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-surface-container-lowest rounded border border-outline-variant">
+<div class="w-5 h-5 rounded bg-primary-fixed-dim flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary text-[14px] font-bold">check</span>
+</div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">Security Audit</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">JWT standards approved</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-surface-container-lowest rounded border border-outline-variant">
+<div class="w-5 h-5 rounded bg-primary-fixed-dim flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary text-[14px] font-bold">check</span>
+</div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">DB Schema</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">`login_history` migrated</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-surface-container-lowest rounded border border-outline-variant">
+<div class="w-5 h-5 rounded bg-primary-fixed-dim flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary text-[14px] font-bold">check</span>
+</div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">Mock Data</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Frontend sandbox ready</p>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">OVERALL PROGRESS</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">100%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full w-full shadow-[0_0_10px_rgba(0,230,57,0.5)]"></div>
+</div>
+</div>
+</div>
+<!-- Telemetry Data -->
+<div class="bg-[#050505] p-6 rounded-xl border border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">analytics</span>
+                            Performance Targets
+                        </h4>
+<div class="grid grid-cols-2 gap-4">
+<div class="p-3 bg-surface-container rounded border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant">LATENCY</p>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim">&lt; 150ms</p>
+</div>
+<div class="p-3 bg-surface-container rounded border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant">THROUGHPUT</p>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim">5k RPS</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Meta -->
+<footer class="mt-16 pt-8 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant">REF_ID: 99x-AUTH-BLUEPRINT</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">STAMP: 2023-11-24:09:44:UTC</span>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface font-code-sm text-code-sm px-4 py-2 rounded transition-colors">
+                        EXPORT SVG
+                    </button>
+<button class="bg-primary-fixed-dim hover:opacity-90 text-on-primary-fixed font-code-sm text-code-sm px-4 py-2 rounded transition-opacity font-bold">
+                        APPROVE SPECS
+                    </button>
+</div>
+</footer>
+</div>
+</main>
+<!-- Background Atmospheric Effect -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+<div class="absolute top-1/4 -right-1/4 w-[800px] h-[800px] bg-primary-container/5 blur-[120px] rounded-full"></div>
+<div class="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] bg-secondary-container/5 blur-[120px] rounded-full"></div>
+</div>
+<!-- Micro-Telemetry Interactions -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nodes = document.querySelectorAll('.group');
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', () => {
+                    node.style.transform = 'translateY(-2px)';
+                });
+                node.addEventListener('mouseleave', () => {
+                    node.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Random flickering effect for terminal aesthetic
+            setInterval(() => {
+                const badge = document.querySelector('.animate-pulse');
+                if (badge) {
+                    badge.style.opacity = Math.random() > 0.9 ? '0.5' : '1';
+                }
+            }, 500);
+        });
+    </script>
+</body></html>

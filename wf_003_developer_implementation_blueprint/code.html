@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-003 Developer Implementation Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-container-highest": "#273647",
+                "outline-variant": "#3b4b37",
+                "outline": "#84967e",
+                "on-tertiary-fixed": "#2c0051",
+                "on-primary": "#003907",
+                "on-background": "#d4e4fa",
+                "error": "#ffb4ab",
+                "on-primary-fixed": "#002203",
+                "secondary-fixed": "#dde1ff",
+                "on-primary-container": "#007117",
+                "primary-fixed-dim": "#00e639",
+                "tertiary-fixed-dim": "#ddb7ff",
+                "on-error": "#690005",
+                "surface-tint": "#00e639",
+                "on-secondary": "#002388",
+                "secondary-fixed-dim": "#b8c3ff",
+                "on-tertiary": "#490080",
+                "on-tertiary-fixed-variant": "#6900b3",
+                "surface-dim": "#051424",
+                "secondary": "#b8c3ff",
+                "on-surface": "#d4e4fa",
+                "surface-container-low": "#0d1c2d",
+                "on-secondary-container": "#c6ceff",
+                "primary-container": "#00ff41",
+                "on-secondary-fixed-variant": "#0035be",
+                "on-surface-variant": "#b9ccb2",
+                "inverse-primary": "#006e16",
+                "surface-container-high": "#1c2b3c",
+                "surface-container": "#122131",
+                "secondary-container": "#0043eb",
+                "tertiary": "#fff6ff",
+                "surface-variant": "#273647",
+                "on-tertiary-container": "#862ed4",
+                "on-primary-fixed-variant": "#00530e",
+                "inverse-surface": "#d4e4fa",
+                "surface-container-lowest": "#010f1f",
+                "surface": "#051424",
+                "on-error-container": "#ffdad6",
+                "error-container": "#93000a",
+                "background": "#051424",
+                "surface-bright": "#2c3a4c",
+                "tertiary-container": "#ecd3ff",
+                "primary": "#ebffe2",
+                "on-secondary-fixed": "#001356",
+                "primary-fixed": "#72ff70",
+                "tertiary-fixed": "#f0dbff",
+                "inverse-on-surface": "#233143"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "node-gutter": "24px",
+                "stack-gap": "4px",
+                "grid-unit": "8px",
+                "lane-margin": "32px"
+            },
+            "fontFamily": {
+                "headline-md": ["Plus Jakarta Sans"],
+                "label-caps": ["JetBrains Mono"],
+                "code-sm": ["JetBrains Mono"],
+                "body-md": ["Plus Jakarta Sans"],
+                "code-xs": ["JetBrains Mono"],
+                "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .glow-green {
+            text-shadow: 0 0 8px rgba(0, 230, 57, 0.4);
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.05);
+            position: absolute;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .node-port {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #00e639;
+            border-radius: 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-container-lowest w-full top-0 border-b border-outline-variant flex justify-between items-center px-grid-unit h-12 w-full fixed z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<h1 class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</h1>
+</div>
+<div class="flex gap-6 h-full items-center">
+<nav class="hidden md:flex h-full items-center gap-4">
+<a class="font-label-caps text-label-caps px-3 h-full flex items-center text-primary-fixed border-b-2 border-primary-fixed transition-colors">BLUEPRINT</a>
+<a class="font-label-caps text-label-caps px-3 h-full flex items-center text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors">RESOURCES</a>
+<a class="font-label-caps text-label-caps px-3 h-full flex items-center text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors">DEPLOY</a>
+</nav>
+<div class="font-label-caps text-label-caps text-primary-fixed flex items-center gap-2 bg-surface-container-high px-3 py-1 rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+                STATUS: OK
+            </div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] flex flex-col h-screen w-64 border-r border-outline-variant bg-surface-container dark:bg-surface-container z-40">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary-fixed opacity-50">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1 py-2">
+<div class="px-3 py-2 flex items-center gap-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">System_Architecture</span>
+</div>
+<div class="px-3 py-2 flex items-center gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Workflow_Engine</span>
+</div>
+<div class="px-3 py-2 flex items-center gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Logic_Matrices</span>
+</div>
+<div class="px-3 py-2 flex items-center gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">insights</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Telemetry_Streams</span>
+</div>
+<div class="px-3 py-2 flex items-center gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">settings_input_component</span>
+<span class="font-code-sm text-code-sm font-label-caps text-label-caps">Node_Registry</span>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-outline text-[16px]">info</span>
+<span class="font-code-xs text-code-xs text-outline">USER: ROOT_DEV</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 rounded overflow-hidden">
+<div class="bg-primary-fixed h-full w-2/3"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 mt-12 mb-8 p-6 overflow-y-auto h-[calc(100vh-80px)] terminal-scroll relative">
+<div class="scanline pointer-events-none"></div>
+<!-- Header Hero -->
+<section class="mb-12">
+<div class="flex justify-between items-end mb-6">
+<div>
+<span class="font-code-sm text-code-sm text-primary-fixed mb-2 block glow-green">HANDOFF_PHASE_03 // READY</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Implementation Blueprint: WF-003</h2>
+</div>
+<div class="text-right">
+<span class="font-code-xs text-code-xs text-outline block">STAMP: 2024.05.21.09:44:12</span>
+<span class="font-code-xs text-code-xs text-primary-fixed block">SECURITY_CLEARANCE: LEVEL_4</span>
+</div>
+</div>
+<!-- Bento Grid Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-container border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-1">MICROSERVICES</span>
+<div class="font-headline-md text-headline-md text-primary-fixed">03</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-1">API_ENDPOINTS</span>
+<div class="font-headline-md text-headline-md text-primary-fixed">12</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-1">EVENT_CHANNELS</span>
+<div class="font-headline-md text-headline-md text-primary-fixed">08</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-1">AUTH_PROTOCOL</span>
+<div class="font-headline-md text-headline-md text-primary-fixed">mTLS + JWT</div>
+</div>
+</div>
+</section>
+<!-- Technical Swimlanes / Workflow Visualization -->
+<section class="mb-12 relative">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed">account_tree</span>
+<h3 class="font-headline-md text-headline-md">Orchestration Layer</h3>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4">
+<!-- Identity Service Node -->
+<div class="min-w-[280px] bg-[#0F0F0F] border border-primary-fixed p-3 relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed">SVC_IDENTITY</span>
+<span class="material-symbols-outlined text-[14px] text-primary-fixed">verified_user</span>
+</div>
+<div class="space-y-2">
+<div class="font-code-sm text-code-sm text-on-surface">/auth/validate-context</div>
+<div class="font-code-xs text-code-xs text-outline">PostgreSQL: identity_db</div>
+<div class="flex gap-1 mt-2">
+<span class="px-1 bg-surface-container-highest text-[8px] font-bold">GRPC</span>
+<span class="px-1 bg-surface-container-highest text-[8px] font-bold">REST</span>
+</div>
+</div>
+<div class="node-port -right-1 top-1/2"></div>
+</div>
+<!-- Connector Arrow -->
+<div class="flex items-center">
+<div class="w-8 h-0.5 bg-primary-fixed"></div>
+<div class="w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-4 border-l-primary-fixed"></div>
+</div>
+<!-- Trust Service Node -->
+<div class="min-w-[280px] bg-[#0F0F0F] border border-secondary p-3 relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="font-label-caps text-label-caps text-secondary">SVC_TRUST_SCORE</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">shield</span>
+</div>
+<div class="space-y-2">
+<div class="font-code-sm text-code-sm text-on-surface">/score/compute-vector</div>
+<div class="font-code-xs text-code-xs text-outline">Redis: trust_cache</div>
+<div class="flex gap-1 mt-2">
+<span class="px-1 bg-surface-container-highest text-[8px] font-bold">PUBSUB</span>
+</div>
+</div>
+<div class="node-port -right-1 top-1/2" style="background: #b8c3ff;"></div>
+</div>
+<!-- Error Path Connector -->
+<div class="flex items-center">
+<div class="w-8 h-0.5 border-t-2 border-dashed border-error"></div>
+<div class="w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-4 border-l-error"></div>
+</div>
+<!-- Fraud Service Node -->
+<div class="min-w-[280px] bg-[#0F0F0F] border border-error p-3">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="font-label-caps text-label-caps text-error">SVC_FRAUD_ENGINE</span>
+<span class="material-symbols-outlined text-[14px] text-error">warning</span>
+</div>
+<div class="space-y-2">
+<div class="font-code-sm text-code-sm text-on-surface">/anomaly/detect-drift</div>
+<div class="font-code-xs text-code-xs text-outline">Cassandra: event_ledger</div>
+<div class="flex gap-1 mt-2">
+<span class="px-1 bg-surface-container-highest text-[8px] font-bold">KAFKA</span>
+<span class="px-1 bg-surface-container-highest text-[8px] font-bold">ML_MODEL</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Detailed Technical Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Column 1: API & DB -->
+<div class="space-y-6">
+<div class="bg-surface-container p-5 border border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-4 border-b border-outline-variant pb-2">REQUIRED_APIS</h4>
+<ul class="space-y-3">
+<li class="group">
+<div class="font-code-sm text-code-sm group-hover:text-primary-fixed transition-colors">GET /v1/identity/status</div>
+<div class="flex justify-between font-code-xs text-code-xs text-outline mt-1">
+<span>Latency: &lt;10ms</span>
+<span>SLA: 99.99%</span>
+</div>
+</li>
+<li class="group">
+<div class="font-code-sm text-code-sm group-hover:text-primary-fixed transition-colors">POST /v1/trust/calculate</div>
+<div class="flex justify-between font-code-xs text-code-xs text-outline mt-1">
+<span>Latency: 45ms</span>
+<span>SLA: 99.9%</span>
+</div>
+</li>
+<li class="group">
+<div class="font-code-sm text-code-sm group-hover:text-primary-fixed transition-colors">PUT /v1/fraud/report</div>
+<div class="flex justify-between font-code-xs text-code-xs text-outline mt-1">
+<span>Latency: 120ms</span>
+<span>SLA: 99.5%</span>
+</div>
+</li>
+</ul>
+</div>
+<div class="bg-surface-container p-5 border border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-4 border-b border-outline-variant pb-2">DB_DEPENDENCIES</h4>
+<div class="space-y-4">
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Identity_SQL (v15.2)</div>
+<div class="font-code-xs text-code-xs text-outline">Primary cluster: us-east-1-main</div>
+</div>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Event_Store (Cassandra)</div>
+<div class="font-code-xs text-code-xs text-outline">Replication factor: 3</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2: Workflow & Event Bus -->
+<div class="space-y-6">
+<div class="bg-surface-container-high p-5 border border-outline-variant relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-10">
+<span class="material-symbols-outlined text-[64px]">hub</span>
+</div>
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-4 border-b border-outline-variant pb-2">EVENT_BUS_FLOW</h4>
+<div class="font-code-xs text-code-xs text-on-surface bg-surface-container-lowest p-3 rounded border border-outline-variant mb-4">
+<div class="text-primary-fixed mb-2">TOPIC: user.lifecycle.v1</div>
+<div class="flex items-center gap-2">
+<span class="w-1 h-1 bg-outline rounded-full"></span>
+<span>Consumer: Identity_Svc (SYNC)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1 h-1 bg-outline rounded-full"></span>
+<span>Consumer: Analytics_Svc (ASYNC)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1 h-1 bg-outline rounded-full"></span>
+<span>Consumer: Fraud_Probe (SYNC)</span>
+</div>
+</div>
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-4 border-b border-outline-variant pb-2">n8n_WORKFLOW_IDS</h4>
+<div class="space-y-2">
+<div class="flex justify-between items-center p-2 bg-surface-container hover:bg-surface-container-highest border border-outline-variant cursor-pointer transition-colors">
+<span class="font-code-xs text-code-xs">WF_ID: 9482-AD-9</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</div>
+<div class="flex justify-between items-center p-2 bg-surface-container hover:bg-surface-container-highest border border-outline-variant cursor-pointer transition-colors">
+<span class="font-code-xs text-code-xs">WF_ID: 1102-ZX-2</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container p-5 border border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-4 border-b border-outline-variant pb-2">DEPLOYMENT_NOTES</h4>
+<div class="text-code-xs space-y-2 text-outline">
+<p>&gt; Blue-Green deployment enabled for all services.</p>
+<p>&gt; Canary threshold set at 5% traffic for 30min.</p>
+<p>&gt; Automated rollback triggered on &gt;2% error rate.</p>
+<p>&gt; Kubernetes Namespace: prod-workflow-core</p>
+</div>
+</div>
+</div>
+<!-- Column 3: Security & Snippets -->
+<div class="space-y-6">
+<div class="bg-surface-container p-5 border border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-4 border-b border-outline-variant pb-2">SECURITY_REQUIREMENTS</h4>
+<div class="grid grid-cols-2 gap-2">
+<div class="p-2 border border-outline-variant bg-surface-container-low text-center">
+<div class="font-code-xs text-code-xs text-outline">ENCRYPTION</div>
+<div class="font-label-caps text-[10px] text-primary-fixed">AES-256-GCM</div>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low text-center">
+<div class="font-code-xs text-code-xs text-outline">ROTATION</div>
+<div class="font-label-caps text-[10px] text-primary-fixed">30_DAYS</div>
+</div>
+</div>
+<div class="mt-4 p-3 bg-error-container/20 border border-error/30 rounded">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-error text-[16px]">gpp_maybe</span>
+<span class="font-label-caps text-label-caps text-error">CRITICAL_VULNERABILITY_CHECK</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-error-container">All ingress traffic must pass through the WAF-V2 layer with aggressive rate limiting (100req/sec/IP).</p>
+</div>
+</div>
+<div class="bg-[#050f1a] p-5 border border-outline-variant font-code-sm overflow-hidden">
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-4 border-b border-outline-variant pb-2">AUTH_SNIPPET.go</h4>
+<pre class="text-primary-fixed/80 leading-tight"><span class="text-outline">// Validate incoming context</span>
+func ValidateContext(ctx context.Context) {
+  claims := ctx.Value("claims")
+  if claims.Role != "ADMIN" {
+    log.Fatal("ACCESS_DENIED")
+    return
+  }
+  <span class="text-primary-fixed">emit_event("access_validated")</span>
+}
+                    </pre>
+</div>
+</div>
+</div>
+<!-- Float FAB -->
+<button class="fixed bottom-12 right-8 w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform active:opacity-80 z-50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">file_download</span>
+</button>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-grid-unit z-50 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<div class="flex items-center gap-4">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">LOGS</a>
+</div>
+</footer>
+<script>
+        // Micro-interaction for the workflow nodes
+        document.querySelectorAll('.bg-[#0F0F0F]').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('shadow-[0_0_15px_rgba(0,230,57,0.2)]');
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('shadow-[0_0_15px_rgba(0,230,57,0.2)]');
+            });
+        });
+
+        // Simple terminal typing effect for the system health
+        const statusText = document.querySelector('footer div span');
+        let dots = 0;
+        setInterval(() => {
+            dots = (dots + 1) % 4;
+            const latency = Math.floor(Math.random() * 5) + 10;
+            statusText.innerText = `SYS_HEALTH: NOMINAL [LATENCY: ${latency}ms] [REGION: US-EAST-1]${'.'.repeat(dots)}`;
+        }, 2000);
+    </script>
+</body></html>
