@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ND-OPERATIONS-HUB | Event Bus Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pulse-glow {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px rgba(0, 255, 65, 0.8)); }
+            50% { opacity: 0.6; filter: drop-shadow(0 0 15px rgba(0, 255, 65, 0.4)); }
+        }
+        .flow-line {
+            stroke-dasharray: 10;
+            animation: dash 5s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+        .glass-card {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #45464f;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#b7c4ff",
+                        "surface-variant": "#343438",
+                        "secondary": "#b7c8e1",
+                        "primary": "#dde1ff",
+                        "on-background": "#e4e1e6",
+                        "secondary-container": "#38485d",
+                        "on-primary-container": "#435083",
+                        "on-primary-fixed-variant": "#374476",
+                        "glass-bg": "rgba(29, 31, 41, 0.8)",
+                        "surface-container-highest": "#343438",
+                        "tertiary-container": "#ffb5a2",
+                        "outline-variant": "#45464f",
+                        "surface-container": "#1d1f29",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-tertiary-fixed-variant": "#6c382b",
+                        "tertiary": "#ffdbd2",
+                        "on-primary": "#1f2d5e",
+                        "inverse-primary": "#4f5c90",
+                        "on-secondary": "#213145",
+                        "on-surface": "#e4e1e6",
+                        "error": "#ffb4ab",
+                        "primary-container": "#b7c4ff",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-container": "#a6b6cf",
+                        "outline": "#90909a",
+                        "on-tertiary": "#512317",
+                        "surface-bright": "#39393d",
+                        "tertiary-fixed": "#ffdbd2",
+                        "auth-error": "#ffb4ab",
+                        "on-tertiary-container": "#7b4436",
+                        "surface-container-low": "#1b1b1f",
+                        "surface-dim": "#131317",
+                        "surface-container-lowest": "#0d0e11",
+                        "inverse-on-surface": "#303034",
+                        "on-primary-fixed": "#071749",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-secondary-fixed": "#0b1c2f",
+                        "on-tertiary-fixed": "#360e05",
+                        "inverse-surface": "#e4e1e6",
+                        "on-surface-variant": "#c3c5d9",
+                        "error-container": "#93000a",
+                        "background": "#11131c",
+                        "surface": "#131317",
+                        "primary-fixed": "#dce1ff",
+                        "tertiary-fixed-dim": "#ffb4a2",
+                        "terminal-green": "#00ff41",
+                        "surface-container-high": "#292a2d",
+                        "surface-tint": "#b7c4ff",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-tight": "0.5rem",
+                        "sidebar-width": "288px",
+                        "stack-default": "1rem",
+                        "header-height": "64px",
+                        "unit": "4px",
+                        "container-padding": "1.5rem",
+                        "gutter": "12px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "micro-tag": ["Inter"],
+                        "body-base": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "code-terminal": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                        "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full h-header-height z-50 bg-background dark:bg-background border-b border-outline-variant flex items-center justify-between px-gutter">
+<div class="flex items-center gap-stack-tight">
+<span class="material-symbols-outlined text-terminal-green">terminal</span>
+<span class="font-code-terminal text-headline-md font-bold tracking-tighter text-terminal-green">ND-OPERATIONS-HUB</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-6 items-center">
+<span class="font-code-terminal text-body-sm text-primary transition-colors cursor-pointer border-b-2 border-primary">NETWORK_MAP</span>
+<span class="font-code-terminal text-body-sm text-on-surface-variant hover:bg-surface-variant/50 transition-colors cursor-pointer px-2 py-1">TRAFFIC_LOGS</span>
+<span class="font-code-terminal text-body-sm text-on-surface-variant hover:bg-surface-variant/50 transition-colors cursor-pointer px-2 py-1">SYS_RESOURCES</span>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-1 font-label-caps rounded-lg active:scale-95 duration-100">ROOT_ACCESS</button>
+</div>
+</header>
+<!-- Sidebar NavigationDrawer -->
+<aside class="fixed left-0 top-header-height h-[calc(100vh-64px)] w-sidebar-width bg-surface-container dark:bg-surface-container border-r border-outline-variant hidden md:flex flex-col py-stack-default">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of a tech lead architect wearing futuristic glasses, glowing subtle neon blue highlights on face, sharp focus, cinematic lighting, cyberpunk corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWwjJqd_0YQ6XvCWDTIjEDnRwZVfab0LEnSKtjXx-fUdK8TVv7859-LNSWKmdqm5o-5NQ86BpydbA6n36DCmIqv7uLYZ9ojzMeLIEIgfcNlJAbUYfccR2IOspnGPxGpDCncGWIe03E65sZDDc2e2xYJcj1GDjhtxiD7A40AMyJYpl-EG3tPCQdt9OL5LbsMUXoXw249MO6O5qQj79SExKdLPWBwV5aHglnbEhMZCzqkoKe3RmBQIMJInVZ0W3ayNooIJhuBiyTD5o"/>
+</div>
+<div>
+<p class="font-label-caps text-primary">Lead Architect</p>
+<p class="font-code-terminal text-micro-tag opacity-60">ND-ECOSYSTEM-SUPERUSER</p>
+</div>
+</div>
+<p class="font-code-terminal text-micro-tag mt-2 text-terminal-green">ACTIVE_SESSION:04:12:01</p>
+</div>
+<nav class="flex flex-col flex-1">
+<div class="bg-secondary-container/30 border-l-4 border-primary-container text-primary-container font-bold px-4 py-3 flex items-center gap-3 transition-all duration-200">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps">Dependency Map</span>
+</div>
+<div class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 flex items-center gap-3 transition-all duration-200">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps">Registry</span>
+</div>
+<div class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 flex items-center gap-3 transition-all duration-200">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="font-label-caps">API Monitor</span>
+</div>
+<div class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 flex items-center gap-3 transition-all duration-200">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps">Health Metrics</span>
+</div>
+<div class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 flex items-center gap-3 transition-all duration-200">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-caps">Admin Terminal</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-sidebar-width pt-header-height min-h-screen p-stack-default md:p-container-padding overflow-x-hidden">
+<!-- Dashboard Header -->
+<section class="mb-gutter flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h1 class="font-display-lg text-display-lg text-primary uppercase tracking-tighter">Event Bus Infrastructure</h1>
+<p class="font-code-terminal text-on-surface-variant max-w-2xl">Visualizing asynchronous message throughput across the NaijaDeals ecosystem. Real-time monitoring of producer nodes and consumer clusters.</p>
+</div>
+<div class="flex gap-2">
+<div class="glass-card px-4 py-2 border-l-4 border-terminal-green">
+<p class="font-label-caps text-on-surface-variant">Global Throughput</p>
+<p class="font-code-terminal text-headline-md text-terminal-green">14.2k <span class="text-body-sm opacity-50">msg/s</span></p>
+</div>
+<div class="glass-card px-4 py-2 border-l-4 border-error">
+<p class="font-label-caps text-on-surface-variant">System Latency</p>
+<p class="font-code-terminal text-headline-md text-error">42ms</p>
+</div>
+</div>
+</section>
+<!-- Node & Pipe Map Visualizer (Bento Grid Style) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Event Bus Visualizer (The Core) -->
+<div class="lg:col-span-8 glass-card relative min-h-[500px] overflow-hidden rounded-xl">
+<div class="absolute inset-0 opacity-10">
+
+</div>
+<div class="relative z-10 p-6 flex flex-col h-full">
+<div class="flex justify-between items-center mb-10">
+<h2 class="font-label-caps text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">hub</span> LIVE_TOPOLOGY_VIEW
+                        </h2>
+<div class="flex gap-2">
+<span class="w-2 h-2 rounded-full bg-terminal-green pulse-glow"></span>
+<span class="font-code-terminal text-micro-tag">LIVE_DATA_STREAMING</span>
+</div>
+</div>
+<!-- Simplified Architecture Visualization -->
+<div class="flex-1 grid grid-cols-3 gap-8 items-center justify-items-center">
+<!-- Producers Column -->
+<div class="flex flex-col gap-3 w-full">
+<div class="font-label-caps text-on-surface-variant text-center mb-2">Producers</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container border border-outline-variant p-2 rounded text-center">
+<p class="font-code-terminal text-micro-tag">SHOP</p>
+<div class="h-1 bg-primary/20 mt-1 overflow-hidden rounded-full"><div class="h-full bg-primary w-2/3"></div></div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-2 rounded text-center">
+<p class="font-code-terminal text-micro-tag">EATS</p>
+<div class="h-1 bg-primary/20 mt-1 overflow-hidden rounded-full"><div class="h-full bg-primary w-1/2"></div></div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-2 rounded text-center">
+<p class="font-code-terminal text-micro-tag">DRIVE</p>
+<div class="h-1 bg-primary/20 mt-1 overflow-hidden rounded-full"><div class="h-full bg-primary w-4/5"></div></div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-2 rounded text-center">
+<p class="font-code-terminal text-micro-tag">WALLET</p>
+<div class="h-1 bg-primary/20 mt-1 overflow-hidden rounded-full"><div class="h-full bg-primary w-1/3"></div></div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-2 rounded text-center col-span-2">
+<p class="font-code-terminal text-micro-tag">ESCROW/TRUST</p>
+<div class="h-1 bg-primary/20 mt-1 overflow-hidden rounded-full"><div class="h-full bg-primary w-1/4"></div></div>
+</div>
+</div>
+</div>
+<!-- Central Bus Node -->
+<div class="relative flex flex-col items-center">
+<div class="w-32 h-32 glass-card rounded-full flex items-center justify-center border-2 border-primary border-dashed animate-[spin_20s_linear_infinite]"></div>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-4xl text-primary-container">dns</span>
+<p class="font-label-caps text-white mt-1">BUS_CORE</p>
+<p class="font-code-terminal text-micro-tag text-terminal-green">99.98% UP</p>
+</div>
+</div>
+<!-- Consumers Column -->
+<div class="flex flex-col gap-3 w-full">
+<div class="font-label-caps text-on-surface-variant text-center mb-2">Consumers</div>
+<div class="space-y-2">
+<div class="bg-surface-container border border-outline-variant p-3 rounded flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary">psychology</span>
+<p class="font-code-terminal text-micro-tag">AI_ENGINE</p>
+</div>
+<span class="text-terminal-green font-code-terminal text-micro-tag">ACTIVE</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-3 rounded flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary">notifications_active</span>
+<p class="font-code-terminal text-micro-tag">NOTIF_HUB</p>
+</div>
+<span class="text-terminal-green font-code-terminal text-micro-tag">ACTIVE</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-3 rounded flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary">security</span>
+<p class="font-code-terminal text-micro-tag">COMPLIANCE</p>
+</div>
+<span class="text-terminal-green font-code-terminal text-micro-tag">ACTIVE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Flow SVG overlay (Conceptual) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+<path class="flow-line" d="M 220 250 L 320 250" fill="none" stroke="#b7c4ff" stroke-width="1"></path>
+<path class="flow-line" d="M 220 180 Q 280 180 320 250" fill="none" stroke="#b7c4ff" stroke-width="1"></path>
+<path class="flow-line" d="M 220 320 Q 280 320 320 250" fill="none" stroke="#b7c4ff" stroke-width="1"></path>
+<path class="flow-line" d="M 440 250 L 540 200" fill="none" stroke="#00ff41" stroke-width="1"></path>
+<path class="flow-line" d="M 440 250 L 540 250" fill="none" stroke="#00ff41" stroke-width="1"></path>
+<path class="flow-line" d="M 440 250 L 540 300" fill="none" stroke="#00ff41" stroke-width="1"></path>
+</svg>
+</div>
+</div>
+<!-- Dead Letter Queue (DLQ) Section -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<div class="glass-card flex-1 rounded-xl p-6 border-t-4 border-error overflow-hidden flex flex-col">
+<h2 class="font-label-caps text-error mb-4 flex items-center justify-between">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">warning</span> DEAD_LETTER_QUEUE</span>
+<span class="bg-error/10 text-error px-2 py-0.5 rounded text-micro-tag font-code-terminal">HIGH_ALERT</span>
+</h2>
+<div class="space-y-4 flex-1">
+<div class="flex justify-between items-end">
+<div>
+<p class="font-code-terminal text-display-lg leading-none">128</p>
+<p class="font-label-caps text-on-surface-variant text-micro-tag">FAILED_MESSAGES</p>
+</div>
+<div class="text-right">
+<p class="font-code-terminal text-error">9.2% failure rate</p>
+<p class="font-micro-tag text-on-surface-variant">Last 5 minutes</p>
+</div>
+</div>
+<div class="terminal-scroll overflow-y-auto h-48 font-code-terminal text-micro-tag space-y-1 bg-background/50 p-2 border border-outline-variant">
+<p class="text-error">[FAIL] msg_id: nd_08129 - Shop -&gt; AI_Engine (Retry: 3/3)</p>
+<p class="text-on-surface-variant opacity-60">[LOG] Retrying nd_08130 in 2000ms...</p>
+<p class="text-error">[FAIL] msg_id: nd_08131 - Wallet -&gt; Compliance (Timeout)</p>
+<p class="text-tertiary">[WARN] Queue depth exceeding threshold: WALLET_SYNC</p>
+<p class="text-error">[FAIL] msg_id: nd_08132 - Eats -&gt; Notif_Hub (Auth_Err)</p>
+<p class="text-error">[FAIL] msg_id: nd_08133 - Send -&gt; AI_Engine (503)</p>
+</div>
+</div>
+<button class="w-full mt-4 bg-surface-variant hover:bg-surface-variant/80 text-on-surface font-label-caps py-2 rounded-lg transition-colors border border-outline-variant">PURGE_DEAD_MESSAGES</button>
+</div>
+<div class="glass-card rounded-xl p-6 border-t-4 border-primary">
+<h2 class="font-label-caps text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">settings_input_component</span> RETRY_CONFIG
+                    </h2>
+<div class="space-y-3">
+<div class="flex justify-between text-micro-tag font-code-terminal">
+<span class="text-on-surface-variant">BACKOFF_POLICY</span>
+<span class="text-primary">EXPONENTIAL</span>
+</div>
+<div class="flex justify-between text-micro-tag font-code-terminal">
+<span class="text-on-surface-variant">MAX_RETRY_COUNT</span>
+<span class="text-primary">5</span>
+</div>
+<div class="flex justify-between text-micro-tag font-code-terminal">
+<span class="text-on-surface-variant">VISIBILITY_TIMEOUT</span>
+<span class="text-primary">300s</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Queue Depth & Performance Bento Row -->
+<div class="lg:col-span-3 glass-card rounded-xl p-5 border-t-4 border-secondary">
+<p class="font-label-caps text-secondary mb-2">QUEUE_DEPTH_AGG</p>
+<div class="flex items-center justify-center h-24">
+<div class="relative w-full h-12 bg-secondary/10 rounded overflow-hidden">
+<div class="absolute inset-0 bg-secondary/20 animate-pulse"></div>
+<div class="absolute left-0 h-full bg-secondary w-[42%]"></div>
+</div>
+</div>
+<div class="flex justify-between mt-2 font-code-terminal text-micro-tag">
+<span>4,210 MSG</span>
+<span class="opacity-50">CAPACITY: 10K</span>
+</div>
+</div>
+<div class="lg:col-span-3 glass-card rounded-xl p-5 border-t-4 border-tertiary">
+<p class="font-label-caps text-tertiary mb-2">CONSUMER_LAG_AVG</p>
+<div class="flex items-end gap-1 h-24">
+<div class="bg-tertiary/40 w-full h-[30%]"></div>
+<div class="bg-tertiary/60 w-full h-[50%]"></div>
+<div class="bg-tertiary w-full h-[80%]"></div>
+<div class="bg-tertiary/50 w-full h-[40%]"></div>
+<div class="bg-tertiary/70 w-full h-[60%]"></div>
+<div class="bg-tertiary w-full h-[90%]"></div>
+<div class="bg-tertiary/30 w-full h-[20%]"></div>
+</div>
+<p class="text-center font-code-terminal text-headline-md text-tertiary mt-2">1.2s</p>
+</div>
+<div class="lg:col-span-6 glass-card rounded-xl p-5 overflow-hidden flex items-center gap-6">
+<div class="w-24 h-24 shrink-0 rounded-lg overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A stylized digital visualization of complex data lines and particles flowing through a central glowing sphere, high contrast black background with neon violet and blue streaks, minimalist technical illustration style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmxs7iKzc0W1O5Uc4zWqB4lJNYtoNGia64pNoTcnnDUE0ce9t_pwaZ8MMrOASVURalonTZNX_gh6BSzE3borjUnQfsM3CGssUCZjGsJJboQRWhnLfails-FjhneIoOyPEsSJ70T7rpXutHFxuazr65LQsiGQ3NJ8w8ZJUz87oULymGVhNQm8-a50vwgiXB6S5RpjZKQE9LaVsZYTZtfGUp-o7QjFlQ21473YJyh22MzEw8fmB6DX5pzFvt741RzIrUcNH3G-FxlZY"/>
+</div>
+<div class="flex-1">
+<p class="font-label-caps text-primary mb-1">SYSTEM_OPTIMIZATION_ENGINE</p>
+<p class="font-body-sm text-on-surface-variant opacity-80 leading-tight">AI is currently balancing traffic between n8n workflows and Notification Hub to prevent queue overflow in the WALLET cluster.</p>
+<div class="flex gap-4 mt-3">
+<span class="text-micro-tag font-code-terminal text-terminal-green flex items-center gap-1"><span class="material-symbols-outlined text-[10px]">check_circle</span> OPTIMIZED</span>
+<span class="text-micro-tag font-code-terminal text-on-surface-variant">AUTO-SCALE: ENABLED</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full z-50 md:hidden backdrop-blur-md bg-glass-bg border-t border-outline-variant flex justify-around items-center h-16 px-4 shadow-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-micro-tag text-micro-tag">DASHBOARD</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 scale-110">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-micro-tag text-micro-tag">TOPOLOGY</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-micro-tag text-micro-tag">NODES</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-micro-tag text-micro-tag">CONFIG</span>
+</div>
+</nav>
+<script>
+        // Micro-interaction: Randomize pulse speeds
+        document.querySelectorAll('.flow-line').forEach(line => {
+            line.style.animationDuration = (Math.random() * 5 + 2) + 's';
+        });
+
+        // Simple terminal log simulator
+        const terminal = document.querySelector('.terminal-scroll');
+        const logs = [
+            { type: 'error', msg: '[FAIL] msg_id: nd_99210 - Stay -> Notif_Hub (Timeout)' },
+            { type: 'info', msg: '[LOG] Attempting automated retry for nd_99210...' },
+            { type: 'warn', msg: '[WARN] Consumer AI_ENGINE lagging by 400ms' },
+            { type: 'info', msg: '[LOG] Heartbeat received from Wholesale_Node_B' }
+        ];
+
+        setInterval(() => {
+            const log = logs[Math.floor(Math.random() * logs.length)];
+            const p = document.createElement('p');
+            p.className = log.type === 'error' ? 'text-error' : (log.type === 'warn' ? 'text-tertiary' : 'text-on-surface-variant opacity-60');
+            p.textContent = log.msg;
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
+            if(terminal.children.length > 30) terminal.removeChild(terminal.children[0]);
+        }, 3000);
+    </script>
+</body></html>

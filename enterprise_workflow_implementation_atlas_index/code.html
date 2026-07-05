@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaDeals Enterprise Workflow Implementation Atlas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .node-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1px;
+            background-color: #3b4b37; /* Outline Variant as Grid Line */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #051424; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; }
+        ::-webkit-scrollbar-thumb:hover { background: #84967e; }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#0d1c2d",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-container": "#122131",
+                    "inverse-primary": "#006e16",
+                    "on-surface-variant": "#b9ccb2",
+                    "primary-container": "#00ff41",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-error-container": "#ffdad6",
+                    "error-container": "#93000a",
+                    "background": "#051424",
+                    "surface": "#051424",
+                    "surface-container-lowest": "#010f1f",
+                    "tertiary": "#fff6ff",
+                    "surface-variant": "#273647",
+                    "on-tertiary-container": "#862ed4",
+                    "on-primary-fixed-variant": "#00530e",
+                    "inverse-surface": "#d4e4fa",
+                    "secondary-container": "#0043eb",
+                    "tertiary-fixed": "#f0dbff",
+                    "inverse-on-surface": "#233143",
+                    "primary-fixed": "#72ff70",
+                    "on-secondary-fixed": "#001356",
+                    "primary": "#ebffe2",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-bright": "#2c3a4c",
+                    "on-primary-fixed": "#002203",
+                    "error": "#ffb4ab",
+                    "on-primary": "#003907",
+                    "on-background": "#d4e4fa",
+                    "outline": "#84967e",
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-container-highest": "#273647",
+                    "outline-variant": "#3b4b37",
+                    "secondary-fixed": "#dde1ff",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-error": "#690005",
+                    "primary-fixed-dim": "#00e639",
+                    "on-primary-container": "#007117",
+                    "on-surface": "#d4e4fa",
+                    "surface-dim": "#051424",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary": "#490080",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-tint": "#00e639",
+                    "on-secondary": "#002388"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "stack-gap": "4px",
+                    "grid-unit": "8px",
+                    "lane-margin": "32px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", { "lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                    "code-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                    "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                    "code-xs": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                    "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                    "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased overflow-hidden flex flex-col h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-12 px-lane-margin w-full fixed top-0 z-50 border-b border-outline-variant bg-background">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">IMPLEMENTATION_ATLAS_v2</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4 items-center">
+<span class="text-label-caps font-label-caps text-primary-fixed font-bold cursor-pointer">SYSTEM_OVERVIEW</span>
+<span class="text-label-caps font-label-caps text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer px-2 py-1 rounded">HEALTH_METRICS</span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- Side Navigation Drawer -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 flex flex-col pt-stack-gap border-r border-outline-variant bg-surface-container-low hidden md:flex">
+<div class="px-6 py-4">
+<h2 class="font-label-caps text-label-caps text-on-surface uppercase opacity-50 tracking-widest">MODULE_REGISTRY</h2>
+</div>
+<nav class="flex-1 overflow-y-auto px-2 space-y-1">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed cursor-default">
+<span class="material-symbols-outlined text-[20px]" data-icon="inventory_2">inventory_2</span>
+<span class="font-code-sm text-code-sm">Inventory_Flow</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-code-sm text-code-sm">Order_Lifecycle</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="payments">payments</span>
+<span class="font-code-sm text-code-sm">Payment_Gateway</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="history_edu">history_edu</span>
+<span class="font-code-sm text-code-sm">Audit_Logs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px]" data-icon="hub">hub</span>
+<span class="font-code-sm text-code-sm">n8n_Connectors</span>
+</div>
+</nav>
+<div class="p-4 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-2">
+<span class="text-code-xs font-code-xs text-on-surface-variant">CPU_LOAD</span>
+<span class="text-code-xs font-code-xs text-primary-fixed">24%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed h-full w-[24%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="mt-12 ml-0 md:ml-64 flex-1 flex flex-col overflow-hidden relative">
+<!-- Search & Filter Bar -->
+<div class="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-lane-margin py-6 border-b border-outline-variant space-y-4">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex-1 max-w-2xl">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-2">FILTER_BY_DOMAIN</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full bg-surface-container border border-outline-variant rounded px-10 py-2.5 font-code-sm text-code-sm text-on-surface focus:border-primary-fixed focus:ring-0 placeholder:opacity-30" placeholder="QUERY_WORKFLOW_ID_OR_NAMESPACE..." type="text"/>
+</div>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="px-3 py-1 bg-surface-container-highest text-primary-fixed font-code-xs text-code-xs border border-primary-fixed/30 hover:bg-primary-fixed/10 transition-colors uppercase">ALL_MODULES</button>
+<button class="px-3 py-1 bg-surface-container text-on-surface-variant font-code-xs text-code-xs border border-outline-variant hover:border-primary-fixed/50 transition-colors uppercase">CORE</button>
+<button class="px-3 py-1 bg-surface-container text-on-surface-variant font-code-xs text-code-xs border border-outline-variant hover:border-primary-fixed/50 transition-colors uppercase">LOGISTICS</button>
+<button class="px-3 py-1 bg-surface-container text-on-surface-variant font-code-xs text-code-xs border border-outline-variant hover:border-primary-fixed/50 transition-colors uppercase">COMMERCE</button>
+</div>
+</div>
+</div>
+<!-- Scrollable Workflow Canvas -->
+<div class="flex-1 overflow-y-auto px-lane-margin py-8">
+<div class="space-y-12">
+<!-- Category: CORE PLATFORM -->
+<section>
+<div class="flex items-center gap-4 mb-4">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="database">database</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">CORE PLATFORM (001-010)</h3>
+<div class="flex-1 h-px bg-outline-variant"></div>
+<span class="text-code-xs font-code-xs text-on-surface-variant opacity-50">STABLE_BUILD_V2.1</span>
+</div>
+<div class="node-grid">
+<!-- Workflow Card Loop Start -->
+<div class="bg-surface-container-lowest p-4 border-l border-primary-fixed hover:bg-surface-container-high transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-code-sm text-code-sm text-primary-fixed">WF-001</span>
+<span class="px-2 py-0.5 bg-primary-container/20 text-primary-fixed font-label-caps text-[9px] border border-primary-fixed/20">PROD</span>
+</div>
+<h4 class="font-label-caps text-label-caps text-on-surface group-hover:text-primary transition-colors">AUTH_GATEWAY_V3</h4>
+<div class="mt-4 flex items-center justify-between">
+<div class="flex gap-1">
+<div class="w-1 h-1 bg-primary-fixed"></div>
+<div class="w-1 h-1 bg-primary-fixed"></div>
+<div class="w-1 h-1 bg-primary-fixed"></div>
+</div>
+<span class="text-code-xs font-code-xs text-on-surface-variant">LATENCY: 12ms</span>
+</div>
+</div>
+<!-- Generating more items with logic -->
+<script>
+                            const categories = [
+                                { name: "CORE PLATFORM", range: [2, 10], status: "PROD", color: "border-primary-fixed" },
+                                { name: "COMMERCE", range: [11, 18], status: "PROD", color: "border-primary-fixed" },
+                                { name: "LOGISTICS & MOBILITY", range: [19, 26], status: "STAGE", color: "border-secondary-container" },
+                                { name: "SERVICES & PROPERTY", range: [27, 32], status: "PROD", color: "border-primary-fixed" },
+                                { name: "FUTURE MODULES", range: [33, 36], status: "DISABLED", color: "border-error/30" },
+                                { name: "ECOSYSTEM OPERATIONS", range: [37, 40], status: "PROD", color: "border-primary-fixed" }
+                            ];
+
+                            const workflowTitles = [
+                                "USER_ID_ROTATOR", "LEDGER_SNAPSHOT", "API_THROTTLE_LLM", "RBAC_RECURSIVE_SYNC", "EVENT_BUS_REPLICATOR", "CACHE_INVALIDATION", "SECRET_VAULT_PROX", "METRIC_AGGREGATOR", "TRACING_COLLECTOR",
+                                "CART_STAGING_ENGINE", "PAYMENT_ROUTING_AI", "PROMO_ENGINE_V5", "INVENTORY_RESERVATION", "ABANDONED_CHECKOUT", "MULTI_CURRENCY_CONV", "TAX_CALC_GLOBAL", "REFUND_ORCHESTRATOR",
+                                "RIDE_MATCH_OPTIMIZER", "GEO_FENCE_VALIDATOR", "FLEET_TELEMETRY", "DISPATCH_AUTO_PILOT", "LAST_MILE_ROUTING", "DRIVER_PAYOUT_LOGIC", "ETA_PREDICTION_ML", "VEHICLE_HEALTH_MON",
+                                "REAL_ESTATE_SCRAPER", "BOOKING_CONCURRENCY", "MAINTENANCE_TICKET", "PROPERTY_VAL_ENGINE", "LEASE_AGREEMENT_GEN", "SMART_LOCK_BRIDGE",
+                                "BLOCKCHAIN_SETTLE", "VR_PROPERTY_TOUR", "PREDICTIVE_MAINT", "GEN_AI_ADS",
+                                "HEALTH_CHECK_CRON", "AUDIT_PIPE_S3", "ALERT_ESCALATION", "DASHBOARD_RENDER_V2"
+                            ];
+
+                            let currentWf = 2;
+                            // Helper to render dynamic content
+                            document.write(categories.map((cat, catIdx) => `
+                                ${catIdx > 0 ? `
+                                <section class="mt-12">
+                                    <div class="flex items-center gap-4 mb-4">
+                                        <span class="material-symbols-outlined text-on-surface-variant" data-icon="grid_view">grid_view</span>
+                                        <h3 class="font-headline-md text-headline-md text-on-surface font-bold uppercase">${cat.name} (${String(cat.range[0]).padStart(3, '0')}-${String(cat.range[1]).padStart(3, '0')})</h3>
+                                        <div class="flex-1 h-px bg-outline-variant"></div>
+                                        <span class="text-code-xs font-code-xs text-on-surface-variant opacity-50">${cat.status === 'DISABLED' ? 'RESERVED_NODE' : 'ACTIVE_LOGIC'}</span>
+                                    </div>
+                                    <div class="node-grid">
+                                ` : ''}
+                                ${workflowTitles.slice(cat.range[0]-1, cat.range[1]).map((title, i) => `
+                                    <div class="bg-surface-container-lowest p-4 border-l ${cat.color} ${cat.status === 'DISABLED' ? 'opacity-40 grayscale' : 'hover:bg-surface-container-high'} transition-colors group cursor-pointer">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="font-code-sm text-code-sm ${cat.status === 'DISABLED' ? 'text-on-surface-variant' : 'text-primary-fixed'}">WF-${String(cat.range[0] + i).padStart(3, '0')}</span>
+                                            <span class="px-2 py-0.5 ${cat.status === 'PROD' ? 'bg-primary-container/20 text-primary-fixed border-primary-fixed/20' : cat.status === 'STAGE' ? 'bg-secondary-container/20 text-secondary-fixed border-secondary-fixed/20' : 'bg-error-container/20 text-error border-error/20'} font-label-caps text-[9px] border uppercase">${cat.status}</span>
+                                        </div>
+                                        <h4 class="font-label-caps text-label-caps text-on-surface group-hover:text-primary transition-colors">${title}</h4>
+                                        <div class="mt-4 flex items-center justify-between">
+                                            <div class="flex gap-1">
+                                                <div class="w-1 h-1 ${cat.status === 'DISABLED' ? 'bg-outline' : 'bg-primary-fixed'}"></div>
+                                                <div class="w-1 h-1 ${cat.status === 'DISABLED' ? 'bg-outline' : 'bg-primary-fixed'}"></div>
+                                                <div class="w-1 h-1 ${cat.status === 'DISABLED' ? 'bg-outline' : 'bg-outline-variant'}"></div>
+                                            </div>
+                                            <span class="text-code-xs font-code-xs text-on-surface-variant">THREADS: ${Math.floor(Math.random() * 12) + 2}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                ${catIdx > 0 ? `</div></section>` : ''}
+                            `).join(''));
+                        </script>
+</div>
+</section>
+</div>
+<!-- Bottom Spacing for Nav -->
+<div class="h-24"></div>
+</div>
+<!-- Bottom NavBar Overlay -->
+<div class="fixed bottom-0 left-0 w-full flex justify-center pb-4 z-50 pointer-events-none">
+<nav class="bg-surface-container-highest border border-outline-variant w-fit rounded-full flex shadow-lg pointer-events-auto">
+<div class="text-primary-fixed bg-surface-container-high rounded-full p-2 m-1 scale-95 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="zoom_in">zoom_in</span>
+</div>
+<div class="text-on-surface-variant p-2 m-1 hover:text-primary transition-colors scale-95 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="zoom_out">zoom_out</span>
+</div>
+<div class="text-on-surface-variant p-2 m-1 hover:text-primary transition-colors scale-95 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="grid_4x4">grid_4x4</span>
+</div>
+<div class="text-on-surface-variant p-2 m-1 hover:text-primary transition-colors scale-95 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="file_download">file_download</span>
+</div>
+</nav>
+</div>
+</main>
+<!-- Context Information Sidebar (Optional Task Focus) -->
+<aside class="fixed right-0 top-12 h-[calc(100vh-48px)] w-80 bg-surface-container border-l border-outline-variant hidden xl:flex flex-col">
+<div class="p-6">
+<h5 class="text-label-caps font-label-caps text-primary-fixed mb-4">NODE_INSPECTOR</h5>
+<div class="aspect-video bg-surface-container-lowest border border-outline-variant mb-4 flex items-center justify-center relative overflow-hidden">
+<div class="w-full h-full bg-cover bg-center opacity-40" data-alt="A macro close-up of a high-tech computer circuit board with glowing terminal green energy pulses traveling through silicon traces. The image is shot with a shallow depth of field, highlighting the intricate engineering and digital-authority aesthetic. Dark slate and deep black dominate the color palette, with sharp neon green accents reflecting off metallic components." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCgDcSsHgCFl6eksTv7vYXk18q-2ypMpN90vEOFVN1qMfhwiaO5jKGZR00LwqZW937dacGZ-vSwvovdWdA7sm4j_W4IlCDH1G5rYOB9vfJ_4UA6FStyZcN98fuEHk9EXpI6jWq8n1qkDWkBWJfatq10ZT-27H5G8cbeyiB1gG1g3I66TxsZNw5LDu_G86jabUx1BJqk8evWH-aDCUqEbktTJeBN_MCKYDeeZDpbiJal5hww9B2gJGJfjuRyWnVx5QSOq9_FX5YV0BE')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container to-transparent"></div>
+<span class="absolute bottom-2 left-2 text-[10px] font-code-sm text-primary-fixed-dim bg-background/80 px-1">LIVE_TELEMETRY</span>
+</div>
+<div class="space-y-4">
+<div class="p-3 bg-surface-container-low border border-outline-variant rounded">
+<div class="text-code-xs text-on-surface-variant mb-1">SELECTED_ENTITY</div>
+<div class="text-label-caps text-on-surface">WF-001 :: AUTH_GATEWAY</div>
+</div>
+<div class="p-3 bg-surface-container-low border border-outline-variant rounded">
+<div class="text-code-xs text-on-surface-variant mb-1">UPTIME_METRIC</div>
+<div class="text-label-caps text-primary-fixed">99.998% [NOMINAL]</div>
+</div>
+<div class="p-3 bg-surface-container-low border border-outline-variant rounded">
+<div class="text-code-xs text-on-surface-variant mb-1">LAST_DEPLOY</div>
+<div class="text-code-sm text-on-surface">2023-11-24T14:22:01Z</div>
+</div>
+</div>
+<div class="mt-8 space-y-2">
+<div class="text-label-caps text-on-surface-variant opacity-50 uppercase tracking-tighter">Event_Stream</div>
+<div class="space-y-1">
+<div class="flex gap-2 text-[10px] font-code-sm">
+<span class="text-outline">12:01:04</span>
+<span class="text-primary-fixed">OK</span>
+<span class="text-on-surface-variant truncate">Session 88x created</span>
+</div>
+<div class="flex gap-2 text-[10px] font-code-sm">
+<span class="text-outline">12:00:58</span>
+<span class="text-primary-fixed">OK</span>
+<span class="text-on-surface-variant truncate">Handshake complete</span>
+</div>
+<div class="flex gap-2 text-[10px] font-code-sm">
+<span class="text-outline">12:00:32</span>
+<span class="text-error">WARN</span>
+<span class="text-on-surface-variant truncate">Retrying node B7</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 flex flex-col gap-2">
+<button class="w-full py-3 bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps uppercase hover:opacity-90 transition-opacity">REDEPLOY_ALL_MODULES</button>
+<button class="w-full py-2 bg-surface-container-highest text-on-surface font-label-caps text-label-caps uppercase hover:bg-surface-bright transition-colors border border-outline-variant">SYSTEM_DUMP</button>
+</div>
+</aside>
+<!-- Interactive Layer: Hover FX Script -->
+<script>
+        // Simple micro-interaction for cards
+        document.querySelectorAll('.node-grid > div').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                // Future implementation: fetch live telemetry for specific node
+            });
+        });
+    </script>
+</body></html>
