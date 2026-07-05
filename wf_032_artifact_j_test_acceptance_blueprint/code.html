@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ND-REPUTATION-ENGINE:WF-032 | Test &amp; Acceptance Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ebffe2",
+                        "secondary-container": "#0043eb",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "inverse-on-surface": "#233143",
+                        "on-tertiary-container": "#862ed4",
+                        "surface-container": "#122131",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "surface-container-highest": "#273647",
+                        "on-secondary": "#002388",
+                        "primary-container": "#00ff41",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-tint": "#00e639",
+                        "outline": "#84967e",
+                        "primary-fixed": "#72ff70",
+                        "secondary-fixed": "#dde1ff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#00530e",
+                        "surface-dim": "#051424",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-container-lowest": "#010f1f",
+                        "outline-variant": "#3b4b37",
+                        "tertiary": "#fff6ff",
+                        "on-error": "#690005",
+                        "on-secondary-container": "#c6ceff",
+                        "on-primary": "#003907",
+                        "surface-variant": "#273647",
+                        "primary-fixed-dim": "#00e639",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-background": "#d4e4fa",
+                        "surface-container-low": "#0d1c2d",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#490080",
+                        "background": "#051424",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-high": "#1c2b3c",
+                        "surface-bright": "#2c3a4c",
+                        "secondary": "#b8c3ff",
+                        "on-primary-container": "#007117",
+                        "inverse-primary": "#006e16",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-primary-fixed": "#002203",
+                        "on-surface": "#d4e4fa",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-secondary-fixed": "#001356",
+                        "surface": "#051424",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #3b4b37;
+            z-index: -1;
+        }
+        .connector-h::after { height: 1px; width: 24px; top: 50%; right: -24px; }
+        .connector-v::after { width: 1px; height: 24px; left: 50%; bottom: -24px; }
+        
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #010f1f; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; }
+        
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(15, 15, 15, 0.8);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- TOP APP BAR -->
+<header class="w-full sticky top-0 bg-background dark:bg-background border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps text-primary tracking-tighter">ND-REPUTATION-ENGINE:WF-032</h1>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<nav class="flex gap-4">
+<button class="px-3 py-1 font-code-sm text-code-sm text-primary-container border-b border-primary-fixed cursor-pointer transition-colors">ACCEPTANCE_PROTOCOL</button>
+<button class="px-3 py-1 font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer">VERIFICATION_SUITE</button>
+<button class="px-3 py-1 font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer">LOG_ARCHIVE</button>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex min-h-screen">
+<!-- NAVIGATION DRAWER (SIDE) -->
+<aside class="hidden md:flex flex-col gap-stack-gap p-grid-unit h-screen w-64 border-r border-outline-variant bg-surface-container-lowest sticky top-16">
+<div class="p-4 mb-4">
+<h2 class="font-label-caps text-label-caps text-on-surface">SYSTEM_HIERARCHY</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer">
+<span class="material-symbols-outlined text-lg" data-icon="account_tree">account_tree</span>
+<span>NODES_MAP</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer">
+<span class="material-symbols-outlined text-lg" data-icon="receipt_long">receipt_long</span>
+<span>LOG_STREAM</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded font-code-sm text-code-sm bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed transition-all cursor-pointer">
+<span class="material-symbols-outlined text-lg" data-icon="verified_user">verified_user</span>
+<span>TRUST_SCORES</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer">
+<span class="material-symbols-outlined text-lg" data-icon="rule">rule</span>
+<span>MOD_QUEUE</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer">
+<span class="material-symbols-outlined text-lg" data-icon="history">history</span>
+<span>ARCHIVE</span>
+</a>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-outline">ENGINE_STATUS: NOMINAL</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container w-3/4 h-full"></div>
+</div>
+</div>
+</aside>
+<!-- MAIN CONTENT CANVAS -->
+<main class="flex-1 p-lane-margin overflow-x-auto">
+<!-- HEADER SECTION -->
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-outline-variant text-primary font-code-xs text-code-xs rounded">DOCUMENT: J-MATRIX</span>
+<span class="text-outline font-code-xs text-code-xs uppercase tracking-widest">Version 4.02.1</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-primary">Test &amp; Acceptance Blueprint</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-2">Comprehensive quality matrix for reputation logic and trust-score algorithmic validation. This blueprint maps logical assertions to technical test suites.</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high hover:bg-surface-container-highest text-primary border border-outline-variant px-4 py-2 font-code-sm text-code-sm flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span> EXPORT_PDF
+                    </button>
+<button class="bg-primary-container hover:bg-primary-fixed text-on-primary-container px-4 py-2 font-code-sm text-code-sm flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="play_arrow">play_arrow</span> RUN_ALL_TESTS
+                    </button>
+</div>
+</div>
+<!-- QUALITY MATRIX GRID (Technical Style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- COLUMN 1: CORE LOGIC -->
+<div class="space-y-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="fact_check">fact_check</span>
+<h3 class="font-headline-md text-headline-md text-primary">Acceptance Criteria</h3>
+</div>
+<!-- Criterion Node -->
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-none relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-outline uppercase">AC-01</span>
+<span class="material-symbols-outlined text-primary-container text-xs" data-icon="check_circle">check_circle</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Deterministic Scoring</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Given identical inputs, the engine must produce bit-exact reputation outputs across all nodes.</p>
+<div class="mt-4 pt-4 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs text-outline">Status: PASS</span>
+<span class="font-code-xs text-code-xs text-primary-container">LOG: 0x2A...</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-none relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-outline uppercase">AC-02</span>
+<span class="material-symbols-outlined text-primary-container text-xs" data-icon="check_circle">check_circle</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Latency Threshold</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Final score calculation must resolve in &lt;150ms for complex graph traversals.</p>
+<div class="mt-4 pt-4 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs text-outline">Status: PASS</span>
+<span class="font-code-xs text-code-xs text-primary-container">AVG: 89ms</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-none relative">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-outline uppercase">AC-03</span>
+<span class="material-symbols-outlined text-secondary text-xs" data-icon="pending">pending</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">Data Persistence</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Verify state atomicity during high-concurrency write operations to the ledger.</p>
+<div class="mt-4 pt-4 border-t border-outline-variant flex justify-between">
+<span class="font-code-xs text-code-xs text-secondary">Status: QUEUED</span>
+<span class="font-code-xs text-code-xs text-outline">WAITING</span>
+</div>
+</div>
+</div>
+<!-- COLUMN 2: TEST SUITES -->
+<div class="space-y-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="biotech">biotech</span>
+<h3 class="font-headline-md text-headline-md text-primary">Verification Tests</h3>
+</div>
+<div class="bg-surface-container-highest border border-primary-container p-4 rounded-none">
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-label-caps text-label-caps text-primary">Review Tests</h4>
+<span class="material-symbols-outlined text-primary-container" data-icon="bolt">bolt</span>
+</div>
+<ul class="space-y-2 font-code-xs text-code-xs text-on-surface-variant">
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-primary-container"></span> Syntax Validation: OK</li>
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-primary-container"></span> Cross-Reference check: OK</li>
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-primary-container"></span> Author ID integrity: OK</li>
+</ul>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-none">
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-label-caps text-label-caps text-on-surface">Rating Tests</h4>
+<span class="material-symbols-outlined text-outline" data-icon="equalizer">equalizer</span>
+</div>
+<ul class="space-y-2 font-code-xs text-code-xs text-on-surface-variant">
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-outline"></span> Weighted Average Calc: 100%</li>
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-outline"></span> Decay function (7d): 100%</li>
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-outline"></span> Deviation detection: 98.4%</li>
+</ul>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-none">
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-label-caps text-label-caps text-on-surface">Moderation Tests</h4>
+<span class="material-symbols-outlined text-outline" data-icon="gavel">gavel</span>
+</div>
+<ul class="space-y-2 font-code-xs text-code-xs text-on-surface-variant">
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-outline"></span> Manual Override Flow: PASS</li>
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-outline"></span> Shadow Ban Logic: PASS</li>
+<li class="flex items-center gap-2"><span class="w-1 h-1 bg-outline"></span> Escalation Triggers: PASS</li>
+</ul>
+</div>
+</div>
+<!-- COLUMN 3: SECURITY & FRAUD -->
+<div class="space-y-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="security">security</span>
+<h3 class="font-headline-md text-headline-md text-primary">Integrity Shield</h3>
+</div>
+<div class="bg-surface-container-low border-l-4 border-error p-4 rounded-none">
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-label-caps text-label-caps text-error">Spam &amp; Fraud Tests</h4>
+</div>
+<div class="space-y-4">
+<div>
+<span class="font-code-xs text-code-xs text-outline block mb-1">Bot Patterns (Cluster A)</span>
+<div class="w-full bg-surface-container h-2 flex">
+<div class="bg-error w-5/6 h-full"></div>
+</div>
+</div>
+<div>
+<span class="font-code-xs text-code-xs text-outline block mb-1">Sybil Attack Resistance</span>
+<div class="w-full bg-surface-container h-2 flex">
+<div class="bg-primary-container w-full h-full"></div>
+</div>
+</div>
+<div class="flex justify-between items-center bg-error-container/20 p-2 border border-error/30">
+<span class="font-code-xs text-code-xs text-error">Anomalous Spike detected</span>
+<span class="material-symbols-outlined text-error text-xs" data-icon="report">report</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-none">
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-label-caps text-label-caps text-on-surface">Appeal Tests</h4>
+<span class="material-symbols-outlined text-outline" data-icon="history_edu">history_edu</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-4">Validating the re-score pipeline after a moderation challenge is upheld.</p>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container p-2 text-center border border-outline-variant">
+<span class="block font-code-sm text-code-sm text-primary">99.8%</span>
+<span class="block font-code-xs text-code-xs text-outline">SUCCESS</span>
+</div>
+<div class="bg-surface-container p-2 text-center border border-outline-variant">
+<span class="block font-code-sm text-code-sm text-primary">12.2s</span>
+<span class="block font-code-xs text-code-xs text-outline">AVG TIME</span>
+</div>
+</div>
+</div>
+</div>
+<!-- COLUMN 4: INFRASTRUCTURE -->
+<div class="space-y-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="storage">storage</span>
+<h3 class="font-headline-md text-headline-md text-primary">Database &amp; API</h3>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-none">
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-label-caps text-label-caps text-on-surface">API Endpoint Validation</h4>
+</div>
+<div class="space-y-2 font-code-xs text-code-xs">
+<div class="flex justify-between py-1 border-b border-outline-variant">
+<span class="text-outline">GET /v1/reputation</span>
+<span class="text-primary-container">200 OK</span>
+</div>
+<div class="flex justify-between py-1 border-b border-outline-variant">
+<span class="text-outline">POST /v1/action</span>
+<span class="text-primary-container">201 CREATED</span>
+</div>
+<div class="flex justify-between py-1 border-b border-outline-variant">
+<span class="text-outline">PATCH /v1/trust</span>
+<span class="text-error">503 DOWN</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-none">
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-label-caps text-label-caps text-on-surface">Database Validation</h4>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container" data-icon="database">database</span>
+<div>
+<span class="block font-code-sm text-code-sm text-on-surface">Schema Synchronicity</span>
+<span class="block font-code-xs text-code-xs text-outline">PostgreSQL 15.2 vs GraphQL Mesh</span>
+</div>
+</div>
+<div class="h-1 bg-surface-container rounded-full mt-2">
+<div class="h-full bg-primary-container w-[100%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- CHECKLISTS SECTION -->
+<div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- DEV CHECKLIST -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6">
+<h4 class="font-label-caps text-label-caps text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="developer_mode">developer_mode</span> DEVELOPER_CHECKLIST
+                    </h4>
+<ul class="space-y-3 font-code-sm text-code-sm text-on-surface-variant">
+<li class="flex items-start gap-3">
+<input checked="" class="mt-1 bg-transparent border-primary text-primary focus:ring-0" type="checkbox"/>
+<span>Unit test coverage &gt; 95% for core arithmetic.</span>
+</li>
+<li class="flex items-start gap-3">
+<input checked="" class="mt-1 bg-transparent border-primary text-primary focus:ring-0" type="checkbox"/>
+<span>Integration stubs for Mod-Queue established.</span>
+</li>
+<li class="flex items-start gap-3">
+<input class="mt-1 bg-transparent border-outline text-primary focus:ring-0" type="checkbox"/>
+<span>Stress-testing for 50k concurrent writes.</span>
+</li>
+<li class="flex items-start gap-3">
+<input class="mt-1 bg-transparent border-outline text-primary focus:ring-0" type="checkbox"/>
+<span>Documentation of scoring constants finalized.</span>
+</li>
+</ul>
+</div>
+<!-- QA CHECKLIST -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6">
+<h4 class="font-label-caps text-label-caps text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="rule">rule</span> QA_CHECKLIST
+                    </h4>
+<ul class="space-y-3 font-code-sm text-code-sm text-on-surface-variant">
+<li class="flex items-start gap-3">
+<input checked="" class="mt-1 bg-transparent border-primary text-primary focus:ring-0" type="checkbox"/>
+<span>Regression test on previous bug ND-401.</span>
+</li>
+<li class="flex items-start gap-3">
+<input class="mt-1 bg-transparent border-outline text-primary focus:ring-0" type="checkbox"/>
+<span>Boundary value analysis for Trust Scores (0-100).</span>
+</li>
+<li class="flex items-start gap-3">
+<input checked="" class="mt-1 bg-transparent border-primary text-primary focus:ring-0" type="checkbox"/>
+<span>End-to-end user flow: Review to Reward.</span>
+</li>
+<li class="flex items-start gap-3">
+<input class="mt-1 bg-transparent border-outline text-primary focus:ring-0" type="checkbox"/>
+<span>Browser compatibility across engine UI.</span>
+</li>
+</ul>
+</div>
+<!-- RELEASE CHECKLIST -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6">
+<h4 class="font-label-caps text-label-caps text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="rocket_launch">rocket_launch</span> RELEASE_CHECKLIST
+                    </h4>
+<ul class="space-y-3 font-code-sm text-code-sm text-on-surface-variant">
+<li class="flex items-start gap-3">
+<input class="mt-1 bg-transparent border-outline text-primary focus:ring-0" type="checkbox"/>
+<span>Canary deployment strategy finalized.</span>
+</li>
+<li class="flex items-start gap-3">
+<input checked="" class="mt-1 bg-transparent border-primary text-primary focus:ring-0" type="checkbox"/>
+<span>Rollback protocol (Artifact 032-B) verified.</span>
+</li>
+<li class="flex items-start gap-3">
+<input class="mt-1 bg-transparent border-outline text-primary focus:ring-0" type="checkbox"/>
+<span>Security audit sign-off (external).</span>
+</li>
+<li class="flex items-start gap-3">
+<input class="mt-1 bg-transparent border-outline text-primary focus:ring-0" type="checkbox"/>
+<span>Stakeholder acceptance of J-Matrix results.</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- DATA VISUALIZATION FOOTER -->
+<div class="mt-12 p-6 bg-surface-container-low border border-outline-variant flex flex-col md:flex-row items-center gap-8">
+<div class="flex-1 w-full">
+<div class="flex justify-between mb-2">
+<span class="font-label-caps text-label-caps text-outline">TOTAL_RELIABILITY_INDEX</span>
+<span class="font-code-sm text-code-sm text-primary-container">94.8% COMPLETE</span>
+</div>
+<div class="w-full h-8 bg-surface-container-highest relative overflow-hidden">
+<div class="absolute inset-0 flex">
+<div class="h-full bg-primary-container/80 w-[45%] border-r border-background"></div>
+<div class="h-full bg-primary-container/60 w-[30%] border-r border-background"></div>
+<div class="h-full bg-primary-container/40 w-[15%] border-r border-background"></div>
+<div class="h-full bg-surface-container w-[10%]"></div>
+</div>
+</div>
+<div class="flex justify-between mt-2 font-code-xs text-code-xs text-outline">
+<span>UNIT_TESTS</span>
+<span>INTEGRATION</span>
+<span>STRESS</span>
+<span>PENDING</span>
+</div>
+</div>
+<div class="w-full md:w-64">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-outline">ERRORS</span>
+<span class="font-code-xs text-code-xs text-error">03 CRITICAL</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-outline">WARNINGS</span>
+<span class="font-code-xs text-code-xs text-secondary-fixed-dim">12 MINOR</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-outline">COVERAGE</span>
+<span class="font-code-xs text-code-xs text-primary">88.4%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- SPACING FOR BOTTOM NAV -->
+<div class="h-20 md:hidden"></div>
+</main>
+</div>
+<!-- BOTTOM NAV BAR (MOBILE) -->
+<nav class="fixed bottom-0 w-full bg-surface-container-low dark:bg-surface-container-low border-t border-outline-variant flex justify-around items-center h-12 md:hidden z-50">
+<span class="material-symbols-outlined text-outline hover:text-primary active:scale-95 transition-all cursor-pointer" data-icon="analytics">analytics</span>
+<span class="material-symbols-outlined text-primary-container scale-110 active:scale-95 transition-all cursor-pointer" data-icon="security" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="material-symbols-outlined text-outline hover:text-primary active:scale-95 transition-all cursor-pointer" data-icon="hub">hub</span>
+<span class="material-symbols-outlined text-outline hover:text-primary active:scale-95 transition-all cursor-pointer" data-icon="query_stats">query_stats</span>
+</nav>
+<script>
+        // Simple micro-interaction for checklist items
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const parent = this.closest('li');
+                if (this.checked) {
+                    parent.classList.add('opacity-50');
+                    this.classList.replace('border-outline', 'border-primary');
+                } else {
+                    parent.classList.remove('opacity-50');
+                    this.classList.replace('border-primary', 'border-outline');
+                }
+            });
+        });
+
+        // Simulating telemetry updates
+        setInterval(() => {
+            const status = document.querySelector('.animate-pulse');
+            if (status) {
+                status.classList.toggle('opacity-50');
+            }
+        }, 2000);
+    </script>
+</body></html>

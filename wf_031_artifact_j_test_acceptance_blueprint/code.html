@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-031 // TEST &amp; ACCEPTANCE BLUEPRINT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-border-glow:hover {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.15);
+            border-color: #00e639;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#fff6ff",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary": "#b8c3ff",
+                        "surface-tint": "#00e639",
+                        "on-error": "#690005",
+                        "surface-variant": "#273647",
+                        "on-surface-variant": "#b9ccb2",
+                        "primary": "#ebffe2",
+                        "inverse-on-surface": "#233143",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed-dim": "#00e639",
+                        "secondary-fixed": "#dde1ff",
+                        "on-secondary": "#002388",
+                        "tertiary-fixed": "#f0dbff",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-dim": "#051424",
+                        "on-primary-container": "#007117",
+                        "inverse-surface": "#d4e4fa",
+                        "inverse-primary": "#006e16",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-tertiary-container": "#862ed4",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#0d1c2d",
+                        "surface": "#051424",
+                        "surface-container-highest": "#273647",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-fixed": "#001356",
+                        "primary-fixed": "#72ff70",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-container": "#122131",
+                        "surface-bright": "#2c3a4c",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-primary": "#003907",
+                        "on-background": "#d4e4fa",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary": "#490080",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-tertiary-fixed": "#2c0051",
+                        "primary-container": "#00ff41",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "outline": "#84967e",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#d4e4fa",
+                        "background": "#051424",
+                        "surface-container-high": "#1c2b3c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "lane-margin": "32px",
+                        "stack-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-surface-tint selection:text-surface">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface text-primary dark:text-primary w-full top-0 border-b border-outline-variant border-b border-outline-variant flat no shadows fixed z-50 flex justify-between items-center px-lane-margin h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-surface-tint" data-icon="hub">hub</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8 h-full">
+<a class="font-code-sm text-code-sm h-full flex items-center px-4 text-primary border-b-2 border-primary cursor-pointer active:opacity-80 transition-colors" href="#">QA_SUITE</a>
+<a class="font-code-sm text-code-sm h-full flex items-center px-4 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:opacity-80" href="#">VALIDATION_MAP</a>
+<a class="font-code-sm text-code-sm h-full flex items-center px-4 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:opacity-80" href="#">METRICS</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer hover:text-surface-tint" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer (Modular Registry) -->
+<aside class="bg-surface-container-low dark:bg-surface-container-low h-full w-64 border-r border-outline-variant border-r border-outline-variant flat no shadows fixed left-0 top-16 h-[calc(100vh-64px)] overflow-y-auto hidden lg:block z-40 custom-scrollbar">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary">MODULE_REGISTRY</span>
+</div>
+<nav class="flex flex-col py-2">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+<span class="font-code-sm text-code-sm">QA_Matrix</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-code-sm text-code-sm">API_V_Suite</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-code-sm text-code-sm">DB_Validator</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-code-sm text-code-sm">Auth_Audit</span>
+</div>
+<div class="mt-4 px-4 py-2 border-t border-outline-variant opacity-50">
+<span class="font-label-caps text-[9px]">ACTIVE_MONITORS</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 text-on-surface-variant text-[10px] font-code-xs">
+<div class="w-1.5 h-1.5 rounded-full bg-surface-tint status-pulse"></div>
+<span>NODE_01: ONLINE</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 text-on-surface-variant text-[10px] font-code-xs">
+<div class="w-1.5 h-1.5 rounded-full bg-surface-tint status-pulse"></div>
+<span>NODE_02: ONLINE</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-16 pb-20 px-lane-margin min-h-screen">
+<!-- Header Section -->
+<div class="py-8 border-b border-outline-variant mb-node-gutter">
+<div class="flex flex-col md:flex-row justify-between items-end gap-4">
+<div>
+<span class="font-label-caps text-label-caps text-surface-tint uppercase mb-2 block">Artifact J // Engineering Blueprint</span>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight">WF-031 :: TEST &amp; ACCEPTANCE MATRIX</h2>
+</div>
+<div class="flex gap-2">
+<div class="bg-surface-container-high px-3 py-1 rounded border border-outline-variant flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">STATUS:</span>
+<span class="font-code-xs text-code-xs text-surface-tint">READY_FOR_PROD</span>
+</div>
+<div class="bg-surface-container-high px-3 py-1 rounded border border-outline-variant flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">COVERAGE:</span>
+<span class="font-code-xs text-code-xs text-primary">98.4%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento Grid: Verification Suites -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-stack-gap mb-node-gutter">
+<!-- Matrix Column: Search Logic -->
+<div class="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-stack-gap">
+<!-- Keyword Search Node -->
+<div class="bg-surface-container-low border border-outline-variant p-4 node-border-glow transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] text-surface-tint">TS-001</span>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="search">search</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary mb-2">KEYWORD_SEARCH_VAL</h3>
+<p class="font-body-md text-on-surface-variant text-xs mb-4">Verifies exact match, fuzzy matching, and multi-term boolean logic across indexed deal metadata.</p>
+<div class="space-y-1">
+<div class="flex items-center gap-2 text-[10px] font-code-xs text-surface-tint">
+<span class="material-symbols-outlined text-[12px]" data-icon="done">done</span>
+<span>Case Insensitivity</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] font-code-xs text-surface-tint">
+<span class="material-symbols-outlined text-[12px]" data-icon="done">done</span>
+<span>Special Char Handling</span>
+</div>
+</div>
+</div>
+<!-- Semantic Search Node -->
+<div class="bg-surface-container-low border border-outline-variant p-4 node-border-glow transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] text-surface-tint">TS-002</span>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="psychology">psychology</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary mb-2">SEMANTIC_SEARCH_VAL</h3>
+<p class="font-body-md text-on-surface-variant text-xs mb-4">Validates vector embedding recall and intent alignment for natural language queries.</p>
+<div class="space-y-1">
+<div class="flex items-center gap-2 text-[10px] font-code-xs text-surface-tint">
+<span class="material-symbols-outlined text-[12px]" data-icon="done">done</span>
+<span>Vector Similarity (Cos)</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] font-code-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[12px] animate-spin" data-icon="sync">sync</span>
+<span>Context Extraction</span>
+</div>
+</div>
+</div>
+<!-- Recommendation Node -->
+<div class="bg-surface-container-low border border-outline-variant p-4 node-border-glow transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] text-surface-tint">TS-003</span>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary mb-2">RECO_ENGINE_LOGIC</h3>
+<p class="font-body-md text-on-surface-variant text-xs mb-4">Ensures collaborative filtering and content-based recommendations align with user history.</p>
+<div class="bg-surface-container-highest p-2 mt-2 rounded">
+<div class="flex justify-between items-center mb-1">
+<span class="font-code-xs text-[9px]">LATENCY_METRIC</span>
+<span class="font-code-xs text-[9px] text-surface-tint">42ms</span>
+</div>
+<div class="w-full bg-surface h-1 rounded-full overflow-hidden">
+<div class="bg-surface-tint h-full w-[85%]"></div>
+</div>
+</div>
+</div>
+<!-- Ranking Node -->
+<div class="bg-surface-container-low border border-outline-variant p-4 node-border-glow transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-[9px] text-surface-tint">TS-004</span>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="format_list_numbered">format_list_numbered</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary mb-2">RANKING_STABILITY</h3>
+<p class="font-body-md text-on-surface-variant text-xs mb-4">Testing NDCG scores and top-k relevance stability across shifting inventory datasets.</p>
+<div class="flex gap-2 mt-4">
+<span class="bg-surface-tint/10 text-surface-tint border border-surface-tint/30 text-[9px] px-1 font-code-xs">NDCG: 0.92</span>
+<span class="bg-primary/10 text-primary border border-primary/30 text-[9px] px-1 font-code-xs">K-REL: 0.88</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Visual Telemetry -->
+<div class="md:col-span-4 bg-surface-container border border-outline-variant overflow-hidden relative">
+<div class="p-4 border-b border-outline-variant bg-surface-container-high">
+<span class="font-label-caps text-label-caps text-primary">REAL_TIME_VALIDATION_FLOW</span>
+</div>
+<div class="h-64 relative">
+
+<div class="absolute inset-0 flex flex-col justify-center items-center p-6 text-center z-10 pointer-events-none">
+<span class="font-code-xs text-code-xs text-surface-tint mb-2">SCANNING_SUITES...</span>
+<div class="font-code-sm text-code-sm text-primary bg-black/60 px-4 py-2 border border-surface-tint/20 backdrop-blur-sm">
+                            CRC_CHECKSUM: 0x8F22A<br/>
+                            STATUS: VERIFIED
+                        </div>
+</div>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-code-xs">Personalization_T</span>
+<span class="text-[10px] font-code-xs text-surface-tint">PASS</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-code-xs">Permission_Guard</span>
+<span class="text-[10px] font-code-xs text-surface-tint">PASS</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-code-xs">Database_Integrity</span>
+<span class="text-[10px] font-code-xs text-error">FAIL [RETRYING]</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Acceptance Criteria Section (Engineering Blueprint Style) -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-node-gutter mb-node-gutter">
+<!-- Developer Checklist -->
+<div class="border border-outline-variant">
+<div class="bg-surface-container-high px-4 py-2 border-b border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="rule">rule</span>
+<span class="font-label-caps text-label-caps text-primary">DEVELOPER_CHECKLIST_V1.2</span>
+</div>
+<div class="p-4 space-y-4">
+<label class="flex items-start gap-3 group cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-outline-variant text-surface-tint focus:ring-surface-tint rounded-sm" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-primary">API Endpoint Encryption (TLS 1.3)</span>
+<span class="font-code-xs text-[10px] text-on-surface-variant">Ensure all data in transit uses forced HTTPS with modern cipher suites.</span>
+</div>
+</label>
+<label class="flex items-start gap-3 group cursor-pointer">
+<input checked="" class="mt-1 bg-transparent border-outline-variant text-surface-tint focus:ring-surface-tint rounded-sm" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-primary">Rate Limiting Calibration</span>
+<span class="font-code-xs text-[10px] text-on-surface-variant">Verify 429 status code responses for burst traffic above 500 req/sec.</span>
+</div>
+</label>
+<label class="flex items-start gap-3 group cursor-pointer">
+<input class="mt-1 bg-transparent border-outline-variant text-surface-tint focus:ring-surface-tint rounded-sm" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-primary">Schema Migration Audit</span>
+<span class="font-code-xs text-[10px] text-on-surface-variant">Run drift analysis on production vs staging database schemas.</span>
+</div>
+</label>
+<label class="flex items-start gap-3 group cursor-pointer">
+<input class="mt-1 bg-transparent border-outline-variant text-surface-tint focus:ring-surface-tint rounded-sm" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-code-sm text-code-sm text-primary">Caching Invalidation Logic</span>
+<span class="font-code-xs text-[10px] text-on-surface-variant">Confirm Redis PURGE triggers correctly on deal inventory updates.</span>
+</div>
+</label>
+</div>
+</div>
+<!-- QA Regression List -->
+<div class="border border-outline-variant">
+<div class="bg-surface-container-high px-4 py-2 border-b border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="history">history</span>
+<span class="font-label-caps text-label-caps text-primary">QA_REGRESSION_LIST</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-code-xs">
+<thead>
+<tr class="bg-surface-container border-b border-outline-variant">
+<th class="px-4 py-2 text-on-surface-variant">ID</th>
+<th class="px-4 py-2 text-on-surface-variant">SCENARIO</th>
+<th class="px-4 py-2 text-on-surface-variant">RESULT</th>
+<th class="px-4 py-2 text-on-surface-variant">OWNER</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-outline-variant/30">
+<td class="px-4 py-3">RG-901</td>
+<td class="px-4 py-3">Concurrent Auth Login Session Limit</td>
+<td class="px-4 py-3"><span class="text-surface-tint">SUCCESS</span></td>
+<td class="px-4 py-3">QA_A7</td>
+</tr>
+<tr class="border-b border-outline-variant/30">
+<td class="px-4 py-3">RG-902</td>
+<td class="px-4 py-3">Large Payload Search Result Overflow</td>
+<td class="px-4 py-3"><span class="text-surface-tint">SUCCESS</span></td>
+<td class="px-4 py-3">QA_A7</td>
+</tr>
+<tr class="border-b border-outline-variant/30">
+<td class="px-4 py-3">RG-903</td>
+<td class="px-4 py-3">Missing Metadata Filter Exception</td>
+<td class="px-4 py-3"><span class="text-error">FAILED</span></td>
+<td class="px-4 py-3">QA_B2</td>
+</tr>
+<tr class="border-b border-outline-variant/30">
+<td class="px-4 py-3">RG-904</td>
+<td class="px-4 py-3">Cross-Region Latency Handover</td>
+<td class="px-4 py-3"><span class="text-on-surface-variant">PENDING</span></td>
+<td class="px-4 py-3">SYSTEM</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Release Readiness Panel -->
+<div class="bg-surface-container-high border-2 border-surface-tint p-8 flex flex-col md:flex-row items-center gap-8 mb-node-gutter">
+<div class="flex-1">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">RELEASE_READINESS_AUTHORIZATION</h3>
+<p class="font-body-md text-on-surface-variant text-sm">System integrity confirmed. All critical blockers resolved. Deployment signature generated. Readiness score 96/100.</p>
+</div>
+<div class="flex flex-col items-center gap-4 w-full md:w-auto">
+<div class="relative w-24 h-24">
+<svg class="w-full h-full" viewbox="0 0 36 36">
+<circle class="stroke-outline-variant" cx="18" cy="18" fill="none" r="16" stroke-width="2"></circle>
+<circle class="stroke-surface-tint" cx="18" cy="18" fill="none" r="16" stroke-dasharray="96, 100" stroke-linecap="round" stroke-width="2"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-code-sm text-code-sm text-primary">96%</span>
+</div>
+</div>
+<button class="bg-surface-tint text-on-primary-container px-6 py-2 font-label-caps text-label-caps font-bold hover:brightness-110 active:opacity-80 transition-all w-full">DEPLOY_NOW</button>
+</div>
+</div>
+<!-- Technical Telemetry / Visual Accent -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-stack-gap opacity-60">
+<div class="bg-surface-container p-3 border border-outline-variant">
+<div class="font-code-xs text-[10px] text-surface-tint mb-1">CPU_LOAD</div>
+<div class="h-10 bg-surface relative overflow-hidden">
+<div class="absolute bottom-0 left-0 right-0 h-4 bg-surface-tint/20 animate-pulse"></div>
+<div class="absolute inset-0 flex items-end gap-1 px-1">
+<div class="w-2 h-[40%] bg-surface-tint/40"></div>
+<div class="w-2 h-[60%] bg-surface-tint/40"></div>
+<div class="w-2 h-[55%] bg-surface-tint/40"></div>
+<div class="w-2 h-[80%] bg-surface-tint/40"></div>
+<div class="w-2 h-[45%] bg-surface-tint/40"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container p-3 border border-outline-variant">
+<div class="font-code-xs text-[10px] text-surface-tint mb-1">MEM_ALLOC</div>
+<div class="h-10 bg-surface flex items-center justify-center">
+<span class="font-code-sm text-code-sm">12.4 GB / 32 GB</span>
+</div>
+</div>
+<div class="bg-surface-container p-3 border border-outline-variant">
+<div class="font-code-xs text-[10px] text-surface-tint mb-1">API_THROUGHPUT</div>
+<div class="h-10 bg-surface flex items-center justify-center">
+<span class="font-code-sm text-code-sm">4.2k REQ / SEC</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-surface-container-lowest text-on-surface-variant dark:text-on-surface-variant font-code-xs text-code-xs w-full bottom-0 border-t border-outline-variant border-t border-outline-variant flat no shadows fixed bottom-0 w-full flex justify-between items-center px-lane-margin py-stack-gap z-50">
+<div class="flex gap-6">
+<span class="text-surface-tint">SYSTEM_STATUS: OK</span>
+<span>LATENCY: 24ms</span>
+<span class="hidden md:inline">AURA_CORE: ACTIVE</span>
+</div>
+<div class="font-label-caps text-label-caps text-surface-tint hidden md:block">
+            © 2024 NAIJADEALS_ECOSYSTEM // SRV_ID: WF-031
+        </div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-surface-tint status-pulse"></div>
+<span class="uppercase">Signal: Secure</span>
+</div>
+</footer>
+<!-- Bottom Nav for Mobile Only -->
+<nav class="md:hidden fixed bottom-12 left-0 right-0 bg-surface border-t border-outline-variant flex justify-around p-4 z-50">
+<span class="material-symbols-outlined text-primary" data-icon="analytics">analytics</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="bug_report">bug_report</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="rocket_launch">rocket_launch</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="terminal">terminal</span>
+</nav>
+<script>
+        // Micro-interactions for Blueprint Nodes
+        document.querySelectorAll('.node-border-glow').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                const icon = node.querySelector('.material-symbols-outlined');
+                if (icon) icon.classList.add('scale-110', 'text-surface-tint');
+            });
+            node.addEventListener('mouseleave', () => {
+                const icon = node.querySelector('.material-symbols-outlined');
+                if (icon) icon.classList.remove('scale-110', 'text-surface-tint');
+            });
+        });
+
+        // Simulating Telemetry Updates
+        setInterval(() => {
+            const lat = Math.floor(Math.random() * (48 - 20) + 20);
+            const footerLat = document.querySelector('footer div span:nth-child(2)');
+            if (footerLat) footerLat.innerText = `LATENCY: ${lat}ms`;
+        }, 3000);
+    </script>
+</body></html>

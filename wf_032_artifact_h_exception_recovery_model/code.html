@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ND-REPUTATION-ENGINE:WF-032 | Exception &amp; Recovery Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ebffe2",
+                    "secondary-container": "#0043eb",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary-fixed": "#2c0051",
+                    "inverse-on-surface": "#233143",
+                    "on-tertiary-container": "#862ed4",
+                    "surface-container": "#122131",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "surface-container-highest": "#273647",
+                    "on-secondary": "#002388",
+                    "primary-container": "#00ff41",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-tint": "#00e639",
+                    "outline": "#84967e",
+                    "primary-fixed": "#72ff70",
+                    "secondary-fixed": "#dde1ff",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#00530e",
+                    "surface-dim": "#051424",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "surface-container-lowest": "#010f1f",
+                    "outline-variant": "#3b4b37",
+                    "tertiary": "#fff6ff",
+                    "on-error": "#690005",
+                    "on-secondary-container": "#c6ceff",
+                    "on-primary": "#003907",
+                    "surface-variant": "#273647",
+                    "primary-fixed-dim": "#00e639",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-background": "#d4e4fa",
+                    "surface-container-low": "#0d1c2d",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary": "#490080",
+                    "background": "#051424",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-bright": "#2c3a4c",
+                    "secondary": "#b8c3ff",
+                    "on-primary-container": "#007117",
+                    "inverse-primary": "#006e16",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-primary-fixed": "#002203",
+                    "on-surface": "#d4e4fa",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-secondary-fixed": "#001356",
+                    "surface": "#051424",
+                    "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .connector-line {
+            background: repeating-linear-gradient(90deg, #3b4b37 0, #3b4b37 4px, transparent 4px, transparent 8px);
+        }
+        .connector-vertical {
+            background: repeating-linear-gradient(180deg, #3b4b37 0, #3b4b37 4px, transparent 4px, transparent 8px);
+        }
+        .node-port {
+            width: 6px;
+            height: 6px;
+            background: #00ff41;
+            border-radius: 50%;
+            position: absolute;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex overflow-hidden h-screen font-body-md">
+<!-- Sidebar Navigation -->
+<aside class="h-screen w-64 border-r border-outline-variant bg-surface-container-lowest flex flex-col gap-stack-gap p-grid-unit hidden md:flex">
+<div class="p-4 mb-4">
+<h2 class="font-label-caps text-label-caps text-on-surface tracking-tighter">SYSTEM_HIERARCHY</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">account_tree</span> NODES_MAP
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">receipt_long</span> LOG_STREAM
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed transition-all cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">verified_user</span> TRUST_SCORES
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">rule</span> MOD_QUEUE
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">history</span> ARCHIVE
+            </a>
+</nav>
+</aside>
+<div class="flex-1 flex flex-col relative overflow-hidden">
+<!-- Top App Bar -->
+<header class="w-full sticky top-0 bg-background border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 z-20">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<h1 class="font-headline-md text-headline-md text-primary font-bold tracking-tight">ND-REPUTATION-ENGINE:WF-032</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-4 mr-6">
+<span class="font-code-xs text-code-xs text-outline bg-surface-container px-2 py-1 border border-outline-variant">UPTIME: 1422:04:12</span>
+<span class="font-code-xs text-code-xs text-primary-container bg-surface-container px-2 py-1 border border-outline-variant">STATUS: RESILIENT</span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80 hover:bg-surface-container-highest transition-colors p-2">settings_input_component</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 relative overflow-auto p-lane-margin scrollbar-hide">
+<!-- Exception Visualizer Background Layer -->
+<div class="absolute inset-0 z-0 pointer-events-none opacity-20">
+
+</div>
+<!-- Flow Container -->
+<div class="relative z-10 min-w-[1200px]">
+<!-- Swimlane Headers -->
+<div class="flex mb-12">
+<div class="w-1/4 border-r border-outline-variant px-4 py-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-outline text-sm">search_check</span>
+<span class="font-label-caps text-label-caps text-outline uppercase">Entry Point</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background">Trigger Logic</h3>
+</div>
+<div class="w-1/4 border-r border-outline-variant px-4 py-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-outline text-sm">psychology</span>
+<span class="font-label-caps text-label-caps text-outline uppercase">Evaluation</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background">Failure Analysis</h3>
+</div>
+<div class="w-1/4 border-r border-outline-variant px-4 py-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-outline text-sm">engineering</span>
+<span class="font-label-caps text-label-caps text-outline uppercase">Workflow</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background">Resolution Logic</h3>
+</div>
+<div class="w-1/4 px-4 py-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-outline text-sm">verified</span>
+<span class="font-label-caps text-label-caps text-outline uppercase">Outcome</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background">Final Decision</h3>
+</div>
+</div>
+<!-- Recovery Paths Grid -->
+<div class="space-y-16">
+<!-- Path 1: Spam -->
+<div class="flex items-center relative group">
+<!-- Node 1 -->
+<div class="w-1/4 pr-12">
+<div class="bg-surface-container-lowest border border-primary-container/30 p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-primary-container">E-001</div>
+<h4 class="font-code-sm text-code-sm text-primary mb-2">SPAM_FLAG_DETECTED</h4>
+<p class="text-on-surface-variant text-[11px] leading-tight">High frequency repeated pattern from IP block 192.x.x.x</p>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2 shadow-[0_0_8px_#00ff41]"></div>
+</div>
+</div>
+<!-- Connector -->
+<div class="w-12 h-px connector-line relative">
+<div class="absolute right-0 -top-1 border-t-4 border-b-4 border-l-4 border-transparent border-l-outline-variant"></div>
+</div>
+<!-- Node 2 -->
+<div class="w-1/4 px-12">
+<div class="bg-surface-container border border-outline-variant p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-outline">PROC-A</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">SPAM_REVIEW_QUEUE</h4>
+<div class="flex justify-between items-center mt-2">
+<span class="font-code-xs text-code-xs text-outline">LATENCY: 12ms</span>
+<span class="material-symbols-outlined text-xs text-primary">auto_mode</span>
+</div>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<!-- Connector -->
+<div class="w-12 h-px connector-line relative"></div>
+<!-- Node 3 -->
+<div class="w-1/4 px-12">
+<div class="bg-surface-container-highest border border-secondary-container/50 p-4 relative group-hover:border-primary-fixed transition-colors">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-secondary">ACT-01</div>
+<h4 class="font-code-sm text-code-sm text-secondary mb-2">MODERATION_TASK</h4>
+<p class="text-on-surface-variant text-[11px] leading-tight">Assigned to Level-1 Mod Cluster [Active]</p>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<!-- Outcome -->
+<div class="flex-1 pl-12">
+<div class="flex gap-2">
+<div class="px-3 py-1 border border-outline-variant font-code-xs text-code-xs bg-surface-container-low text-primary-container">PURGE</div>
+<div class="px-3 py-1 border border-outline-variant font-code-xs text-code-xs bg-surface-container-low text-outline">QUARANTINE</div>
+</div>
+</div>
+</div>
+<!-- Path 2: Fraud -->
+<div class="flex items-center relative group">
+<div class="w-1/4 pr-12">
+<div class="bg-surface-container-lowest border border-error/30 p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-error">E-002</div>
+<h4 class="font-code-sm text-code-sm text-error mb-2">FRAUD_ANOMALY</h4>
+<p class="text-on-surface-variant text-[11px] leading-tight">Identity mismatch across 3 distributed ledgers.</p>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2 !bg-error shadow-[0_0_8px_#ffb4ab]"></div>
+</div>
+</div>
+<div class="w-12 h-px connector-line relative"></div>
+<div class="w-1/4 px-12">
+<div class="bg-surface-container border border-outline-variant p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-outline">PROC-B</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">FRAUD_REVIEW_ENGINE</h4>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<div class="w-12 h-px connector-line relative"></div>
+<div class="w-1/4 px-12">
+<div class="bg-surface-container-highest border border-on-secondary-fixed-variant/50 p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-on-secondary-fixed-variant">ACT-02</div>
+<h4 class="font-code-sm text-code-sm text-on-secondary-container mb-2">INVESTIGATION_NODE</h4>
+<p class="text-on-surface-variant text-[11px] leading-tight">Escalated to Compliance Security Unit.</p>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<div class="flex-1 pl-12">
+<div class="flex gap-2">
+<div class="px-3 py-1 border border-outline-variant font-code-xs text-code-xs bg-surface-container-low text-error">BLACKLIST</div>
+<div class="px-3 py-1 border border-outline-variant font-code-xs text-code-xs bg-surface-container-low text-outline">REDACT</div>
+</div>
+</div>
+</div>
+<!-- Path 3: Duplicate -->
+<div class="flex items-center relative group">
+<div class="w-1/4 pr-12">
+<div class="bg-surface-container-lowest border border-on-tertiary-container/30 p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-on-tertiary-container">E-003</div>
+<h4 class="font-code-sm text-code-sm text-tertiary-fixed-dim mb-2">DUPLICATE_ENTRY</h4>
+<p class="text-on-surface-variant text-[11px] leading-tight">Conflict detected: ID #FF21 and #FF22 overlap.</p>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2 !bg-on-tertiary-container shadow-[0_0_8px_#862ed4]"></div>
+</div>
+</div>
+<div class="w-12 h-px connector-line relative"></div>
+<div class="w-1/4 px-12">
+<div class="bg-surface-container border border-outline-variant p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-outline">PROC-C</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">DUPLICATE_REVIEW</h4>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<div class="w-12 h-px connector-line relative"></div>
+<div class="w-1/4 px-12">
+<div class="bg-surface-container-highest border border-outline-variant p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-outline">ACT-03</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">MERGE_LOGIC</h4>
+<p class="text-on-surface-variant text-[11px] leading-tight">Consolidating metadata into primary hash.</p>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<div class="flex-1 pl-12">
+<div class="flex gap-2">
+<div class="px-3 py-1 border border-outline-variant font-code-xs text-code-xs bg-surface-container-low text-on-surface">SYNCHRONIZED</div>
+</div>
+</div>
+</div>
+<!-- Path 4: Appeal (Complex Path) -->
+<div class="flex items-center relative group">
+<div class="w-1/4 pr-12">
+<div class="bg-surface-container-lowest border border-secondary-fixed-dim/30 p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-secondary-fixed-dim">E-004</div>
+<h4 class="font-code-sm text-code-sm text-secondary-fixed-dim mb-2">USER_APPEAL</h4>
+<p class="text-on-surface-variant text-[11px] leading-tight">Ref: TKT-9912. User disputes moderation action.</p>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2 !bg-secondary-fixed-dim shadow-[0_0_8px_#b8c3ff]"></div>
+</div>
+</div>
+<div class="w-12 h-px connector-line relative"></div>
+<div class="w-1/4 px-12">
+<div class="bg-surface-container border border-outline-variant p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-outline">PROC-D</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">ADMIN_REVIEW_STAGING</h4>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<div class="w-12 h-px connector-line relative"></div>
+<div class="w-1/4 px-12">
+<div class="bg-surface-container-highest border border-primary-container/30 p-4 relative">
+<div class="absolute -top-3 left-3 bg-background px-2 font-label-caps text-code-xs text-primary-container">ACT-04</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">DECISION_MATRIX</h4>
+<div class="flex items-center gap-1 mt-2 text-[10px] text-outline">
+<span class="material-symbols-outlined text-[10px]">shield</span>
+                                    HI-TRUST PROTOCOL
+                                </div>
+<div class="node-port -right-1.5 top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<div class="flex-1 pl-12">
+<div class="flex flex-col gap-2">
+<div class="px-3 py-1 border border-outline-variant font-code-xs text-code-xs bg-surface-container-low text-primary-fixed">REINSTATED</div>
+<div class="px-3 py-1 border border-outline-variant font-code-xs text-code-xs bg-surface-container-low text-error">UPHELD</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Summary / Telemetry -->
+<div class="mt-24 border-t border-outline-variant pt-8 grid grid-cols-4 gap-8">
+<div class="bg-surface-container-low p-4 border border-outline-variant">
+<span class="font-label-caps text-code-xs text-outline">RECOVERY_SUCCESS_RATE</span>
+<div class="text-2xl font-bold text-primary mt-1">99.84%</div>
+<div class="w-full h-1 bg-outline-variant mt-2">
+<div class="h-full bg-primary-container w-[99.8%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant">
+<span class="font-label-caps text-code-xs text-outline">AVG_RESOLUTION_TIME</span>
+<div class="text-2xl font-bold text-on-background mt-1">45.2 <span class="text-sm font-normal">ms</span></div>
+<div class="text-[10px] text-primary-container mt-1">OPTIMIZED</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant">
+<span class="font-label-caps text-code-xs text-outline">ACTIVE_EXCEPTIONS</span>
+<div class="text-2xl font-bold text-error mt-1">12</div>
+<div class="text-[10px] text-outline mt-1">QUEUED IN MOD_STAGE</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant">
+<span class="font-label-caps text-code-xs text-outline">SYSTEM_INTEGRITY</span>
+<div class="text-2xl font-bold text-on-tertiary-container mt-1">LOCKED</div>
+<div class="flex gap-1 mt-2">
+<div class="w-2 h-2 bg-primary-container animate-pulse"></div>
+<div class="w-2 h-2 bg-primary-container"></div>
+<div class="w-2 h-2 bg-primary-container"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Bar (Mobile only) -->
+<nav class="fixed bottom-0 w-full flex justify-around items-center h-12 md:hidden bg-surface-container-low border-t border-outline-variant z-30">
+<span class="material-symbols-outlined text-outline hover:text-primary active:scale-95 transition-transform cursor-pointer">analytics</span>
+<span class="material-symbols-outlined text-primary-container scale-110 active:scale-95 transition-transform cursor-pointer">security</span>
+<span class="material-symbols-outlined text-outline hover:text-primary active:scale-95 transition-transform cursor-pointer">hub</span>
+<span class="material-symbols-outlined text-outline hover:text-primary active:scale-95 transition-transform cursor-pointer">query_stats</span>
+</nav>
+</div>
+<!-- Right Interaction Panel (Bento Style) -->
+<aside class="hidden xl:flex flex-col w-80 border-l border-outline-variant bg-surface-container-lowest p-grid-unit gap-stack-gap">
+<div class="p-4 border-b border-outline-variant">
+<h3 class="font-label-caps text-label-caps text-on-surface">TELEMETRY_LOG</h3>
+</div>
+<div class="flex-1 overflow-auto p-2 space-y-2 font-code-xs text-code-xs">
+<div class="p-2 bg-surface-container-high border-l-2 border-primary-container">
+<span class="text-outline">[14:22:01]</span> RECOVERY: Path E-001 routed to MOD_STAGE.
+            </div>
+<div class="p-2 bg-surface-container-high border-l-2 border-error">
+<span class="text-outline">[14:22:05]</span> CRITICAL: Fraud pattern detected in Cluster 4.
+            </div>
+<div class="p-2 bg-surface-container-high border-l-2 border-outline">
+<span class="text-outline">[14:22:09]</span> CACHE: Flushed duplicate queue #441.
+            </div>
+<div class="p-2 bg-surface-container-high border-l-2 border-secondary-container">
+<span class="text-outline">[14:22:12]</span> APPEAL: User #8821 triggered ADMIN_STAGING.
+            </div>
+<!-- More repetitive log items for density -->
+<div class="p-2 bg-surface-container border-l-2 border-outline opacity-50">
+<span class="text-outline">[14:22:15]</span> SYSTEM: Heartbeat nominal.
+            </div>
+</div>
+<div class="p-4 bg-surface-container-highest">
+<div class="w-full h-32 bg-cover mb-4 grayscale opacity-50" data-alt="A macro visualization of complex digital data structures and nodes, rendered in a dark high-tech blueprint style with thin glowing neon green lines and subtle grid patterns. The composition is technical and minimalist, highlighting the beauty of system architecture with deep slate blacks and electric primary accents." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDW2NfaUCzVXEtwYIiYMkny9Pf9Bp3h0g85UlnRPbA8RY-yudzsMop2MfDuGUq8piXDVIckj6SsAF34uGzmulKUJ4zY-P79nIsJFJNmZPqSySRsuQDBHppQ0Bc18cDarj6RF0JYB0mY6OMKVJmcVjuFJinix2DDKkGjQIQ_ll1eIpLkSH2xl36xBAyuf-lllnI01EICI0HBPZNy_qsWpioMyWFxb2_ZzlMv9ZgAbpGFREHjd0U1ltLQYnoRmkTHUIbXRX2OYv-DCiA')"></div>
+<button class="w-full py-2 bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:bg-primary-fixed transition-colors">
+                TRIGGER_MANUAL_RECOVERY
+            </button>
+</div>
+</aside>
+<script>
+        // Micro-interactions for node hovering
+        document.querySelectorAll('.bg-surface-container-lowest').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('border-primary-fixed');
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('border-primary-fixed');
+                node.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Pulsing dots logic
+        const ports = document.querySelectorAll('.node-port');
+        ports.forEach((port, idx) => {
+            port.style.animation = `pulse 2s infinite ${idx * 0.5}s`;
+        });
+    </script>
+<style>
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .node-port {
+            transform: translate(-50%, -50%);
+        }
+        /* Scrollbar styling */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>

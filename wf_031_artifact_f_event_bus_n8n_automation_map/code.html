@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-031 // EVENT BUS &amp; N8N TOPOLOGY</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --grid-color: rgba(59, 75, 55, 0.2);
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .node-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .connector-flow {
+            stroke-dasharray: 5;
+            animation: flow 10s linear infinite;
+        }
+        @keyframes flow {
+            from { stroke-dashoffset: 100; }
+            to { stroke-dashoffset: 0; }
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(15, 15, 15, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#fff6ff",
+                      "error": "#ffb4ab",
+                      "surface-container-lowest": "#010f1f",
+                      "secondary": "#b8c3ff",
+                      "surface-tint": "#00e639",
+                      "on-error": "#690005",
+                      "surface-variant": "#273647",
+                      "on-surface-variant": "#b9ccb2",
+                      "primary": "#ebffe2",
+                      "inverse-on-surface": "#233143",
+                      "secondary-container": "#0043eb",
+                      "primary-fixed-dim": "#00e639",
+                      "secondary-fixed": "#dde1ff",
+                      "on-secondary": "#002388",
+                      "tertiary-fixed": "#f0dbff",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-dim": "#051424",
+                      "on-primary-container": "#007117",
+                      "inverse-surface": "#d4e4fa",
+                      "inverse-primary": "#006e16",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-tertiary-container": "#862ed4",
+                      "error-container": "#93000a",
+                      "surface-container-low": "#0d1c2d",
+                      "surface": "#051424",
+                      "surface-container-highest": "#273647",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary-fixed": "#001356",
+                      "primary-fixed": "#72ff70",
+                      "on-secondary-container": "#c6ceff",
+                      "surface-container": "#122131",
+                      "surface-bright": "#2c3a4c",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-primary": "#003907",
+                      "on-background": "#d4e4fa",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary": "#490080",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-tertiary-fixed": "#2c0051",
+                      "primary-container": "#00ff41",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "outline": "#84967e",
+                      "on-error-container": "#ffdad6",
+                      "on-surface": "#d4e4fa",
+                      "background": "#051424",
+                      "surface-container-high": "#1c2b3c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "grid-unit": "8px",
+                      "lane-margin": "32px",
+                      "stack-gap": "4px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="bg-surface text-primary font-headline-md text-headline-md w-full top-0 border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 w-full fixed z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-surface-tint">hub</span>
+<span class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-primary border-b-2 border-primary font-code-sm text-code-sm h-16 flex items-center px-2" href="#">TOPOLOGY</a>
+<a class="text-on-surface-variant font-code-sm text-code-sm hover:bg-surface-container-highest transition-colors h-16 flex items-center px-2" href="#">KAFKA_BUS</a>
+<a class="text-on-surface-variant font-code-sm text-code-sm hover:bg-surface-container-highest transition-colors h-16 flex items-center px-2" href="#">AUTOMATIONS</a>
+</nav>
+<div class="flex items-center gap-4 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">settings_input_component</span>
+</div>
+</header>
+<!-- Sidebar Module Registry -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-low border-r border-outline-variant overflow-y-auto hidden md:block z-40">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary">MODULE_REGISTRY</h2>
+</div>
+<nav class="flex flex-col">
+<div class="flex items-center gap-3 p-4 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint font-code-sm text-code-sm">
+<span class="material-symbols-outlined">hub</span>
+<span>Event Bus Topology</span>
+</div>
+<div class="flex items-center gap-3 p-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">local_shipping</span>
+<span>Kafka Queue Manager</span>
+</div>
+<div class="flex items-center gap-3 p-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">work</span>
+<span>Gigs Automation</span>
+</div>
+<div class="flex items-center gap-3 p-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Wholesale Sync</span>
+</div>
+<div class="flex items-center gap-3 p-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">shield</span>
+<span>Insurance Engine</span>
+</div>
+</nav>
+<div class="absolute bottom-0 w-full p-4 bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-xs text-code-xs opacity-60">SRV_UPTIME</span>
+<span class="font-code-xs text-code-xs text-surface-tint">99.98%</span>
+</div>
+<div class="w-full bg-outline-variant h-1 overflow-hidden">
+<div class="bg-surface-tint h-full w-[99%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Topology Canvas -->
+<main class="ml-0 md:ml-64 pt-16 h-screen relative overflow-hidden flex flex-col">
+<!-- Control Header -->
+<div class="p-lane-margin flex justify-between items-center z-10 bg-surface/50 backdrop-blur-sm border-b border-outline-variant/30">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary">WF-031 // ARCHITECTURE_MAP</h1>
+<p class="font-code-xs text-code-xs text-on-surface-variant">ENV: PRODUCTION // CLUSTER: NAIJA-DEALS-MAIN</p>
+</div>
+<div class="flex gap-node-gutter">
+<button class="bg-surface-container-high border border-outline px-4 py-2 font-code-sm text-code-sm hover:bg-surface-container-highest transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span> RUN_DIAGNOSTICS
+                </button>
+<button class="bg-primary text-on-primary px-4 py-2 font-code-sm text-code-sm hover:opacity-90 transition-opacity flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">add</span> NEW_AUTOMATION
+                </button>
+</div>
+</div>
+<!-- Node Canvas Area -->
+<div class="flex-1 relative overflow-auto p-lane-margin">
+<!-- Background Grid (Visual Only) -->
+<div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: linear-gradient(var(--outline-variant) 1px, transparent 1px), linear-gradient(90deg, var(--outline-variant) 1px, transparent 1px); background-size: 48px 48px;"></div>
+<!-- SVG Connectors -->
+<svg class="absolute top-0 left-0 w-full h-full pointer-events-none" style="min-width: 1200px; min-height: 800px;">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#84967e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead-active" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#00e639" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Search Flow -->
+<path class="connector-flow" d="M 280 180 L 400 180" fill="none" marker-end="url(#arrowhead-active)" stroke="#00e639" stroke-width="2"></path>
+<path d="M 640 180 L 760 180" fill="none" marker-end="url(#arrowhead)" stroke="#84967e" stroke-width="1.5"></path>
+<path d="M 640 190 L 760 300" fill="none" marker-end="url(#arrowhead)" stroke="#84967e" stroke-width="1.5"></path>
+<!-- Kafka Bus Vertical -->
+<line stroke="#3b4b37" stroke-linecap="round" stroke-width="4" x1="520" x2="520" y1="180" y2="700"></line>
+<!-- Feedback Loop -->
+<path d="M 1000 420 L 1000 600 L 280 600" fill="none" marker-end="url(#arrowhead)" stroke="#84967e" stroke-dasharray="4" stroke-width="1.5"></path>
+<!-- DLQ Error Path -->
+<path d="M 520 400 L 400 400" fill="none" marker-end="url(#arrowhead)" stroke="#ffb4ab" stroke-dasharray="5" stroke-width="2"></path>
+</svg>
+<!-- Topology Nodes -->
+<div class="relative grid grid-cols-1 md:grid-cols-3 gap-24 items-start" style="min-width: 1100px;">
+<!-- Column 1: Producers -->
+<div class="space-y-12">
+<div class="font-headline-md text-headline-md flex items-center gap-2 mb-6 border-l-2 border-primary pl-4">
+<span class="material-symbols-outlined">input</span> PRODUCERS
+                    </div>
+<!-- SearchStarted Node -->
+<div class="bg-surface-container border border-surface-tint p-4 w-64 shadow-lg">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-surface-tint">EVENT_PRODUCER</span>
+<span class="w-2 h-2 rounded-full bg-surface-tint node-pulse"></span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1">SearchStarted</h3>
+<p class="font-code-xs text-code-xs opacity-60">SRC: Client_Web_01</p>
+<div class="mt-4 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs">
+<span>LAT: 12ms</span>
+<span>ID: ev_9921</span>
+</div>
+</div>
+<!-- FeedbackSubmitted Node -->
+<div class="bg-surface-container border border-outline-variant p-4 w-64">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-primary">EVENT_PRODUCER</span>
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1">FeedbackSubmitted</h3>
+<p class="font-code-xs text-code-xs opacity-60">SRC: User_Mobile_App</p>
+<div class="mt-4 pt-2 border-t border-outline-variant flex justify-between font-code-xs text-code-xs">
+<span>LAT: 45ms</span>
+<span>ID: ev_8842</span>
+</div>
+</div>
+<!-- Dead Letter Queue Warning -->
+<div class="bg-surface-container border border-error p-4 w-64 mt-20 relative">
+<div class="absolute -top-3 right-4 bg-error text-on-error px-2 font-label-caps text-[9px]">CRITICAL</div>
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-error">KAFKA_DLQ</span>
+<span class="material-symbols-outlined text-error text-[16px]">warning</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1">ERROR_HANDLER</h3>
+<p class="font-code-xs text-code-xs opacity-60">Pending Retries: 14</p>
+</div>
+</div>
+<!-- Column 2: Event Bus (Kafka) -->
+<div class="flex flex-col items-center pt-24">
+<div class="bg-[#010f1f] border-x border-outline-variant w-16 h-[500px] flex flex-col justify-around py-8 z-10">
+<div class="rotate-90 font-label-caps text-label-caps text-on-surface-variant whitespace-nowrap">TOPIC_SEARCH_FLOW</div>
+<div class="rotate-90 font-label-caps text-label-caps text-on-surface-variant whitespace-nowrap">TOPIC_RECS_ENGINE</div>
+<div class="rotate-90 font-label-caps text-label-caps text-on-surface-variant whitespace-nowrap">TOPIC_ANALYTICS</div>
+</div>
+<div class="mt-4 bg-surface-container-high p-4 border border-outline w-72 text-center">
+<span class="font-label-caps text-label-caps text-surface-tint">KAFKA_CLUSTER::PROD-01</span>
+<div class="flex justify-around mt-4 font-code-xs text-code-xs">
+<div class="text-center">
+<div class="font-bold">2.4k</div>
+<div class="opacity-50 text-[8px]">MSG/S</div>
+</div>
+<div class="text-center">
+<div class="font-bold">0.01%</div>
+<div class="opacity-50 text-[8px]">DROPPED</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 3: Consumers (n8n & Logic) -->
+<div class="space-y-12">
+<div class="font-headline-md text-headline-md flex items-center gap-2 mb-6 border-l-2 border-secondary pl-4">
+<span class="material-symbols-outlined">auto_awesome</span> AUTOMATIONS
+                    </div>
+<!-- n8n Workflow 1 -->
+<div class="bg-surface-container border border-outline p-4 w-80 glass-panel">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-secondary">N8N_WORKFLOW</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">WF_ID: 31-001</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1 text-primary">RecommendationGenerated</h3>
+<div class="mt-3 space-y-2">
+<div class="flex items-center gap-2 font-code-xs text-code-xs">
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span>Logic: Collaborative Filter</span>
+</div>
+<div class="flex items-center gap-2 font-code-xs text-code-xs">
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span>Output: SearchCompleted</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant flex items-center gap-4">
+<div class="h-1 bg-surface-tint w-3/4 rounded-full"></div>
+<span class="font-code-xs text-code-xs">OK</span>
+</div>
+</div>
+<!-- n8n Workflow 2 -->
+<div class="bg-surface-container border border-outline p-4 w-80 glass-panel">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-secondary">N8N_WORKFLOW</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">WF_ID: 31-012</span>
+</div>
+<h3 class="font-code-sm text-code-sm mb-1 text-primary">RankingUpdated</h3>
+<div class="mt-3 space-y-2 font-code-xs text-code-xs opacity-70">
+<div class="flex justify-between">
+<span>Last Exec:</span>
+<span>2 mins ago</span>
+</div>
+<div class="flex justify-between">
+<span>Success Rate:</span>
+<span class="text-surface-tint">99.9%</span>
+</div>
+</div>
+</div>
+<!-- LearningCompleted Node -->
+<div class="bg-surface-container-high border border-surface-tint/50 p-4 w-80">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-surface-tint">ML_PIPELINE</span>
+<span class="material-symbols-outlined text-surface-tint text-[18px]" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<h3 class="font-code-sm text-code-sm">LearningCompleted</h3>
+<p class="font-code-xs text-code-xs mt-2 opacity-60">Syncing models to Vector DB...</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side Stats Panel -->
+<div class="absolute right-lane-margin top-32 w-64 space-y-4 hidden xl:block">
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<h4 class="font-label-caps text-label-caps text-primary mb-4">REAL-TIME TELEMETRY</h4>
+<div class="space-y-3">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="opacity-60">EVENT_VELOCITY</span>
+<span class="text-surface-tint">142/s</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="opacity-60">AVG_LATENCY</span>
+<span>32ms</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="opacity-60">ACTIVE_QUEUES</span>
+<span>12</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<h4 class="font-label-caps text-label-caps text-error mb-4">SYSTEM_ALERTS</h4>
+<div class="text-[10px] font-code-xs space-y-2">
+<div class="p-2 border-l-2 border-error bg-error/10">
+                        High consumer lag on Topic: RankingUpdated. (Lag: 450ms)
+                    </div>
+<div class="p-2 border-l-2 border-outline-variant bg-surface-container">
+                        No new events in RecommendationClicked for 10m.
+                    </div>
+</div>
+</div>
+</div>
+</main>
+<!-- Global Footer -->
+<footer class="fixed bottom-0 w-full bg-surface-container-lowest text-on-surface-variant font-code-xs text-code-xs border-t border-outline-variant flex justify-between items-center px-lane-margin py-stack-gap z-50 h-8">
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-surface-tint">© 2024 NAIJADEALS_ECOSYSTEM // SRV_ID: WF-031</span>
+<div class="flex gap-4">
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">SYSTEM_STATUS: OK</span>
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">LATENCY: 24ms</span>
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">AURA_CORE: ACTIVE</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-surface-tint node-pulse">sensors</span>
+<span>DATA_FEED_LIVE</span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for node hovering
+        document.querySelectorAll('.bg-surface-container').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px)';
+                node.style.borderColor = 'var(--surface-tint)';
+                node.style.transition = 'all 0.2s ease';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0)';
+                if (!node.classList.contains('border-surface-tint') && !node.classList.contains('border-error')) {
+                    node.style.borderColor = 'var(--outline-variant)';
+                }
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ND-REPUTATION-ENGINE:WF-032 | Domain Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ebffe2",
+                    "secondary-container": "#0043eb",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary-fixed": "#2c0051",
+                    "inverse-on-surface": "#233143",
+                    "on-tertiary-container": "#862ed4",
+                    "surface-container": "#122131",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "surface-container-highest": "#273647",
+                    "on-secondary": "#002388",
+                    "primary-container": "#00ff41",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-tint": "#00e639",
+                    "outline": "#84967e",
+                    "primary-fixed": "#72ff70",
+                    "secondary-fixed": "#dde1ff",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#00530e",
+                    "surface-dim": "#051424",
+                    "on-error": "#690005",
+                    "on-secondary-container": "#c6ceff",
+                    "on-primary": "#003907",
+                    "surface-variant": "#273647",
+                    "primary-fixed-dim": "#00e639",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-background": "#d4e4fa",
+                    "surface-container-low": "#0d1c2d",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary": "#490080",
+                    "background": "#051424",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-bright": "#2c3a4c",
+                    "secondary": "#b8c3ff",
+                    "on-primary-container": "#007117",
+                    "inverse-primary": "#006e16",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-primary-fixed": "#002203",
+                    "on-surface": "#d4e4fa",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-secondary-fixed": "#001356",
+                    "surface": "#051424",
+                    "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "stack-gap": "4px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px"
+            },
+            "fontFamily": {
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-border-active { border: 1px solid #00ff41; }
+        .node-border-neutral { border: 1px solid #3b4b37; }
+        .connector-h { height: 2px; background: #3b4b37; position: relative; }
+        .connector-v { width: 2px; background: #3b4b37; position: relative; }
+        .connector-arrow-r::after { content: ''; position: absolute; right: -4px; top: -3px; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 6px solid #3b4b37; }
+        .connector-arrow-d::after { content: ''; position: absolute; bottom: -4px; left: -3px; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid #3b4b37; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b4b37; border-radius: 2px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md overflow-hidden flex flex-col h-screen">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary w-full sticky top-0 border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 z-50">
+<div class="flex items-center gap-grid-unit">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<h1 class="font-label-caps text-label-caps text-primary tracking-tighter">ND-REPUTATION-ENGINE:WF-032</h1>
+</div>
+<div class="hidden md:flex gap-6">
+<span class="font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 cursor-pointer">SCHEMA_VIEW</span>
+<span class="font-code-sm text-primary-container border-b-2 border-primary-fixed px-2 py-1 cursor-pointer">ENTITY_MAP</span>
+<span class="font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 cursor-pointer">DOCS_V2.4</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="bg-surface-container-lowest dark:bg-surface-container-lowest h-screen w-64 border-r border-outline-variant flex flex-col gap-stack-gap p-grid-unit hidden md:flex shrink-0">
+<div class="px-4 py-6">
+<h2 class="font-label-caps text-label-caps text-on-surface">SYSTEM_HIERARCHY</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-lg">account_tree</span> NODES_MAP
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-lg">receipt_long</span> LOG_STREAM
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-lg">verified_user</span> TRUST_SCORES
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-lg">rule</span> MOD_QUEUE
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-lg">history</span> ARCHIVE
+                </a>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 opacity-60">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-xs text-code-xs">CORE_SYNC_ACTIVE</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-auto p-lane-margin relative custom-scrollbar">
+<!-- Breadcrumbs / Technical Status -->
+<div class="mb-8 flex justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<div class="font-label-caps text-label-caps text-primary opacity-70 mb-1">DOMAIN_MODEL // WF-032_REPUTATION</div>
+<h2 class="font-headline-lg text-headline-lg text-primary">ENTITY_RELATIONSHIP_GRAPH</h2>
+</div>
+<div class="text-right">
+<span class="font-code-xs text-code-xs text-on-surface-variant block">REVISION: 1.0.42</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant block">LAST_MODIFIED: 2024.05.21_14:30:01</span>
+</div>
+</div>
+<!-- Mapping Canvas -->
+<div class="grid grid-cols-12 gap-8 min-w-[1200px]">
+<!-- Swimlane 01: INPUT/DATA -->
+<div class="col-span-3 flex flex-col gap-8 relative">
+<div class="absolute -left-4 top-0 bottom-0 border-l-2 border-dashed border-outline-variant opacity-30"></div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">input</span> 01_DATA_INGESTION
+                    </div>
+<!-- Review Entity -->
+<div class="bg-surface-container-lowest node-border-active p-4 flex flex-col gap-2 relative shadow-xl">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-primary">ENTITY:REVIEW</span>
+<span class="material-symbols-outlined text-sm opacity-50">description</span>
+</div>
+<div class="font-code-sm text-code-sm">
+<ul class="space-y-1 opacity-80">
+<li>uuid: [string]</li>
+<li>user_id: [ref]</li>
+<li>content: [text]</li>
+<li>metadata: [json]</li>
+</ul>
+</div>
+<div class="mt-2 border-t border-outline-variant pt-2">
+<div class="font-label-caps text-[9px] text-primary-container">LIFECYCLE: DRAFT | SUBMITTED | REJECTED | ACTIVE</div>
+</div>
+<!-- Connector to Rating -->
+<div class="absolute -right-8 top-1/2 connector-h w-8 connector-arrow-r"></div>
+</div>
+<!-- Rating Entity -->
+<div class="bg-surface-container-lowest node-border-neutral p-4 flex flex-col gap-2 relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTITY:RATING</span>
+<span class="material-symbols-outlined text-sm opacity-50">star</span>
+</div>
+<div class="font-code-sm text-code-sm">
+<ul class="space-y-1 opacity-80">
+<li>val: [int(1-5)]</li>
+<li>weight: [float]</li>
+<li>dim_id: [ref]</li>
+</ul>
+</div>
+<div class="mt-2 text-right">
+<span class="font-code-xs text-code-xs text-primary bg-primary-container/10 px-1">OWNED_BY: REVIEW</span>
+</div>
+</div>
+</div>
+<!-- Swimlane 02: PROCESSING/MODERATION -->
+<div class="col-span-3 flex flex-col gap-8 relative">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">psychology</span> 02_LOGIC_ENGINE
+                    </div>
+<!-- Moderation Entity -->
+<div class="bg-surface-container-lowest node-border-active p-4 flex flex-col gap-2 relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-primary">ENTITY:MODERATION</span>
+<span class="material-symbols-outlined text-sm opacity-50">gavel</span>
+</div>
+<div class="font-code-sm text-code-sm">
+<ul class="space-y-1 opacity-80">
+<li>agent_id: [string]</li>
+<li>verdict: [enum]</li>
+<li>confidence: [float]</li>
+</ul>
+</div>
+<div class="mt-2 border-t border-outline-variant pt-2">
+<div class="font-label-caps text-[9px] text-error">STATES: QUEUED | AUTO_FAIL | MANUAL_REVIEW | RESOLVED</div>
+</div>
+<!-- Connector to Appeal -->
+<div class="absolute -right-8 top-1/4 connector-h w-8 connector-arrow-r"></div>
+<!-- Connector back to Audit Log -->
+<div class="absolute left-1/2 -bottom-8 connector-v h-8 connector-arrow-d"></div>
+</div>
+<!-- Appeal Entity -->
+<div class="bg-surface-container-lowest node-border-neutral p-4 flex flex-col gap-2 opacity-70">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTITY:APPEAL</span>
+<span class="material-symbols-outlined text-sm opacity-50">history_edu</span>
+</div>
+<div class="font-code-sm text-code-sm">
+<ul class="space-y-1">
+<li>reason: [text]</li>
+<li>exp_date: [ts]</li>
+</ul>
+</div>
+<div class="mt-2 border-t border-outline-variant pt-2">
+<div class="font-label-caps text-[9px]">STATES: OPEN | DENIED | OVERTURNED</div>
+</div>
+</div>
+</div>
+<!-- Swimlane 03: CALCULATIONS/TRUST -->
+<div class="col-span-3 flex flex-col gap-8 relative">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">hub</span> 03_REPUTATION_MESH
+                    </div>
+<!-- TrustEvent Entity -->
+<div class="bg-surface-container-lowest node-border-active p-4 flex flex-col gap-2 relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-primary">ENTITY:TRUSTEVENT</span>
+<span class="material-symbols-outlined text-sm opacity-50">verified</span>
+</div>
+<div class="font-code-sm text-code-sm">
+<ul class="space-y-1 opacity-80">
+<li>delta: [float]</li>
+<li>source_id: [uuid]</li>
+<li>decay_f: [float]</li>
+</ul>
+</div>
+<div class="absolute -right-8 top-1/2 connector-h w-8 connector-arrow-r"></div>
+</div>
+<!-- Recommendation Entity -->
+<div class="bg-surface-container-lowest node-border-neutral p-4 flex flex-col gap-2 relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTITY:RECOMMENDATION</span>
+<span class="material-symbols-outlined text-sm opacity-50">auto_awesome</span>
+</div>
+<div class="font-code-sm text-code-sm">
+<ul class="space-y-1 opacity-80">
+<li>score: [int]</li>
+<li>rank: [int]</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Swimlane 04: OUTPUT/ANALYTICS -->
+<div class="col-span-3 flex flex-col gap-8 relative">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">output</span> 04_DELIVERY
+                    </div>
+<!-- SearchRanking Entity -->
+<div class="bg-surface-container-lowest node-border-neutral p-4 flex flex-col gap-2 relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTITY:SEARCHRANKING</span>
+<span class="material-symbols-outlined text-sm opacity-50">query_stats</span>
+</div>
+<div class="font-code-sm text-code-sm">
+<ul class="space-y-1 opacity-80">
+<li>boost: [float]</li>
+<li>visibility: [bool]</li>
+</ul>
+</div>
+</div>
+<!-- Analytics Entity -->
+<div class="bg-surface-container-lowest node-border-neutral p-4 flex flex-col gap-2 relative border-l-4 border-l-secondary-container">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTITY:ANALYTICS</span>
+<span class="material-symbols-outlined text-sm opacity-50">analytics</span>
+</div>
+<div class="font-code-sm text-code-sm">
+<ul class="space-y-1 opacity-80">
+<li>agg_v: [int]</li>
+<li>p99_lat: [ms]</li>
+</ul>
+</div>
+</div>
+<!-- Notification Entity -->
+<div class="bg-surface-container-lowest node-border-neutral p-4 flex flex-col gap-2 relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTITY:NOTIFICATION</span>
+<span class="material-symbols-outlined text-sm opacity-50">notifications</span>
+</div>
+<div class="font-code-sm text-code-sm">
+<ul class="space-y-1 opacity-80">
+<li>channel: [enum]</li>
+<li>status: [sent|fail]</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Shared Section (Audit & System State) -->
+<div class="mt-16 grid grid-cols-12 gap-8 border-t border-outline-variant pt-8">
+<div class="col-span-12">
+<div class="font-label-caps text-label-caps text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">list_alt</span> CROSS-CUTTING_SERVICES
+                    </div>
+<div class="grid grid-cols-4 gap-8">
+<!-- AuditLog Entity -->
+<div class="bg-surface-container-high node-border-neutral p-4 flex flex-col gap-2">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-primary">ENTITY:AUDITLOG</span>
+<span class="material-symbols-outlined text-sm opacity-50" data-weight="fill">verified_user</span>
+</div>
+<div class="font-code-sm text-code-sm opacity-70">
+<p>Captures all state transitions across all entities. Immutable ledger.</p>
+</div>
+</div>
+<!-- System Telemetry -->
+<div class="col-span-3 bg-surface-container-low p-4 flex items-center justify-between">
+<div class="flex gap-12">
+<div>
+<div class="font-label-caps text-[10px] text-on-surface-variant">TOTAL_ENTITY_COUNT</div>
+<div class="font-headline-md text-headline-md text-primary">1,204,992</div>
+</div>
+<div>
+<div class="font-label-caps text-[10px] text-on-surface-variant">RELATION_DENSITY</div>
+<div class="font-headline-md text-headline-md text-primary">4.2/node</div>
+</div>
+<div>
+<div class="font-label-caps text-[10px] text-on-surface-variant">LATENCY_P95</div>
+<div class="font-headline-md text-headline-md text-primary-container">12ms</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-code-xs text-code-xs text-on-surface-variant uppercase">Data Model Integrity</div>
+<div class="text-primary-container font-code-sm">99.999% SECURE</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Flare / Shader Background Placeholder Area -->
+<div class="fixed bottom-0 right-0 p-8 pointer-events-none opacity-20">
+<div class="w-64 h-64 border-r-2 border-b-2 border-primary-fixed"></div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar -->
+<footer class="bg-surface-container-low dark:bg-surface-container-low fixed bottom-0 w-full border-t border-outline-variant flex justify-around items-center h-12 md:hidden z-50">
+<span class="material-symbols-outlined text-outline hover:text-primary transition-transform active:scale-95 cursor-pointer">analytics</span>
+<span class="material-symbols-outlined text-primary-container scale-110 active:scale-95 cursor-pointer">security</span>
+<span class="material-symbols-outlined text-outline hover:text-primary transition-transform active:scale-95 cursor-pointer">hub</span>
+<span class="material-symbols-outlined text-outline hover:text-primary transition-transform active:scale-95 cursor-pointer">query_stats</span>
+</footer>
+<!-- Side Tooltips (Micro-Telemetry) -->
+<div class="fixed bottom-24 right-8 flex flex-col gap-2">
+<div class="bg-surface-container-highest px-3 py-1 border border-outline-variant font-code-xs text-code-xs">
+            MOD_QUEUE: <span class="text-primary-container">142</span>
+</div>
+<div class="bg-surface-container-highest px-3 py-1 border border-outline-variant font-code-xs text-code-xs">
+            CPU_LOAD: <span class="text-error">82%</span>
+</div>
+<div class="bg-surface-container-highest px-3 py-1 border border-outline-variant font-code-xs text-code-xs">
+            ACTIVE_REQS: <span class="text-primary-container">12.4k</span>
+</div>
+</div>
+<script>
+        // Micro-interaction for entity highlights
+        document.querySelectorAll('.node-border-active, .node-border-neutral').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('bg-surface-container-high');
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.15s ease-out';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('bg-surface-container-high');
+                node.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>

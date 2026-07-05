@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-034: Artifact D — API Contract Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#ffdad6",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-surface-variant": "#b9ccb2",
+                    "secondary": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-container-high": "#1c2b3c",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary-fixed": "#002203",
+                    "on-error": "#690005",
+                    "inverse-primary": "#006e16",
+                    "primary-container": "#00ff41",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "tertiary": "#fff6ff",
+                    "surface-container-highest": "#273647",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-container": "#122131",
+                    "secondary-fixed": "#dde1ff",
+                    "background": "#051424",
+                    "on-surface": "#d4e4fa",
+                    "on-tertiary-fixed": "#2c0051",
+                    "primary": "#ebffe2",
+                    "error-container": "#93000a",
+                    "on-background": "#d4e4fa",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary-container": "#862ed4",
+                    "primary-fixed": "#72ff70",
+                    "outline-variant": "#3b4b37",
+                    "inverse-on-surface": "#233143",
+                    "on-primary-fixed-variant": "#00530e",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-variant": "#273647",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-secondary": "#002388",
+                    "surface": "#051424",
+                    "on-secondary-fixed": "#001356",
+                    "surface-dim": "#051424",
+                    "on-tertiary": "#490080",
+                    "on-primary": "#003907",
+                    "outline": "#84967e",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-primary-container": "#007117",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-tint": "#00e639",
+                    "secondary-container": "#0043eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .code-block {
+            background-color: #010f1f;
+            border-left: 2px solid #00e639;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .endpoint-card:hover {
+            border-color: #00e639;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md antialiased overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-background border-b border-outline-variant flex items-center justify-between px-node-gutter h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">ASSET_INTEGRITY_OS</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 rounded font-code-sm text-code-sm" href="#">SYSTEM_LOGS</a>
+<a class="text-primary-fixed-dim font-bold font-code-sm text-code-sm" href="#">API_SPEC_V1.2</a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 rounded font-code-sm text-code-sm" href="#">SECURITY_POLICY</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="account_tree">account_tree</span>
+</div>
+</header>
+<div class="flex flex-1 pt-16 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col py-grid-unit fixed left-0 top-16 h-full w-64 bg-surface-container-low border-r border-outline-variant z-40">
+<div class="px-6 py-4 border-b border-outline-variant mb-4">
+<span class="font-label-caps text-label-caps text-on-surface">ROOT_ADMIN</span>
+</div>
+<nav class="space-y-1 px-2">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-lg">inventory_2</span>
+                    Document Index
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-lg">enhanced_encryption</span>
+                    Secure Vaults
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-primary-fixed-dim bg-surface-container-highest border-l-2 border-primary-fixed-dim font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-lg">security</span>
+                    Access Matrix
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-lg">history_edu</span>
+                    Audit Stream
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined text-lg">rule_folder</span>
+                    Compliance Gates
+                </a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 overflow-y-auto custom-scrollbar p-node-gutter">
+<div class="max-w-6xl mx-auto space-y-8">
+<!-- Page Header & Telemetry -->
+<div class="flex flex-col md:flex-row md:items-end justify-between border-b border-outline-variant pb-6 gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">WF-034: Artifact D — API Contract Blueprint</h2>
+<div class="flex items-center gap-4 font-code-sm text-code-sm text-primary-fixed-dim">
+<span class="bg-surface-container-high px-2 py-1 rounded">VERSION: v1.2-stable</span>
+<span class="bg-surface-container-high px-2 py-1 rounded">STATUS: ACTIVE_SPEC</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span> UPTIME: 99.998%</span>
+</div>
+</div>
+<div class="flex gap-2">
+<div class="text-right">
+<p class="font-code-xs text-code-xs text-on-surface-variant">AVERAGE_LATENCY</p>
+<p class="font-code-sm text-code-sm text-on-surface">42ms</p>
+</div>
+<div class="w-px h-8 bg-outline-variant mx-2"></div>
+<div class="text-right">
+<p class="font-code-xs text-code-xs text-on-surface-variant">THROUGHPUT</p>
+<p class="font-code-sm text-code-sm text-on-surface">1.2k req/s</p>
+</div>
+</div>
+</div>
+<!-- Bento Grid Configuration -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Security Constraints -->
+<section class="lg:col-span-1 bg-surface-container-low p-6 border border-outline-variant rounded-lg space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">verified_user</span>
+<h3 class="font-label-caps text-label-caps">AUTH_SECURITY_STACK</h3>
+</div>
+<div class="space-y-4">
+<div class="p-3 bg-surface-container border border-outline-variant rounded">
+<p class="font-code-sm text-code-sm text-on-surface mb-1">Authentication</p>
+<p class="font-body-md text-on-surface-variant text-sm">Mutual TLS (mTLS) with X.509 certificates + JWT Bearer tokens for application identity.</p>
+</div>
+<div class="p-3 bg-surface-container border border-outline-variant rounded">
+<p class="font-code-sm text-code-sm text-on-surface mb-1">Authorization</p>
+<p class="font-body-md text-on-surface-variant text-sm">Strict RBAC. Scopes required: `doc:read`, `doc:write`, `doc:admin`, `doc:audit`.</p>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant space-y-2">
+<h4 class="font-label-caps text-label-caps text-primary-fixed-dim">RESILIENCE_PARAMETERS</h4>
+<ul class="font-code-xs text-code-xs space-y-1 text-on-surface-variant">
+<li class="flex justify-between"><span>RETRIES:</span> <span class="text-on-surface">3x Exponential Backoff</span></li>
+<li class="flex justify-between"><span>TIMEOUT:</span> <span class="text-on-surface">15000ms</span></li>
+<li class="flex justify-between"><span>CIRCUIT_BREAKER:</span> <span class="text-on-surface">50% failure @ 10s</span></li>
+</ul>
+</div>
+</section>
+<!-- API Sandbox / Code Blocks -->
+<section class="lg:col-span-2 bg-surface-container-low p-6 border border-outline-variant rounded-lg flex flex-col h-[400px]">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">data_object</span>
+<h3 class="font-label-caps text-label-caps">INTERFACE_PAYLOAD_EXAMPLE</h3>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-surface-container-highest text-primary-fixed-dim font-code-xs text-code-xs rounded border border-outline-variant">REQUEST</button>
+<button class="px-3 py-1 text-on-surface-variant font-code-xs text-code-xs rounded">RESPONSE</button>
+</div>
+</div>
+<div class="flex-1 code-block p-4 font-code-sm text-code-sm overflow-y-auto custom-scrollbar">
+<pre class="text-primary-fixed-dim">{
+  "header": {
+    "version": "v1.2",
+    "request_id": "req-99x-001",
+    "timestamp": "2023-10-24T14:30:00Z"
+  },
+  "payload": {
+    "action": "UPLOAD",
+    "document": {
+      "id": "doc_882910",
+      "mime_type": "application/pdf",
+      "encryption_alg": "AES-256-GCM",
+      "tags": ["financial", "confidential"],
+      "metadata": {
+        "owner": "sys_service_04",
+        "retention_period": "P7Y"
+      }
+    },
+    "checksum": {
+      "alg": "SHA-256",
+      "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}
+</pre>
+</div>
+</section>
+</div>
+<!-- API Endpoints Visualization -->
+<div class="space-y-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">list_alt</span>
+<h3 class="font-label-caps text-label-caps">ENDPOINT_REGISTRY</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- Endpoint: Upload -->
+<div class="endpoint-card bg-surface-container-low border border-outline-variant p-4 rounded-lg transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-xs text-code-xs">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">v1.2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface font-bold">/document/upload</p>
+<p class="font-body-md text-xs text-on-surface-variant mt-2">Initialize multi-part ingestion with integrity verification.</p>
+</div>
+<!-- Endpoint: Update -->
+<div class="endpoint-card bg-surface-container-low border border-outline-variant p-4 rounded-lg transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-xs text-code-xs">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">v1.2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface font-bold">/document/update</p>
+<p class="font-body-md text-xs text-on-surface-variant mt-2">Atomic update of metadata or object stream content.</p>
+</div>
+<!-- Endpoint: Share -->
+<div class="endpoint-card bg-surface-container-low border border-outline-variant p-4 rounded-lg transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-xs text-code-xs">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">v1.2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface font-bold">/document/share</p>
+<p class="font-body-md text-xs text-on-surface-variant mt-2">Generate transient, cryptographically signed access URIs.</p>
+</div>
+<!-- Endpoint: Sign -->
+<div class="endpoint-card bg-surface-container-low border border-outline-variant p-4 rounded-lg transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-xs text-code-xs">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">v1.2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface font-bold">/document/sign</p>
+<p class="font-body-md text-xs text-on-surface-variant mt-2">Apply PKI-based electronic signature for immutability.</p>
+</div>
+<!-- Endpoint: Archive -->
+<div class="endpoint-card bg-surface-container-low border border-outline-variant p-4 rounded-lg transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-xs text-code-xs">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">v1.2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface font-bold">/document/archive</p>
+<p class="font-body-md text-xs text-on-surface-variant mt-2">Transition object to cold storage with long-term audit trail.</p>
+</div>
+<!-- Endpoint: Delete -->
+<div class="endpoint-card bg-surface-container-low border border-outline-variant p-4 rounded-lg transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-xs text-code-xs">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">v1.2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface font-bold">/document/delete</p>
+<p class="font-body-md text-xs text-on-surface-variant mt-2">Cryptographic erasure of document and linked metadata.</p>
+</div>
+<!-- Endpoint: Index -->
+<div class="endpoint-card bg-surface-container-low border border-outline-variant p-4 rounded-lg transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-xs text-code-xs">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">v1.2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface font-bold">/document/index</p>
+<p class="font-body-md text-xs text-on-surface-variant mt-2">Re-synchronize document metadata with global catalog.</p>
+</div>
+<!-- Endpoint: Search -->
+<div class="endpoint-card bg-surface-container-low border border-outline-variant p-4 rounded-lg transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-code-xs text-code-xs">POST</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">v1.2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface font-bold">/document/search</p>
+<p class="font-body-md text-xs text-on-surface-variant mt-2">Execute complex Boolean queries against index cluster.</p>
+</div>
+</div>
+</div>
+<!-- Failure Codes & Audit -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
+<section class="bg-surface-container-low border border-outline-variant rounded-lg overflow-hidden">
+<div class="p-4 border-b border-outline-variant bg-surface-container flex items-center gap-2">
+<span class="material-symbols-outlined text-error">error</span>
+<h3 class="font-label-caps text-label-caps text-error">FAILURE_TERMINOLOGY</h3>
+</div>
+<table class="w-full text-left font-code-sm text-code-sm">
+<thead class="bg-surface-container-low">
+<tr class="text-on-surface-variant border-b border-outline-variant">
+<th class="p-3">CODE</th>
+<th class="p-3">DESCRIPTION</th>
+<th class="p-3">RETRY?</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr><td class="p-3 text-error">401_MTLS_FAIL</td><td class="p-3">X.509 cert invalid/expired</td><td class="p-3">NO</td></tr>
+<tr><td class="p-3 text-on-surface">429_RATE_LIMIT</td><td class="p-3">Exceeded transactional quota</td><td class="p-3 text-primary-fixed-dim">YES</td></tr>
+<tr><td class="p-3 text-error">403_SCOPE_ERR</td><td class="p-3">Insufficient JWT privileges</td><td class="p-3">NO</td></tr>
+<tr><td class="p-3 text-on-surface">503_NODE_BUSY</td><td class="p-3">Vault shard rebalancing</td><td class="p-3 text-primary-fixed-dim">YES</td></tr>
+</tbody>
+</table>
+</section>
+<section class="bg-surface-container-low border border-outline-variant rounded-lg p-6 relative overflow-hidden">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">analytics</span>
+<h3 class="font-label-caps text-label-caps">VERSION_TRAJECTORY</h3>
+</div>
+<div class="space-y-4">
+<div class="relative pl-6 border-l border-outline-variant space-y-6">
+<div class="relative">
+<span class="absolute -left-[29px] top-0 w-3 h-3 rounded-full bg-primary-fixed-dim"></span>
+<p class="font-code-sm text-code-sm text-on-surface">v1.2-stable (Current)</p>
+<p class="text-xs text-on-surface-variant">Added mandatory SHA-256 checksums for all UPLOAD ops.</p>
+</div>
+<div class="relative">
+<span class="absolute -left-[29px] top-0 w-3 h-3 rounded-full bg-outline"></span>
+<p class="font-code-sm text-code-sm text-on-surface-variant">v1.1-deprecated</p>
+<p class="text-xs text-on-surface-variant">Replaced by v1.2. Support ends EOF 2023.</p>
+</div>
+<div class="relative">
+<span class="absolute -left-[29px] top-0 w-3 h-3 rounded-full bg-surface-container-highest"></span>
+<p class="font-code-sm text-code-sm text-on-surface-variant">v2.0-beta (Planning)</p>
+<p class="text-xs text-on-surface-variant">Quantum-resistant encryption layers proposed.</p>
+</div>
+</div>
+</div>
+<!-- Background decoration -->
+<div class="absolute -right-10 -bottom-10 opacity-10">
+<span class="material-symbols-outlined text-[120px]">architecture</span>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 bg-surface-container-lowest border-t border-outline-variant md:hidden z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-caps text-label-caps mt-1">Index</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">enhanced_encryption</span>
+<span class="font-label-caps text-label-caps mt-1">Vaults</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg p-2" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-label-caps text-label-caps mt-1">Matrix</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps mt-1">Audit</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">rule_folder</span>
+<span class="font-label-caps text-label-caps mt-1">Gates</span>
+</a>
+</nav>
+<!-- FAB (Suppressed on Details/Specification screens as per Mandate) -->
+<script>
+        // Micro-interaction: Endpoint card highlights
+        document.querySelectorAll('.endpoint-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Simulating telemetry data drift
+        setInterval(() => {
+            const latency = document.querySelector('p.font-code-sm.text-code-sm.text-on-surface');
+            if (latency) {
+                const newVal = Math.floor(40 + Math.random() * 8);
+                latency.innerText = newVal + 'ms';
+            }
+        }, 3000);
+    </script>
+</body></html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-034: Artifact K | Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#ffdad6",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-surface-variant": "#b9ccb2",
+                    "secondary": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-container-high": "#1c2b3c",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary-fixed": "#002203",
+                    "on-error": "#690005",
+                    "inverse-primary": "#006e16",
+                    "primary-container": "#00ff41",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "tertiary": "#fff6ff",
+                    "surface-container-highest": "#273647",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-container": "#122131",
+                    "secondary-fixed": "#dde1ff",
+                    "background": "#051424",
+                    "on-surface": "#d4e4fa",
+                    "on-tertiary-fixed": "#2c0051",
+                    "primary": "#ebffe2",
+                    "error-container": "#93000a",
+                    "on-background": "#d4e4fa",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary-container": "#862ed4",
+                    "primary-fixed": "#72ff70",
+                    "outline-variant": "#3b4b37",
+                    "inverse-on-surface": "#233143",
+                    "on-primary-fixed-variant": "#00530e",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-variant": "#273647",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-secondary": "#002388",
+                    "surface": "#051424",
+                    "on-secondary-fixed": "#001356",
+                    "surface-dim": "#051424",
+                    "on-tertiary": "#490080",
+                    "on-primary": "#003907",
+                    "outline": "#84967e",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-primary-container": "#007117",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-tint": "#00e639",
+                    "secondary-container": "#0043eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .markdown-content h1 { @apply font-headline-lg text-headline-lg text-primary-fixed-dim mb-4 border-b border-outline-variant pb-2; }
+        .markdown-content h2 { @apply font-headline-md text-headline-md text-on-surface mb-3 mt-6 flex items-center gap-2; }
+        .markdown-content h3 { @apply font-label-caps text-label-caps text-primary-fixed-dim mt-4 mb-2; }
+        .markdown-content p { @apply font-body-md text-body-md text-on-surface-variant mb-4; }
+        .markdown-content ul { @apply list-none mb-4 space-y-2; }
+        .markdown-content li { @apply flex items-start gap-2 font-body-md text-body-md text-on-surface-variant; }
+        .markdown-content li::before { content: "›"; @apply text-primary-fixed-dim font-bold; }
+        .markdown-content code { @apply font-code-sm text-code-sm bg-surface-container-high px-1 rounded text-primary-fixed-dim; }
+        .markdown-content pre { @apply bg-surface-container-lowest border border-outline-variant p-4 rounded-lg my-4 overflow-x-auto; }
+        .markdown-content blockquote { @apply border-l-4 border-primary-fixed-dim bg-surface-container-low p-4 italic my-4; }
+        
+        .node-connector { position: absolute; pointer-events: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-background dark:bg-background border-b border-outline-variant flex items-center justify-between px-node-gutter h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">ASSET_INTEGRITY_OS</span>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<nav class="flex gap-4">
+<a class="text-primary-fixed-dim font-bold font-label-caps text-label-caps hover:bg-surface-container-highest transition-colors px-2 py-1 rounded" href="#">DOCS</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-highest transition-colors px-2 py-1 rounded" href="#">SYSTEMS</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-highest transition-colors px-2 py-1 rounded" href="#">METRICS</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed-dim transition-colors">account_tree</span>
+</div>
+</header>
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="fixed left-0 top-16 h-full w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant hidden md:flex flex-col py-grid-unit z-40">
+<div class="px-4 py-2 mb-4">
+<span class="font-label-caps text-label-caps text-on-surface opacity-50">ROOT_ADMIN</span>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-primary-fixed-dim bg-surface-container-highest border-l-2 border-primary-fixed-dim transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                Document Index
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">enhanced_encryption</span>
+                Secure Vaults
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">security</span>
+                Access Matrix
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+                Audit Stream
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined">rule_folder</span>
+                Compliance Gates
+            </a>
+</nav>
+<!-- Telemetry Miniature -->
+<div class="mt-auto p-4 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-on-surface-variant">Uptime</span>
+<span class="text-primary-fixed-dim">99.992%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full w-[99%]"></div>
+</div>
+<div class="text-on-surface-variant font-code-xs text-code-xs mt-1">
+                    Nodes: 124 Active
+                </div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 mt-16 p-node-gutter pb-24 lg:pb-8">
+<!-- Header Banner with Shader background placeholder -->
+<div class="relative w-full h-48 rounded-xl overflow-hidden border border-outline-variant mb-node-gutter flex flex-col justify-end p-8">
+
+<div class="relative z-10">
+<div class="inline-block bg-primary-fixed-dim text-on-primary-fixed px-2 py-0.5 font-label-caps text-label-caps rounded mb-2">CRITICAL_ASSET</div>
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white mb-0">WF-034: Artifact K</h1>
+<p class="text-on-surface-variant font-code-sm text-code-sm mt-1">Implementation Hash: 0x821f...3ea9 | Owner: System_Architect</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-node-gutter">
+<!-- Left Column: Implementation Guide (Markdown) -->
+<div class="lg:col-span-8 markdown-content bg-surface-container-low p-8 rounded-xl border border-outline-variant">
+<h1>Record Lifecycle Implementation</h1>
+<p>This technical brief outlines the architectural handover for the <strong>Artifact K</strong> record lifecycle. Implementers must ensure strict adherence to the mutual TLS and encryption standards defined in the Secure Vaults protocol.</p>
+<h2><span class="material-symbols-outlined">api</span> Required Service APIs</h2>
+<p>Artifact K orchestration requires synchronized handshakes across four primary microservices.</p>
+<div class="space-y-4 my-4">
+<div class="bg-surface-container border-l-2 border-primary-fixed-dim p-4">
+<h3 class="mt-0">Document Service</h3>
+<p class="font-code-sm text-code-sm text-primary-fixed-dim mb-1">POST /v2/records/initiate</p>
+<ul class="text-code-sm">
+<li>Payload: <code>{ "schema_id": "WF-034", "owner_context": "ADMIN_01" }</code></li>
+<li>Responsibility: UID generation and initial state commitment.</li>
+</ul>
+</div>
+<div class="bg-surface-container border-l-2 border-secondary-container p-4">
+<h3 class="mt-0">Vault Service</h3>
+<p class="font-code-sm text-code-sm text-secondary mb-1">PUT /v1/encryption/wrap</p>
+<ul class="text-code-sm">
+<li>Payload: <code>{ "target_uid": "UUID", "policy": "STRICT_P3" }</code></li>
+<li>Responsibility: Envelope encryption and key rotation logic.</li>
+</ul>
+</div>
+</div>
+<h2><span class="material-symbols-outlined">database</span> Database Schemas</h2>
+<p>Relational integrity for Artifact K is managed via PostgreSQL with a JSONB secondary for dynamic audit metadata.</p>
+<pre class="font-code-sm"><code>CREATE TABLE artifact_k_registry (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    lifecycle_state VARCHAR(32) CHECK (lifecycle_state IN ('STAGED', 'ACTIVE', 'ARCHIVED')),
+    metadata JSONB NOT NULL,
+    checksum_sha256 CHAR(64) UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    sealed_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX idx_metadata_gin ON artifact_k_registry USING GIN (metadata);</code></pre>
+<h2><span class="material-symbols-outlined">cloud_sync</span> Deployment Specs (GKE/EKS)</h2>
+<p>Production environments must utilize horizontal pod autoscaling based on the <code>custom.googleapis.com/vault_queue_depth</code> metric.</p>
+<pre class="font-code-sm"><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: artifact-k-orchestrator
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: main
+        image: internal.repo/artifact-k:v1.4.2
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2000m"
+            memory: "4Gi"
+        securityContext:
+          runAsNonRoot: true</code></pre>
+</div>
+<!-- Right Column: System Status & Micro-Telemetry -->
+<div class="lg:col-span-4 space-y-node-gutter">
+<!-- System Graph / Flow Visualization Node -->
+<div class="bg-surface-container-high rounded-xl border border-outline-variant p-6 relative">
+<div class="flex justify-between items-center mb-6">
+<span class="font-label-caps text-label-caps text-on-surface">NODE_TOPOLOGY</span>
+<span class="flex h-2 w-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+</div>
+<div class="flex flex-col gap-8 relative py-4">
+<!-- Node 1 -->
+<div class="relative z-10 bg-surface-container-lowest border border-primary-fixed-dim p-3 rounded flex flex-col gap-1 w-48 mx-auto">
+<span class="font-label-caps text-code-xs text-primary-fixed-dim opacity-70">ENTRY_GATE</span>
+<span class="font-code-sm text-on-surface">Ingress_Micro</span>
+<div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-px h-8 bg-primary-fixed-dim opacity-30"></div>
+</div>
+<!-- Node 2 -->
+<div class="relative z-10 bg-surface-container-lowest border border-outline-variant p-3 rounded flex flex-col gap-1 w-48 mx-auto">
+<span class="font-label-caps text-code-xs text-on-surface-variant">LOGIC_CORE</span>
+<span class="font-code-sm text-on-surface">Process_K</span>
+<div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-px h-8 bg-outline-variant opacity-30"></div>
+</div>
+<!-- Node 3 -->
+<div class="relative z-10 bg-surface-container-lowest border border-outline-variant p-3 rounded flex flex-col gap-1 w-48 mx-auto">
+<span class="font-label-caps text-code-xs text-on-surface-variant">SINK_VAL</span>
+<span class="font-code-sm text-on-surface">Storage_Layer</span>
+</div>
+</div>
+</div>
+<!-- High-Density Metric Card -->
+<div class="bg-surface-container-low rounded-xl border border-outline-variant p-4">
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-3 rounded border border-outline-variant/30">
+<div class="font-label-caps text-code-xs text-on-surface-variant mb-1 uppercase">Latency</div>
+<div class="font-code-sm text-headline-md text-primary-fixed-dim">45.2<span class="text-xs ml-1">ms</span></div>
+</div>
+<div class="bg-surface-container-lowest p-3 rounded border border-outline-variant/30">
+<div class="font-label-caps text-code-xs text-on-surface-variant mb-1 uppercase">Throughput</div>
+<div class="font-code-sm text-headline-md text-on-surface">12.4k<span class="text-xs ml-1">r/s</span></div>
+</div>
+<div class="bg-surface-container-lowest p-3 rounded border border-outline-variant/30">
+<div class="font-label-caps text-code-xs text-on-surface-variant mb-1 uppercase">Errors</div>
+<div class="font-code-sm text-headline-md text-error">0.02<span class="text-xs ml-1">%</span></div>
+</div>
+<div class="bg-surface-container-lowest p-3 rounded border border-outline-variant/30">
+<div class="font-label-caps text-code-xs text-on-surface-variant mb-1 uppercase">Nodes</div>
+<div class="font-code-sm text-headline-md text-on-surface">14/14</div>
+</div>
+</div>
+</div>
+<!-- Audit Log Preview -->
+<div class="bg-surface-container-low rounded-xl border border-outline-variant overflow-hidden">
+<div class="bg-surface-container p-3 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface">REAL_TIME_AUDIT</span>
+</div>
+<div class="p-0 max-h-64 overflow-y-auto font-code-xs divide-y divide-outline-variant/20">
+<div class="p-3 hover:bg-surface-container-high transition-colors">
+<span class="text-primary-fixed-dim">14:02:11</span> <span class="text-on-surface-variant ml-2">[AUTH]</span> Handshake Success (0x3a)
+                        </div>
+<div class="p-3 hover:bg-surface-container-high transition-colors">
+<span class="text-primary-fixed-dim">14:01:58</span> <span class="text-on-surface-variant ml-2">[VALT]</span> Key Rotation Initiated
+                        </div>
+<div class="p-3 hover:bg-surface-container-high transition-colors">
+<span class="text-primary-fixed-dim">14:01:42</span> <span class="text-on-surface-variant ml-2">[SYNC]</span> Buffer Flushed to S3
+                        </div>
+<div class="p-3 hover:bg-surface-container-high transition-colors">
+<span class="text-primary-fixed-dim">14:01:30</span> <span class="text-on-surface-variant ml-2">[DOCS]</span> Record 821f-3ea9 Created
+                        </div>
+<div class="p-3 hover:bg-surface-container-high transition-colors">
+<span class="text-primary-fixed-dim">14:01:25</span> <span class="text-on-surface-variant ml-2">[AUTH]</span> User Admin session 0122 valid
+                        </div>
+</div>
+</div>
+<!-- Image Placeholder for Hardware View -->
+<div class="relative w-full aspect-video rounded-xl overflow-hidden border border-outline-variant group">
+<img class="object-cover w-full h-full opacity-60 group-hover:scale-105 transition-transform duration-700" data-alt="High-resolution, ultra-detailed architectural photo of a high-tech server room at night. Rows of sleek server racks glow with vibrant Terminal Green and soft Blue LED indicator lights. The perspective is a dramatic wide-angle shot down a corridor with polished dark floors reflecting the digital activity. The atmosphere is quiet, cold, and professional, embodying the core identity of Asset Integrity OS." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv0y_6JTgnel4y2UWE3jFbyhH7YoapewvKtWzAgo3uzNZkSDh8y_ixCQp4l5Is7Gh0uHXWQNe2aNPEJUDD6o1U8FdQrS__FryVQm8f6Qw1PcOXm_JBcKnvtIBHeS2wuuP_8inSqlCJXW3QAYwFA1aZHYCgz35qnF96JO0FSut64GlABZZWmihCmGsrNIku6Y08KouhrghPvWKMku3m6BIXiTA4xsYEtpCnug9WJE2EVaOSfdiYcwoRpe5Hjnd81F1CyMK1Qcr1RUM"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4">
+<div class="font-label-caps text-code-xs text-primary-fixed-dim">INFRASTRUCTURE_VISUALIZATION</div>
+<div class="font-code-sm text-on-surface">Data Center / Zone 4A</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant md:hidden z-50">
+<button class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg p-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-caps text-label-caps mt-1">Index</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform hover:text-on-surface">
+<span class="material-symbols-outlined">enhanced_encryption</span>
+<span class="font-label-caps text-label-caps mt-1">Vaults</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform hover:text-on-surface">
+<span class="material-symbols-outlined">security</span>
+<span class="font-label-caps text-label-caps mt-1">Matrix</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform hover:text-on-surface">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps mt-1">Audit</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform hover:text-on-surface">
+<span class="material-symbols-outlined">rule_folder</span>
+<span class="font-label-caps text-label-caps mt-1">Gates</span>
+</button>
+</nav>
+<!-- Floating Micro-Telemetry Overlay -->
+<div class="fixed bottom-6 right-6 z-40 hidden lg:block">
+<div class="bg-surface-container-high/80 backdrop-blur-md border border-primary-fixed-dim/30 p-3 rounded-lg shadow-2xl flex items-center gap-3">
+<div class="h-2 w-2 bg-primary-fixed-dim rounded-full animate-ping"></div>
+<span class="font-code-sm text-on-surface">Connection Secure: TLS 1.3 | AES-256</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+</div>
+<script>
+        // Simple micro-interaction for copying code blocks
+        document.querySelectorAll('pre').forEach(block => {
+            block.classList.add('cursor-pointer', 'relative', 'group');
+            block.addEventListener('click', () => {
+                const text = block.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalBg = block.style.borderColor;
+                    block.style.borderColor = '#00e639';
+                    setTimeout(() => {
+                        block.style.borderColor = originalBg;
+                    }, 1000);
+                });
+            });
+            
+            const badge = document.createElement('div');
+            badge.className = 'absolute top-2 right-2 font-label-caps text-code-xs text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity';
+            badge.innerText = 'CLICK TO COPY';
+            block.appendChild(badge);
+        });
+
+        // Background atmosphere: pulsing dots effect
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes subtlePulse {
+                0% { opacity: 0.2; }
+                50% { opacity: 0.5; }
+                100% { opacity: 0.2; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body></html>

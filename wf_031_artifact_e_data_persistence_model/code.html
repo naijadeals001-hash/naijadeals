@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-031 // DATA_PERSISTENCE_MODEL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-card {
+            background: #0d1c2d;
+            border-left: 2px solid #00e639;
+            transition: all 0.2s ease-in-out;
+        }
+        .node-card:hover {
+            background: #122131;
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.1);
+        }
+        .connector-line {
+            position: absolute;
+            background-color: #3b4b37;
+            z-index: -1;
+        }
+        .glow-green {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.4);
+        }
+        @keyframes flow {
+            0% { stroke-dashoffset: 24; }
+            100% { stroke-dashoffset: 0; }
+        }
+        .animate-flow {
+            stroke-dasharray: 4 4;
+            animation: flow 1s linear infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#fff6ff",
+                      "error": "#ffb4ab",
+                      "surface-container-lowest": "#010f1f",
+                      "secondary": "#b8c3ff",
+                      "surface-tint": "#00e639",
+                      "on-error": "#690005",
+                      "surface-variant": "#273647",
+                      "on-surface-variant": "#b9ccb2",
+                      "primary": "#ebffe2",
+                      "inverse-on-surface": "#233143",
+                      "secondary-container": "#0043eb",
+                      "primary-fixed-dim": "#00e639",
+                      "secondary-fixed": "#dde1ff",
+                      "on-secondary": "#002388",
+                      "tertiary-fixed": "#f0dbff",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-dim": "#051424",
+                      "on-primary-container": "#007117",
+                      "inverse-surface": "#d4e4fa",
+                      "inverse-primary": "#006e16",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-tertiary-container": "#862ed4",
+                      "error-container": "#93000a",
+                      "surface-container-low": "#0d1c2d",
+                      "surface": "#051424",
+                      "surface-container-highest": "#273647",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary-fixed": "#001356",
+                      "primary-fixed": "#72ff70",
+                      "on-secondary-container": "#c6ceff",
+                      "surface-container": "#122131",
+                      "surface-bright": "#2c3a4c",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-primary": "#003907",
+                      "on-background": "#d4e4fa",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary": "#490080",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-tertiary-fixed": "#2c0051",
+                      "primary-container": "#00ff41",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "outline": "#84967e",
+                      "on-error-container": "#ffdad6",
+                      "on-surface": "#d4e4fa",
+                      "background": "#051424",
+                      "surface-container-high": "#1c2b3c"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "grid-unit": "8px",
+                      "lane-margin": "32px",
+                      "stack-gap": "4px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface text-primary dark:text-primary w-full top-0 border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 fixed z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">hub</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</h1>
+</div>
+<div class="hidden md:flex items-center gap-8 h-full">
+<nav class="flex h-full items-center gap-6">
+<a class="text-primary border-b-2 border-primary h-full flex items-center px-2 cursor-pointer transition-colors font-code-sm text-code-sm">SCHEMA_ARCH</a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest h-full flex items-center px-2 cursor-pointer transition-colors font-code-sm text-code-sm">QUERY_TESTER</a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest h-full flex items-center px-2 cursor-pointer transition-colors font-code-sm text-code-sm">HEALTH_MONITOR</a>
+</nav>
+<span class="material-symbols-outlined cursor-pointer hover:text-surface-tint">settings_input_component</span>
+</div>
+</header>
+<!-- Sidebar (NavigationDrawer) -->
+<aside class="hidden md:flex bg-surface-container-low dark:bg-surface-container-low h-full w-64 border-r border-outline-variant fixed left-0 top-16 z-40 overflow-y-auto flex-col py-6">
+<div class="px-6 mb-8">
+<h2 class="font-label-caps text-label-caps text-primary mb-2">MODULE_REGISTRY</h2>
+<div class="h-1 w-12 bg-surface-tint opacity-50"></div>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">shopping_cart</span> Shop
+            </div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">restaurant</span> Eats
+            </div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">local_shipping</span> Send
+            </div>
+<div class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">work</span> Gigs
+            </div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">inventory_2</span> Wholesale
+            </div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">agriculture</span> Agro
+            </div>
+</nav>
+<div class="mt-auto px-6 py-4">
+<div class="p-3 bg-surface-container-high rounded border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-1 uppercase tracking-tighter">Vector Capacity</p>
+<div class="w-full bg-surface-dim h-1.5 rounded-full overflow-hidden">
+<div class="bg-surface-tint h-full w-3/4"></div>
+</div>
+<p class="font-code-xs text-code-xs text-surface-tint mt-1 text-right">74.2%</p>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 pt-24 px-8 max-w-7xl mx-auto">
+<!-- Header & Breadcrumbs -->
+<div class="mb-10 flex justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<nav class="flex gap-2 font-code-xs text-code-xs text-on-surface-variant mb-2">
+<span>ROOT</span>
+<span class="text-outline">/</span>
+<span>MODELS</span>
+<span class="text-outline">/</span>
+<span class="text-surface-tint">WF-031_PERSISTENCE</span>
+</nav>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight">DATA PERSISTENCE MODEL</h2>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest transition-colors font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-[18px]">export_notes</span> EXPORT_DDL
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container font-bold hover:opacity-90 transition-opacity font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span> RE-INDEX_NOW
+                </button>
+</div>
+</div>
+<!-- Schema Visualizer Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
+<!-- Swimlane 01: Ingestion & Discovery -->
+<div class="space-y-6">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-surface-tint">manage_search</span>
+<h3 class="font-headline-md text-headline-md text-primary">INGESTION_LAYER</h3>
+</div>
+<!-- Table: SearchQuery -->
+<div class="node-card p-4 border border-outline-variant">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-label-caps text-surface-tint bg-surface-tint/10 px-2 py-0.5">TABLE::SEARCHQUERY</span>
+<span class="material-symbols-outlined text-outline text-[16px]">database</span>
+</div>
+<div class="space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span class="text-primary">query_id</span>
+<span class="text-outline">UUID (PK)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span>user_id</span>
+<span class="text-outline">UUID (FK)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span>raw_text</span>
+<span class="text-outline">TEXT</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span>timestamp</span>
+<span class="text-outline">TIMESTAMPTZ</span>
+</div>
+</div>
+</div>
+<!-- Table: SearchHistory -->
+<div class="node-card p-4 border border-outline-variant">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-label-caps text-surface-tint bg-surface-tint/10 px-2 py-0.5">TABLE::SEARCHHISTORY</span>
+<span class="material-symbols-outlined text-outline text-[16px]">history</span>
+</div>
+<div class="space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span class="text-primary">history_id</span>
+<span class="text-outline">UUID (PK)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span>query_id</span>
+<span class="text-outline">UUID (FK)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span>clicked_id</span>
+<span class="text-outline">UUID (REF)</span>
+</div>
+</div>
+</div>
+<!-- Micro-Telemetry -->
+<div class="p-4 bg-surface-container-lowest border border-dashed border-outline-variant opacity-70">
+<p class="font-code-xs text-code-xs flex justify-between">
+<span>L_INGEST_RATE:</span>
+<span class="text-surface-tint">452 ops/s</span>
+</p>
+<p class="font-code-xs text-code-xs flex justify-between">
+<span>QUEUE_DEPTH:</span>
+<span class="text-error">0.02ms</span>
+</p>
+</div>
+</div>
+<!-- Swimlane 02: Vector & Analytics (CORE) -->
+<div class="space-y-6">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-surface-tint">psychology</span>
+<h3 class="font-headline-md text-headline-md text-primary">VECTOR_ANALYTICS_CORE</h3>
+</div>
+<!-- Table: VectorEmbedding -->
+<div class="node-card p-4 border border-primary/40 shadow-lg shadow-primary/5">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps text-on-primary-container bg-primary-container px-2 py-0.5">VECTOR::EMBEDDING</span>
+<span class="animate-pulse w-2 h-2 rounded-full bg-surface-tint"></span>
+</div>
+<span class="material-symbols-outlined text-primary text-[16px]">memory</span>
+</div>
+<div class="space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span class="text-primary">entity_id</span>
+<span class="text-outline">UUID (PK)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span class="text-surface-tint">vector_data</span>
+<span class="text-outline">FLOAT32[1536]</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span>model_ver</span>
+<span class="text-outline">VARCHAR[32]</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/30">
+<p class="font-code-xs text-code-xs text-outline mb-1">INDEXING_TYPE: HNSW</p>
+<p class="font-code-xs text-code-xs text-outline">METRIC: COSINE_SIMILARITY</p>
+</div>
+</div>
+<!-- Table: Recommendation -->
+<div class="node-card p-4 border border-outline-variant">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-label-caps text-surface-tint bg-surface-tint/10 px-2 py-0.5">TABLE::RECOMMENDATION</span>
+<span class="material-symbols-outlined text-outline text-[16px]">stars</span>
+</div>
+<div class="space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span class="text-primary">rec_id</span>
+<span class="text-outline">UUID (PK)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span>query_id</span>
+<span class="text-outline">UUID (FK)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span>score_id</span>
+<span class="text-outline">UUID (FK)</span>
+</div>
+</div>
+</div>
+<!-- Operations Panel -->
+<div class="bg-surface-container border border-outline-variant p-4">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-3">ACTIVE_OPERATIONS</h4>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-dim p-2 flex items-center justify-between border border-outline-variant group cursor-pointer hover:border-surface-tint transition-all">
+<span class="font-code-xs text-code-xs group-hover:text-surface-tint">INSERT</span>
+<span class="material-symbols-outlined text-[14px]">add_circle</span>
+</div>
+<div class="bg-surface-dim p-2 flex items-center justify-between border border-outline-variant group cursor-pointer hover:border-surface-tint transition-all">
+<span class="font-code-xs text-code-xs group-hover:text-surface-tint">VECTOR_INDEX</span>
+<span class="material-symbols-outlined text-[14px]">grid_view</span>
+</div>
+<div class="bg-surface-dim p-2 flex items-center justify-between border border-outline-variant group cursor-pointer hover:border-surface-tint transition-all">
+<span class="font-code-xs text-code-xs group-hover:text-surface-tint">CACHE_HIT</span>
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+</div>
+<div class="bg-surface-dim p-2 flex items-center justify-between border border-outline-variant group cursor-pointer hover:border-error transition-all">
+<span class="font-code-xs text-code-xs group-hover:text-error">DELETE_CASCADE</span>
+<span class="material-symbols-outlined text-[14px]">delete</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane 03: Trust & Audit -->
+<div class="space-y-6">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-surface-tint">verified_user</span>
+<h3 class="font-headline-md text-headline-md text-primary">TRUST_AUDIT_LOG</h3>
+</div>
+<!-- Table: TrustScore -->
+<div class="node-card p-4 border border-outline-variant">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-label-caps text-surface-tint bg-surface-tint/10 px-2 py-0.5">TABLE::TRUSTSCORE</span>
+<span class="material-symbols-outlined text-outline text-[16px]">security</span>
+</div>
+<div class="space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span class="text-primary">entity_id</span>
+<span class="text-outline">UUID (PK)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span class="text-on-secondary-container">score_val</span>
+<span class="text-outline">DECIMAL(5,4)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 py-1">
+<span>last_calc</span>
+<span class="text-outline">TIMESTAMPTZ</span>
+</div>
+</div>
+</div>
+<!-- Table: AuditLog -->
+<div class="node-card p-4 border border-outline-variant">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-label-caps text-surface-tint bg-surface-tint/10 px-2 py-0.5">TABLE::AUDITLOG</span>
+<span class="material-symbols-outlined text-outline text-[16px]">visibility</span>
+</div>
+<div class="max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+<div class="space-y-2 font-code-xs text-code-xs">
+<div class="p-2 border border-outline-variant bg-surface-dim/50">
+<p class="text-surface-tint">2024-05-24 10:24:01</p>
+<p>OP: VECTOR_REINDEX | ADM_ROOT</p>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-dim/50">
+<p class="text-outline">2024-05-24 10:23:45</p>
+<p>OP: UPDATE_TRUST | SYS_CRON</p>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-dim/50">
+<p class="text-outline">2024-05-24 10:22:12</p>
+<p>OP: CACHE_PURGE | REGION_WEST</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Relationship Legend -->
+<div class="p-4 bg-surface-container-high border border-outline-variant rounded-lg">
+<h4 class="font-label-caps text-label-caps text-primary mb-3">SCHEMA_REL_KEYS</h4>
+<div class="space-y-2">
+<div class="flex items-center gap-2">
+<div class="w-3 h-0.5 bg-surface-tint"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ONE_TO_MANY (1:N)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-0.5 bg-secondary border-t border-dashed border-secondary"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">VECTOR_ASSOCIATION</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-0.5 bg-error"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">CASCADE_STRICT</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Global Status Bar -->
+<div class="mt-12 p-6 bg-surface-container border border-outline-variant flex flex-wrap gap-8 items-center justify-between">
+<div class="flex gap-12">
+<div>
+<p class="font-code-xs text-code-xs text-outline mb-1 uppercase">Relational Tables</p>
+<p class="font-headline-md text-headline-md text-primary">148</p>
+</div>
+<div>
+<p class="font-code-xs text-code-xs text-outline mb-1 uppercase">Vector Dimensions</p>
+<p class="font-headline-md text-headline-md text-primary">1536d</p>
+</div>
+<div>
+<p class="font-code-xs text-code-xs text-outline mb-1 uppercase">Total Rows</p>
+<p class="font-headline-md text-headline-md text-primary">14.2M</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="h-12 w-32 bg-surface-dim border border-outline-variant flex flex-col justify-center px-3">
+<span class="font-code-xs text-code-xs text-outline">WRITE_IO</span>
+<span class="font-code-sm text-code-sm text-surface-tint">24.1 MB/s</span>
+</div>
+<div class="h-12 w-32 bg-surface-dim border border-outline-variant flex flex-col justify-center px-3">
+<span class="font-code-xs text-code-xs text-outline">QUERY_LAT</span>
+<span class="font-code-sm text-code-sm text-surface-tint">1.4ms</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Background Visualization (Abstract Node Graph) -->
+<div class="fixed inset-0 pointer-events-none z-[-2] opacity-10">
+<svg height="100%" width="100%">
+<circle cx="20%" cy="30%" fill="#00e639" r="2"></circle>
+<circle cx="80%" cy="40%" fill="#00e639" r="2"></circle>
+<circle cx="50%" cy="80%" fill="#00e639" r="2"></circle>
+<line stroke="#00e639" stroke-width="0.5" x1="20%" x2="50%" y1="30%" y2="80%"></line>
+<line stroke="#00e639" stroke-width="0.5" x1="80%" x2="50%" y1="40%" y2="80%"></line>
+</svg>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-surface-container-lowest text-on-surface-variant dark:text-on-surface-variant w-full bottom-0 border-t border-outline-variant fixed bottom-0 w-full flex justify-between items-center px-lane-margin py-stack-gap z-50 h-10">
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-label-caps text-surface-tint">© 2024 NAIJADEALS_ECOSYSTEM // SRV_ID: WF-031</span>
+</div>
+<div class="flex items-center gap-8 font-code-xs text-code-xs">
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">SYSTEM_STATUS: <span class="text-surface-tint">OK</span></span>
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">LATENCY: <span class="text-surface-tint">24ms</span></span>
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">AURA_CORE: <span class="text-surface-tint">ACTIVE</span></span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for node cards
+        document.querySelectorAll('.node-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('glow-green');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('glow-green');
+            });
+        });
+    </script>
+</body></html>

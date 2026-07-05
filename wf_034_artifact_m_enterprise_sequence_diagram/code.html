@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ASSET_INTEGRITY_OS | Sequence Trace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#ffdad6",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-surface-variant": "#b9ccb2",
+                    "secondary": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-container-high": "#1c2b3c",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary-fixed": "#002203",
+                    "on-error": "#690005",
+                    "inverse-primary": "#006e16",
+                    "primary-container": "#00ff41",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "tertiary": "#fff6ff",
+                    "surface-container-highest": "#273647",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-container": "#122131",
+                    "secondary-fixed": "#dde1ff",
+                    "background": "#051424",
+                    "on-background": "#d4e4fa",
+                    "on-tertiary-fixed": "#2c0051",
+                    "primary": "#ebffe2",
+                    "error-container": "#93000a",
+                    "on-background": "#d4e4fa",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary-container": "#862ed4",
+                    "primary-fixed": "#72ff70",
+                    "outline-variant": "#3b4b37",
+                    "inverse-on-surface": "#233143",
+                    "on-primary-fixed-variant": "#00530e",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-variant": "#273647",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-secondary": "#002388",
+                    "surface": "#051424",
+                    "on-secondary-fixed": "#001356",
+                    "surface-dim": "#051424",
+                    "on-tertiary": "#490080",
+                    "on-primary": "#003907",
+                    "outline": "#84967e",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-primary-container": "#007117",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-tint": "#00e639",
+                    "secondary-container": "#0043eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dot-grid {
+            background-image: radial-gradient(circle, #1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .trace-line {
+            background: linear-gradient(to bottom, #00e639 50%, transparent 50%);
+            background-size: 1px 8px;
+        }
+        .connector-h {
+            border-bottom: 1px dashed #3b4b37;
+        }
+        .connector-active {
+            border-bottom: 2px solid #00e639;
+        }
+        .glow-node {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.15);
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        .pulse::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #00e639;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-background dark:bg-background border-b border-outline-variant flex items-center justify-between px-node-gutter h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="shield_lock">shield_lock</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">ASSET_INTEGRITY_OS</h1>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant font-code-sm text-code-sm hover:text-on-surface transition-colors" href="#">SYSTEM_HEALTH</a>
+<a class="text-primary-fixed-dim font-bold font-code-sm text-code-sm" href="#">SEQUENCE_TRACE</a>
+<a class="text-on-surface-variant font-code-sm text-code-sm hover:text-on-surface transition-colors" href="#">LOG_EXPLORER</a>
+</nav>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+</div>
+</header>
+<div class="flex flex-1 pt-16 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col py-grid-unit fixed left-0 top-16 h-full w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant">
+<div class="px-4 py-6">
+<span class="font-label-caps text-label-caps text-on-surface">ROOT_ADMIN</span>
+</div>
+<div class="space-y-1">
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="inventory_2">inventory_2</span>
+<span class="font-code-sm text-code-sm">Document Index</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="enhanced_encryption">enhanced_encryption</span>
+<span class="font-code-sm text-code-sm">Secure Vaults</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-primary-fixed-dim bg-surface-container-highest border-l-2 border-primary-fixed-dim transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="security">security</span>
+<span class="font-code-sm text-code-sm">Access Matrix</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="history_edu">history_edu</span>
+<span class="font-code-sm text-code-sm">Audit Stream</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-sm" data-icon="rule_folder">rule_folder</span>
+<span class="font-code-sm text-code-sm">Compliance Gates</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 relative overflow-x-auto dot-grid">
+<!-- Sequence Diagram Header Actors -->
+<div class="sticky top-0 z-20 bg-background/80 backdrop-blur-sm border-b border-outline-variant flex min-w-[1200px] py-6 px-12">
+<div class="flex-1 flex justify-center">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline">
+<span class="material-symbols-outlined text-on-surface" data-icon="person">person</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">User</span>
+</div>
+</div>
+<div class="flex-1 flex justify-center">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline">
+<span class="material-symbols-outlined text-on-surface" data-icon="web">web</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">Frontend</span>
+</div>
+</div>
+<div class="flex-1 flex justify-center">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline">
+<span class="material-symbols-outlined text-on-surface" data-icon="router">router</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">API Gateway</span>
+</div>
+</div>
+<div class="flex-1 flex justify-center">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline">
+<span class="material-symbols-outlined text-on-surface" data-icon="description">description</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">Doc Service</span>
+</div>
+</div>
+<div class="flex-1 flex justify-center">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline">
+<span class="material-symbols-outlined text-on-surface" data-icon="vault">taunt</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">Vault</span>
+</div>
+</div>
+<div class="flex-1 flex justify-center">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline">
+<span class="material-symbols-outlined text-on-surface" data-icon="verified_user">verified_user</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">Audit</span>
+</div>
+</div>
+</div>
+<!-- Lifelines -->
+<div class="absolute inset-0 flex min-w-[1200px] px-12 pointer-events-none opacity-20">
+<div class="flex-1 flex justify-center"><div class="w-[1px] h-full trace-line"></div></div>
+<div class="flex-1 flex justify-center"><div class="w-[1px] h-full trace-line"></div></div>
+<div class="flex-1 flex justify-center"><div class="w-[1px] h-full trace-line"></div></div>
+<div class="flex-1 flex justify-center"><div class="w-[1px] h-full trace-line"></div></div>
+<div class="flex-1 flex justify-center"><div class="w-[1px] h-full trace-line"></div></div>
+<div class="flex-1 flex justify-center"><div class="w-[1px] h-full trace-line"></div></div>
+</div>
+<!-- Messages Trace -->
+<div class="relative min-w-[1200px] px-12 py-12 space-y-16">
+<!-- Sequence Step 1 -->
+<div class="flex items-center group relative">
+<div class="w-1/2 flex justify-center relative translate-x-[25%]">
+<div class="absolute inset-x-0 bottom-0 connector-active"></div>
+<div class="bg-surface-container-high px-3 py-1 rounded border border-primary-fixed-dim -mb-4 z-10 glow-node">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">UPLOAD_REQUEST(DOC_A)</span>
+</div>
+<div class="absolute right-0 bottom-[-4px] w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[8px] border-l-primary-fixed-dim"></div>
+<div class="absolute left-0 bottom-[-4px] pulse"></div>
+</div>
+<div class="absolute right-node-gutter top-0 text-right opacity-40">
+<p class="font-code-xs text-code-xs">T+0.00ms</p>
+</div>
+</div>
+<!-- Sequence Step 2 -->
+<div class="flex items-center group relative">
+<div class="w-[33.33%] translate-x-[150%] flex justify-center relative">
+<div class="absolute inset-x-0 bottom-0 connector-active"></div>
+<div class="bg-surface-container px-3 py-1 rounded border border-outline -mb-4 z-10">
+<span class="font-code-sm text-code-sm text-on-surface-variant">VALIDATE_JWT()</span>
+</div>
+<div class="absolute right-0 bottom-[-4px] w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[8px] border-l-primary-fixed-dim"></div>
+</div>
+<div class="absolute right-node-gutter top-0 text-right opacity-40">
+<p class="font-code-xs text-code-xs">T+12.4ms</p>
+</div>
+</div>
+<!-- Sequence Step 3 -->
+<div class="flex items-center group relative">
+<div class="w-[16.66%] translate-x-[350%] flex justify-center relative">
+<div class="absolute inset-x-0 bottom-0 connector-active"></div>
+<div class="bg-surface-container-high px-3 py-1 rounded border border-primary-fixed-dim -mb-4 z-10 glow-node">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">INIT_ENCRYPTION()</span>
+</div>
+<div class="absolute right-0 bottom-[-4px] w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[8px] border-l-primary-fixed-dim"></div>
+</div>
+</div>
+<!-- Async Block -->
+<div class="border border-outline-variant border-dashed p-6 rounded-lg bg-surface-container-lowest/40 ml-1/2 w-1/2 translate-x-[40%]">
+<div class="flex items-center gap-2 mb-4">
+<div class="bg-secondary-container text-on-secondary-container text-[8px] px-2 py-0.5 rounded-full font-label-caps">ASYNC_PROCESS</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant italic">State synchronization in progress...</span>
+</div>
+<div class="flex items-center group relative py-4">
+<div class="w-[100%] flex justify-center relative">
+<div class="absolute inset-x-0 bottom-0 border-b border-secondary"></div>
+<div class="bg-surface-container-high px-3 py-1 rounded border border-secondary -mb-4 z-10">
+<span class="font-code-sm text-code-sm text-secondary">EMIT_AUDIT_LOG(EV_034)</span>
+</div>
+<div class="absolute right-0 bottom-[-4px] w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[8px] border-l-secondary"></div>
+</div>
+</div>
+</div>
+<!-- Sequence Step 4 (Callback) -->
+<div class="flex items-center group relative">
+<div class="w-1/2 flex justify-center relative translate-x-[25%]">
+<div class="absolute inset-x-0 bottom-0 border-b border-primary-fixed-dim/40 border-dashed"></div>
+<div class="bg-surface-container px-3 py-1 rounded border border-outline -mb-4 z-10">
+<span class="font-code-sm text-code-sm text-on-surface-variant">HTTP_201_CREATED</span>
+</div>
+<div class="absolute left-0 bottom-[-4px] w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-r-[8px] border-r-primary-fixed-dim/40"></div>
+</div>
+</div>
+</div>
+<!-- Micro-Telemetry Overlays -->
+<div class="fixed bottom-24 right-node-gutter z-30 space-y-2 pointer-events-none">
+<div class="bg-surface-container-highest/80 border border-outline-variant p-3 rounded backdrop-blur-md">
+<div class="flex items-center justify-between gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">GLOBAL_LATENCY</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">42.8ms</span>
+</div>
+<div class="w-32 h-1 bg-surface-container mt-2 overflow-hidden rounded-full">
+<div class="h-full bg-primary-fixed-dim w-[65%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-highest/80 border border-outline-variant p-3 rounded backdrop-blur-md">
+<div class="flex items-center justify-between gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">EXEC_COUNT</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">1.24M</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Right Side Audit Log Stubs -->
+<aside class="hidden xl:flex flex-col w-80 bg-surface-container border-l border-outline-variant h-full overflow-y-auto">
+<div class="p-4 border-b border-outline-variant bg-surface-container-low">
+<h3 class="font-headline-md text-headline-md text-on-surface">Audit Stream</h3>
+</div>
+<div class="divide-y divide-outline-variant">
+<div class="p-4 space-y-1 hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">DOC_STORE_ACK</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:20:01</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Hash verified: 0x82f...a1</p>
+</div>
+<div class="p-4 space-y-1 hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">VAULT_LOCK</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:19:58</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Sharded key rotation complete.</p>
+</div>
+<div class="p-4 space-y-1 hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="flex justify-between items-center text-error">
+<span class="font-code-xs text-code-xs">GATEWAY_TIMEOUT</span>
+<span class="font-code-xs text-code-xs">14:19:42</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-error-container">Retrying connection (3/5)</p>
+</div>
+<div class="p-4 space-y-1 hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">USER_LOGIN</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">14:19:30</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Session ID: adm_42_01</p>
+</div>
+</div>
+</aside>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant z-50">
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-caps text-label-caps">Index</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="enhanced_encryption">enhanced_encryption</span>
+<span class="font-label-caps text-label-caps">Vaults</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg p-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-label-caps text-label-caps">Matrix</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps">Audit</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="rule_folder">rule_folder</span>
+<span class="font-label-caps text-label-caps">Gates</span>
+</div>
+</nav>
+<!-- Floating UI Control for Interaction -->
+<button class="fixed bottom-24 left-node-gutter z-50 w-12 h-12 bg-primary-container text-on-primary-container rounded-full shadow-lg flex items-center justify-center hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="play_arrow">play_arrow</span>
+</button>
+<script>
+        // Micro-interaction for sequence tracing
+        document.querySelectorAll('.glow-node').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('scale-105');
+                node.style.borderColor = '#ffffff';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('scale-105');
+                node.style.borderColor = '';
+            });
+        });
+
+        // Atmospheric grid pulse logic
+        let gridOpacity = 0.4;
+        function pulseGrid() {
+            gridOpacity = 0.4 + Math.sin(Date.now() / 1000) * 0.1;
+            document.querySelector('.dot-grid').style.opacity = gridOpacity;
+            requestAnimationFrame(pulseGrid);
+        }
+        // pulseGrid(); // Optional: subtle performance impact
+    </script>
+</body></html>

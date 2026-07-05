@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-031 // SECURITY &amp; COMPLIANCE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dot-grid {
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-pulse {
+            box-shadow: 0 0 0 0 rgba(0, 230, 57, 0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 230, 57, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 230, 57, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 230, 57, 0); }
+        }
+        .connector-flow {
+            stroke-dasharray: 10;
+            animation: flow 20s linear infinite;
+        }
+        @keyframes flow {
+            from { stroke-dashoffset: 200; }
+            to { stroke-dashoffset: 0; }
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3b4b37; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#fff6ff",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary": "#b8c3ff",
+                        "surface-tint": "#00e639",
+                        "on-error": "#690005",
+                        "surface-variant": "#273647",
+                        "on-surface-variant": "#b9ccb2",
+                        "primary": "#ebffe2",
+                        "inverse-on-surface": "#233143",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed-dim": "#00e639",
+                        "secondary-fixed": "#dde1ff",
+                        "on-secondary": "#002388",
+                        "tertiary-fixed": "#f0dbff",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-dim": "#051424",
+                        "on-primary-container": "#007117",
+                        "inverse-surface": "#d4e4fa",
+                        "inverse-primary": "#006e16",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-tertiary-container": "#862ed4",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#0d1c2d",
+                        "surface": "#051424",
+                        "surface-container-highest": "#273647",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-fixed": "#001356",
+                        "primary-fixed": "#72ff70",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-container": "#122131",
+                        "surface-bright": "#2c3a4c",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-primary": "#003907",
+                        "on-background": "#d4e4fa",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary": "#490080",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-tertiary-fixed": "#2c0051",
+                        "primary-container": "#00ff41",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "outline": "#84967e",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#d4e4fa",
+                        "background": "#051424",
+                        "surface-container-high": "#1c2b3c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "lane-margin": "32px",
+                        "stack-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface selection:bg-surface-tint selection:text-background overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-lane-margin h-16 w-full top-0 border-b border-outline-variant bg-surface shrink-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+<span class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</span>
+</div>
+<nav class="hidden md:flex items-center gap-8 h-full">
+<a class="font-code-sm text-code-sm text-primary border-b-2 border-primary h-full flex items-center px-2" href="#">SECURITY_STACK</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors h-full flex items-center px-2" href="#">ARCHITECTURE</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors h-full flex items-center px-2" href="#">COMPLIANCE</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer (Suppressed for focused architecture view, using it as a mini-sidebar instead) -->
+<aside class="hidden lg:flex flex-col h-full w-64 border-r border-outline-variant bg-surface-container-low shrink-0">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary">MODULE_REGISTRY</span>
+</div>
+<div class="flex-1 overflow-y-auto py-2">
+<!-- Select categories relevant to Security/DevOps -->
+<div class="px-4 py-2 flex items-center gap-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint">
+<span class="material-symbols-outlined text-[18px]" data-icon="shield">shield</span>
+<span class="font-code-sm text-code-sm">Insurance</span>
+</div>
+<div class="px-4 py-2 flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="inventory_2">inventory_2</span>
+<span class="font-code-sm text-code-sm">Wholesale</span>
+</div>
+<div class="px-4 py-2 flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="business_center">business_center</span>
+<span class="font-code-sm text-code-sm">Jobs</span>
+</div>
+<div class="px-4 py-2 flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="school">school</span>
+<span class="font-code-sm text-code-sm">Learn</span>
+</div>
+</div>
+</aside>
+<!-- Main Content: Security Architecture -->
+<main class="flex-1 relative dot-grid overflow-hidden flex flex-col">
+<!-- Architecture Canvas -->
+<div class="flex-1 relative p-lane-margin overflow-auto">
+<!-- SVG Connections Overlay -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="min-width: 1200px; min-height: 800px;">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#00e639" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Connection paths -->
+<path class="connector-flow" d="M 280 120 L 380 120" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="1.5"></path>
+<path class="connector-flow" d="M 280 320 L 380 320" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="1.5"></path>
+<path class="connector-flow" d="M 580 120 L 680 220" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="1.5"></path>
+<path class="connector-flow" d="M 580 320 L 680 220" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="1.5"></path>
+<path class="connector-flow" d="M 880 220 L 980 220" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<path d="M 1180 220 L 1280 220" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="1.5"></path>
+<!-- Error Path -->
+<path d="M 480 370 L 480 450 L 980 450" fill="none" marker-end="url(#arrowhead)" stroke="#ffb4ab" stroke-dasharray="4" stroke-width="1.5"></path>
+</svg>
+<div class="grid grid-cols-4 gap-x-32 gap-y-16 relative" style="width: 1400px;">
+<!-- Entry Row -->
+<div class="space-y-16">
+<div class="flex items-center gap-3 opacity-50 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="login">login</span>
+<span class="font-headline-md text-headline-md">INGRESS_GATEWAY</span>
+</div>
+<!-- Permission Filtering -->
+<div class="bg-surface-container-low border border-surface-tint p-4 w-64 rounded-sm relative z-10 node-pulse">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-surface-tint">SEC_MOD::01</span>
+<span class="text-surface-tint font-code-xs text-code-xs">ACTIVE</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary uppercase">Permission Filtering</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-2">JWT/RBAC validation layer</p>
+<div class="mt-4 flex gap-1">
+<div class="h-1 flex-1 bg-surface-tint"></div>
+<div class="h-1 flex-1 bg-surface-tint"></div>
+<div class="h-1 flex-1 bg-surface-tint opacity-30"></div>
+</div>
+</div>
+<!-- Private Content Protection -->
+<div class="bg-surface-container-low border border-surface-tint p-4 w-64 rounded-sm relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-surface-tint">SEC_MOD::02</span>
+<span class="text-surface-tint font-code-xs text-code-xs">ENFORCING</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary uppercase">Private Content Protection</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-2">Isolation boundary for PII/SPI</p>
+</div>
+</div>
+<!-- Middle Layer -->
+<div class="space-y-16">
+<div class="h-10"></div>
+<!-- Trust Filtering -->
+<div class="bg-surface-container-low border border-primary p-4 w-64 rounded-sm relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary">ANALYSIS::0A</span>
+<span class="text-primary font-code-xs text-code-xs">SCANNING</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary uppercase">Trust Filtering</h3>
+<div class="bg-surface-container-highest p-2 mt-3 font-code-xs text-code-xs">
+<span class="text-surface-tint">Score: 0.992</span>
+</div>
+</div>
+<!-- Fraud Detection -->
+<div class="bg-surface-container-low border border-error p-4 w-64 rounded-sm relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error">ML_CORE::0B</span>
+<span class="text-error font-code-xs text-code-xs">MONITORING</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary uppercase">Fraud Detection</h3>
+<div class="mt-2 text-on-surface-variant font-code-xs">Pattern matching active</div>
+</div>
+</div>
+<!-- Core Protection -->
+<div class="space-y-16 py-12">
+<div class="h-12"></div>
+<!-- Encryption (AES-256) -->
+<div class="bg-surface-container-high border-2 border-surface-tint p-6 w-80 rounded-sm relative z-10 shadow-lg">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-surface-tint text-sm" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="font-label-caps text-label-caps text-surface-tint">CRYPTO_ENGINE</span>
+</div>
+<span class="font-code-xs text-code-xs text-surface-tint">FIPS 140-2</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Encryption (AES-256)</h3>
+<div class="font-code-xs text-code-xs text-on-surface-variant bg-black p-2 overflow-hidden whitespace-nowrap opacity-70">
+                                0x74 0x68 0x69 0x73 0x20 0x69 0x73 0x20 0x73 0x65 0x63 0x75 0x72 0x65
+                            </div>
+</div>
+<!-- Search Abuse Detection -->
+<div class="bg-surface-container-low border border-outline p-4 w-64 rounded-sm relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-outline">LIMITER</span>
+<span class="text-surface-tint font-code-xs text-code-xs">5k req/s</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary uppercase">Search Abuse Detection</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-2">Dynamic rate limiting engine</p>
+</div>
+</div>
+<!-- Compliance/Audit -->
+<div class="space-y-8">
+<div class="flex items-center gap-3 opacity-50 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="verified_user">verified_user</span>
+<span class="font-headline-md text-headline-md">AUDIT_PERSISTENCE</span>
+</div>
+<!-- Audit Logging -->
+<div class="bg-surface-container-low border border-surface-tint p-4 w-64 rounded-sm relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-surface-tint">LOG::IMUT</span>
+<span class="text-surface-tint font-code-xs text-code-xs">SYNCED</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary uppercase">Audit Logging (Immutable)</h3>
+<div class="mt-4 flex flex-col gap-1">
+<div class="h-1 bg-surface-tint opacity-80"></div>
+<div class="h-1 bg-surface-tint opacity-60"></div>
+<div class="h-1 bg-surface-tint opacity-40"></div>
+</div>
+</div>
+<!-- Compliance Monitoring -->
+<div class="bg-surface-container-low border border-secondary p-4 w-64 rounded-sm relative z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-secondary">REG_MAP</span>
+<span class="text-secondary font-code-xs text-code-xs">SOC2/GDPR</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary uppercase">Compliance Monitoring</h3>
+<div class="mt-2 grid grid-cols-2 gap-1">
+<div class="h-4 bg-secondary/20 rounded-full flex items-center justify-center font-code-xs text-[8px]">ISO</div>
+<div class="h-4 bg-secondary/20 rounded-full flex items-center justify-center font-code-xs text-[8px]">PCI</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Telemetry / Audit Log Footer (Docked Panel) -->
+<div class="h-48 border-t border-outline-variant bg-surface-container-low p-4 flex flex-col overflow-hidden shrink-0 z-40">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-primary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-surface-tint animate-pulse"></span>
+                            LIVE_SECURITY_TELEMETRY
+                        </span>
+<div class="h-4 w-px bg-outline-variant"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">LATENCY: 12ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">THREAT_LEVEL: LOW</span>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-highest hover:bg-surface-bright px-3 py-1 font-code-xs text-code-xs rounded border border-outline-variant transition-colors">EXPORT_LOGS</button>
+<button class="bg-surface-tint text-background px-3 py-1 font-code-xs text-code-xs rounded font-bold hover:opacity-90 transition-opacity">RESCAN_ALL</button>
+</div>
+</div>
+<div class="flex-1 font-code-xs text-code-xs space-y-1 overflow-y-auto pr-4" id="log-container">
+<!-- Logs injected via JS -->
+</div>
+</div>
+<!-- Floating Telemetry Overlay (Right) -->
+<div class="absolute right-8 top-8 w-64 space-y-4 pointer-events-none hidden xl:block">
+<div class="bg-surface/80 backdrop-blur-md border border-outline-variant p-3 rounded shadow-xl">
+<span class="font-label-caps text-[9px] text-surface-tint block mb-2">SYSTEM_INTEGRITY</span>
+<div class="flex items-end gap-1 h-8">
+<div class="bg-surface-tint w-full h-[60%]"></div>
+<div class="bg-surface-tint w-full h-[80%]"></div>
+<div class="bg-surface-tint w-full h-[70%]"></div>
+<div class="bg-surface-tint w-full h-[90%]"></div>
+<div class="bg-surface-tint w-full h-[85%]"></div>
+<div class="bg-surface-tint w-full h-[95%]"></div>
+</div>
+<p class="font-code-xs text-[10px] mt-2 text-on-surface-variant">Uptime: 99.998% // Nodes: 128</p>
+</div>
+<div class="bg-surface/80 backdrop-blur-md border border-outline-variant p-3 rounded shadow-xl">
+<span class="font-label-caps text-[9px] text-error block mb-2">BLOCK_RATE</span>
+<div class="flex justify-between items-baseline">
+<span class="font-headline-lg text-headline-lg text-primary">0.04<span class="text-sm">%</span></span>
+<span class="text-error font-code-xs text-code-xs">↓ 12%</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full bottom-0 border-t border-outline-variant bg-surface-container-lowest text-on-surface-variant font-code-xs text-code-xs flex justify-between items-center px-lane-margin py-stack-gap z-50 shrink-0">
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-surface-tint">© 2024 NAIJADEALS_ECOSYSTEM // SRV_ID: WF-031</span>
+<div class="hidden md:flex gap-4">
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">SYSTEM_STATUS: OK</span>
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">LATENCY: 24ms</span>
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">AURA_CORE: ACTIVE</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="cloud_done">cloud_done</span>
+<span>ENCRYPTED_SESSION: 256bit</span>
+</div>
+</footer>
+<script>
+        // Micro-telemetry log generator
+        const logContainer = document.getElementById('log-container');
+        const eventTypes = ['AUTH_PASS', 'TOKEN_VALID', 'ENCRYPT_SUCCESS', 'AUDIT_WRITE', 'TRUST_SCAN', 'THREAT_MONITOR'];
+        const actors = ['USER_882', 'BOT_33', 'API_01', 'GATEWAY_PROXY', 'COMPLIANCE_BOT'];
+        
+        function addLog() {
+            const time = new Date().toISOString().split('T')[1].split('.')[0];
+            const event = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+            const actor = actors[Math.floor(Math.random() * actors.length)];
+            const id = Math.random().toString(16).slice(2, 8).toUpperCase();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'flex gap-4 border-l border-outline-variant pl-2 hover:bg-surface-container-highest transition-colors py-0.5 group';
+            
+            let statusColor = 'text-surface-tint';
+            if(Math.random() > 0.95) {
+                statusColor = 'text-error';
+            }
+
+            logEntry.innerHTML = `
+                <span class="text-on-surface-variant w-16 opacity-50">${time}</span>
+                <span class="w-24 font-bold text-primary">[${event}]</span>
+                <span class="flex-1 text-on-surface-variant">REQ_ID: <span class="text-primary-fixed-dim">${id}</span> // INITIATOR: ${actor}</span>
+                <span class="${statusColor} font-bold opacity-0 group-hover:opacity-100 transition-opacity">VERIFIED</span>
+            `;
+            
+            logContainer.prepend(logEntry);
+            
+            if (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        setInterval(addLog, 1200);
+        // Initial batch
+        for(let i=0; i<15; i++) addLog();
+    </script>
+</body></html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAIJADEALS_CORE_ENGINE // Business Rules Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .node-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.1);
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, rgba(114, 255, 112, 0.1), transparent);
+            position: absolute;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            from { top: 0%; }
+            to { top: 100%; }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#ebffe2",
+                      "on-secondary-container": "#c6ceff",
+                      "on-primary-fixed-variant": "#00530e",
+                      "inverse-surface": "#d4e4fa",
+                      "outline": "#84967e",
+                      "on-surface-variant": "#b9ccb2",
+                      "inverse-on-surface": "#233143",
+                      "on-secondary-fixed": "#001356",
+                      "on-primary-container": "#007117",
+                      "on-surface": "#d4e4fa",
+                      "on-tertiary-fixed": "#2c0051",
+                      "error": "#ffb4ab",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "surface-container-lowest": "#010f1f",
+                      "on-primary": "#003907",
+                      "tertiary-fixed": "#f0dbff",
+                      "surface-container-high": "#1c2b3c",
+                      "surface-container": "#122131",
+                      "surface-bright": "#2c3a4c",
+                      "primary-fixed-dim": "#00e639",
+                      "primary-fixed": "#72ff70",
+                      "primary-container": "#00ff41",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-highest": "#273647",
+                      "on-secondary": "#002388",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "secondary-fixed": "#dde1ff",
+                      "secondary": "#b8c3ff",
+                      "inverse-primary": "#006e16",
+                      "surface-tint": "#00e639",
+                      "on-error": "#690005",
+                      "error-container": "#93000a",
+                      "surface-dim": "#051424",
+                      "surface": "#051424",
+                      "secondary-container": "#0043eb",
+                      "on-background": "#d4e4fa",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "tertiary": "#fff6ff",
+                      "on-tertiary": "#490080",
+                      "surface-variant": "#273647",
+                      "tertiary-container": "#ecd3ff",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary-container": "#862ed4",
+                      "background": "#051424",
+                      "surface-container-low": "#0d1c2d",
+                      "outline-variant": "#3b4b37"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px",
+                      "stack-gap": "4px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex overflow-hidden h-screen font-body-md text-on-surface">
+<!-- Navigation Drawer (SideNav) -->
+<aside class="hidden md:flex flex-col gap-stack-gap py-lane-margin h-full w-64 left-0 border-r border-outline-variant bg-surface-container dark:bg-surface-container shrink-0">
+<div class="px-6 mb-8">
+<h2 class="font-label-caps text-label-caps text-primary">SYSTEM_MANIFEST</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-6 py-3 text-primary font-bold border-l-4 border-primary bg-primary-container/10 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schema</span>
+<span class="font-code-sm text-code-sm">BPMN Designer</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings_ethernet</span>
+<span class="font-code-sm text-code-sm">API Gateway</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">event_repeat</span>
+<span class="font-code-sm text-code-sm">Reservation Logic</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">memory</span>
+<span class="font-code-sm text-code-sm">Node Clusters</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-code-sm text-code-sm">Security Ops</span>
+</a>
+</nav>
+<!-- Technical Telemetry mini-widget -->
+<div class="mt-auto px-6 py-4 border-t border-outline-variant bg-surface-container-low">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] uppercase opacity-50">Heartbeat</span>
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+</div>
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">
+                CPU: 12.4% / MEM: 1.2GB
+            </div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col relative overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-grid-unit h-16 w-full top-0 sticky bg-surface dark:bg-surface border-b border-outline-variant z-40">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-tighter text-primary dark:text-primary">NAIJADEALS_CORE_ENGINE</h1>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex bg-surface-container-highest rounded px-2 py-1 items-center gap-2 border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+<span class="font-code-sm text-code-sm text-primary">LIVE_PROD_ENV</span>
+</div>
+<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:opacity-80">settings_input_component</button>
+</div>
+</header>
+<!-- Rules Engine Content -->
+<section class="flex-1 overflow-auto p-lane-margin relative">
+<div class="scanline"></div>
+<div class="mb-lane-margin">
+<div class="flex items-baseline gap-4 mb-2">
+<h2 class="font-headline-lg text-headline-lg text-primary">ARTIFACT C: Business Rules Engine</h2>
+<span class="font-code-sm text-code-sm text-outline px-2 border border-outline uppercase">Schema_v3.1.2</span>
+</div>
+<p class="text-on-surface-variant max-w-2xl font-body-md">Active validation matrix for high-frequency transaction flow. All nodes are orthogonal-connected to the central decision gateway.</p>
+</div>
+<!-- Technical Grid / Table -->
+<div class="w-full border border-outline-variant bg-surface-container-low overflow-hidden rounded-none shadow-2xl">
+<div class="grid grid-cols-12 bg-surface-container-highest border-b border-outline-variant font-label-caps text-[10px] tracking-widest text-on-surface-variant uppercase">
+<div class="col-span-3 p-4 border-r border-outline-variant">Rule Identifier</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">Decision Logic (IF/THEN)</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">Service Node</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">Failure Result</div>
+<div class="col-span-2 p-4">Recovery Path</div>
+</div>
+<!-- Table Rows -->
+<div class="divide-y divide-outline-variant/30">
+<!-- Row 1 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">check_circle</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">Resource Available?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> inventory.qty &gt; 0 <br/>
+<span class="text-primary-fixed-dim">THEN</span> proceed_to_lock
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">INV_SRVC_01</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_OUT_OF_STOCK</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            TRIGGER: Notify_Waitlist
+                        </div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">event_busy</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">Conflict Exists?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> overlap(req, existing) <br/>
+<span class="text-primary-fixed-dim">THEN</span> throw_409
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">SCHED_NODE</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_OVERLAP</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            PROPOSE: Alt_Slots
+                        </div>
+</div>
+<!-- Row 3 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">schedule</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">Working Hours?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> time IN [0800-2200] <br/>
+<span class="text-primary-fixed-dim">THEN</span> validate_location
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">LOC_SRVC_MAIN</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_OFF_HOURS</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            RETENTION: Queued_Req
+                        </div>
+</div>
+<!-- Row 4 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">celebration</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">Holiday?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> date NOT IN h_list <br/>
+<span class="text-primary-fixed-dim">THEN</span> apply_std_rate
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">CAL_GATEWAY</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_BLOCKED_DAY</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            OVERRIDE: Manager_Auth
+                        </div>
+</div>
+<!-- Row 5 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">notification_important</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">Minimum Notice?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> delta &gt; 24h <br/>
+<span class="text-primary-fixed-dim">THEN</span> bypass_expedite
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">POLICY_EXEC</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_MIN_NOTICE</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            UPSELL: Rush_Fee
+                        </div>
+</div>
+<!-- Row 6 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">calendar_month</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">Max Booking Window?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> delta &lt; 90d <br/>
+<span class="text-primary-fixed-dim">THEN</span> secure_inventory
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">CAP_PLANNER</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_WINDOW_EXCEED</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            LOG: Demand_Interest
+                        </div>
+</div>
+<!-- Row 7 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">payments</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">Payment Required?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> cost &gt; 0 <br/>
+<span class="text-primary-fixed-dim">THEN</span> call_stripe_api
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">FIN_ORCHESTRA</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_PAY_AUTH</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            ACTION: Retry_3D_Secure
+                        </div>
+</div>
+<!-- Row 8 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">shield_with_heart</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">Escrow Required?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> deal_type == HighValue <br/>
+<span class="text-primary-fixed-dim">THEN</span> hold_funds_ESCROW
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">TRUST_PROTOCOL</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_TRUST_INIT</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            RETRY: Backup_Vault
+                        </div>
+</div>
+<!-- Row 9 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">cancel_schedule_send</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">Cancellation Window?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> now &lt; (start - 48h) <br/>
+<span class="text-primary-fixed-dim">THEN</span> refund_full
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">OPS_ENGINE</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_CANCEL_LATE</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            POLICY: Apply_Penalty
+                        </div>
+</div>
+<!-- Row 10 -->
+<div class="grid grid-cols-12 group hover:bg-primary/5 transition-colors items-center border-b-0">
+<div class="col-span-3 p-4 border-r border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">person_off</span>
+<span class="font-code-sm text-code-sm font-bold text-primary">No-Show Policy?</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">IF</span> checkin == FALSE <br/>
+<span class="text-primary-fixed-dim">THEN</span> flag_account_risk
+                        </div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="font-code-xs text-code-xs bg-surface-container-highest px-2 py-1 border border-outline-variant">USER_RATING_S</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<span class="text-error font-code-sm">ERR_NO_SHOW</span>
+</div>
+<div class="col-span-2 p-4 font-code-xs text-code-xs text-on-surface-variant">
+                            INCIDENT: Fraud_Audit
+                        </div>
+</div>
+</div>
+</div>
+<!-- Bottom Telemetry Stats -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">Rules Active</p>
+<p class="font-code-sm text-headline-md text-primary">124_NODES</p>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">Avg Latency</p>
+<p class="font-code-sm text-headline-md text-primary-fixed-dim">14.2ms</p>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">Fail Rate</p>
+<p class="font-code-sm text-headline-md text-error">0.02%</p>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">Throughput</p>
+<p class="font-code-sm text-headline-md text-primary">8.4k rps</p>
+</div>
+</div>
+</section>
+<!-- Mobile BottomNavBar -->
+<nav class="md:hidden flex justify-around items-center w-full h-16 bg-surface fixed bottom-0 z-50 border-t border-outline-variant">
+<a class="flex flex-col items-center justify-center bg-on-primary-fixed-variant text-primary-fixed rounded-none p-2 border-t-2 border-primary-fixed active:scale-95 duration-75" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-[9px] mt-1">Flows</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 hover:bg-surface-container-high transition-all active:scale-95 duration-75" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-caps text-[9px] mt-1">Telemetry</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 hover:bg-surface-container-high transition-all active:scale-95 duration-75" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-[9px] mt-1">Logs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 hover:bg-surface-container-high transition-all active:scale-95 duration-75" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-label-caps text-[9px] mt-1">Systems</span>
+</a>
+</nav>
+</main>
+<!-- Side Inspection Panel (Simulated Node Detail) -->
+<aside class="hidden xl:flex flex-col w-80 border-l border-outline-variant bg-surface-container-low shrink-0">
+<div class="p-6 border-b border-outline-variant">
+<h3 class="font-label-caps text-label-caps text-primary uppercase">Node_Inspection</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-1">UUID: rule_0884_PAY_AUTH</p>
+</div>
+<div class="p-6 space-y-6">
+<div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">Trace_Graph</span>
+<div class="h-32 border border-outline-variant mt-2 relative overflow-hidden bg-black/40">
+<!-- SVG simulation of flow -->
+<svg class="absolute inset-0 w-full h-full">
+<path d="M 20 40 L 60 40 L 60 80 L 100 80" fill="none" stroke="#72ff70" stroke-width="2"></path>
+<path d="M 100 80 L 140 80" fill="none" stroke="#72ff70" stroke-dasharray="4" stroke-width="2"></path>
+<circle cx="20" cy="40" fill="#72ff70" r="3"></circle>
+<circle cx="60" cy="40" fill="#72ff70" r="3"></circle>
+<circle cx="60" cy="80" fill="#72ff70" r="3"></circle>
+<circle cx="100" cy="80" fill="#72ff70" r="3"></circle>
+</svg>
+<div class="absolute bottom-2 right-2 font-code-xs text-[9px] text-primary opacity-50">RELAY_OK</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center text-code-xs">
+<span class="text-on-surface-variant">Complexity_Score</span>
+<span class="text-primary">O(log n)</span>
+</div>
+<div class="flex justify-between items-center text-code-xs">
+<span class="text-on-surface-variant">Last_Updated</span>
+<span class="text-primary">12-OCT-2023 14:02:11</span>
+</div>
+<div class="flex justify-between items-center text-code-xs">
+<span class="text-on-surface-variant">Hash_Integrity</span>
+<span class="text-primary">SHA-256_VERIFIED</span>
+</div>
+</div>
+<button class="w-full py-2 border border-primary text-primary font-label-caps text-label-caps hover:bg-primary/10 transition-colors uppercase">
+                Edit_Logic_Block
+            </button>
+</div>
+</aside>
+<script>
+        // Micro-interaction for hover effects on grid rows
+        document.querySelectorAll('.grid.group').forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                // Potential logic to update the side inspector based on row data
+                const ruleName = row.querySelector('.font-bold').textContent;
+                const inspectorTitle = document.querySelector('h3.font-label-caps');
+                if (inspectorTitle) inspectorTitle.innerText = `Node: ${ruleName}`;
+            });
+        });
+
+        // Atmospheric grid mouse tracking (subtle)
+        document.body.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            // You could use this to shift shadows or glows slightly
+        });
+    </script>
+</body></html>

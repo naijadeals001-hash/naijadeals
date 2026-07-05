@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAIJADEALS_CORE_ENGINE // Data Persistence Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ebffe2",
+                        "on-secondary-container": "#c6ceff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "inverse-surface": "#d4e4fa",
+                        "outline": "#84967e",
+                        "on-surface-variant": "#b9ccb2",
+                        "inverse-on-surface": "#233143",
+                        "on-secondary-fixed": "#001356",
+                        "on-primary-container": "#007117",
+                        "on-surface": "#d4e4fa",
+                        "on-tertiary-fixed": "#2c0051",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-container-lowest": "#010f1f",
+                        "on-primary": "#003907",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container-high": "#1c2b3c",
+                        "surface-container": "#122131",
+                        "surface-bright": "#2c3a4c",
+                        "primary-fixed-dim": "#00e639",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-highest": "#273647",
+                        "on-secondary": "#002388",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "secondary-fixed": "#dde1ff",
+                        "secondary": "#b8c3ff",
+                        "inverse-primary": "#006e16",
+                        "surface-tint": "#00e639",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "surface-dim": "#051424",
+                        "surface": "#051424",
+                        "secondary-container": "#0043eb",
+                        "on-background": "#d4e4fa",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "tertiary": "#fff6ff",
+                        "on-tertiary": "#490080",
+                        "surface-variant": "#273647",
+                        "tertiary-container": "#ecd3ff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary-container": "#862ed4",
+                        "background": "#051424",
+                        "surface-container-low": "#0d1c2d",
+                        "outline-variant": "#3b4b37"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px",
+                        "stack-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            stroke: #3b4b37;
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .node-connector-active {
+            stroke: #00e639;
+            stroke-width: 2;
+        }
+        .node-connector-error {
+            stroke: #ffb4ab;
+            stroke-dasharray: 4;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+            border-radius: 2px;
+        }
+        .grid-mask {
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-50 bg-surface dark:bg-surface border-b border-outline-variant flex justify-between items-center px-grid-unit h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-tighter text-primary dark:text-primary">NAIJADEALS_CORE_ENGINE</h1>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<nav class="flex items-center gap-8">
+<a class="font-code-sm text-code-sm text-primary dark:text-primary border-b-2 border-primary pb-1" href="#">SCHEMA_VIEW</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary transition-colors" href="#">QUERY_CONSOLE</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary transition-colors" href="#">RELATION_MAP</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary transition-colors" href="#">MIGRATIONS</a>
+</nav>
+<div class="w-px h-6 bg-outline-variant mx-2"></div>
+<button class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80 hover:bg-surface-container-highest p-2 rounded-full transition-colors">settings_input_component</button>
+</div>
+</header>
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Left Navigation Drawer -->
+<aside class="h-full w-64 flex flex-col gap-stack-gap py-lane-margin bg-surface-container dark:bg-surface-container border-r border-outline-variant shrink-0">
+<div class="px-4 mb-4">
+<span class="font-label-caps text-label-caps text-primary opacity-50 block mb-2">SYSTEM_MANIFEST</span>
+<div class="h-1 w-8 bg-primary"></div>
+</div>
+<nav class="flex-1 overflow-y-auto custom-scrollbar px-2 space-y-1">
+<div class="flex items-center gap-3 p-2 text-primary font-bold border-l-4 border-primary bg-primary-container/10 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">schema</span>
+<span class="font-code-sm text-code-sm">BPMN Designer</span>
+</div>
+<div class="flex items-center gap-3 p-2 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">settings_ethernet</span>
+<span class="font-code-sm text-code-sm">API Gateway</span>
+</div>
+<div class="flex items-center gap-3 p-2 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">event_repeat</span>
+<span class="font-code-sm text-code-sm">Reservation Logic</span>
+</div>
+<div class="flex items-center gap-3 p-2 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">memory</span>
+<span class="font-code-sm text-code-sm">Node Clusters</span>
+</div>
+<div class="flex items-center gap-3 p-2 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">security</span>
+<span class="font-code-sm text-code-sm">Security Ops</span>
+</div>
+</nav>
+<!-- Status Indicator -->
+<div class="p-4 bg-surface-container-low mt-auto border-t border-outline-variant">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-xs text-code-xs text-primary/60">DB_STATUS</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_8px_rgba(114,255,112,0.5)]"></span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant/80">
+                    LATENCY: 12ms<br/>
+                    ACTIVE_TX: 1,402
+                </div>
+</div>
+</aside>
+<!-- Main Visualization Canvas -->
+<main class="flex-1 overflow-auto bg-surface-dim relative grid-mask custom-scrollbar">
+<!-- Canvas Controls Overlay -->
+<div class="absolute top-4 right-4 z-40 flex flex-col gap-2">
+<div class="bg-surface-container-highest border border-outline-variant p-1 rounded flex flex-col">
+<button class="p-2 hover:bg-surface-container text-on-surface transition-colors"><span class="material-symbols-outlined">add</span></button>
+<button class="p-2 hover:bg-surface-container text-on-surface transition-colors border-t border-outline-variant"><span class="material-symbols-outlined">remove</span></button>
+<button class="p-2 hover:bg-surface-container text-on-surface transition-colors border-t border-outline-variant"><span class="material-symbols-outlined">fit_screen</span></button>
+</div>
+<div class="bg-surface-container-highest border border-outline-variant p-1 rounded">
+<button class="p-2 hover:bg-surface-container text-on-surface transition-colors"><span class="material-symbols-outlined">layers</span></button>
+</div>
+</div>
+<!-- ER Diagram Content -->
+<div class="p-10 min-w-[1600px] min-h-[1200px] relative">
+<!-- SVG Connectors Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+<!-- Connections -->
+<path class="node-connector" d="M 280 180 L 340 180"></path> <!-- Reservation -> Booking -->
+<path class="node-connector" d="M 540 180 L 600 180"></path> <!-- Booking -> WalletTransaction -->
+<path class="node-connector" d="M 180 280 L 180 340"></path> <!-- Reservation -> Calendar -->
+<path class="node-connector" d="M 180 500 L 180 560"></path> <!-- Calendar -> Availability -->
+<path class="node-connector-error" d="M 440 340 L 440 300 L 500 300"></path> <!-- Resource -> AuditLog -->
+<path class="node-connector" d="M 440 500 L 440 560"></path> <!-- Resource -> Schedule -->
+<path class="node-connector" d="M 700 340 L 700 560"></path> <!-- WalletTransaction -> Escrow -->
+<path class="node-connector" d="M 440 720 L 440 780"></path> <!-- Schedule -> TimeSlot -->
+<path class="node-connector" d="M 960 180 L 1020 180"></path> <!-- WalletTransaction -> Notification -->
+<path class="node-connector" d="M 1120 280 L 1120 780 L 540 840"></path> <!-- Notification -> AuditLog -->
+</svg>
+<!-- ROW 1: Transactional Core -->
+<div class="grid grid-cols-4 gap-node-gutter">
+<!-- Table: Reservation -->
+<div class="bg-surface-container-lowest border border-primary-fixed-dim/30 w-60 shrink-0 shadow-2xl">
+<div class="bg-primary/10 border-b border-primary/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-primary">RESERVATION</span>
+<span class="font-code-xs text-code-xs text-primary/50">PK</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="text-primary-fixed">res_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">user_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">resource_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">status</span>
+<span class="text-on-surface-variant">ENUM</span>
+</div>
+<div class="mt-4 pt-2 border-t border-outline-variant">
+<span class="font-label-caps text-[9px] text-primary/40 block mb-1">LIFECYCLE</span>
+<div class="flex gap-1">
+<span class="px-1 bg-on-primary-fixed-variant text-primary-fixed text-[8px]">INSERT</span>
+<span class="px-1 bg-surface-container text-on-surface-variant text-[8px]">LOCK</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Table: Booking -->
+<div class="bg-surface-container-lowest border border-secondary/30 w-60 shrink-0">
+<div class="bg-secondary/10 border-b border-secondary/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-secondary">BOOKING</span>
+<span class="font-code-xs text-code-xs text-secondary/50">PK</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="text-secondary-fixed-dim">booking_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">res_id</span>
+<span class="text-on-secondary-container">FK</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">total_amt</span>
+<span class="text-on-surface-variant">DECIMAL</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">booked_at</span>
+<span class="text-on-surface-variant">TIMESTAMP</span>
+</div>
+</div>
+</div>
+<!-- Table: WalletTransaction -->
+<div class="bg-surface-container-lowest border border-tertiary-fixed-dim/30 w-60 shrink-0">
+<div class="bg-tertiary/10 border-b border-tertiary/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-tertiary">WALLET_TX</span>
+<span class="font-code-xs text-code-xs text-tertiary/50">PK</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="text-tertiary-fixed-dim">tx_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">wallet_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">booking_id</span>
+<span class="text-on-tertiary-container">FK</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">state</span>
+<span class="text-on-surface-variant">TX_STATE</span>
+</div>
+</div>
+</div>
+<!-- Table: Notification -->
+<div class="bg-surface-container-lowest border border-outline-variant w-60 shrink-0">
+<div class="bg-surface-container-highest border-b border-outline-variant px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface">NOTIFICATION</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">PK</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="text-on-surface">notify_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">target_user</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">template_id</span>
+<span class="text-on-surface-variant">STRING</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 2: Scheduling & Assets -->
+<div class="grid grid-cols-4 gap-node-gutter mt-20">
+<!-- Table: Calendar -->
+<div class="bg-surface-container-lowest border border-primary-fixed-dim/30 w-60 shrink-0">
+<div class="bg-primary/10 border-b border-primary/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-primary">CALENDAR</span>
+<span class="font-code-xs text-code-xs text-primary/50">PK</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between">
+<span class="text-primary-fixed">cal_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">res_id</span>
+<span class="text-on-primary-container">FK</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">entry_type</span>
+<span class="text-on-surface-variant">ENUM</span>
+</div>
+</div>
+</div>
+<!-- Table: Resource -->
+<div class="bg-surface-container-lowest border border-secondary/30 w-60 shrink-0">
+<div class="bg-secondary/10 border-b border-secondary/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-secondary">RESOURCE</span>
+<span class="font-code-xs text-code-xs text-secondary/50">PK</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="text-secondary-fixed-dim">resource_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">owner_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">type</span>
+<span class="text-on-surface-variant">STRING</span>
+</div>
+</div>
+</div>
+<!-- Placeholder for alignment -->
+<div></div>
+<!-- Table: Escrow -->
+<div class="bg-surface-container-lowest border border-tertiary-fixed-dim/30 w-60 shrink-0">
+<div class="bg-tertiary/10 border-b border-tertiary/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-tertiary">ESCROW</span>
+<span class="font-code-xs text-code-xs text-tertiary/50">PK</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between">
+<span class="text-tertiary-fixed-dim">escrow_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">tx_id</span>
+<span class="text-on-tertiary-container">FK</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">hold_until</span>
+<span class="text-on-surface-variant">TIMESTAMP</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 3: Availability & Time Slots -->
+<div class="grid grid-cols-4 gap-node-gutter mt-20">
+<!-- Table: Availability -->
+<div class="bg-surface-container-lowest border border-primary-fixed-dim/30 w-60 shrink-0">
+<div class="bg-primary/10 border-b border-primary/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-primary">AVAILABILITY</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between">
+<span class="text-on-surface">cal_id</span>
+<span class="text-on-primary-container">FK</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">is_open</span>
+<span class="text-on-surface-variant">BOOLEAN</span>
+</div>
+</div>
+</div>
+<!-- Table: Schedule -->
+<div class="bg-surface-container-lowest border border-secondary/30 w-60 shrink-0">
+<div class="bg-secondary/10 border-b border-secondary/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-secondary">SCHEDULE</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between">
+<span class="text-on-surface">resource_id</span>
+<span class="text-on-secondary-container">FK</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">timezone</span>
+<span class="text-on-surface-variant">STRING</span>
+</div>
+</div>
+</div>
+<!-- Table: AuditLog (Spans right) -->
+<div class="col-span-2 bg-surface-container-lowest border border-error/20 w-full shrink-0">
+<div class="bg-error/10 border-b border-error/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-error">AUDIT_LOG</span>
+<span class="font-code-xs text-code-xs text-error/50">SEQ_PK</span>
+</div>
+<div class="p-3 font-code-sm text-code-sm grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span class="text-error">log_id</span>
+<span class="text-on-surface-variant">BIGINT</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">entity_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">operation</span>
+<span class="text-on-surface-variant">OP_ENUM</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between">
+<span class="text-on-surface">diff_payload</span>
+<span class="text-on-surface-variant">JSONB</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">actor_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">timestamp</span>
+<span class="text-on-surface-variant">TSZ</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 4: Final Leafs -->
+<div class="grid grid-cols-4 gap-node-gutter mt-20">
+<div class="invisible w-60"></div>
+<!-- Table: TimeSlot -->
+<div class="bg-surface-container-lowest border border-secondary/30 w-60 shrink-0">
+<div class="bg-secondary/10 border-b border-secondary/20 px-3 py-2 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-secondary">TIME_SLOT</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between">
+<span class="text-on-surface">sched_id</span>
+<span class="text-on-secondary-container">FK</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">start_time</span>
+<span class="text-on-surface-variant">TIME</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">end_time</span>
+<span class="text-on-surface-variant">TIME</span>
+</div>
+</div>
+</div>
+<!-- Table: Reminder -->
+<div class="bg-surface-container-lowest border border-outline-variant w-60 shrink-0">
+<div class="bg-surface-container-highest border-b border-outline-variant px-3 py-2">
+<span class="font-label-caps text-label-caps text-on-surface">REMINDER</span>
+</div>
+<div class="p-3 space-y-2 font-code-sm text-code-sm">
+<div class="flex justify-between">
+<span class="text-on-surface">target_res</span>
+<span class="text-on-surface-variant">FK</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface">remind_at</span>
+<span class="text-on-surface-variant">TIMESTAMP</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Floating Panel -->
+<div class="fixed bottom-20 right-6 w-72 bg-surface-container-highest border border-outline-variant p-4 backdrop-blur-md bg-opacity-80 z-50">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary-fixed text-lg">query_stats</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">LIVE_PERSISTENCE_FEED</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-code-xs font-code-xs py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant">[14:22:01] BEGIN TX 0x7E3</span>
+<span class="text-primary-fixed">COMMIT</span>
+</div>
+<div class="flex justify-between items-center text-code-xs font-code-xs py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant">[14:22:05] UPDATE WALLET</span>
+<span class="text-on-secondary-container">PENDING</span>
+</div>
+<div class="flex justify-between items-center text-code-xs font-code-xs py-1 border-b border-outline-variant/30">
+<span class="text-on-surface-variant">[14:22:08] LOCK RESERVATION</span>
+<span class="text-primary-fixed">OK</span>
+</div>
+<div class="flex justify-between items-center text-code-xs font-code-xs py-1">
+<span class="text-on-surface-variant">[14:22:12] DELETE TEMP_BUFF</span>
+<span class="text-error">ROLLBACK</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Bottom Navigation Bar (Mobile View) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center w-full h-16 bg-surface border-t border-outline-variant">
+<div class="flex flex-col items-center justify-center bg-on-primary-fixed-variant text-primary-fixed rounded-none p-2 border-t-2 border-primary-fixed cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Flows</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps">Logs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-label-caps text-label-caps">Systems</span>
+</div>
+</nav>
+<!-- FAB Contextual Action -->
+<div class="fixed bottom-24 left-6 z-40 md:bottom-10">
+<button class="flex items-center gap-2 bg-primary text-on-primary px-4 py-3 shadow-lg hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined">add_box</span>
+<span class="font-label-caps text-label-caps">NEW_ENTITY</span>
+</button>
+</div>
+<script>
+        // Micro-interactions for the schema nodes
+        document.querySelectorAll('.bg-surface-container-lowest').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.borderColor = 'rgba(235, 255, 226, 0.6)';
+                node.classList.add('transition-all', 'duration-300');
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.borderColor = '';
+            });
+        });
+
+        // Simple pan simulation for the canvas
+        const canvas = document.querySelector('main');
+        let isDown = false;
+        let startX;
+        let startY;
+        let scrollLeft;
+        let scrollTop;
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.target !== canvas && !canvas.contains(e.target)) return;
+            isDown = true;
+            canvas.classList.add('cursor-grabbing');
+            startX = e.pageX - canvas.offsetLeft;
+            startY = e.pageY - canvas.offsetTop;
+            scrollLeft = canvas.scrollLeft;
+            scrollTop = canvas.scrollTop;
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            isDown = false;
+            canvas.classList.remove('cursor-grabbing');
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDown = false;
+            canvas.classList.remove('cursor-grabbing');
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - canvas.offsetLeft;
+            const y = e.pageY - canvas.offsetTop;
+            const walkX = (x - startX) * 1.5;
+            const walkY = (y - startY) * 1.5;
+            canvas.scrollLeft = scrollLeft - walkX;
+            canvas.scrollTop = scrollTop - walkY;
+        });
+    </script>
+</body></html>

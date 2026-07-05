@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OPERATIONAL MONITORING // WF-031</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .node-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.1);
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.05);
+            position: absolute;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            from { top: 0%; }
+            to { top: 100%; }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#fff6ff",
+                      "error": "#ffb4ab",
+                      "surface-container-lowest": "#010f1f",
+                      "secondary": "#b8c3ff",
+                      "surface-tint": "#00e639",
+                      "on-error": "#690005",
+                      "surface-variant": "#273647",
+                      "on-surface-variant": "#b9ccb2",
+                      "primary": "#ebffe2",
+                      "inverse-on-surface": "#233143",
+                      "secondary-container": "#0043eb",
+                      "primary-fixed-dim": "#00e639",
+                      "secondary-fixed": "#dde1ff",
+                      "on-secondary": "#002388",
+                      "tertiary-fixed": "#f0dbff",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-dim": "#051424",
+                      "on-primary-container": "#007117",
+                      "inverse-surface": "#d4e4fa",
+                      "inverse-primary": "#006e16",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "on-tertiary-container": "#862ed4",
+                      "error-container": "#93000a",
+                      "surface-container-low": "#0d1c2d",
+                      "surface": "#051424",
+                      "surface-container-highest": "#273647",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "outline-variant": "#3b4b37",
+                      "on-secondary-fixed": "#001356",
+                      "primary-fixed": "#72ff70",
+                      "on-secondary-container": "#c6ceff",
+                      "surface-container": "#122131",
+                      "surface-bright": "#2c3a4c",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-primary": "#003907",
+                      "on-background": "#d4e4fa",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary": "#490080",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-tertiary-fixed": "#2c0051",
+                      "primary-container": "#00ff41",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "outline": "#84967e",
+                      "on-error-container": "#ffdad6",
+                      "on-surface": "#d4e4fa",
+                      "background": "#051424",
+                      "surface-container-high": "#1c2b3c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "grid-unit": "8px",
+                      "lane-margin": "32px",
+                      "stack-gap": "4px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface selection:bg-surface-tint selection:text-on-background">
+<!-- TopAppBar -->
+<header class="fixed bg-surface dark:bg-surface text-primary dark:text-primary w-full top-0 border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 w-full z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-surface-tint">hub</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</h1>
+</div>
+<div class="hidden md:flex gap-8">
+<nav class="flex gap-6 items-center">
+<a class="text-primary border-b-2 border-primary cursor-pointer active:opacity-80 font-label-caps text-label-caps py-5 transition-colors" href="#">DASHBOARD</a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:opacity-80 font-label-caps text-label-caps py-5 px-2" href="#">MODULES</a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:opacity-80 font-label-caps text-label-caps py-5 px-2" href="#">ANALYTICS</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end mr-4">
+<span class="font-code-xs text-code-xs text-surface-tint">STATUS: OPERATIONAL</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">SRV_ID: WF-031</span>
+</div>
+<span class="material-symbols-outlined cursor-pointer active:opacity-80 hover:bg-surface-container-highest transition-colors p-2 rounded">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] overflow-y-auto w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant z-40 custom-scrollbar hidden md:block">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary">MODULE_REGISTRY</span>
+</div>
+<nav class="flex flex-col py-2">
+<!-- Active State: Search/Dashboard context -->
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">monitoring</span>
+<span class="font-code-sm text-code-sm uppercase">Live Telemetry</span>
+</div>
+<!-- Labels from JSON mapping -->
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+<span class="font-code-sm text-code-sm">Shop</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">restaurant</span>
+<span class="font-code-sm text-code-sm">Eats</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">local_shipping</span>
+<span class="font-code-sm text-code-sm">Send</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">directions_car</span>
+<span class="font-code-sm text-code-sm">Drive</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">work</span>
+<span class="font-code-sm text-code-sm">Gigs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">bed</span>
+<span class="font-code-sm text-code-sm">Stay</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+<span class="font-code-sm text-code-sm">Stream</span>
+</div>
+<div class="mt-4 px-4 pt-4 border-t border-outline-variant opacity-40">
+<span class="font-label-caps text-[9px] tracking-widest">SYSTEM_SERVICES</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span class="font-code-sm text-code-sm">Wholesale</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">agriculture</span>
+<span class="font-code-sm text-code-sm">Agro</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">medical_services</span>
+<span class="font-code-sm text-code-sm">Health</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">business_center</span>
+<span class="font-code-sm text-code-sm">Jobs</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 pt-20 pb-20 px-lane-margin min-h-screen">
+<!-- Dashboard Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 border-l-2 border-surface-tint pl-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tight">Operational Telemetry</h2>
+<div class="flex items-center gap-2 mt-1">
+<span class="w-2 h-2 bg-surface-tint rounded-full animate-pulse"></span>
+<span class="font-code-sm text-code-sm text-on-surface-variant uppercase tracking-widest">Aura Core: Active // Sync Active // Node WF-031</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="px-4 py-2 bg-surface-container-high border border-outline-variant flex flex-col items-center justify-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Uptime</span>
+<span class="font-code-sm text-code-sm text-primary">99.998%</span>
+</div>
+<div class="px-4 py-2 bg-surface-container-high border border-outline-variant flex flex-col items-center justify-center">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">Latency</span>
+<span class="font-code-sm text-code-sm text-surface-tint">24ms</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Telemetry -->
+<div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-grid-unit">
+<!-- Large Hero Chart: Searches Per Minute -->
+<div class="md:col-span-4 lg:col-span-4 bg-surface-container-low border border-outline-variant p-6 relative overflow-hidden flex flex-col min-h-[320px]">
+<div class="absolute top-0 left-0 w-1 h-full bg-surface-tint"></div>
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">METRIC::SEARCHES_PER_MINUTE</span>
+<span class="font-code-xs text-code-xs text-surface-tint">REAL-TIME FEED</span>
+</div>
+<div class="flex-grow flex items-end gap-1 overflow-hidden relative">
+<div class="scanline"></div>
+<!-- Mock chart bars -->
+<div class="flex-grow bg-surface-tint opacity-20 h-[40%]"></div>
+<div class="flex-grow bg-surface-tint opacity-30 h-[55%]"></div>
+<div class="flex-grow bg-surface-tint opacity-40 h-[70%]"></div>
+<div class="flex-grow bg-surface-tint opacity-20 h-[35%]"></div>
+<div class="flex-grow bg-surface-tint opacity-50 h-[80%]"></div>
+<div class="flex-grow bg-surface-tint opacity-40 h-[60%]"></div>
+<div class="flex-grow bg-surface-tint opacity-60 h-[90%]"></div>
+<div class="flex-grow bg-surface-tint opacity-40 h-[50%]"></div>
+<div class="flex-grow bg-surface-tint opacity-80 h-[75%]"></div>
+<div class="flex-grow bg-surface-tint h-[100%] animate-pulse"></div>
+</div>
+<div class="mt-4 flex justify-between items-baseline">
+<span class="font-headline-lg text-headline-lg text-primary">12.4k <span class="text-label-caps text-[14px]">RPM</span></span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">VOLATILITY: LOW</span>
+</div>
+</div>
+<!-- Gauge: Recommendation Accuracy -->
+<div class="md:col-span-2 lg:col-span-2 bg-surface-container-low border border-outline-variant p-6 flex flex-col items-center justify-center text-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-6 uppercase">Recommendation Accuracy</span>
+<div class="relative w-32 h-32 flex items-center justify-center rounded-full border-4 border-outline-variant border-t-surface-tint">
+<span class="font-headline-lg text-headline-lg text-primary">94.2<small class="text-sm">%</small></span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-6 uppercase tracking-widest">Model: Discovery_Alpha_04</p>
+</div>
+<!-- Stats Column -->
+<div class="md:col-span-2 lg:col-span-2 grid grid-rows-2 gap-grid-unit">
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CTR</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md text-primary">18.52%</span>
+<span class="text-surface-tint text-[10px] flex items-center"><span class="material-symbols-outlined text-[12px]">arrow_upward</span> 2.4%</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SEARCH SUCCESS</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md text-primary">99.1%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-50">STABLE</span>
+</div>
+</div>
+</div>
+<!-- Visualization: Latency P99 -->
+<div class="md:col-span-4 lg:col-span-4 bg-surface-container-low border border-outline-variant p-6 flex flex-col justify-between relative group hover:border-surface-tint transition-colors">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Latency Distribution (p99)</span>
+<h3 class="font-headline-md text-headline-md text-primary mt-1">45.2ms <span class="font-code-xs text-code-xs text-on-surface-variant ml-2">Avg: 24ms</span></h3>
+</div>
+<span class="material-symbols-outlined text-surface-tint opacity-50">speed</span>
+</div>
+<div class="w-full bg-outline-variant h-1 mt-6 relative overflow-hidden">
+<div class="absolute left-0 top-0 h-full bg-surface-tint w-[65%]"></div>
+</div>
+<div class="mt-4 grid grid-cols-3 gap-2">
+<div class="flex flex-col">
+<span class="font-code-xs text-[9px] text-on-surface-variant uppercase">Min</span>
+<span class="font-code-sm text-code-sm">8ms</span>
+</div>
+<div class="flex flex-col">
+<span class="font-code-xs text-[9px] text-on-surface-variant uppercase">Median</span>
+<span class="font-code-sm text-code-sm">22ms</span>
+</div>
+<div class="flex flex-col">
+<span class="font-code-xs text-[9px] text-on-surface-variant uppercase">Max</span>
+<span class="font-code-sm text-code-sm">114ms</span>
+</div>
+</div>
+</div>
+<!-- Index Health & Ranking Quality -->
+<div class="md:col-span-3 lg:col-span-3 bg-surface-container-low border border-outline-variant p-6 flex items-center gap-6">
+<div class="w-16 h-16 shrink-0 bg-surface-container-high border border-outline-variant flex items-center justify-center text-surface-tint">
+<span class="material-symbols-outlined text-3xl">database</span>
+</div>
+<div class="flex-grow">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Index Health</span>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex-grow bg-outline-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-surface-tint h-full w-[98%]"></div>
+</div>
+<span class="font-code-sm text-code-sm text-primary">98%</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant block mt-1 uppercase">Partitions: 48/48 Online</span>
+</div>
+</div>
+<div class="md:col-span-3 lg:col-span-3 bg-surface-container-low border border-outline-variant p-6 flex items-center gap-6">
+<div class="w-16 h-16 shrink-0 bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">analytics</span>
+</div>
+<div class="flex-grow">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Ranking Quality</span>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex-grow bg-outline-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[82%]"></div>
+</div>
+<span class="font-code-sm text-code-sm text-primary">82%</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant block mt-1 uppercase">NDCG: 0.824 // MRR: 0.71</span>
+</div>
+</div>
+</div>
+<!-- System Log Snippet -->
+<section class="mt-12 bg-surface-container-lowest border border-outline-variant p-6">
+<div class="flex justify-between items-center mb-4 border-b border-outline-variant pb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">terminal</span>
+<span class="font-label-caps text-label-caps">AUDIT_LOG::STREAM</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">10.244.0.1 // SRV_WF031</span>
+</div>
+<div class="font-code-sm text-code-sm space-y-2 opacity-80 custom-scrollbar max-h-48 overflow-y-auto">
+<p><span class="text-surface-tint">[2024-05-24 14:22:01]</span> <span class="text-on-surface-variant">INF</span> Discovery Engine: Handshake successful with Load Balancer EDGE-01.</p>
+<p><span class="text-surface-tint">[2024-05-24 14:22:04]</span> <span class="text-on-surface-variant">INF</span> Sync Active: 1,402 records replicated from primary shard.</p>
+<p><span class="text-surface-tint">[2024-05-24 14:22:08]</span> <span class="text-primary">[WAR]</span> High latency detected in shard-04. Initiating auto-scaling task.</p>
+<p><span class="text-surface-tint">[2024-05-24 14:22:15]</span> <span class="text-on-surface-variant">INF</span> Metrics updated. CTR trending upwards (+0.4%).</p>
+<p><span class="text-surface-tint">[2024-05-24 14:22:20]</span> <span class="text-on-surface-variant">INF</span> Operational heart-beat received. All systems green.</p>
+<p><span class="text-surface-tint">[2024-05-24 14:22:22]</span> <span class="text-on-surface-variant">INF</span> Cleaning temporary cache files... Done.</p>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full flex justify-between items-center px-lane-margin py-stack-gap z-50 bg-surface-container-lowest dark:bg-surface-container-lowest text-on-surface-variant dark:text-on-surface-variant font-code-xs text-code-xs border-t border-outline-variant">
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-label-caps text-surface-tint">NAIJADEALS_ECOSYSTEM</span>
+<span class="opacity-50">© 2024 NAIJADEALS_ECOSYSTEM // SRV_ID: WF-031</span>
+</div>
+<div class="hidden md:flex gap-6 items-center">
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">SYSTEM_STATUS: OK</span>
+<span class="hover:text-surface-tint transition-opacity cursor-pointer text-surface-tint">LATENCY: 24ms</span>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-surface-tint rounded-full"></span>
+<span class="hover:text-surface-tint transition-opacity cursor-pointer">AURA_CORE: ACTIVE</span>
+</div>
+</div>
+</footer>
+<!-- Animated Element Script -->
+<script>
+        // Simple micro-interaction for gauge values
+        document.addEventListener('DOMContentLoaded', () => {
+            const bars = document.querySelectorAll('.flex-grow.bg-surface-tint');
+            setInterval(() => {
+                bars.forEach(bar => {
+                    const randomHeight = Math.floor(Math.random() * 80) + 20;
+                    bar.style.height = randomHeight + '%';
+                });
+            }, 2000);
+        });
+    </script>
+</body></html>

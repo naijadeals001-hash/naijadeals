@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ND-REPUTATION-ENGINE:WF-032 | Business Rules Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Subtle Grid Overlay */
+        .grid-bg {
+            background-image: radial-gradient(circle, rgba(132, 150, 126, 0.1) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .orthogonal-connector {
+            position: relative;
+        }
+        .orthogonal-connector::after {
+            content: '';
+            position: absolute;
+            width: 1px;
+            background: theme('colors.outline-variant');
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: theme('colors.surface-container-lowest');
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: theme('colors.outline-variant');
+        }
+
+        @keyframes pulse-scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline {
+            background: linear-gradient(to bottom, transparent, theme('colors.primary-container'), transparent);
+            opacity: 0.1;
+            height: 100px;
+            animation: pulse-scan 4s linear infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ebffe2",
+                        "secondary-container": "#0043eb",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "inverse-on-surface": "#233143",
+                        "on-tertiary-container": "#862ed4",
+                        "surface-container": "#122131",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "surface-container-highest": "#273647",
+                        "on-secondary": "#002388",
+                        "primary-container": "#00ff41",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-tint": "#00e639",
+                        "outline": "#84967e",
+                        "primary-fixed": "#72ff70",
+                        "secondary-fixed": "#dde1ff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#00530e",
+                        "surface-dim": "#051424",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-container-lowest": "#010f1f",
+                        "outline-variant": "#3b4b37",
+                        "tertiary": "#fff6ff",
+                        "on-error": "#690005",
+                        "on-secondary-container": "#c6ceff",
+                        "on-primary": "#003907",
+                        "surface-variant": "#273647",
+                        "primary-fixed-dim": "#00e639",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-background": "#d4e4fa",
+                        "surface-container-low": "#0d1c2d",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#490080",
+                        "background": "#051424",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-high": "#1c2b3c",
+                        "surface-bright": "#2c3a4c",
+                        "secondary": "#b8c3ff",
+                        "on-primary-container": "#007117",
+                        "inverse-primary": "#006e16",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-primary-fixed": "#002203",
+                        "on-surface": "#d4e4fa",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-secondary-fixed": "#001356",
+                        "surface": "#051424",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<div class="flex h-screen w-full">
+<!-- NavigationDrawer -->
+<aside class="h-screen w-64 border-r border-outline-variant bg-surface-container-lowest flex flex-col gap-stack-gap p-grid-unit hidden md:flex">
+<div class="p-4 mb-4">
+<span class="font-label-caps text-label-caps text-on-surface">SYSTEM_HIERARCHY</span>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="group flex items-center px-4 py-2 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined mr-3 text-[18px]">account_tree</span>
+<span>NODES_MAP</span>
+</div>
+<div class="group flex items-center px-4 py-2 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined mr-3 text-[18px]">receipt_long</span>
+<span>LOG_STREAM</span>
+</div>
+<!-- Active Item -->
+<div class="group flex items-center px-4 py-2 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined mr-3 text-[18px]">verified_user</span>
+<span>TRUST_SCORES</span>
+</div>
+<div class="group flex items-center px-4 py-2 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined mr-3 text-[18px]">rule</span>
+<span>MOD_QUEUE</span>
+</div>
+<div class="group flex items-center px-4 py-2 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150 font-code-sm text-code-sm">
+<span class="material-symbols-outlined mr-3 text-[18px]">history</span>
+<span>ARCHIVE</span>
+</div>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-highest rounded border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[16px]">terminal</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-primary">ADMIN_CORE</span>
+<span class="font-code-xs text-code-xs text-outline">v4.2.0-STABLE</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 relative grid-bg">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 bg-background border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 z-20">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">terminal</span>
+<h1 class="font-headline-md text-headline-md text-primary tracking-tighter uppercase">ND-REPUTATION-ENGINE:WF-032</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center gap-4 px-4 py-1 bg-surface-container rounded border border-outline-variant">
+<span class="font-code-xs text-code-xs text-outline">LATENCY: <span class="text-primary-container">12ms</span></span>
+<span class="w-[1px] h-3 bg-outline-variant"></span>
+<span class="font-code-xs text-code-xs text-outline">UPTIME: <span class="text-primary-container">99.98%</span></span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<div class="flex-1 overflow-auto custom-scrollbar p-lane-margin">
+<!-- Page Header -->
+<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="w-2 h-2 bg-primary-container rounded-full"></span>
+<span class="font-label-caps text-label-caps text-outline tracking-widest">ARTIFACT_C // GOVERNANCE_LOGIC</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Business Rules Engine</h2>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 border border-outline-variant bg-surface-container-low text-on-surface font-code-sm text-code-sm hover:bg-surface-container-high transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">download</span>
+                            EXPORT_CONFIG
+                        </button>
+<button class="px-3 py-1.5 bg-primary-container text-on-primary-container font-code-sm text-code-sm hover:opacity-90 transition-opacity flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">add</span>
+                            DEPLOY_NEW_RULE
+                        </button>
+</div>
+</div>
+<!-- Rules Engine High Density Table -->
+<div class="border border-outline-variant bg-surface-container-lowest overflow-hidden shadow-2xl">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container border-b border-outline-variant">
+<th class="p-4 font-label-caps text-label-caps text-outline uppercase tracking-wider">Rule Identifier</th>
+<th class="p-4 font-label-caps text-label-caps text-outline uppercase tracking-wider">Decision Logic</th>
+<th class="p-4 font-label-caps text-label-caps text-outline uppercase tracking-wider">Responsible Service</th>
+<th class="p-4 font-label-caps text-label-caps text-outline uppercase tracking-wider">Failure Result</th>
+<th class="p-4 font-label-caps text-label-caps text-outline uppercase tracking-wider">Recovery Path</th>
+<th class="p-4 font-label-caps text-label-caps text-outline uppercase tracking-wider">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Rule 01 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Verified Purchase?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_PUR_001</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">IF OrderStatus == 'DELIVERED'</div>
+<div class="font-code-xs text-outline">Match SKU to UserID</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-commerce-v2
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">FLAG_UNVERIFIED</div>
+<div class="font-code-xs text-outline mt-1">Badge: Removed</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Manual Receipt Upload</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-primary-container text-[18px]">check_circle</span>
+</td>
+</tr>
+<!-- Rule 02 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Verified Delivery?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_LOG_002</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">Carrier_Ping == Success</div>
+<div class="font-code-xs text-outline">Geo-fencing validation</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-logistics-core
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">BLOCK_SUBMISSION</div>
+<div class="font-code-xs text-outline mt-1">Reason: Not_Delivered</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Webhook Re-trigger</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-primary-container text-[18px]">check_circle</span>
+</td>
+</tr>
+<!-- Rule 03 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Verified Booking?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_SRV_003</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">Appointment_State == 4</div>
+<div class="font-code-xs text-outline">Verify Provider Sign-off</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-calendar-mgmt
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">PENDING_REVIEW</div>
+<div class="font-code-xs text-outline mt-1">Wait: 24h cooldown</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">CS Agent Override</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-primary-container text-[18px]">check_circle</span>
+</td>
+</tr>
+<!-- Rule 04 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Review Window Open?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_TIM_004</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">Current_T &lt;= (Delivery_T + 30d)</div>
+<div class="font-code-xs text-outline">30-day compliance limit</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-policy-engine
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">HARD_REJECT</div>
+<div class="font-code-xs text-outline mt-1">Code: WINDOW_EXPIRED</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Loyalty Tier Exception</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-primary-container text-[18px]">check_circle</span>
+</td>
+</tr>
+<!-- Rule 05 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Spam Detected?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_AI_005</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">NLP_Spam_Score &gt;= 0.85</div>
+<div class="font-code-xs text-outline">Bert-v3 classifier</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-ml-inference
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">QUARANTINE</div>
+<div class="font-code-xs text-outline mt-1">Queue: MOD_01</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Recaptcha Challenge</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-outline text-[18px]">pending</span>
+</td>
+</tr>
+<!-- Rule 06 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Duplicate Review?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_DEDUP_006</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">Semantic_Hash == Exists</div>
+<div class="font-code-xs text-outline">Global content hash check</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-storage-index
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">MERGE_DUPE</div>
+<div class="font-code-xs text-outline mt-1">Ref: PREV_REV_ID</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Edit Original Review</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-primary-container text-[18px]">check_circle</span>
+</td>
+</tr>
+<!-- Rule 07 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Photo Allowed?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_MED_007</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">Category_Policy == 'MEDIA_ON'</div>
+<div class="font-code-xs text-outline">Tenant-level setting</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-tenant-config
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">STRIP_MEDIA</div>
+<div class="font-code-xs text-outline mt-1">Retain: Text only</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Upgrade Subscription</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-primary-container text-[18px]">check_circle</span>
+</td>
+</tr>
+<!-- Rule 08 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Video Allowed?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_MED_008</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">Bandwidth_Quota &gt; 0</div>
+<div class="font-code-xs text-outline">Monthly processing pool</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-asset-proc
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">TRANSCODE_FAIL</div>
+<div class="font-code-xs text-outline mt-1">Status: Low_Prio</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Async Retry (Off-peak)</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-primary-container text-[18px]">check_circle</span>
+</td>
+</tr>
+<!-- Rule 09 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Merchant Reply?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_CRM_009</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">User_Role == 'ADMIN'</div>
+<div class="font-code-xs text-outline">RBAC verify on shop-id</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-iam-core
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">REVOKE_ACCESS</div>
+<div class="font-code-xs text-outline mt-1">Code: 403_FORBIDDEN</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Permission Request</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-primary-container text-[18px]">check_circle</span>
+</td>
+</tr>
+<!-- Rule 10 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">Appeal Allowed?</div>
+<div class="font-code-xs text-outline mt-1">ID: RULE_GOV_010</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-primary">Strike_Count &lt; 3</div>
+<div class="font-code-xs text-outline">Lifetime moderation history</div>
+</td>
+<td class="p-4 align-top">
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-highest border border-outline-variant font-code-xs text-on-surface">
+                                            svc-moderation
+                                        </div>
+</td>
+<td class="p-4 align-top">
+<div class="text-error font-code-sm">FINAL_JUDGMENT</div>
+<div class="font-code-xs text-outline mt-1">Action: Acc_Ban</div>
+</td>
+<td class="p-4 align-top">
+<div class="font-code-sm text-on-surface">External Arbitration</div>
+</td>
+<td class="p-4 align-top">
+<span class="material-symbols-outlined text-primary-container text-[18px]">check_circle</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer -->
+<div class="p-4 bg-surface-container border-t border-outline-variant flex items-center justify-between">
+<div class="font-code-xs text-outline">
+                            SHOWING 10 OF 156 ACTIVE RULES
+                        </div>
+<div class="flex items-center gap-1">
+<button class="p-1 hover:bg-surface-container-highest text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="font-code-sm text-on-surface px-2">PAGE 01</span>
+<button class="p-1 hover:bg-surface-container-highest text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Secondary Section: Analytics Bento -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="col-span-1 md:col-span-2 border border-outline-variant bg-surface-container-low p-6 relative overflow-hidden group">
+<div class="relative z-10">
+<span class="font-label-caps text-label-caps text-primary-container">SYSTEM_LATENCY_HEATMAP</span>
+<div class="mt-4 h-32 flex items-end gap-1">
+<div class="w-full bg-primary-container opacity-20 h-[40%]" style="transition: height 0.3s"></div>
+<div class="w-full bg-primary-container opacity-30 h-[60%]"></div>
+<div class="w-full bg-primary-container opacity-50 h-[85%]"></div>
+<div class="w-full bg-primary-container opacity-70 h-[45%]"></div>
+<div class="w-full bg-primary-container h-[100%]"></div>
+<div class="w-full bg-primary-container opacity-60 h-[70%]"></div>
+<div class="w-full bg-primary-container opacity-40 h-[30%]"></div>
+</div>
+<div class="mt-4 flex justify-between font-code-xs text-outline">
+<span>00:00</span>
+<span>12:00</span>
+<span>23:59</span>
+</div>
+</div>
+<div class="scanline absolute inset-0 pointer-events-none"></div>
+</div>
+<div class="col-span-1 border border-outline-variant bg-surface-container-low p-6">
+<span class="font-label-caps text-label-caps text-outline">FAIL_RATE_AVG</span>
+<div class="mt-2 text-[32px] font-bold text-error tracking-tighter">4.2%</div>
+<div class="mt-1 font-code-xs text-outline">+0.8% FROM LAST EPOCH</div>
+<div class="mt-6 space-y-2">
+<div class="flex justify-between font-code-xs">
+<span class="text-on-surface">RULE_TIM_004</span>
+<span class="text-error">21%</span>
+</div>
+<div class="w-full bg-surface-container h-1">
+<div class="bg-error w-[21%] h-full"></div>
+</div>
+</div>
+</div>
+<div class="col-span-1 border border-outline-variant bg-surface-container-low p-6">
+<span class="font-label-caps text-label-caps text-outline">ACTIVE_NODE_STREAMS</span>
+<div class="mt-2 text-[32px] font-bold text-primary-container tracking-tighter">14,204</div>
+<div class="mt-1 font-code-xs text-outline">PROCESSING AT 840 REQ/S</div>
+<div class="mt-4 flex flex-wrap gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<div class="w-2 h-2 rounded-full bg-primary-container opacity-50"></div>
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+<div class="w-2 h-2 rounded-full bg-primary-container opacity-30"></div>
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<footer class="fixed bottom-0 w-full bg-surface-container-low border-t border-outline-variant flex justify-around items-center h-12 md:hidden z-30">
+<div class="flex flex-col items-center justify-center text-primary-container scale-110 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<div class="flex flex-col items-center justify-center text-outline hover:text-primary active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">security</span>
+</div>
+<div class="flex flex-col items-center justify-center text-outline hover:text-primary active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">hub</span>
+</div>
+<div class="flex flex-col items-center justify-center text-outline hover:text-primary active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">query_stats</span>
+</div>
+</footer>
+</main>
+</div>
+<!-- Node Editor Drawer (Contextual Overlay) -->
+<div class="fixed right-0 top-0 h-screen w-[400px] bg-background/80 backdrop-blur-xl border-l border-outline-variant transform translate-x-full transition-transform duration-300 z-40 p-lane-margin" id="config-drawer">
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-headline-md text-headline-md text-primary">EDIT_NODE_CFG</h3>
+<button class="p-2 hover:bg-surface-container-highest text-outline transition-colors" onclick="toggleDrawer()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<form class="space-y-6">
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-outline block">RULE_IDENTIFIER</label>
+<input class="w-full bg-transparent border border-outline-variant p-2 font-code-sm text-primary focus:border-primary-container focus:ring-0" type="text" value="RULE_PUR_001"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-outline block">LOGIC_GATE_JSON</label>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant p-2 font-code-sm text-primary h-48 focus:border-primary-container focus:ring-0 custom-scrollbar">{
+  "op": "AND",
+  "conditions": [
+    { "field": "status", "val": "DELIVERED" },
+    { "field": "user_trust", "gt": 0.4 }
+  ]
+}</textarea>
+</div>
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-outline block">RESPONSIBLE_SVC</label>
+<select class="w-full bg-transparent border border-outline-variant p-2 font-code-sm text-on-surface focus:border-primary-container focus:ring-0">
+<option class="bg-surface-container">svc-commerce-v2</option>
+<option class="bg-surface-container">svc-logistics-core</option>
+<option class="bg-surface-container">svc-moderation</option>
+</select>
+</div>
+<div class="pt-6">
+<button class="w-full bg-primary-container text-on-primary-container py-3 font-code-sm uppercase tracking-widest hover:opacity-90 transition-opacity" type="button">
+                    Commit Changes
+                </button>
+</div>
+</form>
+</div>
+<script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('config-drawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        // Add interaction to table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                toggleDrawer();
+            });
+            row.style.cursor = 'pointer';
+        });
+
+        // Simple telemetry oscillation effect
+        setInterval(() => {
+            document.querySelectorAll('.animate-pulse').forEach(el => {
+                el.style.opacity = Math.random() > 0.5 ? '1' : '0.3';
+            });
+        }, 1000);
+    </script>
+</body></html>

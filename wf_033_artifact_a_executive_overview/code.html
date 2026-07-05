@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAIJADEALS_CORE_ENGINE // Executive Workflow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ebffe2",
+                    "on-secondary-container": "#c6ceff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "inverse-surface": "#d4e4fa",
+                    "outline": "#84967e",
+                    "on-surface-variant": "#b9ccb2",
+                    "inverse-on-surface": "#233143",
+                    "on-secondary-fixed": "#001356",
+                    "on-primary-container": "#007117",
+                    "on-surface": "#d4e4fa",
+                    "on-tertiary-fixed": "#2c0051",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary": "#003907",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-container": "#122131",
+                    "surface-bright": "#2c3a4c",
+                    "primary-fixed-dim": "#00e639",
+                    "primary-fixed": "#72ff70",
+                    "primary-container": "#00ff41",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-highest": "#273647",
+                    "on-secondary": "#002388",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "secondary-fixed": "#dde1ff",
+                    "secondary": "#b8c3ff",
+                    "inverse-primary": "#006e16",
+                    "surface-tint": "#00e639",
+                    "on-error": "#690005",
+                    "error-container": "#93000a",
+                    "surface-dim": "#051424",
+                    "surface": "#051424",
+                    "secondary-container": "#0043eb",
+                    "on-background": "#d4e4fa",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "tertiary": "#fff6ff",
+                    "on-tertiary": "#490080",
+                    "surface-variant": "#273647",
+                    "tertiary-container": "#ecd3ff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary-fixed": "#002203",
+                    "on-tertiary-container": "#862ed4",
+                    "background": "#051424",
+                    "surface-container-low": "#0d1c2d",
+                    "outline-variant": "#3b4b37"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector-horizontal {
+            position: absolute;
+            height: 2px;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .node-connector-horizontal::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: -3px;
+            border-left: 6px solid #3b4b37;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        .flow-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .flow-container::-webkit-scrollbar-thumb {
+            background: #273647;
+            border-radius: 4px;
+        }
+        .glow-active {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.2);
+        }
+        @keyframes pulse-line {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        .animate-pulse-line {
+            animation: pulse-line 2s infinite ease-in-out;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-surface dark:bg-surface border-b border-outline-variant flex justify-between items-center px-grid-unit h-16 shadow-none">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps tracking-tighter text-primary">NAIJADEALS_CORE_ENGINE</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase tracking-widest">System Status</span>
+<span class="font-code-sm text-code-sm text-primary-fixed flex items-center gap-1">
+<span class="w-2 h-2 bg-primary-fixed rounded-full animate-pulse"></span> OPERATIONAL
+                </span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80 hover:bg-surface-container-highest transition-colors p-2 rounded" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex h-full w-64 flex-col gap-stack-gap py-lane-margin bg-surface-container dark:bg-surface-container border-r border-outline-variant z-40">
+<div class="px-4 mb-4">
+<span class="font-label-caps text-label-caps text-primary opacity-60">SYSTEM_MANIFEST</span>
+</div>
+<nav class="flex flex-col">
+<a class="flex items-center gap-3 px-4 py-3 text-primary font-bold border-l-4 border-primary bg-primary-container/10 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-code-sm text-code-sm">BPMN Designer</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-code-sm text-code-sm">API Gateway</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="event_repeat">event_repeat</span>
+<span class="font-code-sm text-code-sm">Reservation Logic</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="memory">memory</span>
+<span class="font-code-sm text-code-sm">Node Clusters</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-code-sm text-code-sm">Security Ops</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col relative overflow-hidden bg-surface-dim">
+<!-- Breadcrumbs / Top Bar -->
+<div class="p-4 flex items-center justify-between border-b border-outline-variant bg-surface-container-low">
+<div class="flex items-center gap-3">
+<span class="font-headline-md text-headline-md text-primary">WF-033 ARTIFACT A: Executive Workflow Overview</span>
+<span class="px-2 py-0.5 bg-outline-variant/30 rounded text-code-xs font-code-xs border border-outline-variant text-on-surface-variant uppercase">Version 4.2.0-STABLE</span>
+</div>
+<div class="flex gap-2">
+<button class="bg-primary-container text-on-primary-container font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1">play_arrow</span> RUN SIMULATION
+                    </button>
+<button class="border border-outline text-on-surface font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined" data-icon="download">download</span> EXPORT BPMN
+                    </button>
+</div>
+</div>
+<!-- Dashboard Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border-b border-outline-variant">
+<div class="bg-surface-container p-3 border border-outline-variant flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-70">PURPOSE</span>
+<span class="font-body-md text-body-md text-primary">Centralized resource orchestration</span>
+</div>
+<div class="bg-surface-container p-3 border border-outline-variant flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-70">OBJECTIVE</span>
+<span class="font-body-md text-body-md text-primary">Maximize utilization &amp; minimize conflicts</span>
+</div>
+<div class="bg-surface-container p-3 border border-outline-variant flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-70">ACTORS</span>
+<div class="flex gap-2 mt-1">
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-code-xs rounded">CUSTOMER</span>
+<span class="px-2 py-0.5 bg-on-primary-fixed-variant text-primary-fixed text-code-xs rounded">PROVIDER</span>
+<span class="px-2 py-0.5 bg-surface-container-highest text-on-surface text-code-xs rounded">ADMIN</span>
+</div>
+</div>
+<div class="bg-surface-container p-3 border border-outline-variant flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-70">SUCCESS CRITERIA</span>
+<span class="font-code-sm text-code-sm text-primary-fixed">&lt;1s latency / Zero Double-Bookings</span>
+</div>
+</div>
+<!-- The Flow Diagram (Canvas) -->
+<div class="flex-1 overflow-auto relative p-lane-margin flow-container bg-[#050505]/50">
+<!-- Swimlane Labels (Horizontal Layout in this Case) -->
+<div class="absolute left-0 top-0 w-full h-full pointer-events-none">
+<div class="absolute left-4 top-8 h-px w-full border-t border-dashed border-outline-variant/30"></div>
+</div>
+<div class="relative min-w-[2800px] flex flex-col gap-lane-margin h-full">
+<!-- Main Journey Row -->
+<div class="flex items-start gap-[80px] relative">
+<!-- Step 1 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTRY_POINT</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-primary-fixed-dim/40 glow-active min-h-[80px]">
+<span class="font-code-sm text-code-sm text-primary block mb-2 uppercase">Customer Requests Booking</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-fixed text-[14px]" data-icon="input">input</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Trigger: WebUI</span>
+</div>
+</div>
+<div class="bg-surface-container p-1 border-x border-b border-outline-variant">
+<span class="font-code-xs text-code-xs opacity-50">LATENCY: 12ms</span>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">DATA_LOOKUP</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-outline-variant min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Resource Search</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ElasticSearch Cluster-B</span>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">VALIDATION</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-outline-variant min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Availability Check</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Redis-Cache.v12</span>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">LOGIC_GATE</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-error/50 min-h-[80px]">
+<span class="font-code-sm text-code-sm text-error block mb-2 uppercase">Conflict Detection</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Strict Locking Enabled</span>
+</div>
+</div>
+<!-- Step 5 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">USER_INTERACTION</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-outline-variant min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Time Slot Selection</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ISO-8601 Compliance</span>
+</div>
+</div>
+<!-- Step 6: AI Specialized -->
+<div class="flex flex-col gap-2 z-10 w-56">
+<div class="bg-primary-fixed-dim/20 p-2 rounded-t border-t border-x border-primary-fixed-dim/50">
+<span class="font-label-caps text-label-caps text-primary">AURA_AI_ENGINE</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border-2 border-primary-fixed-dim min-h-[80px] relative overflow-hidden">
+<div class="absolute top-0 right-0 p-1">
+<span class="material-symbols-outlined text-primary-fixed-dim animate-pulse text-[18px]" data-icon="psychology">psychology</span>
+</div>
+<span class="font-code-sm text-code-sm text-primary block mb-2 uppercase">Scheduling Recommendation</span>
+<span class="font-code-xs text-code-xs text-primary-fixed/70">Probability Offset: 0.982</span>
+</div>
+</div>
+<!-- Step 7 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">OBJECT_PERSISTENCE</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-outline-variant min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Reservation Created</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Status: PENDING_AUTH</span>
+</div>
+</div>
+<!-- Step 8: Transaction -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-secondary-container p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-secondary-container">FINANCIAL_LAYER</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-secondary-fixed min-h-[80px]">
+<span class="font-code-sm text-code-sm text-secondary block mb-2 uppercase">Wallet / Escrow Authorization</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Smart Contract v2.1</span>
+</div>
+</div>
+<!-- Step 9 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CONFIRMATION</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-primary-fixed-dim/30 min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Confirmation</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Webhook Dispatched</span>
+</div>
+</div>
+<!-- Step 10 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CALENDAR_SYNC</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-outline-variant min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Calendar Updated</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">CalDAV / Google Sync</span>
+</div>
+</div>
+<!-- Step 11 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">NOTIFICATION</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-outline-variant min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Reminders Scheduled</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">T-24h / T-1h / T-15m</span>
+</div>
+</div>
+<!-- Step 12 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">STATE_LOCK</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-primary-fixed-dim min-h-[80px]">
+<span class="font-code-sm text-code-sm text-primary block mb-2 uppercase">Resource Reserved</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Hard-Lock Implemented</span>
+</div>
+</div>
+<!-- Step 13 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">LIFECYCLE_ACTIVE</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-outline-variant min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Booking Active</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Session Key: #A892</span>
+</div>
+</div>
+<!-- Step 14 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">EXECUTION_END</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-outline-variant min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Service Completed</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Log Finalized</span>
+</div>
+</div>
+<!-- Step 15 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">FINAL_CONSENT</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-outline-variant min-h-[80px]">
+<span class="font-code-sm text-code-sm text-on-surface block mb-2 uppercase">Customer Confirmation</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">2FA / Signature</span>
+</div>
+</div>
+<!-- Step 16 -->
+<div class="flex flex-col gap-2 z-10 w-48">
+<div class="bg-surface-container-highest p-2 rounded-t border-t border-x border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ARCHIVE</span>
+</div>
+<div class="bg-[#0F0F0F] p-3 border border-primary-fixed-dim/60 min-h-[80px]">
+<span class="font-code-sm text-code-sm text-primary-fixed block mb-2 uppercase">Booking Closed</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Immutable Record Stored</span>
+</div>
+</div>
+<!-- Visual Connectors -->
+<!-- Using absolute positioning relative to parent flex -->
+<div class="absolute top-[85px] left-0 w-[calc(100%-192px)] h-px pointer-events-none z-0">
+<!-- JS will ideally handle complex paths, but for high density we can use repeating dash or static lines -->
+<div class="node-connector-horizontal w-[calc(2800px-240px)] animate-pulse-line"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Audit Log Stub Section (Bottom Drawer Style) -->
+<div class="h-32 border-t border-outline-variant bg-surface-container-lowest p-4 flex gap-8">
+<div class="w-64 border-r border-outline-variant/30 pr-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-2">SYSTEM_TELEMETRY</span>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-on-surface-variant">CPU Usage:</span>
+<span class="text-primary-fixed">14.2%</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-on-surface-variant">Throughput:</span>
+<span class="text-primary-fixed">1.2k req/s</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-on-surface-variant">Error Rate:</span>
+<span class="text-error">0.0001%</span>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-2">LIVE_AUDIT_STREAM</span>
+<div class="flex flex-col gap-1">
+<div class="font-code-xs text-code-xs flex gap-4 text-on-surface-variant">
+<span class="text-outline-variant">12:04:15.001</span>
+<span class="text-primary-fixed">[INFO]</span>
+<span>AURA_AI: Validated node availability for Resource_ID: #FF22</span>
+</div>
+<div class="font-code-xs text-code-xs flex gap-4 text-on-surface-variant">
+<span class="text-outline-variant">12:04:14.892</span>
+<span class="text-primary-fixed">[INFO]</span>
+<span>TX_ENGINE: Escrow lock initiated for Transaction_ID: tx_8812</span>
+</div>
+<div class="font-code-xs text-code-xs flex gap-4 text-on-surface-variant">
+<span class="text-outline-variant">12:04:14.550</span>
+<span class="text-on-secondary-container">[TRACE]</span>
+<span>ELASTIC_SEARCH: Query executed in 4.2ms (32 nodes found)</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant flex justify-around items-center h-16">
+<a class="flex flex-col items-center justify-center bg-on-primary-fixed-variant text-primary-fixed rounded-none p-2 border-t-2 border-primary-fixed active:scale-95 duration-75" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Flows</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 active:scale-95 duration-75 hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 active:scale-95 duration-75 hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps">Logs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 active:scale-95 duration-75 hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="font-label-caps text-label-caps">Systems</span>
+</a>
+</nav>
+<!-- Contextual FAB (Only on Dashboard/Flows) -->
+<button class="fixed bottom-20 right-6 md:bottom-10 md:right-10 bg-primary-container text-on-primary-container w-14 h-14 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-50">
+<span class="material-symbols-outlined" data-icon="add" style="font-variation-settings: 'FILL' 1">add</span>
+</button>
+<script>
+        // Micro-interaction for nodes: Highlight path on hover
+        document.querySelectorAll('.flex.flex-col.z-10').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.querySelector('div:nth-child(2)').classList.add('border-primary-fixed');
+            });
+            node.addEventListener('mouseleave', () => {
+                if (!node.querySelector('div:nth-child(2)').classList.contains('glow-active')) {
+                    node.querySelector('div:nth-child(2)').classList.remove('border-primary-fixed');
+                }
+            });
+        });
+
+        // Initialize any specific node logic if needed
+        console.log("NAIJADEALS_CORE_ENGINE: Workflow visualization initialized.");
+    </script>
+</body></html>

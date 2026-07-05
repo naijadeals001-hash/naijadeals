@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ND-REPUTATION-ENGINE:WF-032</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .grid-bg {
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: absolute;
+            background: #84967e;
+            z-index: 0;
+        }
+        .node-connector-horizontal { height: 1px; }
+        .node-connector-vertical { width: 1px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #010f1f; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b4b37; }
+        .glow-green { box-shadow: 0 0 15px rgba(0, 255, 65, 0.1); }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#ebffe2",
+                      "secondary-container": "#0043eb",
+                      "tertiary-fixed": "#f0dbff",
+                      "on-tertiary-fixed": "#2c0051",
+                      "inverse-on-surface": "#233143",
+                      "on-tertiary-container": "#862ed4",
+                      "surface-container": "#122131",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "surface-container-highest": "#273647",
+                      "on-secondary": "#002388",
+                      "primary-container": "#00ff41",
+                      "inverse-surface": "#d4e4fa",
+                      "surface-tint": "#00e639",
+                      "outline": "#84967e",
+                      "primary-fixed": "#72ff70",
+                      "secondary-fixed": "#dde1ff",
+                      "error-container": "#93000a",
+                      "on-primary-fixed-variant": "#00530e",
+                      "surface-dim": "#051424",
+                      "on-error": "#690005",
+                      "on-secondary-container": "#c6ceff",
+                      "on-primary": "#003907",
+                      "surface-variant": "#273647",
+                      "primary-fixed-dim": "#00e639",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-background": "#d4e4fa",
+                      "surface-container-low": "#0d1c2d",
+                      "on-error-container": "#ffdad6",
+                      "on-tertiary": "#490080",
+                      "background": "#051424",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-container-high": "#1c2b3c",
+                      "surface-bright": "#2c3a4c",
+                      "secondary": "#b8c3ff",
+                      "on-primary-container": "#007117",
+                      "inverse-primary": "#006e16",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "on-primary-fixed": "#002203",
+                      "on-surface": "#d4e4fa",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-secondary-fixed": "#001356",
+                      "surface": "#051424",
+                      "error": "#ffb4ab"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container custom-scrollbar overflow-x-hidden">
+<div class="flex h-screen overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col gap-stack-gap p-grid-unit h-screen w-64 border-r border-outline-variant bg-surface-container-lowest dark:bg-surface-container-lowest">
+<div class="px-4 py-6 border-b border-outline-variant mb-4">
+<h2 class="font-label-caps text-label-caps text-on-surface">SYSTEM_HIERARCHY</h2>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-fixed cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="font-code-sm text-code-sm">NODES_MAP</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span class="font-code-sm text-code-sm">LOG_STREAM</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+<span class="font-code-sm text-code-sm">TRUST_SCORES</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined text-[20px]">rule</span>
+<span class="font-code-sm text-code-sm">MOD_QUEUE</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-all duration-150">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="font-code-sm text-code-sm">ARCHIVE</span>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low rounded-lg border border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-outline uppercase">Sys Health</span>
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+</div>
+<div class="space-y-1">
+<div class="h-1 bg-outline-variant w-full overflow-hidden">
+<div class="h-full bg-primary-container w-[88%]"></div>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Uptime: 99.98%</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col min-w-0 relative">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-50 flex justify-between items-center px-lane-margin h-16 bg-background dark:bg-background border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<h1 class="font-label-caps text-label-caps text-primary tracking-tighter">ND-REPUTATION-ENGINE:WF-032</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant border border-outline-variant px-2 py-0.5 rounded">ENV: PRODUCTION</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant border border-outline-variant px-2 py-0.5 rounded">REGION: US-EAST-1</span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer hover:bg-surface-container-highest transition-colors p-2 rounded-full">settings_input_component</span>
+</div>
+</header>
+<!-- Scrollable Flow Area -->
+<div class="flex-1 overflow-auto grid-bg p-lane-margin custom-scrollbar">
+<!-- Metadata Panel (Executive Summary) -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-grid-unit mb-12">
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<h3 class="font-label-caps text-label-caps text-outline mb-2">PURPOSE</h3>
+<p class="font-body-md text-body-md text-on-surface">Universal algorithmic framework for validating and weight-adjusting multi-modal user feedback loops.</p>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<h3 class="font-label-caps text-label-caps text-outline mb-2">OBJECTIVE</h3>
+<p class="font-body-md text-body-md text-on-surface">Mitigate Sybil attacks and incentivized bias while maximizing genuine sentiment signal in search relevance.</p>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<h3 class="font-label-caps text-label-caps text-outline mb-2">ACTORS</h3>
+<div class="flex flex-wrap gap-2">
+<span class="font-code-xs text-code-xs bg-surface-container-high text-primary border border-outline-variant px-2 py-0.5">CUSTOMER</span>
+<span class="font-code-xs text-code-xs bg-surface-container-high text-primary border border-outline-variant px-2 py-0.5">AI_MODERATOR</span>
+<span class="font-code-xs text-code-xs bg-surface-container-high text-primary border border-outline-variant px-2 py-0.5">MERCHANT_API</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<h3 class="font-label-caps text-label-caps text-outline mb-2">SUCCESS_CRITERIA</h3>
+<p class="font-body-md text-body-md text-on-surface">False positive rate &lt; 0.02%. Latency from submission to trust update &lt; 400ms.</p>
+</div>
+</div>
+<!-- Technical Flow Map -->
+<div class="relative min-w-[1400px]">
+<!-- Swimlanes Headers -->
+<div class="flex mb-4 sticky top-0 bg-background/80 backdrop-blur-md z-10 py-2">
+<div class="w-[200px] font-headline-md text-headline-md text-on-surface border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined">shopping_cart</span> TRANX
+                        </div>
+<div class="w-[300px] px-6 font-headline-md text-headline-md text-on-surface border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined">rate_review</span> INTAKE
+                        </div>
+<div class="w-[400px] px-6 font-headline-md text-headline-md text-on-surface border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined">psychology</span> ANALYSIS
+                        </div>
+<div class="flex-1 px-6 font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined">database</span> SYNC
+                        </div>
+</div>
+<!-- Flow Content -->
+<div class="flex gap-0 items-start">
+<!-- Lane: Transaction -->
+<div class="w-[200px] flex flex-col items-center gap-12 pt-8">
+<div class="relative z-10 w-full">
+<div class="bg-surface-container-lowest border border-primary-container p-3 rounded flex flex-col gap-1 glow-green">
+<span class="font-label-caps text-[9px] text-primary-container">EVENT_01</span>
+<span class="font-code-sm text-code-sm text-primary">Completed Transaction</span>
+<span class="font-code-xs text-code-xs text-outline italic">Trigger: Payment_Success</span>
+</div>
+<div class="node-connector node-connector-horizontal w-12 -right-12 top-1/2"></div>
+</div>
+</div>
+<!-- Lane: Intake -->
+<div class="w-[300px] flex flex-col gap-12 pt-8 px-6 relative">
+<div class="relative z-10">
+<div class="bg-surface-container border border-outline p-3 rounded">
+<span class="font-label-caps text-[9px] text-outline">INTAKE_01</span>
+<span class="font-code-sm text-code-sm text-on-surface">Review Invitation</span>
+<div class="flex items-center gap-1 mt-1">
+<span class="w-1 h-1 rounded-full bg-primary-container"></span>
+<span class="font-code-xs text-code-xs text-outline">Push/Email Sent</span>
+</div>
+</div>
+<div class="node-connector node-connector-horizontal w-12 -right-12 top-1/2"></div>
+</div>
+<div class="relative z-10 ml-8">
+<div class="bg-surface-container border border-outline p-3 rounded">
+<span class="font-label-caps text-[9px] text-outline">INTAKE_02</span>
+<span class="font-code-sm text-code-sm text-on-surface">Customer Feedback</span>
+<div class="mt-1 flex gap-1">
+<div class="h-1 w-full bg-outline-variant"><div class="h-full bg-primary-container w-3/4"></div></div>
+</div>
+</div>
+<div class="node-connector node-connector-horizontal w-12 -right-12 top-1/2"></div>
+</div>
+<div class="relative z-10">
+<div class="bg-surface-container border border-outline p-3 rounded">
+<span class="font-label-caps text-[9px] text-outline">INTAKE_03</span>
+<span class="font-code-sm text-code-sm text-on-surface">Rating Submitted</span>
+<span class="font-code-xs text-code-xs text-outline block mt-1">Weight: 1.0 (Base)</span>
+</div>
+<div class="node-connector node-connector-horizontal w-12 -right-12 top-1/2"></div>
+</div>
+<div class="relative z-10 border-l border-dashed border-outline-variant pl-4 py-2">
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded">
+<span class="font-label-caps text-[9px] text-outline">ATTACH_01</span>
+<span class="font-code-sm text-code-sm text-on-surface">Photos / Videos</span>
+<span class="font-code-xs text-code-xs text-secondary italic">BLOB_STORE_REF: AX-92</span>
+</div>
+</div>
+</div>
+<!-- Lane: Analysis -->
+<div class="w-[400px] flex flex-col gap-8 pt-8 px-6">
+<div class="relative z-10">
+<div class="bg-surface-container-highest border border-secondary p-4 rounded-lg">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-secondary">AI MODERATION</span>
+<span class="material-symbols-outlined text-secondary text-sm">smart_toy</span>
+</div>
+<div class="space-y-3">
+<div class="bg-background/50 p-2 border border-outline-variant rounded">
+<div class="flex justify-between font-code-xs text-code-xs text-outline mb-1">
+<span>SPAM_DETECTION</span>
+<span class="text-primary-container">PASS (0.02)</span>
+</div>
+<div class="h-1 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[2%]"></div>
+</div>
+</div>
+<div class="bg-background/50 p-2 border border-outline-variant rounded">
+<div class="flex justify-between font-code-xs text-code-xs text-outline mb-1">
+<span>FRAUD_DETECTION</span>
+<span class="text-primary-container">PASS (0.01)</span>
+</div>
+<div class="h-1 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[1%]"></div>
+</div>
+</div>
+<div class="bg-background/50 p-2 border border-outline-variant rounded">
+<div class="flex justify-between font-code-xs text-code-xs text-outline mb-1">
+<span>SENTIMENT_ANALYSIS</span>
+<span class="text-secondary">POSITIVE (0.89)</span>
+</div>
+<div class="h-1 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container w-[89%]"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="node-connector node-connector-horizontal w-12 -right-12 top-1/2"></div>
+</div>
+<!-- Alternate Path -->
+<div class="relative z-10 border-l-2 border-dashed border-error pl-4">
+<div class="bg-error-container/20 border border-error/50 p-3 rounded">
+<span class="font-label-caps text-[9px] text-error">EX_PATH_01</span>
+<span class="font-code-sm text-code-sm text-error">Manual Moderation Required</span>
+<div class="mt-2 flex gap-2">
+<button class="bg-error-container text-on-error font-code-xs text-code-xs px-2 py-1 rounded hover:opacity-90">REJECT</button>
+<button class="bg-surface-container-high text-on-surface font-code-xs text-code-xs px-2 py-1 rounded hover:bg-surface-container-highest">APPEAL</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Lane: Sync -->
+<div class="flex-1 flex flex-col gap-6 pt-8 px-6">
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest border border-outline-variant p-4 relative">
+<div class="node-connector node-connector-horizontal w-6 -left-6 top-1/2"></div>
+<span class="font-label-caps text-[9px] text-outline">UPD_01</span>
+<span class="font-code-sm text-code-sm text-on-surface block mb-2">Trust Updated</span>
+<div class="flex items-end gap-1 h-8">
+<div class="bg-primary-container w-2 h-4"></div>
+<div class="bg-primary-container w-2 h-6"></div>
+<div class="bg-primary-container w-2 h-8"></div>
+<div class="bg-primary-container w-2 h-5"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<span class="font-label-caps text-[9px] text-outline">UPD_02</span>
+<span class="font-code-sm text-code-sm text-on-surface block mb-2">Search Ranking Updated</span>
+<span class="font-code-xs text-code-xs text-primary">+12 Position Gain</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<span class="font-label-caps text-[9px] text-outline">UPD_03</span>
+<span class="font-code-sm text-code-sm text-on-surface block mb-2">Recommendation Engine</span>
+<span class="font-code-xs text-code-xs text-outline italic">Embedding Cache Refreshed</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-4 border-l-4 border-l-primary-container">
+<span class="font-label-caps text-[9px] text-primary">FINAL_STATE</span>
+<span class="font-code-sm text-code-sm text-on-surface block mb-1">Merchant Score Updated</span>
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-primary">4.92</span>
+<span class="font-code-xs text-code-xs text-outline">/ 5.00</span>
+</div>
+</div>
+</div>
+<div class="mt-8 bg-primary-container/10 border border-primary-container/30 p-4 rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container">check_circle</span>
+</div>
+<div>
+<h4 class="font-code-sm text-code-sm text-primary">Workflow Instance: COMPLETED</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Trace ID: 8821-X99-PROD</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-[10px] text-outline">LATENCY</span>
+<p class="font-code-sm text-code-sm text-primary-container">312ms</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Philosophy & Dependencies -->
+<div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 pb-20">
+<div class="space-y-4">
+<h2 class="font-headline-md text-headline-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">menu_book</span> Review Philosophy
+                        </h2>
+<ul class="space-y-3">
+<li class="flex gap-3">
+<span class="font-code-sm text-code-sm text-primary-container shrink-0">[01]</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Proof-of-Transaction (PoT) mandatory for trust weight &gt; 0.5.</p>
+</li>
+<li class="flex gap-3">
+<span class="font-code-sm text-code-sm text-primary-container shrink-0">[02]</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Temporal Decay: Review impact on Merchant Score diminishes linearly over 180 days.</p>
+</li>
+<li class="flex gap-3">
+<span class="font-code-sm text-code-sm text-primary-container shrink-0">[03]</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Multi-Factor Authenticity: Verification against hardware IDs and session patterns.</p>
+</li>
+</ul>
+</div>
+<div class="space-y-4">
+<h2 class="font-headline-md text-headline-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">settings_ethernet</span> System Dependencies
+                        </h2>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container p-3 border border-outline-variant">
+<span class="font-label-caps text-[9px] text-outline">KAFKA_CLUSTER</span>
+<p class="font-code-sm text-code-sm">INGEST_V2</p>
+</div>
+<div class="bg-surface-container p-3 border border-outline-variant">
+<span class="font-label-caps text-[9px] text-outline">VECTOR_DB</span>
+<p class="font-code-sm text-code-sm">PINECONE_US_E1</p>
+</div>
+<div class="bg-surface-container p-3 border border-outline-variant">
+<span class="font-label-caps text-[9px] text-outline">AI_INFERENCE</span>
+<p class="font-code-sm text-code-sm">Llama-3-70B-R</p>
+</div>
+<div class="bg-surface-container p-3 border border-outline-variant">
+<span class="font-label-caps text-[9px] text-outline">LEGACY_SQL</span>
+<p class="font-code-sm text-code-sm">TRANS_MASTER_01</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<footer class="fixed bottom-0 w-full h-12 md:hidden bg-surface-container-low dark:bg-surface-container-low border-t border-outline-variant flex justify-around items-center z-50">
+<span class="material-symbols-outlined text-primary-container scale-110 cursor-pointer">analytics</span>
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary">security</span>
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary">hub</span>
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary">query_stats</span>
+</footer>
+<!-- Micro-Telemetry HUD -->
+<div class="absolute bottom-16 right-8 hidden lg:block z-40">
+<div class="bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant p-4 rounded-lg w-64 shadow-2xl">
+<div class="flex items-center gap-2 mb-3">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-caps text-label-caps text-primary">LIVE TELEMETRY</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-outline">Active Workflows</span>
+<span class="text-on-surface">1,248</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-outline">Ingestion Rate</span>
+<span class="text-on-surface">42 req/s</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-outline">Fraud Blocks (1h)</span>
+<span class="text-error">12</span>
+</div>
+<div class="pt-2 border-t border-outline-variant mt-2">
+<button class="w-full py-1 bg-surface-container-high text-primary font-label-caps text-[9px] border border-outline-variant hover:bg-surface-container-highest transition-colors">VIEW FULL CLUSTER</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Background Decoration -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-20">
+
+</div>
+<script>
+        // Simple micro-interaction for nodes
+        document.querySelectorAll('.bg-surface-container, .bg-surface-container-lowest').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('border-primary-container');
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                if (!node.classList.contains('glow-green')) {
+                    node.classList.remove('border-primary-container');
+                }
+                node.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Simulating live data update
+        setInterval(() => {
+            const telemetryValue = document.querySelector('.text-on-surface:nth-child(2)');
+            if(telemetryValue) {
+                const current = parseInt(telemetryValue.innerText.replace(',', ''));
+                telemetryValue.innerText = (current + Math.floor(Math.random() * 5 - 2)).toLocaleString();
+            }
+        }, 3000);
+    </script>
+</body></html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ASSET_INTEGRITY_OS | Data Persistence Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#ffdad6",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-surface-variant": "#b9ccb2",
+                    "secondary": "#b8c3ff",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-container-high": "#1c2b3c",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary-fixed": "#002203",
+                    "on-error": "#690005",
+                    "inverse-primary": "#006e16",
+                    "primary-container": "#00ff41",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "tertiary": "#fff6ff",
+                    "surface-container-highest": "#273647",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-container": "#122131",
+                    "secondary-fixed": "#dde1ff",
+                    "background": "#051424",
+                    "on-background": "#d4e4fa",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary-container": "#862ed4",
+                    "primary-fixed": "#72ff70",
+                    "outline-variant": "#3b4b37",
+                    "inverse-on-surface": "#233143",
+                    "on-primary-fixed-variant": "#00530e",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-variant": "#273647",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-secondary": "#002388",
+                    "surface": "#051424",
+                    "on-secondary-fixed": "#001356",
+                    "surface-dim": "#051424",
+                    "on-tertiary": "#490080",
+                    "on-primary": "#003907",
+                    "outline": "#84967e",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-primary-container": "#007117",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-tint": "#00e639",
+                    "secondary-container": "#0043eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "code-xs": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            stroke: #3b4b37;
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+        .primary-path {
+            stroke: #00e639;
+            stroke-width: 2;
+            stroke-dasharray: 4;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -1000; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-background selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-background dark:bg-background border-b border-outline-variant flex items-center justify-between px-node-gutter h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="shield_lock">shield_lock</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">ASSET_INTEGRITY_OS</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-highest transition-colors px-3 py-1 rounded" href="#">DASHBOARD</a>
+<a class="text-primary-fixed-dim font-bold font-label-caps text-label-caps border-b-2 border-primary-fixed-dim px-3 py-1" href="#">ENTITY_MAP</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-highest transition-colors px-3 py-1 rounded" href="#">LOG_STREAM</a>
+</nav>
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer active:opacity-80 transition-all" data-icon="account_tree">account_tree</span>
+</div>
+</header>
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="fixed left-0 top-16 h-full w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant hidden md:flex flex-col py-grid-unit z-40">
+<div class="px-6 py-4 mb-4">
+<span class="font-label-caps text-label-caps text-on-surface opacity-50 uppercase">Root Admin Control</span>
+<h2 class="font-headline-md text-headline-md text-primary-fixed-dim mt-1">ROOT_ADMIN</h2>
+</div>
+<nav class="flex flex-col space-y-1">
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span> Document Index
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-primary-fixed-dim bg-surface-container-highest border-l-2 border-primary-fixed-dim transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="enhanced_encryption" style="font-variation-settings: 'FILL' 1;">enhanced_encryption</span> Secure Vaults
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span> Access Matrix
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span> Audit Stream
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="rule_folder">rule_folder</span> Compliance Gates
+            </a>
+</nav>
+<div class="mt-auto p-6 border-t border-outline-variant/30">
+<div class="bg-surface-container p-3 border border-primary-fixed-dim/20 rounded">
+<p class="font-code-xs text-code-xs text-primary-fixed-dim">SYSTEM_STATUS: NOMINAL</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-1">UPTIME: 1,422H 12M</p>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 mt-16 p-node-gutter h-[calc(100vh-64px)] overflow-auto relative">
+<!-- Background Decor (Technical Grid) -->
+<div class="absolute inset-0 pointer-events-none opacity-20">
+<svg height="100%" width="100%">
+<defs>
+<pattern height="48" id="grid" patternunits="userSpaceOnUse" width="48">
+<path d="M 48 0 L 0 0 0 48" fill="none" stroke="#84967e" stroke-width="0.5"></path>
+</pattern>
+</defs>
+<rect fill="url(#grid)" height="100%" width="100%"></rect>
+</svg>
+</div>
+<!-- Entity Relationship Diagram -->
+<div class="relative min-w-[1200px] min-h-[800px] p-10">
+<!-- Relationship Connectors (SVG Overlay) -->
+<svg class="absolute inset-0 pointer-events-none w-full h-full">
+<!-- Vault -> Folder -->
+<path class="node-connector" d="M 180 180 H 320"></path>
+<!-- Folder -> Document -->
+<path class="node-connector" d="M 520 180 H 660"></path>
+<!-- Document -> Version -->
+<path class="node-connector" d="M 860 180 H 1000"></path>
+<!-- Document -> Signature -->
+<path class="node-connector" d="M 760 280 V 380"></path>
+<!-- Document -> Permission -->
+<path class="node-connector" d="M 760 80 V 50 H 1050 V 420"></path>
+<!-- Owner -> Permission -->
+<path class="node-connector" d="M 520 480 H 660"></path>
+<!-- Document -> AuditLog -->
+<path class="node-connector" d="M 660 230 H 150 V 500"></path>
+<!-- Vault -> RetentionPolicy -->
+<path class="node-connector" d="M 100 280 V 420"></path>
+<!-- Animating Primary Logic Path -->
+<path class="primary-path opacity-40" d="M 100 180 H 1000"></path>
+</svg>
+<!-- Node Grid Layout -->
+<div class="grid grid-cols-4 gap-x-32 gap-y-24">
+<!-- Vault Node -->
+<div class="w-64 bg-surface-container-low border border-primary-fixed-dim/40 relative z-10 flex flex-col shadow-lg shadow-black/50">
+<div class="bg-primary-fixed-dim/10 px-3 py-2 border-b border-primary-fixed-dim/40 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">TABLE: VAULT</span>
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim" data-icon="database">database</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">vault_id</span>
+<span class="text-on-surface-variant">PK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">name</span>
+<span class="text-on-surface-variant">VARCHAR</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">policy_id</span>
+<span class="text-on-surface-variant">FK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">created_at</span>
+<span class="text-on-surface-variant">TIMESTAMP</span>
+</div>
+</div>
+</div>
+<!-- Folder Node -->
+<div class="w-64 bg-surface-container-low border border-outline shadow-lg shadow-black/50 relative z-10">
+<div class="bg-surface-variant px-3 py-2 border-b border-outline flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">TABLE: FOLDER</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="folder_open">folder_open</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">folder_id</span>
+<span class="text-on-surface-variant">PK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">vault_id</span>
+<span class="text-on-surface-variant">FK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">parent_id</span>
+<span class="text-on-surface-variant">FK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">meta_tags</span>
+<span class="text-on-surface-variant">JSONB</span>
+</div>
+</div>
+</div>
+<!-- Document Node -->
+<div class="w-80 bg-surface-container-low border-2 border-primary-fixed-dim relative z-10 flex flex-col shadow-xl shadow-primary-fixed-dim/10">
+<div class="bg-primary-fixed-dim/20 px-3 py-2 border-b border-primary-fixed-dim flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">TABLE: DOCUMENT</span>
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim" data-icon="description" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex justify-between font-code-sm text-code-sm border-b border-outline-variant pb-1">
+<span class="text-primary-fixed-dim font-bold">doc_id</span>
+<span class="text-primary-fixed-dim">PK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">folder_id</span>
+<span class="text-on-surface-variant">FK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">owner_id</span>
+<span class="text-on-surface-variant">FK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">state</span>
+<span class="text-secondary">ENUM</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">checksum</span>
+<span class="text-on-surface-variant">CHAR(64)</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">is_encrypted</span>
+<span class="text-on-surface-variant">BOOLEAN</span>
+</div>
+</div>
+<div class="bg-surface-container-highest/50 p-2 border-t border-outline-variant">
+<div class="flex gap-2">
+<span class="bg-primary-fixed-dim/10 text-primary-fixed-dim font-code-xs text-code-xs px-1.5 py-0.5 rounded border border-primary-fixed-dim/30">LATEST_VER: 4.2.0</span>
+<span class="bg-secondary-container/10 text-secondary font-code-xs text-code-xs px-1.5 py-0.5 rounded border border-secondary-container/30">AES-256</span>
+</div>
+</div>
+</div>
+<!-- Version Node -->
+<div class="w-64 bg-surface-container-low border border-secondary relative z-10">
+<div class="bg-secondary/10 px-3 py-2 border-b border-secondary flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-secondary">TABLE: VERSION</span>
+<span class="material-symbols-outlined text-[14px] text-secondary" data-icon="history">history</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">version_id</span>
+<span class="text-secondary">PK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">doc_id</span>
+<span class="text-on-surface-variant">FK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">blob_ptr</span>
+<span class="text-on-surface-variant">VARCHAR</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">diff_log</span>
+<span class="text-on-surface-variant">JSONB</span>
+</div>
+</div>
+</div>
+<!-- RetentionPolicy Node -->
+<div class="w-64 bg-surface-container-low border border-error relative z-10 translate-y-[-20px]">
+<div class="bg-error/10 px-3 py-2 border-b border-error flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-error">TABLE: POLICY</span>
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="policy">policy</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">policy_id</span>
+<span class="text-on-surface-variant">PK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">duration_days</span>
+<span class="text-on-surface-variant">INT4</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">action</span>
+<span class="text-on-surface-variant">ENUM</span>
+</div>
+</div>
+</div>
+<!-- Owner Node -->
+<div class="w-64 bg-surface-container-low border border-outline relative z-10 translate-y-[-20px]">
+<div class="bg-surface-variant px-3 py-2 border-b border-outline flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">TABLE: OWNER</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="person">person</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">user_id</span>
+<span class="text-on-surface-variant">PK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">pub_key</span>
+<span class="text-on-surface-variant">TEXT</span>
+</div>
+</div>
+</div>
+<!-- Permission Node -->
+<div class="w-64 bg-surface-container-low border border-tertiary-fixed-dim relative z-10 translate-y-[-20px]">
+<div class="bg-tertiary-fixed-dim/10 px-3 py-2 border-b border-tertiary-fixed-dim flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">TABLE: PERMISSION</span>
+<span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim" data-icon="key">key</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">doc_id</span>
+<span class="text-on-surface-variant">FK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">grantee_id</span>
+<span class="text-on-surface-variant">FK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">level</span>
+<span class="text-on-surface-variant">SMALLINT</span>
+</div>
+</div>
+</div>
+<!-- Signature Node -->
+<div class="w-64 bg-surface-container-low border border-primary-fixed-dim/40 relative z-10 translate-y-[-20px]">
+<div class="bg-primary-fixed-dim/10 px-3 py-2 border-b border-primary-fixed-dim/40 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">TABLE: SIGNATURE</span>
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim" data-icon="verified">verified</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">sig_id</span>
+<span class="text-on-surface-variant">PK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">doc_id</span>
+<span class="text-on-surface-variant">FK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">signature</span>
+<span class="text-on-surface-variant">BYTEA</span>
+</div>
+</div>
+</div>
+<!-- AuditLog Node -->
+<div class="w-80 col-span-1 bg-surface-container-lowest border border-outline-variant relative z-10 translate-y-[20px] shadow-2xl">
+<div class="bg-surface-container px-3 py-2 border-b border-outline-variant flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">TABLE: AUDIT_LOG</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="history_edu">history_edu</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">event_id</span>
+<span class="text-on-surface-variant">PK: UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">entity_type</span>
+<span class="text-on-surface-variant">VARCHAR</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">entity_id</span>
+<span class="text-on-surface-variant">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">action</span>
+<span class="text-primary-fixed-dim">ENUM</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">timestamp</span>
+<span class="text-on-surface-variant">TIMESTAMP</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">request_ctx</span>
+<span class="text-on-surface-variant">JSONB</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Operations Overlay Panel -->
+<div class="fixed right-node-gutter top-24 w-72 bg-surface-container-high border border-outline-variant rounded shadow-2xl overflow-hidden glass-overlay">
+<div class="bg-surface-container-highest px-4 py-3 border-b border-outline-variant">
+<h3 class="font-headline-md text-headline-md text-on-surface">SYSTEM_OPERATIONS</h3>
+</div>
+<div class="p-4 space-y-4">
+<!-- Operation Item -->
+<div class="group flex items-center justify-between p-2 hover:bg-primary-fixed-dim/10 border border-transparent hover:border-primary-fixed-dim/20 rounded transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container/20 flex items-center justify-center text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">INSERT</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant group-hover:text-primary-fixed-dim">POST</span>
+</div>
+<div class="group flex items-center justify-between p-2 hover:bg-secondary-container/10 border border-transparent hover:border-secondary-container/20 rounded transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">UPDATE</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant group-hover:text-secondary">PATCH</span>
+</div>
+<div class="group flex items-center justify-between p-2 hover:bg-error-container/10 border border-transparent hover:border-error-container/20 rounded transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-error-container/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">DELETE</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant group-hover:text-error">DELETE</span>
+</div>
+<div class="group flex items-center justify-between p-2 hover:bg-surface-container-highest/50 border border-transparent hover:border-outline rounded transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="archive">archive</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">ARCHIVE</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">MOVE</span>
+</div>
+<div class="group flex items-center justify-between p-2 hover:bg-primary-fixed-dim/10 border border-transparent hover:border-primary-fixed-dim/20 rounded transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-fixed-dim/10 flex items-center justify-center text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[18px]" data-icon="update">update</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface">VERSION</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant group-hover:text-primary-fixed-dim">BRANCH</span>
+</div>
+</div>
+<!-- Mini Telemetry -->
+<div class="mt-4 p-4 border-t border-outline-variant bg-surface-container-lowest/50">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant uppercase">DB_LOAD</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">12%</span>
+</div>
+<div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[12%]"></div>
+</div>
+<div class="flex justify-between mt-3">
+<div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">LATENCY</p>
+<p class="font-code-sm text-code-sm text-on-surface">14ms</p>
+</div>
+<div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">POOL_CONN</p>
+<p class="font-code-sm text-code-sm text-on-surface">42/100</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 bg-surface-container-lowest border-t border-outline-variant md:hidden z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-on-surface active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-caps text-label-caps mt-1">Index</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="enhanced_encryption" style="font-variation-settings: 'FILL' 1;">enhanced_encryption</span>
+<span class="font-label-caps text-label-caps mt-1">Vaults</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-on-surface active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-label-caps text-label-caps mt-1">Matrix</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-on-surface active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps mt-1">Audit</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-on-surface active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="rule_folder">rule_folder</span>
+<span class="font-label-caps text-label-caps mt-1">Gates</span>
+</a>
+</nav>
+<!-- Floating UI: Audit Stub Indicator -->
+<div class="fixed bottom-10 left-10 md:left-72 bg-surface-container border border-primary-fixed-dim/50 rounded-full px-4 py-2 flex items-center gap-3 animate-pulse shadow-lg z-30">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">LOG_LISTENER_ACTIVE: ENTITY_PERSISTENCE_POOL_A</span>
+</div>
+<!-- Micro-Telemetry Hover Tooltip (Simulated) -->
+<div class="fixed pointer-events-none hidden bg-black/90 border border-primary-fixed-dim p-2 rounded shadow-2xl z-[100] max-w-xs" id="tooltip">
+<p class="font-code-xs text-code-xs text-primary-fixed-dim border-b border-primary-fixed-dim/20 pb-1 mb-1">NODE_PROPERTIES</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant" id="tooltip-content"></p>
+</div>
+<script>
+        // Simple micro-interaction for node highlighting
+        document.querySelectorAll('.bg-surface-container-low').forEach(node => {
+            node.addEventListener('mouseenter', (e) => {
+                node.style.borderColor = '#00e639';
+                const label = node.querySelector('.font-label-caps').innerText;
+                const tooltip = document.getElementById('tooltip');
+                const content = document.getElementById('tooltip-content');
+                
+                content.innerText = `Accessing metadata for ${label}...\nRead/Write: VERIFIED\nIsolation: Level 4`;
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 15) + 'px';
+            });
+            
+            node.addEventListener('mouseleave', () => {
+                node.style.borderColor = '';
+                document.getElementById('tooltip').style.display = 'none';
+            });
+
+            node.addEventListener('mousemove', (e) => {
+                const tooltip = document.getElementById('tooltip');
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 15) + 'px';
+            });
+        });
+
+        // Toggle mobile drawer or other interactions could go here
+    </script>
+</body></html>

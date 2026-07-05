@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-031 :: INTERACTION_BLUEPRINT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .node-connector-line {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        @keyframes flow-dash {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+        .animate-flow {
+            stroke-dasharray: 5;
+            animation: flow-dash 1s linear infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#fff6ff",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary": "#b8c3ff",
+                        "surface-tint": "#00e639",
+                        "on-error": "#690005",
+                        "surface-variant": "#273647",
+                        "on-surface-variant": "#b9ccb2",
+                        "primary": "#ebffe2",
+                        "inverse-on-surface": "#233143",
+                        "secondary-container": "#0043eb",
+                        "primary-fixed-dim": "#00e639",
+                        "secondary-fixed": "#dde1ff",
+                        "on-secondary": "#002388",
+                        "tertiary-fixed": "#f0dbff",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-dim": "#051424",
+                        "on-primary-container": "#007117",
+                        "inverse-surface": "#d4e4fa",
+                        "inverse-primary": "#006e16",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-tertiary-container": "#862ed4",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#0d1c2d",
+                        "surface": "#051424",
+                        "surface-container-highest": "#273647",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary-fixed": "#001356",
+                        "primary-fixed": "#72ff70",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-container": "#122131",
+                        "surface-bright": "#2c3a4c",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-primary": "#003907",
+                        "on-background": "#d4e4fa",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary": "#490080",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-tertiary-fixed": "#2c0051",
+                        "primary-container": "#00ff41",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "outline": "#84967e",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#d4e4fa",
+                        "background": "#051424",
+                        "surface-container-high": "#1c2b3c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "grid-unit": "8px",
+                        "lane-margin": "32px",
+                        "stack-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface text-primary dark:text-primary w-full top-0 border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 sticky z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer">hub</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</h1>
+</div>
+<div class="hidden md:flex gap-8">
+<nav class="flex gap-6 items-center">
+<a class="font-code-sm text-code-sm text-primary border-b-2 border-primary py-5" href="#">BLUEPRINT_ACTIVE</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 rounded" href="#">LOGS</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors px-2 py-1 rounded" href="#">METRICS</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer (Module Registry) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-112px)] overflow-y-auto bg-surface-container-low dark:bg-surface-container-low w-64 border-r border-outline-variant hidden lg:flex flex-col z-40">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary">MODULE_REGISTRY</h2>
+</div>
+<nav class="flex-1 py-4">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">work</span>
+<span class="font-code-sm text-code-sm">Gigs</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-code-sm text-code-sm">Shop</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-code-sm text-code-sm">Eats</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-code-sm text-code-sm">Send</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">directions_car</span>
+<span class="font-code-sm text-code-sm">Drive</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">agriculture</span>
+<span class="font-code-sm text-code-sm">Agro</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">medical_services</span>
+<span class="font-code-sm text-code-sm">Health</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 lg:ml-64 relative overflow-hidden flex flex-col p-lane-margin pb-24">
+<!-- Header Section -->
+<div class="mb-12">
+<h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tighter">Artifact L: UX ↔ Backend Blueprint</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-2 max-w-2xl">
+                High-fidelity trace of global search execution flow. Monitoring transaction WF-031 across distributed service layers.
+            </p>
+</div>
+<!-- Blueprint Container -->
+<div class="relative flex-1 min-h-[600px] border border-outline-variant bg-surface-container-lowest rounded-lg p-8">
+<!-- Background Decoration -->
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+
+</div>
+<!-- Swimlanes Definition -->
+<div class="grid grid-cols-1 md:grid-cols-4 h-full relative z-10 gap-x-12">
+<!-- Actor: User / Frontend -->
+<div class="flex flex-col gap-12 relative border-r border-outline-variant/30 pr-6">
+<div class="flex items-center gap-2 mb-4 border-b border-outline pb-2">
+<span class="material-symbols-outlined text-surface-tint">person</span>
+<span class="font-label-caps text-label-caps text-primary">CLIENT_TIER</span>
+</div>
+<!-- Node: User Search -->
+<div class="bg-surface border border-primary p-4 rounded shadow-lg relative group" id="node-start">
+<div class="text-[9px] font-label-caps text-primary/50 mb-1">01 :: ACTION</div>
+<div class="font-code-sm text-code-sm text-primary">USER_INITIATED_SEARCH</div>
+<div class="mt-2 flex gap-2">
+<span class="bg-primary/10 text-primary px-1 font-code-xs text-code-xs">Query: "Tech Jobs Lagos"</span>
+</div>
+<!-- Latency Stub -->
+<div class="absolute -right-12 top-1/2 -translate-y-1/2 font-code-xs text-code-xs text-on-surface-variant">
+                            T: 0ms
+                        </div>
+</div>
+<div class="flex-1"></div>
+<!-- Node: Frontend Update -->
+<div class="bg-surface border border-surface-tint p-4 rounded shadow-lg relative group" id="node-end">
+<div class="text-[9px] font-label-caps text-surface-tint/50 mb-1">09 :: RENDER</div>
+<div class="font-code-sm text-code-sm text-surface-tint">UI_STATE_SYNCHRONIZED</div>
+<div class="mt-2 flex gap-2">
+<span class="bg-surface-tint/10 text-surface-tint px-1 font-code-xs text-code-xs">E: 242ms Total</span>
+</div>
+</div>
+</div>
+<!-- Gateway & Routing -->
+<div class="flex flex-col gap-12 relative border-r border-outline-variant/30 px-6 pt-24">
+<div class="flex items-center gap-2 mb-4 border-b border-outline pb-2">
+<span class="material-symbols-outlined text-surface-tint">router</span>
+<span class="font-label-caps text-label-caps text-primary">TRAFFIC_CONTROL</span>
+</div>
+<!-- Node: API Gateway -->
+<div class="bg-surface border border-outline p-4 rounded shadow-lg relative" id="node-gateway">
+<div class="text-[9px] font-label-caps text-on-surface-variant mb-1">02 :: ROUTING</div>
+<div class="font-code-sm text-code-sm text-on-surface">API_GATEWAY_V3</div>
+<div class="mt-2 text-code-xs text-on-surface-variant">Auth &amp; Rate-Limit Check</div>
+<div class="absolute -right-12 top-1/2 -translate-y-1/2 font-code-xs text-code-xs text-on-surface-variant">
+                            +12ms
+                        </div>
+</div>
+</div>
+<!-- Application Services -->
+<div class="flex flex-col gap-12 relative border-r border-outline-variant/30 px-6 pt-48">
+<div class="flex items-center gap-2 mb-4 border-b border-outline pb-2">
+<span class="material-symbols-outlined text-surface-tint">settings_applications</span>
+<span class="font-label-caps text-label-caps text-primary">SERVICE_MESH</span>
+</div>
+<!-- Node: Search Service -->
+<div class="bg-surface border border-outline p-4 rounded shadow-lg relative" id="node-search-svc">
+<div class="text-[9px] font-label-caps text-on-surface-variant mb-1">03 :: ORCHESTRATION</div>
+<div class="font-code-sm text-code-sm text-on-surface">SEARCH_SERVICE_CORE</div>
+<div class="mt-2 text-code-xs text-on-surface-variant">Elastic Query Translation</div>
+<div class="absolute -right-12 top-1/2 -translate-y-1/2 font-code-xs text-code-xs text-on-surface-variant">
+                            +8ms
+                        </div>
+</div>
+<!-- Node: Results Aggregation -->
+<div class="bg-surface border border-outline p-4 rounded shadow-lg relative" id="node-results">
+<div class="text-[9px] font-label-caps text-on-surface-variant mb-1">08 :: AGGREGATION</div>
+<div class="font-code-sm text-code-sm text-on-surface">COLLECTOR_NODE</div>
+<div class="mt-2 text-code-xs text-on-surface-variant">Payload Formatting</div>
+<div class="absolute -right-12 top-1/2 -translate-y-1/2 font-code-xs text-code-xs text-on-surface-variant">
+                            +15ms
+                        </div>
+</div>
+</div>
+<!-- Intelligence Tier -->
+<div class="flex flex-col gap-8 relative px-6 pt-12">
+<div class="flex items-center gap-2 mb-4 border-b border-outline pb-2">
+<span class="material-symbols-outlined text-surface-tint">psychology</span>
+<span class="font-label-caps text-label-caps text-primary">AURA_INTELLIGENCE</span>
+</div>
+<!-- Node: Aura AI -->
+<div class="bg-surface border border-surface-tint p-3 rounded shadow-lg relative" id="node-aura">
+<div class="text-[9px] font-label-caps text-surface-tint mb-1">04 :: ANALYTICS</div>
+<div class="font-code-sm text-code-sm text-on-surface">AURA_AI_EMBEDDINGS</div>
+<div class="absolute -right-8 top-1/2 -translate-y-1/2 font-code-xs text-code-xs text-surface-tint">
+                            +45ms
+                        </div>
+</div>
+<!-- Node: Vector Search -->
+<div class="bg-surface border border-secondary p-3 rounded shadow-lg relative" id="node-vector">
+<div class="text-[9px] font-label-caps text-secondary mb-1">05 :: DATABASE</div>
+<div class="font-code-sm text-code-sm text-on-surface">VECTOR_DATABASE_STORE</div>
+<div class="absolute -right-8 top-1/2 -translate-y-1/2 font-code-xs text-code-xs text-on-surface-variant">
+                            +82ms
+                        </div>
+</div>
+<!-- Node: Ranking -->
+<div class="bg-surface border border-outline p-3 rounded shadow-lg relative" id="node-rank">
+<div class="text-[9px] font-label-caps text-on-surface-variant mb-1">06 :: RANKING</div>
+<div class="font-code-sm text-code-sm text-on-surface">SEMANTIC_RANKER_V2</div>
+<div class="absolute -right-8 top-1/2 -translate-y-1/2 font-code-xs text-code-xs text-on-surface-variant">
+                            +30ms
+                        </div>
+</div>
+<!-- Node: Recommendation -->
+<div class="bg-surface border border-outline p-3 rounded shadow-lg relative" id="node-recommend">
+<div class="text-[9px] font-label-caps text-on-surface-variant mb-1">07 :: INFERENCE</div>
+<div class="font-code-sm text-code-sm text-on-surface">REC_ENGINE_DELTA</div>
+<div class="absolute -right-8 top-1/2 -translate-y-1/2 font-code-xs text-code-xs text-on-surface-variant">
+                            +50ms
+                        </div>
+</div>
+</div>
+</div>
+<!-- SVG Overlay for connectors -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" id="connector-canvas">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#84967e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead-primary" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#00e639" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Connections will be drawn by JS for accuracy -->
+<path class="animate-flow" d="" fill="none" id="path-1" marker-end="url(#arrowhead)" stroke="#84967e" stroke-width="1.5"></path>
+</svg>
+</div>
+<!-- Telemetry Data Overlay (Floating) -->
+<div class="grid grid-cols-4 gap-4 mt-8">
+<div class="border border-outline-variant bg-surface p-3 rounded flex flex-col gap-1">
+<span class="font-label-caps text-[9px] text-on-surface-variant">AVG_LATENCY</span>
+<span class="font-code-sm text-code-sm text-primary">152.4ms</span>
+</div>
+<div class="border border-outline-variant bg-surface p-3 rounded flex flex-col gap-1">
+<span class="font-label-caps text-[9px] text-on-surface-variant">THROUGHPUT</span>
+<span class="font-code-sm text-code-sm text-primary">12.4k req/s</span>
+</div>
+<div class="border border-outline-variant bg-surface p-3 rounded flex flex-col gap-1">
+<span class="font-label-caps text-[9px] text-on-surface-variant">ERROR_RATE</span>
+<span class="font-code-sm text-code-sm text-error">0.04%</span>
+</div>
+<div class="border border-outline-variant bg-surface p-3 rounded flex flex-col gap-1">
+<span class="font-label-caps text-[9px] text-on-surface-variant">CLUSTER_STATUS</span>
+<span class="font-code-sm text-code-sm text-surface-tint">NOMINAL</span>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-surface-container-lowest text-on-surface-variant dark:text-on-surface-variant font-code-xs text-code-xs w-full bottom-0 border-t border-outline-variant fixed bottom-0 w-full flex justify-between items-center px-lane-margin py-stack-gap z-50 h-12">
+<div class="flex gap-4">
+<span class="font-label-caps text-surface-tint">© 2024 NAIJADEALS_ECOSYSTEM // SRV_ID: WF-031</span>
+</div>
+<div class="flex gap-6 uppercase">
+<span class="hover:text-surface-tint cursor-pointer transition-opacity">SYSTEM_STATUS: OK</span>
+<span class="hover:text-surface-tint cursor-pointer transition-opacity">LATENCY: 24ms</span>
+<span class="hover:text-surface-tint cursor-pointer transition-opacity">AURA_CORE: ACTIVE</span>
+</div>
+</footer>
+<script>
+        // Simple logic to draw connectors between nodes
+        function drawConnectors() {
+            const svg = document.getElementById('connector-canvas');
+            const paths = [
+                { from: 'node-start', to: 'node-gateway' },
+                { from: 'node-gateway', to: 'node-search-svc' },
+                { from: 'node-search-svc', to: 'node-aura' },
+                { from: 'node-aura', to: 'node-vector' },
+                { from: 'node-vector', to: 'node-rank' },
+                { from: 'node-rank', to: 'node-recommend' },
+                { from: 'node-recommend', to: 'node-results' },
+                { from: 'node-results', to: 'node-end' }
+            ];
+
+            const svgRect = svg.getBoundingClientRect();
+
+            paths.forEach((p, idx) => {
+                const startEl = document.getElementById(p.from);
+                const endEl = document.getElementById(p.to);
+                if(!startEl || !endEl) return;
+
+                const startRect = startEl.getBoundingClientRect();
+                const endRect = endEl.getBoundingClientRect();
+
+                // Calculate center points relative to SVG
+                const x1 = startRect.right - svgRect.left;
+                const y1 = startRect.top + startRect.height / 2 - svgRect.top;
+                const x2 = endRect.left - svgRect.left;
+                const y2 = endRect.top + endRect.height / 2 - svgRect.top;
+
+                // Create orthogonal path
+                const midX = x1 + (x2 - x1) / 2;
+                const d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+
+                let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", d);
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", idx > 5 ? "#00e639" : "#84967e");
+                path.setAttribute("stroke-width", "1.5");
+                path.setAttribute("marker-end", idx > 5 ? "url(#arrowhead-primary)" : "url(#arrowhead)");
+                path.classList.add("animate-flow");
+                
+                svg.appendChild(path);
+            });
+        }
+
+        window.onload = drawConnectors;
+        window.onresize = () => {
+            const svg = document.getElementById('connector-canvas');
+            while (svg.lastChild && svg.lastChild.nodeName === 'path') {
+                svg.removeChild(svg.lastChild);
+            }
+            drawConnectors();
+        };
+    </script>
+</body></html>

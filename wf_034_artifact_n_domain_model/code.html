@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-034: Artifact N — Domain Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-surface-variant": "#b9ccb2",
+                        "secondary": "#b8c3ff",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-container-high": "#1c2b3c",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-container-highest": "#273647",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-container": "#122131",
+                        "secondary-fixed": "#dde1ff",
+                        "background": "#051424",
+                        "on-surface": "#d4e4fa",
+                        "on-tertiary-fixed": "#2c0051",
+                        "primary": "#ebffe2",
+                        "error-container": "#93000a",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-tertiary-container": "#862ed4",
+                        "primary-fixed": "#72ff70",
+                        "outline-variant": "#3b4b37",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-fixed-variant": "#00530e",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-variant": "#273647",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-secondary": "#002388",
+                        "surface": "#051424",
+                        "on-secondary-fixed": "#001356",
+                        "surface-dim": "#051424",
+                        "on-tertiary": "#490080",
+                        "on-primary": "#003907",
+                        "outline": "#84967e",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-primary-container": "#007117",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-tint": "#00e639",
+                        "secondary-container": "#0043eb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px",
+                        "stack-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector-h {
+            height: 2px;
+            background: #00e639;
+            position: absolute;
+            z-index: -1;
+        }
+        .node-connector-v {
+            width: 2px;
+            background: #00e639;
+            position: absolute;
+            z-index: -1;
+        }
+        .node-border-glow {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-node-gutter h-16 w-full bg-background dark:bg-background border-b border-outline-variant flat no shadows">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">shield_lock</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">ASSET_INTEGRITY_OS</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<nav class="flex gap-6">
+<a class="text-on-surface-variant font-code-sm text-code-sm hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">ROOT_INDEX</a>
+<a class="text-primary-fixed-dim font-bold font-code-sm text-code-sm hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">DOMAIN_MODEL</a>
+<a class="text-on-surface-variant font-code-sm text-code-sm hover:bg-surface-container-highest transition-colors px-2 py-1" href="#">SCHEMA_VIEW</a>
+</nav>
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer active:opacity-80 transition-all">account_tree</span>
+</div>
+</header>
+<!-- NavigationDrawer (Desktop Only) -->
+<aside class="fixed left-0 top-16 h-full w-64 hidden md:flex flex-col py-grid-unit bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant flat no shadows">
+<div class="px-4 py-4 mb-4 border-b border-outline-variant/30">
+<span class="font-label-caps text-label-caps text-on-surface opacity-50">ROOT_ADMIN</span>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-code-sm text-code-sm hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-xl">inventory_2</span> Document Index
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-primary-fixed-dim bg-surface-container-highest border-l-2 border-primary-fixed-dim font-code-sm text-code-sm transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-xl">enhanced_encryption</span> Secure Vaults
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-code-sm text-code-sm hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-xl">security</span> Access Matrix
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-code-sm text-code-sm hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-xl">history_edu</span> Audit Stream
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-code-sm text-code-sm hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-xl">rule_folder</span> Compliance Gates
+            </a>
+</nav>
+<!-- Telemetry Stub -->
+<div class="mt-auto p-4 bg-surface-container-highest/10 border-t border-outline-variant/20">
+<div class="font-code-xs text-code-xs text-primary-fixed-dim opacity-70 mb-2">TELEMETRY_STREAM</div>
+<div class="flex justify-between items-center text-code-xs">
+<span class="text-on-surface-variant">Uptime</span>
+<span class="text-primary-fixed-dim">99.998%</span>
+</div>
+<div class="flex justify-between items-center text-code-xs">
+<span class="text-on-surface-variant">IO_TPS</span>
+<span class="text-primary-fixed-dim">14.2k/s</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:pl-64 pt-16 pb-20 md:pb-8 min-h-screen">
+<div class="p-node-gutter">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-l-4 border-primary-fixed-dim pl-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight">Artifact N — Domain Model</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">Version: 1.0.44 | Status: ACTIVE | Protocol: ER_MAPPING_SECURE</p>
+</div>
+<div class="mt-4 md:mt-0 flex gap-4">
+<button class="bg-surface-container-high border border-outline px-4 py-2 font-code-sm text-code-sm text-on-surface flex items-center gap-2 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-sm">download</span> EXPORT_SVG
+                    </button>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 font-code-sm text-code-sm font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">add_link</span> NEW_ENTITY
+                    </button>
+</div>
+</div>
+<!-- Mapping Grid (Swimlanes) -->
+<div class="relative overflow-x-auto pb-8">
+<div class="flex gap-node-gutter min-w-[1200px] h-full relative">
+<!-- Lane 1: Storage Layer -->
+<div class="flex-1 flex flex-col gap-lane-margin border-r border-outline-variant/30 pr-node-gutter relative">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">database</span>
+<span class="font-headline-md text-headline-md text-on-surface opacity-80">STORAGE_LAYER</span>
+</div>
+<!-- Entity: Vault -->
+<div class="bg-surface-container-low border border-primary-fixed-dim/40 p-4 rounded-sm node-border-glow relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">ENTITY :: VAULT</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: VLT_0x1</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface border-t border-outline-variant/20 pt-2 mb-4">
+                                Root storage container for encrypted assets and access policies.
+                            </div>
+<div class="space-y-2">
+<div class="flex justify-between text-code-xs font-code-xs py-1 border-b border-outline-variant/10">
+<span class="text-on-surface-variant">vault_id</span>
+<span class="text-primary-fixed-dim">UUID (PK)</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs py-1 border-b border-outline-variant/10">
+<span class="text-on-surface-variant">encryption_key</span>
+<span class="text-on-surface">AES_256</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs py-1">
+<span class="text-on-surface-variant">region</span>
+<span class="text-on-surface">EU-CENTRAL-1</span>
+</div>
+</div>
+<!-- Lifecycle Badge -->
+<div class="mt-4 inline-flex items-center px-2 py-0.5 bg-green-900/30 text-primary-fixed-dim rounded-full text-[9px] font-bold border border-primary-fixed-dim/30">
+                                ACTIVE_PERSISTENT
+                            </div>
+</div>
+<!-- Entity: Folder -->
+<div class="bg-surface-container-low border border-outline p-4 rounded-sm relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTITY :: FOLDER</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: FLD_0x2</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface border-t border-outline-variant/20 pt-2 mb-4">
+                                Logical grouping for hierarchical document organization.
+                            </div>
+<div class="space-y-2">
+<div class="flex justify-between text-code-xs font-code-xs py-1 border-b border-outline-variant/10">
+<span class="text-on-surface-variant">folder_id</span>
+<span class="text-primary-fixed-dim">UUID (PK)</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs py-1 border-b border-outline-variant/10">
+<span class="text-on-surface-variant">vault_id</span>
+<span class="text-tertiary-fixed-dim">FK -&gt; VAULT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Lane 2: Document Logic -->
+<div class="flex-1 flex flex-col gap-lane-margin border-r border-outline-variant/30 px-node-gutter relative">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">description</span>
+<span class="font-headline-md text-headline-md text-on-surface opacity-80">CONTENT_LOGIC</span>
+</div>
+<!-- Entity: Document -->
+<div class="bg-surface-container-low border border-primary-fixed-dim p-4 rounded-sm node-border-glow relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">ENTITY :: DOCUMENT</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: DOC_0x3</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface border-t border-outline-variant/20 pt-2 mb-4">
+                                Core entity representing a singular binary asset or file.
+                            </div>
+<div class="space-y-2">
+<div class="flex justify-between text-code-xs font-code-xs py-1 border-b border-outline-variant/10">
+<span class="text-on-surface-variant">doc_id</span>
+<span class="text-primary-fixed-dim">UUID (PK)</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs py-1 border-b border-outline-variant/10">
+<span class="text-on-surface-variant">folder_id</span>
+<span class="text-tertiary-fixed-dim">FK -&gt; FOLDER</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs py-1">
+<span class="text-on-surface-variant">mime_type</span>
+<span class="text-on-surface">APP/OCTET</span>
+</div>
+</div>
+<div class="mt-4 flex gap-2">
+<span class="px-2 py-0.5 bg-surface-container-highest text-on-surface text-[9px] rounded-sm font-bold border border-outline">1:N VERSIONS</span>
+<span class="px-2 py-0.5 bg-surface-container-highest text-on-surface text-[9px] rounded-sm font-bold border border-outline">M:N OWNERS</span>
+</div>
+</div>
+<!-- Entity: Version -->
+<div class="bg-surface-container-low border border-outline p-4 rounded-sm relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTITY :: VERSION</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: VER_0x4</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface border-t border-outline-variant/20 pt-2 mb-4">
+                                Immutable snapshot of a Document at a point in time.
+                            </div>
+<div class="space-y-2">
+<div class="flex justify-between text-code-xs font-code-xs py-1 border-b border-outline-variant/10">
+<span class="text-on-surface-variant">version_id</span>
+<span class="text-primary-fixed-dim">UUID (PK)</span>
+</div>
+<div class="flex justify-between text-code-xs font-code-xs py-1">
+<span class="text-on-surface-variant">checksum</span>
+<span class="text-on-surface">SHA_256_HEX</span>
+</div>
+</div>
+<div class="mt-4 inline-flex items-center px-2 py-0.5 bg-blue-900/30 text-secondary rounded-full text-[9px] font-bold border border-secondary/30">
+                                IMMUTABLE_LOCKED
+                            </div>
+</div>
+</div>
+<!-- Lane 3: Security & Actors -->
+<div class="flex-1 flex flex-col gap-lane-margin px-node-gutter relative">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">group</span>
+<span class="font-headline-md text-headline-md text-on-surface opacity-80">ACTOR_MATRIX</span>
+</div>
+<!-- Entity: Owner -->
+<div class="bg-surface-container-low border border-outline p-4 rounded-sm relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENTITY :: OWNER</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: OWN_0x5</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface border-t border-outline-variant/20 pt-2">
+                                Primary identity responsible for asset lifecycle.
+                            </div>
+</div>
+<!-- Entity: Permission -->
+<div class="bg-surface-container-low border border-error p-4 rounded-sm relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error">ENTITY :: PERMISSION</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: PRM_0x6</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface border-t border-outline-variant/20 pt-2 mb-4">
+                                RBAC/ABAC mapping for entity interactions.
+                            </div>
+<div class="space-y-1">
+<div class="flex items-center gap-2 text-code-xs font-code-xs text-error">
+<span class="material-symbols-outlined text-sm">lock</span> READ_GRANT
+                                </div>
+<div class="flex items-center gap-2 text-code-xs font-code-xs text-error">
+<span class="material-symbols-outlined text-sm">lock</span> WRITE_GRANT
+                                </div>
+</div>
+</div>
+<!-- Entity: Signature -->
+<div class="bg-surface-container-low border border-tertiary-fixed-dim p-4 rounded-sm relative">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">ENTITY :: SIGNATURE</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: SIG_0x7</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface border-t border-outline-variant/20 pt-2 mb-4">
+                                Cryptographic proof of authorization for a specific Version.
+                            </div>
+<div class="flex justify-between text-code-xs font-code-xs">
+<span class="text-on-surface-variant">signed_at</span>
+<span class="text-tertiary-fixed-dim">ISO_8601</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Schematic Overlay Logic (Manual Connector Simulation) -->
+<div class="absolute top-[180px] left-[320px] w-12 node-connector-h"></div> <!-- Vault to Folder -->
+<div class="absolute top-[180px] left-[730px] w-12 node-connector-h"></div> <!-- Folder to Document -->
+<div class="absolute top-[480px] left-[730px] w-12 node-connector-h"></div> <!-- Document to Version -->
+<div class="absolute top-[350px] left-[520px] h-[100px] node-connector-v bg-outline-variant/40"></div> <!-- Vertical link -->
+</div>
+<!-- Dashboard Analytics Panel -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">TOTAL_RECORDS</div>
+<div class="font-headline-lg text-headline-lg text-primary-fixed-dim">2,441,092</div>
+<div class="font-code-xs text-code-xs text-green-500 mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span> +12.4% / mo
+                    </div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">DATA_INTEGRITY</div>
+<div class="font-headline-lg text-headline-lg text-primary-fixed-dim">100%</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant mt-2">NO_CORRUPTION_DETECTED</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">AUDIT_LOGS</div>
+<div class="font-headline-lg text-headline-lg text-on-surface">9.1 TB</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant mt-2">RETENTION: 7 YEARS</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-1">PENDING_SIGN</div>
+<div class="font-headline-lg text-headline-lg text-error">12</div>
+<div class="font-code-xs text-code-xs text-error mt-2">REQUIRES_IMMEDIATE_ACTION</div>
+</div>
+</div>
+<!-- Audit Stream Bento Section -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-2 bg-surface-container-low border border-outline-variant p-6 rounded-lg overflow-hidden relative">
+<div class="absolute top-0 right-0 p-4 opacity-5">
+<span class="material-symbols-outlined text-[120px]">terminal</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">history</span> RECENT_SCHEMA_MUTATIONS
+                    </h3>
+<div class="space-y-3">
+<div class="flex gap-4 items-center font-code-sm text-code-sm p-2 bg-surface-container-highest/20 border-l-2 border-primary-fixed-dim">
+<span class="text-on-surface-variant">14:02:11</span>
+<span class="text-primary-fixed-dim">ALTER_ENTITY</span>
+<span class="text-on-surface">DOCUMENT -&gt; ADD_ATTR(mime_type)</span>
+<span class="ml-auto text-on-surface-variant">ID: 0xEE4</span>
+</div>
+<div class="flex gap-4 items-center font-code-sm text-code-sm p-2 hover:bg-surface-container-highest/10 transition-colors">
+<span class="text-on-surface-variant">13:45:02</span>
+<span class="text-tertiary-fixed-dim">RELATION_MAP</span>
+<span class="text-on-surface">VAULT : FOLDER (1:N) INITIALIZED</span>
+<span class="ml-auto text-on-surface-variant">ID: 0xEE3</span>
+</div>
+<div class="flex gap-4 items-center font-code-sm text-code-sm p-2 hover:bg-surface-container-highest/10 transition-colors">
+<span class="text-on-surface-variant">12:20:55</span>
+<span class="text-primary-fixed-dim">SYNC_COMPLETE</span>
+<span class="text-on-surface">GLOBAL_REDUNDANCY_CHECK :: SUCCESS</span>
+<span class="ml-auto text-on-surface-variant">ID: 0xEE2</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant rounded-lg overflow-hidden flex flex-col">
+<div class="p-6">
+<h3 class="font-headline-md text-headline-md mb-2">DOMAIN_HEALTH</h3>
+<p class="text-code-sm text-on-surface-variant mb-6">Real-time status of entity relationships and connectivity.</p>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between text-code-xs mb-1">
+<span>VAULT_CONNECTIVITY</span>
+<span>OPTIMAL</span>
+</div>
+<div class="h-1 bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[95%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-code-xs mb-1">
+<span>RELATION_INTEGRITY</span>
+<span>CHECKING...</span>
+</div>
+<div class="h-1 bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[82%] animate-pulse"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-code-xs mb-1">
+<span>SIGNATURE_LATENCY</span>
+<span>45ms</span>
+</div>
+<div class="h-1 bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-secondary-container w-[40%]"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto bg-surface-container-highest/40 p-4 border-t border-outline-variant">
+<button class="w-full text-center py-2 font-label-caps text-label-caps text-primary-fixed-dim hover:text-on-primary transition-colors">RUN_DEEP_DIAGNOSTIC</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant md:hidden z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-caps text-label-caps mt-1">Index</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">enhanced_encryption</span>
+<span class="font-label-caps text-label-caps mt-1">Vaults</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-label-caps text-label-caps mt-1">Matrix</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps mt-1">Audit</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">rule_folder</span>
+<span class="font-label-caps text-label-caps mt-1">Gates</span>
+</a>
+</nav>
+<!-- Micro-Telemetry Data Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Artifact N DOM loaded. Initializing entity listeners...');
+            
+            // Subtle pulse animation for PKs
+            const pkLabels = document.querySelectorAll('.text-primary-fixed-dim');
+            setInterval(() => {
+                pkLabels.forEach(label => {
+                    label.style.opacity = '0.8';
+                    setTimeout(() => label.style.opacity = '1', 500);
+                });
+            }, 3000);
+        });
+    </script>
+</body></html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-031 // EXCEPTION & RECOVERY MODEL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#fff6ff",
+                    "error": "#ffb4ab",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary": "#b8c3ff",
+                    "surface-tint": "#00e639",
+                    "on-error": "#690005",
+                    "surface-variant": "#273647",
+                    "on-surface-variant": "#b9ccb2",
+                    "primary": "#ebffe2",
+                    "inverse-on-surface": "#233143",
+                    "secondary-container": "#0043eb",
+                    "primary-fixed-dim": "#00e639",
+                    "secondary-fixed": "#dde1ff",
+                    "on-secondary": "#002388",
+                    "tertiary-fixed": "#f0dbff",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-dim": "#051424",
+                    "on-primary-container": "#007117",
+                    "inverse-surface": "#d4e4fa",
+                    "inverse-primary": "#006e16",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-tertiary-container": "#862ed4",
+                    "error-container": "#93000a",
+                    "surface-container-low": "#0d1c2d",
+                    "surface": "#051424",
+                    "surface-container-highest": "#273647",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary-fixed": "#001356",
+                    "primary-fixed": "#72ff70",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-container": "#122131",
+                    "surface-bright": "#2c3a4c",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-primary": "#003907",
+                    "on-background": "#d4e4fa",
+                    "on-primary-fixed": "#002203",
+                    "on-tertiary": "#490080",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-tertiary-fixed": "#2c0051",
+                    "primary-container": "#00ff41",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "outline": "#84967e",
+                    "on-error-container": "#ffdad6",
+                    "on-surface": "#d4e4fa",
+                    "background": "#051424",
+                    "surface-container-high": "#1c2b3c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "grid-unit": "8px",
+                    "lane-margin": "32px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(rgba(0, 230, 57, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-container {
+            position: relative;
+            z-index: 10;
+        }
+        .connector-line {
+            position: absolute;
+            z-index: 1;
+            pointer-events: none;
+            border-color: #3b4b37;
+        }
+        .connector-active {
+            border-color: #00e639;
+        }
+        .connector-error {
+            border-style: dashed;
+            border-color: #ffb4ab;
+        }
+        .ortho-v { width: 2px; height: 32px; border-left-width: 2px; }
+        .ortho-h { height: 2px; width: 48px; border-top-width: 2px; }
+        
+        .glow-active {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #010f1f; }
+        ::-webkit-scrollbar-thumb { background: #273647; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b4b37; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TOP APP BAR -->
+<header class="fixed top-0 z-[100] bg-surface dark:bg-surface text-primary dark:text-primary w-full border-b border-outline-variant flex justify-between items-center px-lane-margin h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-surface-tint">hub</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-surface-tint">SYSTEM_CORE::DISCOVERY_ENGINE</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-6 font-code-sm text-code-sm">
+<span class="text-primary border-b-2 border-primary cursor-pointer h-16 flex items-center">HEALTH_MONITOR</span>
+<span class="text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer px-2 h-16 flex items-center">RECOVERY_LOGS</span>
+<span class="text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer px-2 h-16 flex items-center">METRICS</span>
+</div>
+<span class="material-symbols-outlined cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<!-- NAVIGATION DRAWER -->
+<aside class="hidden lg:block fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant z-50 overflow-y-auto">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-primary">MODULE_REGISTRY</h2>
+</div>
+<nav class="py-2">
+<!-- Mapping JSON icons and labels -->
+<div class="flex items-center px-4 py-3 gap-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">shopping_cart</span> Shop
+            </div>
+<div class="flex items-center px-4 py-3 gap-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">restaurant</span> Eats
+            </div>
+<div class="flex items-center px-4 py-3 gap-4 bg-secondary-container text-on-secondary-container font-bold border-l-4 border-surface-tint font-code-sm text-code-sm">
+<span class="material-symbols-outlined">shield</span> Insurance
+            </div>
+<div class="flex items-center px-4 py-3 gap-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">local_shipping</span> Send
+            </div>
+<div class="flex items-center px-4 py-3 gap-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">directions_car</span> Drive
+            </div>
+<div class="flex items-center px-4 py-3 gap-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">work</span> Gigs
+            </div>
+<div class="flex items-center px-4 py-3 gap-4 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer font-code-sm text-code-sm">
+<span class="material-symbols-outlined">inventory_2</span> Wholesale
+            </div>
+<div class="mt-8 px-4 py-2 opacity-50 font-label-caps text-[9px] tracking-tighter">TELEMETRY_STREAM</div>
+<div class="px-4 py-2">
+<div class="bg-surface-container-highest h-1 w-full rounded-full overflow-hidden">
+<div class="bg-surface-tint h-full w-[64%]"></div>
+</div>
+<div class="flex justify-between mt-1 font-code-xs text-code-xs text-on-surface-variant">
+<span>BUFFER_LOAD</span>
+<span>64%</span>
+</div>
+</div>
+</nav>
+</aside>
+<!-- MAIN CANVAS -->
+<main class="pt-24 pb-16 lg:ml-64 px-lane-margin min-h-screen">
+<!-- Header Section -->
+<div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 rounded-full bg-surface-tint animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Resilience Logic Map</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-primary">WF-031 // EXCEPTION & RECOVERY MODEL</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant max-w-2xl mt-2">
+                    Active topological map of failover procedures and recovery nodes for the Discovery Engine. Health checks are executed at 500ms intervals.
+                </p>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant flex gap-8">
+<div class="text-center">
+<div class="font-label-caps text-code-xs text-on-surface-variant">UPTIME</div>
+<div class="font-code-sm text-primary">99.982%</div>
+</div>
+<div class="text-center">
+<div class="font-label-caps text-code-xs text-on-surface-variant">MTTR</div>
+<div class="font-code-sm text-primary">124ms</div>
+</div>
+<div class="text-center">
+<div class="font-label-caps text-code-xs text-on-surface-variant">FAIL_INDEX</div>
+<div class="font-code-sm text-error">0.04%</div>
+</div>
+</div>
+</div>
+<!-- DIAGRAM AREA -->
+<div class="relative overflow-x-auto pb-12">
+<div class="min-w-[1000px] grid grid-cols-5 gap-y-16">
+<!-- LANE 1: TRIGGER -->
+<div class="flex flex-col items-center">
+<div class="font-headline-md text-headline-md mb-8 text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined">bolt</span> TRIGGER
+                    </div>
+<!-- Entry Node -->
+<div class="w-48 bg-surface-container-low border border-primary p-3 rounded shadow-lg">
+<div class="font-label-caps text-label-caps text-primary border-b border-outline-variant mb-2 pb-1">INPUT_QUERY</div>
+<div class="font-code-sm text-code-sm text-on-surface">Stream Search Pipeline Initiated</div>
+<div class="mt-2 flex justify-between font-code-xs text-code-xs text-on-surface-variant">
+<span>Status:</span>
+<span class="text-surface-tint">ACTIVE</span>
+</div>
+</div>
+</div>
+<!-- LANE 2: EXCEPTION STATES -->
+<div class="flex flex-col items-center gap-12">
+<div class="font-headline-md text-headline-md mb-8 text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined">warning</span> EXCEPTION_STATES
+                    </div>
+<!-- No Results -->
+<div class="w-48 bg-surface-container-high border border-outline-variant p-3 rounded group hover:border-error transition-colors">
+<div class="font-label-caps text-label-caps text-error border-b border-outline-variant mb-2 pb-1">ERR_ZERO_RET</div>
+<div class="font-code-sm text-code-sm text-on-surface">No Results returned from Index.</div>
+<div class="mt-2 font-code-xs text-code-xs text-on-surface-variant italic">Threshold: 0 matches</div>
+</div>
+<!-- Search Failure -->
+<div class="w-48 bg-surface-container-high border border-outline-variant p-3 rounded group hover:border-error transition-colors">
+<div class="font-label-caps text-label-caps text-error border-b border-outline-variant mb-2 pb-1">ERR_PIPE_FAIL</div>
+<div class="font-code-sm text-code-sm text-on-surface">Cluster Search Failure (5xx)</div>
+<div class="mt-2 font-code-xs text-code-xs text-on-surface-variant">Retries: 0/3</div>
+</div>
+<!-- Vector Failure -->
+<div class="w-48 bg-surface-container-high border border-outline-variant p-3 rounded group hover:border-error transition-colors">
+<div class="font-label-caps text-label-caps text-error border-b border-outline-variant mb-2 pb-1">ERR_VEC_IDX</div>
+<div class="font-code-sm text-code-sm text-on-surface">Vector Embeddings Unavailable</div>
+</div>
+<!-- Timeout -->
+<div class="w-48 bg-surface-container-high border border-outline-variant p-3 rounded group hover:border-error transition-colors">
+<div class="font-label-caps text-label-caps text-error border-b border-outline-variant mb-2 pb-1">ERR_LAT_TO</div>
+<div class="font-code-sm text-code-sm text-on-surface">Latency > 1500ms (Timeout)</div>
+</div>
+</div>
+<!-- LANE 3: ACTIVE RECOVERY -->
+<div class="flex flex-col items-center gap-12">
+<div class="font-headline-md text-headline-md mb-8 text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined">settings_backup_restore</span> ACTIVE_RECOVERY
+                    </div>
+<!-- AI Expansion -->
+<div class="w-48 bg-surface-dim border border-surface-tint p-3 rounded-lg shadow-xl glow-active">
+<div class="font-label-caps text-label-caps text-surface-tint border-b border-outline-variant mb-2 pb-1">AI_EXPAND_SUGGEST</div>
+<div class="font-code-sm text-code-sm text-on-surface">LLM-driven query broadening initiated.</div>
+<div class="mt-2 font-code-xs text-code-xs text-surface-tint animate-pulse">Running...</div>
+</div>
+<!-- Retry Logic -->
+<div class="w-48 bg-surface-dim border border-secondary p-3 rounded-lg">
+<div class="font-label-caps text-label-caps text-secondary border-b border-outline-variant mb-2 pb-1">EXP_BACKOFF_RETRY</div>
+<div class="font-code-sm text-code-sm text-on-surface">Exponential backoff retry policy (100ms..400ms)</div>
+</div>
+<!-- Keyword Fallback -->
+<div class="w-48 bg-surface-dim border border-primary p-3 rounded-lg">
+<div class="font-label-caps text-label-caps text-primary border-b border-outline-variant mb-2 pb-1">BM25_KEYWORD_FAILBACK</div>
+<div class="font-code-sm text-code-sm text-on-surface">Switched to lexical BM25 matching.</div>
+</div>
+<!-- Cached Results -->
+<div class="w-48 bg-surface-dim border border-surface-tint p-3 rounded-lg">
+<div class="font-label-caps text-label-caps text-surface-tint border-b border-outline-variant mb-2 pb-1">CACHE_HYDRATION</div>
+<div class="font-code-sm text-code-sm text-on-surface">Serving stale-while-revalidate cache (TTL: 5m)</div>
+</div>
+</div>
+<!-- LANE 4: HEALTH CHECKS -->
+<div class="flex flex-col items-center gap-12">
+<div class="font-headline-md text-headline-md mb-8 text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined">health_metrics</span> HEALTH_CHECKS
+                    </div>
+<!-- Node Monitor -->
+<div class="w-56 p-4 bg-surface-container border border-outline-variant rounded">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-code-xs text-on-surface-variant">PROBE_01</span>
+<span class="bg-surface-tint text-on-primary font-code-xs px-1 rounded">OK</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-[10px] font-code-xs">
+<span class="text-on-surface-variant">CLUSTER_A</span>
+<span class="text-surface-tint">ONLINE</span>
+</div>
+<div class="flex justify-between text-[10px] font-code-xs">
+<span class="text-on-surface-variant">VECTOR_DB</span>
+<span class="text-error">DEGRADED</span>
+</div>
+<div class="flex justify-between text-[10px] font-code-xs">
+<span class="text-on-surface-variant">ELASTIC_NODES</span>
+<span class="text-surface-tint">ONLINE</span>
+</div>
+</div>
+</div>
+<div class="w-56 p-4 bg-surface-container border border-outline-variant rounded">
+<div class="font-label-caps text-code-xs text-on-surface-variant mb-2">LATENCY_HEATMAP</div>
+<div class="flex gap-1">
+<div class="h-8 w-4 bg-surface-tint"></div>
+<div class="h-8 w-4 bg-surface-tint opacity-80"></div>
+<div class="h-8 w-4 bg-surface-tint opacity-60"></div>
+<div class="h-8 w-4 bg-error opacity-40"></div>
+<div class="h-8 w-4 bg-error"></div>
+<div class="h-8 w-4 bg-surface-tint opacity-30"></div>
+</div>
+<div class="mt-2 text-[9px] font-code-xs text-on-surface-variant">P99: 1240ms | P50: 12ms</div>
+</div>
+</div>
+<!-- LANE 5: RESOLUTION -->
+<div class="flex flex-col items-center">
+<div class="font-headline-md text-headline-md mb-8 text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined">check_circle</span> RESOLUTION
+                    </div>
+<div class="w-48 bg-primary-container text-on-primary-container p-3 rounded-lg border border-primary font-bold text-center">
+<div class="font-label-caps text-label-caps border-b border-on-primary-container/20 mb-2 pb-1">RESULT_SERVING</div>
+<div class="font-code-sm text-code-sm uppercase">Success</div>
+</div>
+<div class="mt-16 w-48 bg-surface-container-highest border border-outline p-3 rounded">
+<div class="font-label-caps text-label-caps text-primary border-b border-outline mb-2 pb-1">EVENT_LOGGED</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant font-mono">
+                            ID: e9a-f421<br/>
+                            ACT: RECOVERY_SUCCESS<br/>
+                            TS: 1723491022
+                        </div>
+</div>
+</div>
+</div>
+<!-- SVG Overlay for Orthogonal Connectors (Simulated with absolute divs for this high-density layout) -->
+<!-- Note: Real implementations would use a canvas or dedicated SVG layer -->
+<div class="absolute inset-0 pointer-events-none opacity-20">
+<!-- Connectors logic simplified for representation -->
+</div>
+</div>
+<!-- TELEMETRY FEED (Bento Style) -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-2 bg-surface-container border border-outline-variant p-6 rounded-xl">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-label-caps text-label-caps text-primary">REAL_TIME_EXCEPTION_LOGS</h3>
+<span class="text-code-xs font-code-xs text-on-surface-variant">POLLING_ID: 99x-1</span>
+</div>
+<div class="space-y-3 font-code-sm text-code-sm">
+<div class="flex gap-4 border-b border-outline-variant/30 pb-2">
+<span class="text-on-surface-variant">[12:44:02]</span>
+<span class="text-error font-bold">WARN</span>
+<span class="text-on-surface">Timeout detected on Node_7B. Escalating to recovery.</span>
+</div>
+<div class="flex gap-4 border-b border-outline-variant/30 pb-2">
+<span class="text-on-surface-variant">[12:44:03]</span>
+<span class="text-surface-tint font-bold">INFO</span>
+<span class="text-on-surface">Cache hydrated from Edge_Cluster_West.</span>
+</div>
+<div class="flex gap-4 border-b border-outline-variant/30 pb-2">
+<span class="text-on-surface-variant">[12:44:05]</span>
+<span class="text-surface-tint font-bold">RECOVERY</span>
+<span class="text-on-surface">LLM Expand successfully returned 3 candidate objects.</span>
+</div>
+<div class="flex gap-4 pb-2">
+<span class="text-on-surface-variant">[12:44:08]</span>
+<span class="text-primary font-bold">SYS</span>
+<span class="text-on-surface">State: NOMINAL. All probes returning 200 OK.</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-6 rounded-xl relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-label-caps text-label-caps text-primary mb-4">SYSTEM_AURA_CORE</h3>
+<div class="flex items-center justify-center h-32">
+<div class="w-24 h-24 rounded-full border-4 border-dashed border-surface-tint animate-[spin_10s_linear_infinite] flex items-center justify-center">
+<div class="w-16 h-16 rounded-full border-2 border-primary animate-pulse"></div>
+</div>
+</div>
+<div class="text-center mt-4">
+<span class="font-code-sm text-code-sm text-surface-tint uppercase tracking-widest">Core Active</span>
+</div>
+</div>
+<!-- Subtle background glow -->
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-surface-tint/5 blur-3xl rounded-full"></div>
+</div>
+</div>
+</main>
+<!-- FOOTER -->
+<footer class="fixed bottom-0 w-full bg-surface-container-lowest dark:bg-surface-container-lowest text-on-surface-variant dark:text-on-surface-variant border-t border-outline-variant flex justify-between items-center px-lane-margin py-stack-gap z-50 h-10">
+<div class="font-label-caps text-label-caps text-surface-tint">
+            © 2024 NAIJADEALS_ECOSYSTEM // SRV_ID: WF-031
+        </div>
+<div class="flex gap-8 font-code-xs text-code-xs">
+<span class="hover:text-surface-tint cursor-pointer transition-opacity">SYSTEM_STATUS: OK</span>
+<span class="hover:text-surface-tint cursor-pointer transition-opacity">LATENCY: 24ms</span>
+<span class="hover:text-surface-tint cursor-pointer transition-opacity">AURA_CORE: ACTIVE</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Randomize some telemetry numbers
+        setInterval(() => {
+            const latencyEl = document.querySelector('footer div:last-child span:nth-child(2)');
+            if(latencyEl) {
+                const newLat = Math.floor(Math.random() * 10) + 20;
+                latencyEl.innerText = `LATENCY: ${newLat}ms`;
+            }
+        }, 3000);
+
+        // Simple node interaction highlight
+        document.querySelectorAll('.bg-surface-container-high').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.boxShadow = '0 0 20px rgba(255, 180, 171, 0.1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body></html>

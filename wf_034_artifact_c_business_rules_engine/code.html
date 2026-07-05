@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ASSET_INTEGRITY_OS // Business Rules Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .rule-node-border {
+            border-left: 2px solid #00e639;
+        }
+        .connector-line {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .glow-subtle {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.1);
+        }
+        /* Custom Scrollbar for High Density Data */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1c2d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00e639;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-surface-variant": "#b9ccb2",
+                        "secondary": "#b8c3ff",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-container-high": "#1c2b3c",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-container-lowest": "#010f1f",
+                        "on-primary-fixed": "#002203",
+                        "on-error": "#690005",
+                        "inverse-primary": "#006e16",
+                        "primary-container": "#00ff41",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "tertiary": "#fff6ff",
+                        "surface-container-highest": "#273647",
+                        "on-secondary-container": "#c6ceff",
+                        "surface-container": "#122131",
+                        "secondary-fixed": "#dde1ff",
+                        "background": "#051424",
+                        "on-surface": "#d4e4fa",
+                        "on-tertiary-fixed": "#2c0051",
+                        "primary": "#ebffe2",
+                        "error-container": "#93000a",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-tertiary-container": "#862ed4",
+                        "primary-fixed": "#72ff70",
+                        "outline-variant": "#3b4b37",
+                        "inverse-on-surface": "#233143",
+                        "on-primary-fixed-variant": "#00530e",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-variant": "#273647",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-secondary": "#002388",
+                        "surface": "#051424",
+                        "on-secondary-fixed": "#001356",
+                        "surface-dim": "#051424",
+                        "on-tertiary": "#490080",
+                        "on-primary": "#003907",
+                        "outline": "#84967e",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-primary-container": "#007117",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-tint": "#00e639",
+                        "secondary-container": "#0043eb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px",
+                        "stack-gap": "4px"
+                    },
+                    "fontFamily": {
+                        "code-xs": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface antialiased overflow-hidden flex flex-col h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-node-gutter h-16 w-full bg-background dark:bg-background border-b border-outline-variant flat no shadows">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="shield_lock">shield_lock</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">ASSET_INTEGRITY_OS</h1>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<nav class="flex items-center gap-6">
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-colors font-code-sm text-code-sm px-3 py-1" href="#">DOC_INDEX</a>
+<a class="text-primary-fixed-dim font-bold font-code-sm text-code-sm px-3 py-1 border-b-2 border-primary-fixed-dim" href="#">LOGIC_ENGINE</a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-colors font-code-sm text-code-sm px-3 py-1" href="#">MATRIX_VIEW</a>
+</nav>
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+</div>
+</header>
+<div class="flex flex-1 mt-16 mb-0 md:mb-0">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col py-grid-unit fixed left-0 top-16 h-full w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant flat no shadows">
+<div class="px-6 py-4 mb-4">
+<h2 class="font-label-caps text-label-caps text-on-surface opacity-50">ROOT_ADMIN</h2>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+                    Document Index
+                </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="enhanced_encryption">enhanced_encryption</span>
+                    Secure Vaults
+                </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+                    Access Matrix
+                </a>
+<a class="flex items-center gap-3 px-6 py-3 text-primary-fixed-dim bg-surface-container-highest border-l-2 border-primary-fixed-dim font-code-sm text-code-sm transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+                    Audit Stream
+                </a>
+<a class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-150 ease-in-out font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="rule_folder">rule_folder</span>
+                    Compliance Gates
+                </a>
+</nav>
+<div class="mt-auto p-4 m-4 bg-surface-container rounded-lg border border-outline-variant">
+<div class="font-label-caps text-[10px] text-primary-fixed-dim mb-2 uppercase">System Telemetry</div>
+<div class="flex justify-between font-code-xs text-code-xs mb-1">
+<span>Active Rules</span>
+<span class="text-primary-fixed-dim">12,402</span>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span>Latency</span>
+<span class="text-primary-fixed-dim">4ms</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 p-node-gutter overflow-y-auto overflow-x-hidden">
+<div class="max-w-7xl mx-auto">
+<!-- Section Header -->
+<div class="flex items-end justify-between mb-8 border-b border-outline-variant pb-4">
+<div>
+<div class="font-label-caps text-label-caps text-primary-fixed-dim mb-1">WF-034 // ARTIFACT_C</div>
+<h2 class="font-headline-lg text-headline-lg uppercase tracking-tight">Business Rules Engine</h2>
+</div>
+<div class="flex gap-4">
+<button class="px-4 py-2 bg-surface-container-highest border border-outline-variant font-code-sm text-code-sm hover:bg-primary-fixed-dim hover:text-on-primary transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="add_circle">add_circle</span>
+                            APPEND_RULE
+                        </button>
+<button class="px-4 py-2 bg-surface-container-highest border border-outline-variant font-code-sm text-code-sm hover:bg-primary-fixed-dim hover:text-on-primary transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="play_arrow">play_arrow</span>
+                            SIMULATE_ALL
+                        </button>
+</div>
+</div>
+<!-- Decision Matrix -->
+<div class="grid grid-cols-1 gap-1">
+<!-- Table Header -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container-high border-x border-t border-outline-variant">
+<div class="col-span-2 p-3 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant">Rule Identifier</div>
+<div class="col-span-3 p-3 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant">Decision Logic (IF/THEN)</div>
+<div class="col-span-2 p-3 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant">Responsible Service</div>
+<div class="col-span-2 p-3 font-label-caps text-label-caps text-on-surface-variant border-r border-outline-variant">Failure Result</div>
+<div class="col-span-3 p-3 font-label-caps text-label-caps text-on-surface-variant">Recovery Path</div>
+</div>
+<!-- Matrix Rows -->
+<div class="space-y-[1px] bg-outline-variant border border-outline-variant">
+<!-- Rule 01: Document Type? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_DOC_TYPE_VALIDATION</span>
+<span class="font-code-xs text-code-xs opacity-50">v4.2.1</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> mime_type <span class="text-secondary">NOT IN</span> [PDF, JSON, MD] 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> REJECT_UNSUPPORTED
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-code-sm text-code-sm uppercase">Ingress_Router</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">HTTP_415_UNSUPPORTED</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="conversion_path">conversion_path</span>
+<span class="font-code-sm text-code-sm">Route to <span class="text-primary-fixed-dim underline">Legacy_Transcoder</span></span>
+</div>
+</div>
+<!-- Rule 02: Encrypted? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_ENCRYPTION_CHECK</span>
+<span class="font-code-xs text-code-xs opacity-50">v1.0.8</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> encryption_bit <span class="text-secondary">==</span> FALSE 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> FORCE_AES256
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="lock">lock</span>
+<span class="font-code-sm text-code-sm uppercase">KMS_Vault</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">SEC_VULNERABILITY_0x3</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="refresh">refresh</span>
+<span class="font-code-sm text-code-sm">Auto-encrypt &amp; re-verify hash</span>
+</div>
+</div>
+<!-- Rule 03: Verified? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_VERIFICATION_STATE</span>
+<span class="font-code-xs text-code-xs opacity-50">v2.1.0</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> checksum_match <span class="text-secondary">==</span> FALSE 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> QUARANTINE_NODE
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="verified">verified</span>
+<span class="font-code-sm text-code-sm uppercase">Integrity_Monitor</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">CHECKSUM_MISMATCH</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="settings_backup_restore">settings_backup_restore</span>
+<span class="font-code-sm text-code-sm">Fetch version from <span class="text-primary-fixed-dim">L3_Mirror</span></span>
+</div>
+</div>
+<!-- Rule 04: Signed? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_SIGNATURE_AUTH</span>
+<span class="font-code-xs text-code-xs opacity-50">v5.5.5</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> digital_signature <span class="text-secondary">==</span> NULL 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> TRIGGER_SIGN_FLOW
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="draw">draw</span>
+<span class="font-code-sm text-code-sm uppercase">Identity_Svc</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">AUTH_PENDING</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="mail">mail</span>
+<span class="font-code-sm text-code-sm">Notify <span class="text-primary-fixed-dim">Assigned_Owner</span></span>
+</div>
+</div>
+<!-- Rule 05: Expired? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_TTL_EXPIRY</span>
+<span class="font-code-xs text-code-xs opacity-50">v1.1.2</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> current_ts <span class="text-secondary">&gt;</span> ttl_expiry 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> FLAG_OBSOLETE
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="timer">timer</span>
+<span class="font-code-sm text-code-sm uppercase">Cron_Janitor</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">TOKEN_EXPIRED</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="archive">archive</span>
+<span class="font-code-sm text-code-sm">Move to <span class="text-primary-fixed-dim">Cold_Storage</span></span>
+</div>
+</div>
+<!-- Rule 06: Retention Required? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_RETENTION_POL</span>
+<span class="font-code-xs text-code-xs opacity-50">v3.0.1</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> category <span class="text-secondary">==</span> FINANCIAL 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> SET_RETENTION (7Y)
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="history">history</span>
+<span class="font-code-sm text-code-sm uppercase">Policy_Mgr</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">POLICY_VIOLATION</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="gavel">gavel</span>
+<span class="font-code-sm text-code-sm">Manual <span class="text-primary-fixed-dim">Compliance_Review</span></span>
+</div>
+</div>
+<!-- Rule 07: Legal Hold? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_LEGAL_IMMUTABLE</span>
+<span class="font-code-xs text-code-xs opacity-50">v0.9.9</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> legal_hold <span class="text-secondary">==</span> TRUE 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> LOCK_DELETION
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="lock_clock">lock_clock</span>
+<span class="font-code-sm text-code-sm uppercase">Legal_Core</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">WRITE_PROTECTED</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="warning">warning</span>
+<span class="font-code-sm text-code-sm">Elevate to <span class="text-primary-fixed-dim">General_Counsel</span></span>
+</div>
+</div>
+<!-- Rule 08: Owner Verified? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_OWNER_AUTH_L2</span>
+<span class="font-code-xs text-code-xs opacity-50">v2.4.4</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> owner_id <span class="text-secondary">NOT IN</span> directory 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> FLAG_ORPHANED
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="person_search">person_search</span>
+<span class="font-code-sm text-code-sm uppercase">Auth_Directory</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">ORPHAN_ENTRY</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="move_up">move_up</span>
+<span class="font-code-sm text-code-sm">Transfer to <span class="text-primary-fixed-dim">Admin_Group</span></span>
+</div>
+</div>
+<!-- Rule 09: Public? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_EXT_VISIBILITY</span>
+<span class="font-code-xs text-code-xs opacity-50">v6.0.0</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> visibility <span class="text-secondary">==</span> PUBLIC 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> STRIP_PII
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="public">public</span>
+<span class="font-code-sm text-code-sm uppercase">Proxy_Gateway</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">PII_LEAK_DETECTED</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="mask">masks</span>
+<span class="font-code-sm text-code-sm">Trigger <span class="text-primary-fixed-dim">Auto-Redaction</span></span>
+</div>
+</div>
+<!-- Rule 10: Private? -->
+<div class="grid grid-cols-12 gap-0 bg-surface-container hover:bg-surface-container-highest transition-colors group">
+<div class="col-span-2 p-4 border-r border-outline-variant flex flex-col justify-center">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">R_INT_RESTRICTED</span>
+<span class="font-code-xs text-code-xs opacity-50">v4.4.1</span>
+</div>
+<div class="col-span-3 p-4 border-r border-outline-variant">
+<code class="font-code-sm text-code-sm text-on-surface">
+<span class="text-primary-fixed-dim">IF</span> classification <span class="text-secondary">==</span> PRIVATE 
+                                    <br/><span class="text-primary-fixed-dim">THEN</span> ENFORCE_MFA
+                                </code>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="lock_open">lock_open</span>
+<span class="font-code-sm text-code-sm uppercase">Security_Fabric</span>
+</div>
+<div class="col-span-2 p-4 border-r border-outline-variant">
+<div class="px-2 py-0.5 bg-error-container text-on-error-container font-code-xs text-code-xs rounded inline-block">ACCESS_DENIED</div>
+</div>
+<div class="col-span-3 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim" data-icon="shield_with_heart">shield_with_heart</span>
+<span class="font-code-sm text-code-sm">Verify via <span class="text-primary-fixed-dim">Physical_Token</span></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Telemetry -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-[10px] text-on-surface-variant mb-2">LAST EXECUTION</div>
+<div class="font-code-sm text-code-sm text-primary-fixed-dim">2023-11-24T14:22:11.004Z</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-[10px] text-on-surface-variant mb-2">COMPLIANCE SCORE</div>
+<div class="flex items-center gap-2">
+<div class="h-2 flex-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[98%]"></div>
+</div>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">98%</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-[10px] text-on-surface-variant mb-2">RECOVERY EFFICIENCY</div>
+<div class="font-code-sm text-code-sm text-primary-fixed-dim">AUTO_HEAL: 92.4%</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4">
+<div class="font-label-caps text-[10px] text-on-surface-variant mb-2">AUDIT STATUS</div>
+<div class="flex items-center gap-2 font-code-sm text-code-sm text-primary-fixed-dim">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+                            ACTIVE_STREAMING
+                        </div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-caps text-label-caps mt-1">Index</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="enhanced_encryption">enhanced_encryption</span>
+<span class="font-label-caps text-label-caps mt-1">Vaults</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary-fixed-dim bg-surface-container-high rounded-lg p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-label-caps text-label-caps mt-1">Matrix</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps mt-1">Audit</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="rule_folder">rule_folder</span>
+<span class="font-label-caps text-label-caps mt-1">Gates</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for rule rows
+        document.querySelectorAll('.grid-cols-12').forEach(row => {
+            row.addEventListener('click', () => {
+                console.log('Opening detailed node config...');
+                // Visual feedback
+                row.classList.add('bg-surface-container-highest');
+                setTimeout(() => row.classList.remove('bg-surface-container-highest'), 300);
+            });
+        });
+
+        // Atmospheric effect: random blinking telemetry
+        setInterval(() => {
+            const telemetryValue = document.querySelector('.text-primary-fixed-dim.animate-pulse');
+            if (telemetryValue) {
+                telemetryValue.parentElement.style.opacity = Math.random() > 0.1 ? '1' : '0.8';
+            }
+        }, 1000);
+    </script>
+</body></html>

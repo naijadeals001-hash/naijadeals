@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-033 ARTIFACT F: Event Bus &amp; n8n Automation Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(185, 204, 178, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.1);
+        }
+        .connector-h {
+            height: 2px;
+            background: repeating-linear-gradient(90deg, #3b4b37, #3b4b37 4px, transparent 4px, transparent 8px);
+        }
+        .connector-v {
+            width: 2px;
+            background: repeating-linear-gradient(0deg, #3b4b37, #3b4b37 4px, transparent 4px, transparent 8px);
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 230, 57, 0.1);
+            position: absolute;
+            animation: scan 8s linear infinite;
+        }
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ebffe2",
+                    "on-secondary-container": "#c6ceff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "inverse-surface": "#d4e4fa",
+                    "outline": "#84967e",
+                    "on-surface-variant": "#b9ccb2",
+                    "inverse-on-surface": "#233143",
+                    "on-secondary-fixed": "#001356",
+                    "on-primary-container": "#007117",
+                    "on-surface": "#d4e4fa",
+                    "on-tertiary-fixed": "#2c0051",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-container-lowest": "#010f1f",
+                    "on-primary": "#003907",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface-container-high": "#1c2b3c",
+                    "surface-container": "#122131",
+                    "surface-bright": "#2c3a4c",
+                    "primary-fixed-dim": "#00e639",
+                    "primary-fixed": "#72ff70",
+                    "primary-container": "#00ff41",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-highest": "#273647",
+                    "on-secondary": "#002388",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "secondary-fixed": "#dde1ff",
+                    "secondary": "#b8c3ff",
+                    "inverse-primary": "#006e16",
+                    "surface-tint": "#00e639",
+                    "on-error": "#690005",
+                    "error-container": "#93000a",
+                    "surface-dim": "#051424",
+                    "surface": "#051424",
+                    "secondary-container": "#0043eb",
+                    "on-background": "#d4e4fa",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "tertiary": "#fff6ff",
+                    "on-tertiary": "#490080",
+                    "surface-variant": "#273647",
+                    "tertiary-container": "#ecd3ff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary-fixed": "#002203",
+                    "on-tertiary-container": "#862ed4",
+                    "background": "#051424",
+                    "surface-container-low": "#0d1c2d",
+                    "outline-variant": "#3b4b37"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "node-gutter": "24px",
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "stack-gap": "4px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky border-b border-outline-variant bg-surface dark:bg-surface flex justify-between items-center px-grid-unit h-16 w-full z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary">terminal</span>
+<span class="font-label-caps text-label-caps tracking-tighter text-primary dark:text-primary">NAIJADEALS_CORE_ENGINE</span>
+</div>
+<div class="hidden md:flex gap-6 items-center">
+<span class="font-label-caps text-label-caps text-primary cursor-pointer transition-colors hover:bg-surface-container-highest px-3 py-2">FLOWS</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer transition-colors hover:bg-surface-container-highest px-3 py-2">TELEMETRY</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer transition-colors hover:bg-surface-container-highest px-3 py-2">LOGS</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer transition-colors hover:bg-surface-container-highest px-3 py-2">SYSTEMS</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80">settings_input_component</span>
+</div>
+</header>
+<div class="flex h-[calc(100vh-64px)]">
+<!-- Navigation Drawer -->
+<aside class="hidden lg:flex flex-col gap-stack-gap py-lane-margin h-full w-64 left-0 border-r border-outline-variant bg-surface-container dark:bg-surface-container shrink-0">
+<div class="px-4 pb-4 border-b border-outline-variant/30 mb-4">
+<span class="font-label-caps text-label-caps text-primary">SYSTEM_MANIFEST</span>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-4 py-2 text-primary font-bold border-l-4 border-primary bg-primary-container/10 cursor-pointer">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-code-sm text-code-sm">BPMN Designer</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">settings_ethernet</span>
+<span class="font-code-sm text-code-sm">API Gateway</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">event_repeat</span>
+<span class="font-code-sm text-code-sm">Reservation Logic</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">memory</span>
+<span class="font-code-sm text-code-sm">Node Clusters</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined">security</span>
+<span class="font-code-sm text-code-sm">Security Ops</span>
+</div>
+</nav>
+<div class="mt-auto px-4 py-6 border-t border-outline-variant/30">
+<div class="bg-surface-container-low p-3 border border-outline-variant rounded">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">SYSTEM LOAD</p>
+<div class="h-1 w-full bg-surface-variant overflow-hidden">
+<div class="h-full bg-primary-container w-2/3"></div>
+</div>
+<p class="font-code-xs text-code-xs text-primary mt-1">68.4% STABLE</p>
+</div>
+</div>
+</aside>
+<!-- Main Content (Topology Map) -->
+<main class="flex-1 relative overflow-auto p-lane-margin">
+<div class="scanline"></div>
+<div class="mb-lane-margin flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tight">WF-033 ARTIFACT F</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Event Bus &amp; n8n Automation Map // Production Environment</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-primary">BUS_UP</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-label-caps text-label-caps text-error">DLQ_ACTIVE</span>
+</div>
+</div>
+</div>
+<!-- Flow Topology Grid -->
+<div class="relative min-w-[1200px] grid grid-cols-12 gap-8 items-start">
+<!-- COLUMN 1: PRODUCERS -->
+<div class="col-span-3 flex flex-col gap-node-gutter">
+<div class="flex items-center gap-2 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary">input</span>
+<span class="font-headline-md text-headline-md text-primary">EVENT_PRODUCERS</span>
+</div>
+<!-- Node: Booking Engine -->
+<div class="bg-[#0F0F0F] border border-primary/40 p-3 node-glow">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary">SRC:API_GATEWAY</span>
+<span class="material-symbols-outlined text-[12px] text-primary" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface mb-3">BookingCreated</p>
+<div class="flex items-center justify-between font-code-xs text-code-xs text-on-surface-variant border-t border-outline-variant/30 pt-2">
+<span>ID: PUB_0x442</span>
+<span>latency: 12ms</span>
+</div>
+</div>
+<!-- Node: Availability Service -->
+<div class="bg-[#0F0F0F] border border-primary/40 p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary">SRC:STOCK_V4</span>
+<span class="material-symbols-outlined text-[12px] text-primary">fiber_manual_record</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface mb-3">AvailabilityChecked</p>
+<div class="flex items-center justify-between font-code-xs text-code-xs text-on-surface-variant border-t border-outline-variant/30 pt-2">
+<span>ID: PUB_0x991</span>
+<span>latency: 4ms</span>
+</div>
+</div>
+<!-- Node: Escrow Control -->
+<div class="bg-[#0F0F0F] border border-primary/40 p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary">SRC:LEDGER_OPS</span>
+<span class="material-symbols-outlined text-[12px] text-primary">fiber_manual_record</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface mb-3">EscrowReleased</p>
+<div class="flex items-center justify-between font-code-xs text-code-xs text-on-surface-variant border-t border-outline-variant/30 pt-2">
+<span>ID: PUB_0xBC1</span>
+<span>latency: 22ms</span>
+</div>
+</div>
+</div>
+<!-- COLUMN 2: KAFKA CLUSTER -->
+<div class="col-span-3 flex flex-col items-center">
+<div class="h-full w-px connector-v absolute top-32 left-1/4"></div>
+<div class="relative z-10 w-full mt-16">
+<div class="bg-surface-container-highest border-2 border-primary p-6 text-center shadow-2xl">
+<span class="material-symbols-outlined text-primary-container text-4xl mb-2">hub</span>
+<h2 class="font-headline-md text-headline-md text-primary mb-1">KAFKA_BUS_V3</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Partition Count: 64</p>
+<div class="mt-4 grid grid-cols-1 gap-2">
+<div class="bg-black/50 p-2 border border-outline-variant font-code-xs text-left">
+<span class="text-primary-container">TOPIC:</span> booking.events.v1
+                                </div>
+<div class="bg-black/50 p-2 border border-outline-variant font-code-xs text-left">
+<span class="text-primary-container">TOPIC:</span> payment.reconcile
+                                </div>
+</div>
+</div>
+<!-- DLQ Highlight -->
+<div class="mt-8 bg-error-container/20 border border-error p-3 relative">
+<div class="absolute -top-3 left-4 bg-error px-2 font-label-caps text-[9px] text-on-error">CRITICAL_EXCEPTION</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<p class="font-label-caps text-label-caps text-error">DEAD_LETTER_QUEUE (DLQ)</p>
+<p class="font-code-xs text-code-xs text-on-error-container">Retries: 3 | TTL: 48h</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- COLUMN 3: n8n ORCHESTRATION -->
+<div class="col-span-3 flex flex-col gap-stack-gap">
+<div class="flex items-center gap-2 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-on-secondary-container">automation</span>
+<span class="font-headline-md text-headline-md text-on-secondary-container">N8N_LOGIC_ENGINE</span>
+</div>
+<!-- Workflow Grid -->
+<div class="space-y-4">
+<div class="bg-surface-container-low border border-on-secondary-container/40 p-3 hover:border-on-secondary-container transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-secondary-container">WF_ID: 1201</span>
+<span class="bg-on-secondary-container/20 text-on-secondary-container px-2 font-code-xs">ACTIVE</span>
+</div>
+<p class="font-code-sm text-code-sm py-1">ReservationConfirmed</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant opacity-60">Nodes: 12 | Trigger: Kafka</p>
+</div>
+<div class="bg-surface-container-low border border-on-secondary-container/40 p-3">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-secondary-container">WF_ID: 1205</span>
+<span class="bg-on-secondary-container/20 text-on-secondary-container px-2 font-code-xs">ACTIVE</span>
+</div>
+<p class="font-code-sm text-code-sm py-1">CalendarUpdated</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant opacity-60">Sync: G-Cal / iCal</p>
+</div>
+<div class="bg-surface-container-low border border-on-secondary-container/40 p-3">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-secondary-container">WF_ID: 1210</span>
+<span class="bg-on-secondary-container/20 text-on-secondary-container px-2 font-code-xs">IDLE</span>
+</div>
+<p class="font-code-sm text-code-sm py-1">ReminderScheduled</p>
+</div>
+<div class="bg-surface-container-low border border-on-secondary-container/40 p-3">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-secondary-container">WF_ID: 1215</span>
+<span class="bg-on-secondary-container/20 text-on-secondary-container px-2 font-code-xs">ACTIVE</span>
+</div>
+<p class="font-code-sm text-code-sm py-1">BookingRescheduled</p>
+</div>
+</div>
+</div>
+<!-- COLUMN 4: CONSUMERS/SINKS -->
+<div class="col-span-3 flex flex-col gap-node-gutter">
+<div class="flex items-center gap-2 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-secondary">output</span>
+<span class="font-headline-md text-headline-md text-secondary">CONSUMER_SINKS</span>
+</div>
+<!-- Sink: Notification Engine -->
+<div class="bg-[#0F0F0F] border border-secondary/40 p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-secondary">SINK:TWILIO_SEND</span>
+<span class="material-symbols-outlined text-[12px] text-secondary">radio_button_checked</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface mb-3">NotificationSent</p>
+<div class="flex flex-col gap-1 font-code-xs text-on-surface-variant">
+<div class="flex justify-between"><span>SMS:</span><span class="text-secondary">4.2k/day</span></div>
+<div class="flex justify-between"><span>Push:</span><span class="text-secondary">1.8k/day</span></div>
+</div>
+</div>
+<!-- Sink: Service Ledger -->
+<div class="bg-[#0F0F0F] border border-secondary/40 p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-secondary">SINK:LEDGER_DB</span>
+<span class="material-symbols-outlined text-[12px] text-secondary">radio_button_checked</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface mb-3">ServiceCompleted</p>
+<div class="flex items-center justify-between font-code-xs text-code-xs text-on-surface-variant border-t border-outline-variant/30 pt-2">
+<span>Status: SYNCED</span>
+<span>latency: 45ms</span>
+</div>
+</div>
+<!-- Sink: Cancelation Hub -->
+<div class="bg-[#0F0F0F] border border-secondary/40 p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-secondary">SINK:CLEANUP_DAEMON</span>
+<span class="material-symbols-outlined text-[12px] text-secondary">radio_button_checked</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface mb-3">BookingCancelled</p>
+</div>
+</div>
+</div>
+<!-- Dashboard Telemetry Footer -->
+<div class="mt-lane-margin grid grid-cols-4 gap-4">
+<div class="bg-surface-container p-4 border border-outline-variant">
+<p class="font-label-caps text-label-caps text-on-surface-variant">TOTAL_EVENTS_24H</p>
+<p class="font-headline-lg text-headline-lg text-primary mt-2">1,245,882</p>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<p class="font-label-caps text-label-caps text-on-surface-variant">AVG_BUS_LATENCY</p>
+<p class="font-headline-lg text-headline-lg text-on-secondary-container mt-2">14.2ms</p>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<p class="font-label-caps text-label-caps text-on-surface-variant">SUCCESS_RATE</p>
+<p class="font-headline-lg text-headline-lg text-primary-container mt-2">99.98%</p>
+</div>
+<div class="bg-surface-container p-4 border border-outline-variant">
+<p class="font-label-caps text-label-caps text-on-surface-variant">DLQ_MESSAGES</p>
+<p class="font-headline-lg text-headline-lg text-error mt-2">14</p>
+</div>
+</div>
+</main>
+</div>
+<!-- Bottom Navigation (Mobile Only) -->
+<footer class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center h-16 bg-surface border-t border-outline-variant">
+<div class="flex flex-col items-center justify-center bg-on-primary-fixed-variant text-primary-fixed rounded-none p-2 border-t-2 border-primary-fixed cursor-pointer">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Flows</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 cursor-pointer">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-caps text-label-caps">Telemetry</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 cursor-pointer">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-caps text-label-caps">Logs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-2 opacity-60 cursor-pointer">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-label-caps text-label-caps">Systems</span>
+</div>
+</footer>
+<!-- FAB Overlay (Contextual) -->
+<button class="fixed bottom-20 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 lg:bottom-8">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 700;">add</span>
+</button>
+<script>
+        // Micro-interaction for nodes
+        document.querySelectorAll('.bg-[#0F0F0F]').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.borderColor = '#ebffe2';
+                node.style.boxShadow = '0 0 20px rgba(235, 255, 226, 0.2)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.borderColor = 'rgba(132, 150, 126, 0.4)';
+                node.style.boxShadow = 'none';
+            });
+        });
+
+        // Simple line drawing logic simulation
+        console.log("Topology Map Initialized: Artifact WF-033-F");
+    </script>
+</body></html>
