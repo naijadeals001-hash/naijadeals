@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-001: ECOSYSTEM_ORCHESTRATOR</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#862ed4",
+                    "secondary-fixed": "#dde1ff",
+                    "on-surface": "#d4e4fa",
+                    "error-container": "#93000a",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface-container-lowest": "#010f1f",
+                    "surface-bright": "#2c3a4c",
+                    "secondary": "#b8c3ff",
+                    "on-secondary-fixed": "#001356",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary-fixed": "#002203",
+                    "primary-fixed-dim": "#00e639",
+                    "secondary-container": "#0043eb",
+                    "on-primary": "#003907",
+                    "tertiary-fixed": "#f0dbff",
+                    "primary-fixed": "#72ff70",
+                    "on-tertiary-fixed": "#2c0051",
+                    "error": "#ffb4ab",
+                    "primary-container": "#00ff41",
+                    "primary": "#ebffe2",
+                    "on-primary-fixed-variant": "#00530e",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-variant": "#273647",
+                    "on-background": "#d4e4fa",
+                    "outline-variant": "#3b4b37",
+                    "background": "#051424",
+                    "on-surface-variant": "#b9ccb2",
+                    "tertiary-container": "#ecd3ff",
+                    "on-primary-container": "#007117",
+                    "surface-container": "#122131",
+                    "surface-tint": "#00e639",
+                    "surface-container-low": "#0d1c2d",
+                    "outline": "#84967e",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-container": "#c6ceff",
+                    "on-error": "#690005",
+                    "tertiary": "#fff6ff",
+                    "on-tertiary": "#490080",
+                    "surface": "#051424",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "inverse-primary": "#006e16",
+                    "surface-dim": "#051424",
+                    "inverse-on-surface": "#233143",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-container-high": "#1c2b3c",
+                    "on-secondary": "#002388",
+                    "surface-container-highest": "#273647"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "grid-unit": "8px",
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, #122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .flow-connector {
+            position: absolute;
+            background: #84967e;
+            z-index: 0;
+        }
+        .flow-connector.error {
+            background: repeating-linear-gradient(90deg, #93000a, #93000a 4px, transparent 4px, transparent 8px);
+        }
+        .node-port {
+            width: 8px;
+            height: 8px;
+            background: #00e639;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .audit-stub {
+            width: 4px;
+            height: 4px;
+            background: #72ff70;
+            box-shadow: 0 0 4px #72ff70;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface flex justify-between items-center px-lane-margin h-16 border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR</h1>
+</div>
+<div class="flex gap-6 items-center">
+<nav class="hidden md:flex gap-4">
+<span class="text-primary border-b-2 border-primary text-label-caps font-label-caps py-1 cursor-default">WORKFLOW_MAP</span>
+<span class="text-on-surface-variant hover:bg-surface-container-high transition-colors px-2 py-1 text-label-caps font-label-caps cursor-pointer">TELEMETRY</span>
+<span class="text-on-surface-variant hover:bg-surface-container-high transition-colors px-2 py-1 text-label-caps font-label-caps cursor-pointer">AUDIT_LOGS</span>
+</nav>
+<div class="bg-primary-container text-on-primary-container px-3 py-1 rounded-sm text-label-caps font-label-caps">
+                v4.2.0 LIVE
+            </div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container border-r border-outline-variant w-64 hidden lg:flex">
+<div class="px-6 mb-6">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant uppercase">Workflow Index</h2>
+</div>
+<nav class="flex flex-col">
+<a class="bg-surface-variant text-primary border-l-4 border-primary px-6 py-3 flex items-center gap-3 transition-transform translate-x-1" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="fingerprint">fingerprint</span>
+<span class="text-code-sm font-code-sm">WF-001: AUTH</span>
+</a>
+<a class="text-on-surface-variant px-6 py-3 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="payments">payments</span>
+<span class="text-code-sm font-code-sm">WF-002: PAY</span>
+</a>
+<a class="text-on-surface-variant px-6 py-3 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="security">security</span>
+<span class="text-code-sm font-code-sm">WF-003: RISK</span>
+</a>
+<a class="text-on-surface-variant px-6 py-3 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="mail">mail</span>
+<span class="text-code-sm font-code-sm">WF-004: NOTIF</span>
+</a>
+<a class="text-on-surface-variant px-6 py-3 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="database">database</span>
+<span class="text-code-sm font-code-sm">WF-005: DATA</span>
+</a>
+<a class="text-on-surface-variant px-6 py-3 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="sync">sync</span>
+<span class="text-code-sm font-code-sm">WF-006: SYNC</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content: The Workflow Canvas -->
+<main class="lg:ml-64 pt-16 pb-12 min-h-screen relative overflow-x-auto">
+<!-- Swimlane Headers -->
+<div class="flex min-w-[1400px]">
+<div class="w-1/4 min-w-[350px] border-r border-outline-variant px-lane-margin py-8 sticky top-16 bg-surface z-10">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<h3 class="text-headline-md font-headline-md uppercase">VISITOR</h3>
+</div>
+</div>
+<div class="w-1/4 min-w-[350px] border-r border-outline-variant px-lane-margin py-8 sticky top-16 bg-surface z-10">
+<div class="flex items-center gap-3 text-secondary">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<h3 class="text-headline-md font-headline-md uppercase">CORE_SYSTEM</h3>
+</div>
+</div>
+<div class="w-1/4 min-w-[350px] border-r border-outline-variant px-lane-margin py-8 sticky top-16 bg-surface z-10">
+<div class="flex items-center gap-3 text-on-tertiary-container">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<h3 class="text-headline-md font-headline-md uppercase">AURA_AI</h3>
+</div>
+</div>
+<div class="w-1/4 min-w-[350px] px-lane-margin py-8 sticky top-16 bg-surface z-10">
+<div class="flex items-center gap-3 text-on-secondary-fixed-variant">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<h3 class="text-headline-md font-headline-md uppercase">LEDGER_SVC</h3>
+</div>
+</div>
+</div>
+<!-- Diagram Grid Container -->
+<div class="relative min-w-[1400px] min-h-[1200px] p-lane-margin">
+<!-- STEP 1: START -->
+<div class="absolute left-[calc(12.5%-40px)] top-10 flex flex-col items-center">
+<div class="w-20 h-20 rounded-full border-2 border-primary flex items-center justify-center bg-surface-container-lowest">
+<span class="material-symbols-outlined text-primary scale-125" data-icon="login">login</span>
+</div>
+<p class="mt-2 text-label-caps font-label-caps text-center">EVT_INIT_REG</p>
+<div class="audit-stub mt-2"></div>
+</div>
+<!-- Vertical Connector Start to Input -->
+<div class="flow-connector absolute left-[12.5%] top-[140px] w-[2px] h-[60px]"></div>
+<!-- TASK: Input Validation -->
+<div class="absolute left-[calc(12.5%-100px)] top-[200px] w-[200px] bg-surface-container-high border border-primary p-3 rounded-sm shadow-xl">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="text-label-caps font-label-caps opacity-60">TASK_001</span>
+<span class="material-symbols-outlined text-xs" data-icon="fact_check">fact_check</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-primary mb-1">CLIENT_VALIDATE</h4>
+<div class="flex justify-between">
+<span class="text-code-xs font-code-xs opacity-50">LATENCY: 12ms</span>
+<div class="audit-stub"></div>
+</div>
+</div>
+<!-- Connector Task to Diamond -->
+<div class="flow-connector absolute left-[12.5%] top-[290px] w-[2px] h-[40px]"></div>
+<!-- DECISION: Data Valid? -->
+<div class="absolute left-[calc(12.5%-30px)] top-[330px] w-[60px] h-[60px] border-2 border-outline rotate-45 flex items-center justify-center bg-surface-container">
+<span class="-rotate-45 material-symbols-outlined text-outline" data-icon="question_mark">question_mark</span>
+</div>
+<p class="absolute left-[calc(12.5%+40px)] top-[350px] text-label-caps font-label-caps">VALID_INPUT?</p>
+<!-- Error Loop Back -->
+<div class="flow-connector error absolute left-[calc(12.5%-150px)] top-[360px] w-[120px] h-[2px]"></div>
+<div class="flow-connector error absolute left-[calc(12.5%-150px)] top-[40px] w-[2px] h-[320px]"></div>
+<div class="flow-connector error absolute left-[calc(12.5%-150px)] top-[40px] w-[70px] h-[2px]"></div>
+<!-- Proceed to Aura AI -->
+<div class="flow-connector absolute left-[calc(12.5%+30px)] top-[360px] w-[calc(50%-30px)] h-[2px]"></div>
+<!-- STEP 2: Aura AI Fraud Check -->
+<div class="absolute left-[calc(62.5%-110px)] top-[320px] w-[220px] bg-surface-container-highest border border-on-tertiary-container p-3 rounded-sm">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="text-label-caps font-label-caps text-on-tertiary-container">AI_PROC_77</span>
+<span class="material-symbols-outlined text-xs text-on-tertiary-container" data-icon="bolt">bolt</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-on-surface mb-1">AURA_FRAUD_SCAN</h4>
+<div class="flex justify-between items-center">
+<span class="text-code-xs font-code-xs text-on-tertiary-container">CONFIDENCE: 99.8%</span>
+<div class="audit-stub"></div>
+</div>
+</div>
+<!-- Connector AI to Decision -->
+<div class="flow-connector absolute left-[62.5%] top-[410px] w-[2px] h-[50px]"></div>
+<!-- DECISION: Fraud Detected? -->
+<div class="absolute left-[calc(62.5%-30px)] top-[460px] w-[60px] h-[60px] border-2 border-on-tertiary-container rotate-45 flex items-center justify-center bg-surface-container">
+<span class="-rotate-45 material-symbols-outlined text-on-tertiary-container" data-icon="security">security</span>
+</div>
+<p class="absolute left-[calc(62.5%+40px)] top-[480px] text-label-caps font-label-caps">FRAUD_DETECTED?</p>
+<!-- Proceed to Core (OTP) -->
+<div class="flow-connector absolute left-[calc(37.5%+2px)] top-[490px] w-[calc(25%-32px)] h-[2px]"></div>
+<!-- STEP 3: Core System OTP Execution -->
+<div class="absolute left-[calc(37.5%-100px)] top-[450px] w-[200px] border border-secondary bg-surface-container-low p-3 rounded-sm">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="text-label-caps font-label-caps text-secondary">CORE_SYS</span>
+<span class="material-symbols-outlined text-xs" data-icon="sms">sms</span>
+</div>
+<h4 class="text-code-sm font-code-sm text-secondary">GEN_OTP_CHALLENGE</h4>
+<p class="text-code-xs font-code-xs mt-2 opacity-60">SVC: NOTIF_EDGE</p>
+</div>
+<!-- Parallel Path: n8n Workflow Trigger -->
+<div class="flow-connector absolute left-[37.5%] top-[540px] w-[2px] h-[60px]"></div>
+<div class="absolute left-[calc(37.5%-100px)] top-[600px] w-[200px] border border-dashed border-outline-variant p-3">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+<span class="text-label-caps font-label-caps">HOOK: n8n_REGISTERED</span>
+</div>
+<p class="text-code-xs font-code-xs">EVT: user.created.v1</p>
+<p class="text-code-xs font-code-xs">DEST: CRM, Slack, Mailer</p>
+</div>
+<!-- Connector OTP to Verify (Back to Visitor) -->
+<div class="flow-connector absolute left-[calc(12.5%+2px)] top-[490px] w-[calc(25%-102px)] h-[2px]"></div>
+<!-- TASK: OTP Verification (Visitor) -->
+<div class="absolute left-[calc(12.5%-100px)] top-[450px] w-[200px] border border-primary p-3 bg-surface-container">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="text-label-caps font-label-caps">ACTION_USER</span>
+<span class="material-symbols-outlined text-xs" data-icon="vpn_key">vpn_key</span>
+</div>
+<h4 class="text-code-sm font-code-sm">VERIFY_OTP_CHALLENGE</h4>
+<div class="mt-2 h-1 w-full bg-outline-variant overflow-hidden">
+<div class="h-full bg-primary w-2/3"></div>
+</div>
+</div>
+<!-- Connector Verify to Decision -->
+<div class="flow-connector absolute left-[12.5%] top-[540px] w-[2px] h-[50px]"></div>
+<!-- DECISION: OTP Correct? -->
+<div class="absolute left-[calc(12.5%-30px)] top-[590px] w-[60px] h-[60px] border-2 border-primary rotate-45 flex items-center justify-center">
+<span class="-rotate-45 text-label-caps font-label-caps">?</span>
+</div>
+<!-- Retry Logic -->
+<div class="flow-connector error absolute left-[calc(12.5%-60px)] top-[620px] w-[30px] h-[2px]"></div>
+<div class="flow-connector error absolute left-[calc(12.5%-60px)] top-[490px] w-[2px] h-[130px]"></div>
+<div class="flow-connector error absolute left-[calc(12.5%-60px)] top-[490px] w-[30px] h-[2px]"></div>
+<p class="absolute left-[calc(12.5%-100px)] top-[560px] text-code-xs font-code-xs text-error">RETRY &lt; 3</p>
+<!-- Final State Transition: Proceed to Ledger -->
+<div class="flow-connector absolute left-[12.5%] top-[650px] w-[2px] h-[100px]"></div>
+<div class="flow-connector absolute left-[12.5%] top-[750px] w-[75%] h-[2px]"></div>
+<div class="flow-connector absolute left-[87.5%] top-[750px] w-[2px] h-[50px]"></div>
+<!-- DATA: Identity Record & Wallet -->
+<div class="absolute left-[calc(87.5%-110px)] top-[800px] w-[220px]">
+<div class="h-8 border-2 border-on-secondary-fixed-variant rounded-t-full border-b-0 bg-surface-container-low"></div>
+<div class="border-x-2 border-on-secondary-fixed-variant p-4 bg-surface-container-low">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-sm" data-icon="token">token</span>
+<span class="text-label-caps font-label-caps">LEDGER_STORES</span>
+</div>
+<ul class="space-y-2 text-code-xs font-code-xs">
+<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-on-secondary-fixed-variant"></span> IDENTITY_ROOT</li>
+<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-on-secondary-fixed-variant"></span> WALLET_ADDR_0x</li>
+<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-on-secondary-fixed-variant"></span> TRUST_PROFILE</li>
+<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-on-secondary-fixed-variant"></span> AUDIT_CHAIN_v1</li>
+</ul>
+</div>
+<div class="h-8 border-2 border-on-secondary-fixed-variant rounded-b-full bg-surface-container-low"></div>
+</div>
+<!-- Connector Ledger to End -->
+<div class="flow-connector absolute left-[87.5%] top-[980px] w-[2px] h-[60px]"></div>
+<div class="flow-connector absolute left-[12.5%] top-[1040px] w-[75%] h-[2px]"></div>
+<div class="flow-connector absolute left-[12.5%] top-[1040px] w-[2px] h-[40px]"></div>
+<!-- END NODE: Success -->
+<div class="absolute left-[calc(12.5%-45px)] top-[1080px] flex flex-col items-center">
+<div class="w-24 h-24 rounded-full border-4 border-double border-primary flex items-center justify-center bg-surface-container-lowest">
+<span class="material-symbols-outlined text-primary scale-150" data-icon="task_alt">task_alt</span>
+</div>
+<div class="mt-4 text-center">
+<p class="text-label-caps font-label-caps text-primary">WF_TERM_SUCCESS</p>
+<p class="text-code-xs font-code-xs opacity-60">REDIR_DASHBOARD</p>
+</div>
+</div>
+<!-- Floating Audit Panel Mock (Contextual FAB Suppression) -->
+<div class="fixed right-8 bottom-16 w-80 bg-surface-container border border-outline-variant p-4 shadow-2xl z-50">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-primary rounded-full"></span>
+<h4 class="text-label-caps font-label-caps">LIVE_AUDIT_STREAMS</h4>
+</div>
+<span class="material-symbols-outlined text-xs" data-icon="open_in_full">open_in_full</span>
+</div>
+<div class="space-y-3">
+<div class="p-2 bg-surface-container-low border-l-2 border-primary">
+<p class="text-code-xs font-code-xs opacity-40">14:02:11.455</p>
+<p class="text-code-sm font-code-sm">VAL_REQ: user_reg_entry</p>
+</div>
+<div class="p-2 bg-surface-container-low border-l-2 border-on-tertiary-container">
+<p class="text-code-xs font-code-xs opacity-40">14:02:11.890</p>
+<p class="text-code-sm font-code-sm">AI_INFER: fraud_score 0.0012</p>
+</div>
+<div class="p-2 bg-surface-container-low border-l-2 border-on-secondary-fixed-variant">
+<p class="text-code-xs font-code-xs opacity-40">14:02:12.110</p>
+<p class="text-code-sm font-code-sm">BLOCKCHAIN_TX: block_confirm_99</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-low flex justify-between items-center px-lane-margin py-2 border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="text-code-sm font-code-sm text-primary">ENGINE: V4.2.0-STABLE</span>
+<div class="flex gap-4 border-l border-outline-variant pl-4">
+<span class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer">AUDIT_TRAIL: ACTIVE</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer">N8N_SYNC: OK</span>
+<span class="text-code-xs font-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer">LATENCY: 12ms</span>
+</div>
+</div>
+<div class="text-label-caps font-label-caps text-on-surface-variant opacity-40">
+            SYSTEM_CLOCK: 14:02:44 UTC
+        </div>
+</footer>
+<script>
+        // Micro-interaction for process highlighting
+        document.querySelectorAll('.bg-surface-container-high, .bg-surface-container-highest, .bg-surface-container-low').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('scale-[1.02]');
+                node.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('scale-[1.02]');
+            });
+        });
+    </script>
+</body></html>

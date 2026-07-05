@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaDeals | Core Systems Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .orthogonal-line {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .connector-dot {
+            width: 6px;
+            height: 6px;
+            background: #00ff41;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .node-glow:hover {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.2);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab-glow {
+            box-shadow: inset 4px 0 0 0 #00e639;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#0d1c2d",
+                        "secondary-container": "#0043eb",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface": "#051424",
+                        "primary-container": "#00ff41",
+                        "error": "#ffb4ab",
+                        "tertiary": "#fff6ff",
+                        "on-primary-container": "#007117",
+                        "on-background": "#d4e4fa",
+                        "inverse-primary": "#006e16",
+                        "primary": "#ebffe2",
+                        "tertiary-container": "#ecd3ff",
+                        "on-error": "#690005",
+                        "secondary": "#b8c3ff",
+                        "on-tertiary-container": "#862ed4",
+                        "on-surface": "#d4e4fa",
+                        "on-secondary-fixed": "#001356",
+                        "surface-container-lowest": "#010f1f",
+                        "primary-fixed-dim": "#00e639",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#2c0051",
+                        "surface-tint": "#00e639",
+                        "surface-dim": "#051424",
+                        "surface-bright": "#2c3a4c",
+                        "surface-container-high": "#1c2b3c",
+                        "surface-container-highest": "#273647",
+                        "on-secondary-container": "#c6ceff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "primary-fixed": "#72ff70",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-container": "#122131",
+                        "on-tertiary": "#490080",
+                        "inverse-surface": "#d4e4fa",
+                        "outline": "#84967e",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-surface-variant": "#b9ccb2",
+                        "surface-variant": "#273647",
+                        "inverse-on-surface": "#233143",
+                        "on-primary": "#003907",
+                        "outline-variant": "#3b4b37",
+                        "on-secondary": "#002388",
+                        "error-container": "#93000a",
+                        "background": "#051424",
+                        "secondary-fixed": "#dde1ff"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-lane-margin h-16 w-full z-50 fixed top-0 bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="account_tree">account_tree</span>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-on-surface">NaijaDeals | Core Systems</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-code-sm text-code-sm text-primary-fixed-dim border border-primary-fixed-dim/30 px-2 py-0.5 rounded">v2.4.1-STABLE</span>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors" data-icon="search">search</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors" data-icon="notifications">notifications</button>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 w-64 bg-surface-container-low border-r border-outline-variant z-40 hidden md:flex">
+<div class="px-6 py-4">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">MODULES</span>
+</div>
+<nav class="flex-1">
+<a class="text-primary-fixed-dim bg-secondary-container/20 border-l-4 border-primary-fixed-dim flex items-center gap-3 px-4 py-3 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="memory">memory</span>
+<span class="font-code-sm text-code-sm">System Architecture</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-code-sm text-code-sm">Logic Flow</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-code-sm text-code-sm">Data Mapping</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+<span class="font-code-sm text-code-sm">API Specs</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-code-sm text-code-sm">Audit Logs</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
+<span class="font-code-sm text-code-sm">Deployment</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<div class="bg-surface-container-highest p-3 rounded-lg border border-outline-variant">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[10px] font-label-caps text-on-surface-variant">NODE STATUS</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+</div>
+<div class="font-code-sm text-[10px] text-primary-fixed-dim">Uptime: 99.98%</div>
+<div class="font-code-sm text-[10px] text-on-surface-variant">Latency: 24ms</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="md:ml-64 pt-16 min-h-screen relative overflow-x-auto">
+<!-- Workflow Canvas -->
+<div class="p-8 min-w-[1200px]">
+<!-- Header Info -->
+<div class="mb-12 border-l-4 border-primary-fixed-dim pl-6">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">WF-001 API + Database Transaction Map</h2>
+<p class="text-on-surface-variant max-w-2xl font-body-md">
+                    Complete registration and identity provisioning workflow. Maps external REST consumers through security layers to atomic database persistence.
+                </p>
+<div class="flex gap-4 mt-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="font-code-sm text-code-sm">mTLS Required</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-code-sm text-code-sm">AES-256 PII</span>
+</div>
+</div>
+</div>
+<!-- The Flow Grid (Swimlanes) -->
+<div class="grid grid-cols-12 gap-0 relative border border-outline-variant rounded-xl overflow-hidden bg-surface-container-lowest">
+<!-- Swimlane Header -->
+<div class="col-span-12 grid grid-cols-12 border-b border-outline-variant bg-surface-container">
+<div class="col-span-4 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="api">api</span>
+<span class="font-label-caps text-label-caps">API CONSUMER LAYER</span>
+</div>
+<div class="col-span-4 p-4 border-r border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container" data-icon="mediation">mediation</span>
+<span class="font-label-caps text-label-caps">LOGIC &amp; PROCESSING</span>
+</div>
+<div class="col-span-4 p-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="storage">storage</span>
+<span class="font-label-caps text-label-caps">PERSISTENCE LAYER (DB)</span>
+</div>
+</div>
+<!-- Transaction Row 1: Auth Registration -->
+<div class="col-span-12 grid grid-cols-12 border-b border-outline-variant/30 min-h-[160px] relative">
+<!-- API -->
+<div class="col-span-4 p-6 border-r border-outline-variant/30 flex flex-col justify-center gap-3">
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded-md node-glow transition-all">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-sm text-[10px] text-primary-fixed-dim">POST</span>
+<span class="material-symbols-outlined text-sm text-secondary-container" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<div class="font-code-sm text-code-sm">/auth/register</div>
+<div class="mt-2 flex gap-1">
+<div class="h-1 w-1/3 bg-primary-fixed-dim/40 rounded-full"></div>
+<div class="h-1 w-1/3 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Logic -->
+<div class="col-span-4 p-6 border-r border-outline-variant/30 flex flex-col justify-center items-center gap-4">
+<div class="w-full flex items-center justify-between text-on-surface-variant px-4">
+<span class="font-code-xs text-code-xs">Validation</span>
+<span class="material-symbols-outlined text-sm" data-icon="trending_flat">trending_flat</span>
+<span class="font-code-xs text-code-xs">Hashing (Argon2)</span>
+</div>
+<div class="w-full h-0.5 bg-outline-variant relative">
+<div class="absolute -right-1 -top-1 w-2 h-2 rounded-full bg-outline-variant"></div>
+</div>
+</div>
+<!-- DB -->
+<div class="col-span-4 p-6 flex flex-col justify-center gap-3">
+<div class="bg-surface-container-low border border-primary-fixed-dim/30 p-3 rounded-md relative">
+<span class="absolute -top-2 -right-2 bg-primary-fixed-dim text-on-primary-fixed px-1.5 py-0.5 text-[8px] font-bold rounded">COMMIT</span>
+<div class="font-code-sm text-code-sm text-on-surface">INSERT INTO users</div>
+<div class="mt-2 font-code-xs text-code-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="history">history</span> Audit Log Created
+                            </div>
+</div>
+</div>
+</div>
+<!-- Transaction Row 2: Identity Provisioning -->
+<div class="col-span-12 grid grid-cols-12 border-b border-outline-variant/30 min-h-[160px] relative">
+<!-- API -->
+<div class="col-span-4 p-6 border-r border-outline-variant/30 flex flex-col justify-center gap-3">
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded-md node-glow transition-all">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-sm text-[10px] text-primary-fixed-dim">POST</span>
+<span class="material-symbols-outlined text-sm text-secondary-container" data-icon="shield">shield</span>
+</div>
+<div class="font-code-sm text-code-sm">/identity/create</div>
+<div class="mt-2 text-[10px] text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="vpn_key">vpn_key</span> mTLS Handshake
+                            </div>
+</div>
+</div>
+<!-- Logic -->
+<div class="col-span-4 p-6 border-r border-outline-variant/30 flex flex-col justify-center items-center">
+<div class="bg-surface-container p-3 border border-tertiary-fixed-dim/40 rounded-sm">
+<div class="font-code-xs text-code-xs text-tertiary-fixed-dim mb-1">ENCRYPTION ENGINE</div>
+<div class="font-code-sm text-[11px]">AES-256-GCM (BV-ID)</div>
+</div>
+<div class="h-8 w-px bg-outline-variant my-2"></div>
+<div class="text-[10px] font-code-xs text-on-surface-variant">Provisioning Trust Profile...</div>
+</div>
+<!-- DB -->
+<div class="col-span-4 p-6 flex flex-col justify-center gap-3">
+<div class="space-y-2">
+<div class="bg-surface-container-low border border-outline-variant p-2 rounded-md">
+<div class="font-code-sm text-code-sm">INSERT INTO profiles</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-2 rounded-md border-l-4 border-tertiary-fixed-dim">
+<div class="font-code-sm text-code-sm">INSERT INTO trust_profiles</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Transaction Row 3: Wallet Initialization -->
+<div class="col-span-12 grid grid-cols-12 border-b border-outline-variant/30 min-h-[160px] relative">
+<!-- API -->
+<div class="col-span-4 p-6 border-r border-outline-variant/30 flex flex-col justify-center gap-3">
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded-md node-glow transition-all">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code-sm text-[10px] text-primary-fixed-dim">POST</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div class="font-code-sm text-code-sm">/wallet/create</div>
+</div>
+</div>
+<!-- Logic -->
+<div class="col-span-4 p-6 border-r border-outline-variant/30 flex flex-col justify-center items-center">
+<div class="text-on-surface-variant flex items-center gap-2 mb-4">
+<span class="w-2 h-2 bg-primary-fixed-dim rounded-full"></span>
+<span class="font-code-xs text-code-xs">ID Verif Success</span>
+</div>
+<div class="w-full flex items-center">
+<div class="flex-1 h-px bg-outline-variant"></div>
+<div class="px-3 py-1 border border-outline-variant rounded-full text-[10px] font-label-caps">ASYNC QUEUE</div>
+<div class="flex-1 h-px bg-outline-variant"></div>
+</div>
+</div>
+<!-- DB -->
+<div class="col-span-4 p-6 flex flex-col justify-center gap-3">
+<div class="bg-surface-container-low border border-outline-variant p-3 rounded-md relative overflow-hidden">
+<div class="absolute top-0 right-0 p-1">
+<span class="material-symbols-outlined text-sm text-primary-fixed-dim" data-icon="check_circle">check_circle</span>
+</div>
+<div class="font-code-sm text-code-sm">INSERT INTO wallets</div>
+<div class="mt-2 font-code-xs text-code-xs text-on-surface-variant">Balance: 0.00 NGN</div>
+</div>
+</div>
+</div>
+<!-- Footer Audit Trace -->
+<div class="col-span-12 p-4 bg-surface-container-high/50 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="description">description</span>
+<span class="font-code-xs text-code-xs uppercase tracking-wider text-on-surface-variant">Global Audit Required:</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">INSERT INTO audit_logs (Strict Serial)</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">TraceID: </span>
+<span class="font-code-xs text-code-xs text-secondary-fixed">882-f4-90-ax92</span>
+</div>
+</div>
+</div>
+<!-- Telemetry & Details Section -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Data Mapping Details -->
+<div class="bg-surface-container p-6 rounded-xl border border-outline-variant">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="dataset">dataset</span>
+<h3 class="font-headline-md text-headline-md">PII Mapping</h3>
+</div>
+<ul class="space-y-3">
+<li class="flex items-start justify-between border-b border-outline-variant/30 pb-2">
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">full_name</div>
+<div class="text-[10px] text-on-surface-variant">profiles table</div>
+</div>
+<span class="bg-tertiary-fixed-dim/20 text-tertiary-fixed-dim px-2 py-0.5 rounded text-[9px] font-bold">AES-256</span>
+</li>
+<li class="flex items-start justify-between border-b border-outline-variant/30 pb-2">
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">email_addr</div>
+<div class="text-[10px] text-on-surface-variant">users table</div>
+</div>
+<span class="bg-primary-container/20 text-primary-container px-2 py-0.5 rounded text-[9px] font-bold">HMAC-SHA</span>
+</li>
+<li class="flex items-start justify-between border-b border-outline-variant/30 pb-2">
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">bv_number</div>
+<div class="text-[10px] text-on-surface-variant">trust_profiles table</div>
+</div>
+<span class="bg-tertiary-fixed-dim/20 text-tertiary-fixed-dim px-2 py-0.5 rounded text-[9px] font-bold">AES-256</span>
+</li>
+</ul>
+</div>
+<!-- API Connectivity -->
+<div class="bg-surface-container p-6 rounded-xl border border-outline-variant">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary-container" data-icon="settings_input_component">settings_input_component</span>
+<h3 class="font-headline-md text-headline-md">mTLS Config</h3>
+</div>
+<div class="bg-surface-container-low p-4 rounded font-code-xs text-[11px] leading-relaxed text-on-surface-variant">
+<p class="text-primary-fixed-dim mb-2"># Server-Side Requirement</p>
+<p>SSLVerifyClient require</p>
+<p>SSLVerifyDepth 1</p>
+<p>SSLCACertificateFile /etc/pki/tls/certs/naija-ca.crt</p>
+<div class="mt-4 pt-4 border-t border-outline-variant">
+<p class="text-secondary-fixed"># Cipher Suite</p>
+<p>ECDHE-RSA-AES256-GCM-SHA384</p>
+</div>
+</div>
+</div>
+<!-- Node Health -->
+<div class="bg-surface-container p-6 rounded-xl border border-outline-variant flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="analytics">analytics</span>
+<h3 class="font-headline-md text-headline-md">Execution Telemetry</h3>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="font-code-xs text-code-xs text-on-surface-variant">API Latency (p99)</span>
+<span class="font-code-sm text-code-sm text-primary-fixed-dim">142ms</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full" style="width: 65%;"></div>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-code-xs text-code-xs text-on-surface-variant">DB Lock Wait</span>
+<span class="font-code-sm text-code-sm text-on-surface">12ms</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary-container h-full" style="width: 15%;"></div>
+</div>
+</div>
+</div>
+<div class="mt-6 flex justify-center">
+<button class="w-full py-2 bg-surface-container-highest hover:bg-surface-bright transition-colors border border-outline-variant rounded font-label-caps text-label-caps flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span> View Live Console
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Background Graphics for "Cyber-Authority" feel -->
+<div class="fixed bottom-8 right-8 pointer-events-none opacity-20">
+<span class="material-symbols-outlined text-[120px] text-primary-fixed-dim" data-icon="hub">hub</span>
+</div>
+</main>
+<script>
+        // Micro-interaction: Update Telemetry Values randomly
+        setInterval(() => {
+            const latencies = document.querySelectorAll('.font-code-sm.text-primary-fixed-dim');
+            latencies.forEach(el => {
+                if (el.textContent.includes('ms')) {
+                    const current = parseInt(el.textContent);
+                    const variation = Math.floor(Math.random() * 5) - 2;
+                    el.textContent = `${Math.max(120, Math.min(200, current + variation))}ms`;
+                }
+            });
+        }, 3000);
+
+        // Simple terminal log simulation
+        console.log("%c NAIJADEALS CORE SYSTEMS %c AUTH_LOADED %c", 
+            "background:#00e639; color:#002203; font-weight:bold; padding:4px;", 
+            "background:#122131; color:#d4e4fa; padding:4px;",
+            "");
+    </script>
+</body></html>

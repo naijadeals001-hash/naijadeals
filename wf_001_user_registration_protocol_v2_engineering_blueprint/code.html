@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-001: USER_REGISTRATION_ENGINE | V2 Enterprise</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dot-grid {
+            background-image: radial-gradient(circle, #3b4b37 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .workflow-node {
+            position: relative;
+            z-index: 10;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .workflow-node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 255, 65, 0.1);
+        }
+        .connector-line {
+            position: absolute;
+            z-index: 0;
+            background-color: #84967e;
+            opacity: 0.2;
+        }
+        .active-flow {
+            background-color: #00ff41 !important;
+            opacity: 0.6 !important;
+            box-shadow: 0 0 10px #00ff41;
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ebffe2",
+                        "on-tertiary-container": "#862ed4",
+                        "on-surface-variant": "#b9ccb2",
+                        "outline": "#84967e",
+                        "surface-dim": "#051424",
+                        "surface-container-low": "#0d1c2d",
+                        "tertiary-container": "#ecd3ff",
+                        "secondary-fixed": "#dde1ff",
+                        "primary-container": "#00ff41",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-secondary": "#002388",
+                        "primary-fixed": "#72ff70",
+                        "surface-container": "#122131",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-variant": "#273647",
+                        "tertiary": "#fff6ff",
+                        "surface-container-high": "#1c2b3c",
+                        "surface": "#051424",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#007117",
+                        "surface-tint": "#00e639",
+                        "on-surface": "#d4e4fa",
+                        "on-secondary-container": "#c6ceff",
+                        "secondary": "#b8c3ff",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-tertiary": "#490080",
+                        "inverse-on-surface": "#233143",
+                        "secondary-container": "#0043eb",
+                        "surface-container-highest": "#273647",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "background": "#051424",
+                        "on-secondary-fixed": "#001356",
+                        "on-tertiary-fixed": "#2c0051",
+                        "outline-variant": "#3b4b37",
+                        "on-background": "#d4e4fa",
+                        "on-primary-fixed": "#002203",
+                        "surface-container-lowest": "#010f1f",
+                        "primary-fixed-dim": "#00e639",
+                        "inverse-primary": "#006e16",
+                        "surface-bright": "#2c3a4c",
+                        "error": "#ffb4ab",
+                        "on-primary": "#003907"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation -->
+<header class="bg-surface text-primary border-b border-outline-variant top-0 flex justify-between items-center w-full px-lane-margin h-16 fixed z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-container" data-icon="account_tree">account_tree</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">WF-001: ECOSYSTEM_ORCHESTRATOR <span class="ml-2 text-primary-container font-code-sm opacity-50">[V2_ENTERPRISE_BLUEPRINT]</span></h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4">
+<a class="text-primary border-b-2 border-primary text-label-caps font-label-caps h-16 flex items-center px-2" href="#">VISUALIZER</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high text-label-caps font-label-caps h-16 flex items-center px-2 transition-colors" href="#">ANALYTICS</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high text-label-caps font-label-caps h-16 flex items-center px-2 transition-colors" href="#">DEPLOYMENTS</a>
+</nav>
+<div class="text-label-caps font-label-caps bg-primary-container text-on-primary-container px-3 py-1 rounded">v2.0.0-PROD</div>
+</div>
+</header>
+<!-- Side Navigation Drawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-20 bg-surface-container border-r border-outline-variant w-64">
+<div class="px-4 py-2">
+<span class="text-label-caps font-label-caps text-on-surface-variant">BLUEPRINT_ASSETS</span>
+</div>
+<nav class="flex-1 mt-4 space-y-1">
+<a class="bg-surface-variant text-primary border-l-4 border-primary px-4 py-3 flex items-center gap-3 translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="text-code-sm font-code-sm">WF-001: REGISTRATION</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="text-code-sm font-code-sm">WF-002: N8N_PIPELINE</span>
+</a>
+<div class="pt-8 px-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant text-[9px]">BLUEPRINT_LEGEND</span>
+<div class="mt-4 space-y-3 bg-surface-container-low p-3 border border-outline-variant rounded">
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 border border-outline"></div>
+<span class="text-code-xs text-on-surface-variant">PROCESS_NODE</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 border-2 border-secondary rotate-45"></div>
+<span class="text-code-xs text-on-surface-variant">DECISION_GATE</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[16px]" data-icon="psychology">psychology</span>
+<span class="text-code-xs text-on-surface-variant">AURA_AI_LOGIC</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#ff6d5a] text-[16px]" data-icon="hub">hub</span>
+<span class="text-code-xs text-on-surface-variant">n8n_WORKFLOW</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container text-[16px]" data-icon="database">database</span>
+<span class="text-code-xs text-on-surface-variant">DATABASE_QUERY</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline text-[16px]" data-icon="receipt_long">receipt_long</span>
+<span class="text-code-xs text-on-surface-variant">AUDIT_LOG_ENTRY</span>
+</div>
+</div>
+</div>
+</nav>
+</aside>
+<!-- Main Workflow Canvas -->
+<main class="ml-64 pt-16 pb-12 h-screen overflow-auto relative dot-grid">
+<div class="flex flex-col min-w-[2000px] h-full">
+<!-- Swimlane: VISITOR (Input & Intent) -->
+<div class="flex border-b border-outline-variant/30 min-h-[180px]">
+<div class="w-16 flex items-center justify-center border-r border-outline-variant bg-surface-container-low shrink-0 relative">
+<span class="vertical-text transform rotate-180 text-label-caps font-label-caps text-on-surface-variant whitespace-nowrap">ACTOR: VISITOR</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center">
+<div class="workflow-node w-48 bg-surface-container-lowest border border-primary-container p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-caps font-label-caps text-primary-container">START_NODE</span>
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+</div>
+<div class="text-code-sm font-code-sm text-on-surface uppercase">Request Registration</div>
+<div class="mt-2 text-code-xs font-code-xs text-on-surface-variant opacity-60 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]" data-icon="api">api</span>
+                        ENTRY: WEB_API_v4
+                    </div>
+</div>
+</div>
+</div>
+<!-- Swimlane: CORE SYSTEM (Orchestration & Validation) -->
+<div class="flex border-b border-outline-variant/30 min-h-[280px]">
+<div class="w-16 flex items-center justify-center border-r border-outline-variant bg-surface-container-low shrink-0">
+<span class="vertical-text transform rotate-180 text-label-caps font-label-caps text-on-surface-variant whitespace-nowrap">ACTOR: CORE_SYS</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center gap-20">
+<div class="workflow-node w-56 bg-surface-container-lowest border border-outline p-3 ml-[200px]">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-caps font-label-caps text-outline">HANDSHAKE</span>
+<span class="material-symbols-outlined text-outline text-[14px]" data-icon="handshake">handshake</span>
+</div>
+<div class="text-code-sm font-code-sm text-on-surface">OTP Dispatch Engine</div>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-code-xs font-code-xs text-on-surface-variant">SMS/EMAIL Gateway</span>
+<span class="material-symbols-outlined text-[12px] text-primary-container" data-icon="outbound">outbound</span>
+</div>
+</div>
+<!-- Decision Gateway with Exception Path -->
+<div class="relative">
+<div class="workflow-node w-32 h-32 transform rotate-45 border-2 border-secondary bg-surface-container-lowest flex items-center justify-center relative shadow-xl">
+<div class="transform -rotate-45 text-center">
+<span class="text-label-caps font-label-caps text-secondary block mb-1">VALID?</span>
+<span class="text-code-sm font-code-sm font-bold">OTP_VER</span>
+</div>
+</div>
+<!-- YES Path -->
+<div class="absolute top-1/2 left-full w-20 h-0.5 bg-secondary -translate-y-1/2 flex items-center justify-end">
+<span class="text-[9px] text-secondary font-bold -mt-4">TRUE</span>
+<div class="w-1.5 h-1.5 bg-secondary rounded-full"></div>
+</div>
+<!-- EXCEPTION PATH (NO Path) -->
+<div class="absolute bottom-[-20px] left-1/2 -translate-x-1/2 w-0.5 h-24 bg-error flex flex-col items-center justify-end">
+<span class="text-[9px] text-error font-bold ml-12">FALSE_EXCEPTION</span>
+<div class="w-1.5 h-1.5 bg-error rounded-full"></div>
+</div>
+</div>
+<!-- Exception Handler Node -->
+<div class="workflow-node w-56 bg-surface-container-lowest border border-error border-dashed p-3 mt-[240px] absolute left-[720px]">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-caps font-label-caps text-error">EXCEPTION_HANDLER</span>
+<span class="material-symbols-outlined text-error text-[14px] animate-pulse" data-icon="error_outline">error_outline</span>
+</div>
+<div class="text-code-sm font-code-sm text-on-surface">Retry Loop / Support Tier 2</div>
+<div class="mt-2 text-code-xs text-error/60 font-code-xs italic underline cursor-pointer">TRIGGER_MANUAL_REVIEW</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: AURA AI (Intelligent Processing) -->
+<div class="flex border-b border-outline-variant/30 min-h-[200px]">
+<div class="w-16 flex items-center justify-center border-r border-outline-variant bg-surface-container-low shrink-0">
+<span class="vertical-text transform rotate-180 text-label-caps font-label-caps text-secondary whitespace-nowrap">ACTOR: AURA_AI</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center">
+<div class="workflow-node w-72 bg-surface-container-high border-2 border-secondary p-4 rounded-lg ml-[780px]">
+<div class="absolute -top-3 -right-3">
+<span class="material-symbols-outlined text-secondary animate-pulse" data-icon="psychology" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="text-label-caps font-label-caps text-secondary">AURA_SCORE_V2</span>
+</div>
+<div class="text-code-sm font-code-sm text-on-surface mb-3">Biometric &amp; Fraud Correlation</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] text-on-surface-variant">
+<span>RELIABILITY:</span>
+<span class="text-primary-container">0.9998</span>
+</div>
+<div class="w-full bg-surface-container h-1">
+<div class="bg-primary-container h-full w-[99.9%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: DATA & INFRA (Database Transactions) -->
+<div class="flex border-b border-outline-variant/30 min-h-[340px]">
+<div class="w-16 flex items-center justify-center border-r border-outline-variant bg-surface-container-low shrink-0">
+<span class="vertical-text transform rotate-180 text-label-caps font-label-caps text-on-surface-variant whitespace-nowrap">ACTOR: DATA_VAULT</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center">
+<div class="flex gap-12 ml-[1080px]">
+<!-- Main Database Op -->
+<div class="workflow-node w-56 bg-surface-container-lowest border border-primary-container p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-caps font-label-caps text-primary-container">SQL_COMMIT</span>
+<span class="material-symbols-outlined text-primary-container text-[16px]" data-icon="database">database</span>
+</div>
+<div class="text-code-sm font-code-sm text-on-surface">Identity Record Created</div>
+<div class="mt-2 text-[9px] text-outline-variant font-mono">UUID: 550e8400-e29b-41d4...</div>
+</div>
+<!-- Detail Sub-processes -->
+<div class="flex flex-col gap-4">
+<div class="workflow-node w-48 bg-surface-container-low border-l-4 border-secondary p-2 flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[18px]" data-icon="account_balance_wallet">account_balance_wallet</span>
+<div>
+<div class="text-[9px] text-secondary font-bold">EVENT: DB_WRITE</div>
+<div class="text-code-xs">Wallet Entry Created</div>
+</div>
+</div>
+<div class="workflow-node w-48 bg-surface-container-low border-l-4 border-primary-container p-2 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container text-[18px]" data-icon="verified_user">verified_user</span>
+<div>
+<div class="text-[9px] text-primary-container font-bold">EVENT: DB_WRITE</div>
+<div class="text-code-xs">Trust Profile Initialized</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: n8n ORCHESTRATOR (Webhooks & Logic) -->
+<div class="flex border-b border-outline-variant/30 min-h-[180px]">
+<div class="w-16 flex items-center justify-center border-r border-outline-variant bg-surface-container-low shrink-0">
+<span class="vertical-text transform rotate-180 text-label-caps font-label-caps text-[#ff6d5a] whitespace-nowrap">ACTOR: n8n_ORCH</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center">
+<div class="workflow-node w-72 bg-[#ff6d5a]/10 border border-[#ff6d5a] p-4 rounded-lg ml-[1450px] flex gap-4">
+<div class="w-12 h-12 bg-[#ff6d5a] flex items-center justify-center rounded shrink-0">
+<span class="material-symbols-outlined text-surface" data-icon="hub">hub</span>
+</div>
+<div>
+<div class="text-label-caps font-label-caps text-[#ff6d5a] text-[10px]">WEBHOOK_EXECUTION</div>
+<div class="text-code-sm font-code-sm leading-tight">Broadcast 'User Registered' Event to Ecosystem</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane: ADMIN & NOTIFS (Finalization) -->
+<div class="flex min-h-[220px]">
+<div class="w-16 flex items-center justify-center border-r border-outline-variant bg-surface-container-low shrink-0">
+<span class="vertical-text transform rotate-180 text-label-caps font-label-caps text-on-surface-variant whitespace-nowrap">ACTOR: ADMIN</span>
+</div>
+<div class="flex-1 p-8 relative flex items-center gap-12 ml-[1750px]">
+<div class="workflow-node w-48 bg-surface-container-lowest border border-outline p-3">
+<div class="flex justify-between items-center mb-1">
+<span class="text-label-caps font-label-caps text-outline">OUTBOUND</span>
+<span class="material-symbols-outlined text-outline text-[14px]" data-icon="mail">mail</span>
+</div>
+<div class="text-code-sm font-code-sm">Welcome Notification</div>
+</div>
+<!-- End Node -->
+<div class="workflow-node w-12 h-12 rounded-full border-4 border-primary-container flex items-center justify-center relative">
+<div class="w-6 h-6 bg-primary-container rounded-full animate-pulse"></div>
+<span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-label-caps font-label-caps text-primary-container whitespace-nowrap">STATUS: COMPLETED</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Float Overlays: Real-Time Audit -->
+<div class="fixed bottom-12 right-6 w-80 max-h-96 overflow-hidden bg-surface-container-high/95 backdrop-blur-md border border-outline-variant shadow-2xl flex flex-col rounded-lg z-30">
+<div class="p-3 bg-surface-container-highest border-b border-outline-variant flex justify-between items-center">
+<span class="text-label-caps font-label-caps text-primary-container flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="receipt_long">receipt_long</span>
+                SYSTEM_AUDIT_LOG
+            </span>
+<span class="text-[9px] font-mono text-outline-variant">LIVE_FEED</span>
+</div>
+<div class="flex-1 overflow-auto p-3 space-y-2 font-mono text-[10px] h-64" id="audit-log">
+<div class="flex gap-2 text-outline-variant">
+<span>[09:42:01]</span>
+<span class="text-primary-container">[INFO]</span>
+<span>DB_COMMIT: Identity record 0x442 initialized.</span>
+</div>
+<div class="flex gap-2 text-outline-variant">
+<span>[09:42:03]</span>
+<span class="text-secondary">[AURA]</span>
+<span>BIOMETRIC_CHECK: Match confirmed (confidence 0.99)</span>
+</div>
+</div>
+</div>
+<!-- Floating Canvas Controls -->
+<div class="fixed top-20 right-6 flex flex-col gap-2 z-30">
+<button class="w-10 h-10 bg-surface border border-outline-variant flex items-center justify-center hover:bg-surface-container-high text-primary-container">
+<span class="material-symbols-outlined text-[20px]" data-icon="zoom_in">zoom_in</span>
+</button>
+<button class="w-10 h-10 bg-surface border border-outline-variant flex items-center justify-center hover:bg-surface-container-high text-primary-container">
+<span class="material-symbols-outlined text-[20px]" data-icon="zoom_out">zoom_out</span>
+</button>
+<div class="h-px bg-outline-variant my-1"></div>
+<button class="w-10 h-10 bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg shadow-primary-container/20">
+<span class="material-symbols-outlined text-[20px]" data-icon="play_arrow">play_arrow</span>
+</button>
+</div>
+</main>
+<!-- Footer Status Bar -->
+<footer class="bg-surface-container-low text-on-surface-variant border-t border-outline-variant bottom-0 flex justify-between items-center px-lane-margin py-2 fixed w-full z-50 h-10">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_5px_#00ff41]"></span>
+<span class="text-code-sm font-code-sm text-primary uppercase">ORCHESTRATOR_V2.0_STABLE</span>
+</div>
+<span class="h-4 w-px bg-outline-variant"></span>
+<div class="flex gap-6 text-code-xs">
+<span class="hover:text-primary transition-colors cursor-pointer flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="monitoring">monitoring</span>
+                LATENCY: 4.2ms
+            </span>
+<span class="hover:text-primary transition-colors cursor-pointer flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="cloud_sync">cloud_sync</span>
+                n8n_SYNC: ENABLED
+            </span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-label-caps font-label-caps">INSTANCE_ID: AFRI-PROD-001</span>
+<span class="text-code-xs opacity-50">UPTIME: 142D:11H</span>
+</div>
+</footer>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const auditLog = document.getElementById('audit-log');
+        const logEvents = [
+            { actor: 'CORE', msg: 'OTP_SENT via SMS_GATEWAY_V2', type: 'INFO' },
+            { actor: 'AURA', msg: 'SCORING_COMPLETE: Valid user profile', type: 'AURA' },
+            { actor: 'DATA', msg: 'VAULT_LOCK: Identity 0x992 secured', type: 'DATA' },
+            { actor: 'n8n', msg: 'BROADCAST: Registration event acknowledged', type: 'n8n' }
+        ];
+
+        setInterval(() => {
+            const event = logEvents[Math.floor(Math.random() * logEvents.length)];
+            const time = new Date().toTimeString().split(' ')[0];
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 text-outline-variant animate-pulse';
+            
+            let typeColor = 'text-primary-container';
+            if(event.type === 'AURA') typeColor = 'text-secondary';
+            if(event.type === 'n8n') typeColor = 'text-[#ff6d5a]';
+
+            div.innerHTML = `<span>[${time}]</span><span class="${typeColor}">[${event.actor}]</span><span>${event.msg}</span>`;
+            auditLog.appendChild(div);
+            auditLog.scrollTop = auditLog.scrollHeight;
+            
+            if(auditLog.children.length > 20) auditLog.children[0].remove();
+            setTimeout(() => div.classList.remove('animate-pulse'), 1000);
+        }, 4000);
+    });
+</script>
+</body></html>
