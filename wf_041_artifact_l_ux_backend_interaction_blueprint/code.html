@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-041 | UX ↔ BE Interaction Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#00e639",
+                    "surface-bright": "#2c3a4c",
+                    "on-tertiary-fixed": "#2c0051",
+                    "error-container": "#93000a",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-container": "#122131",
+                    "surface-container-highest": "#273647",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "on-background": "#d4e4fa",
+                    "primary-container": "#00ff41",
+                    "inverse-on-surface": "#233143",
+                    "tertiary-fixed": "#f0dbff",
+                    "outline-variant": "#3b4b37",
+                    "on-secondary-fixed": "#001356",
+                    "on-secondary-container": "#c6ceff",
+                    "surface-variant": "#273647",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-primary-fixed": "#002203",
+                    "on-surface": "#d4e4fa",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "tertiary": "#fff6ff",
+                    "surface-dim": "#051424",
+                    "primary": "#ebffe2",
+                    "secondary": "#b8c3ff",
+                    "on-error": "#690005",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "surface-container-high": "#1c2b3c",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-primary": "#003907",
+                    "inverse-surface": "#d4e4fa",
+                    "on-tertiary-container": "#862ed4",
+                    "background": "#051424",
+                    "secondary-container": "#0043eb",
+                    "outline": "#84967e",
+                    "inverse-primary": "#006e16",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary-fixed": "#dde1ff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "tertiary-container": "#ecd3ff",
+                    "on-tertiary": "#490080",
+                    "surface": "#051424",
+                    "on-error-container": "#ffdad6",
+                    "on-primary-container": "#007117",
+                    "error": "#ffb4ab",
+                    "surface-tint": "#00e639",
+                    "primary-fixed": "#72ff70",
+                    "on-secondary": "#002388"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "grid-unit": "8px",
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px"
+            },
+            "fontFamily": {
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(rgba(0, 230, 57, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector-horizontal {
+            height: 2px;
+            background: repeating-linear-gradient(90deg, #3b4b37, #3b4b37 4px, transparent 4px, transparent 8px);
+        }
+        .node-connector-vertical {
+            width: 2px;
+            background: repeating-linear-gradient(0deg, #3b4b37, #3b4b37 4px, transparent 4px, transparent 8px);
+        }
+        .swimlane-border {
+            border-color: rgba(132, 150, 126, 0.2);
+        }
+        .active-glow {
+            box-shadow: 0 0 15px rgba(0, 230, 57, 0.15);
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface-container-highest flex justify-between items-center w-full px-grid-unit h-16 z-50 border-b border-outline-variant fixed top-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps font-bold text-primary-fixed-dim tracking-widest">ENGINE:FORECAST_v4.2.0</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SYS_STATUS: OPTIMAL</span>
+</div>
+</div>
+</header>
+<div class="flex flex-1 pt-16 pb-8 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="bg-surface-container-lowest border-r border-outline-variant w-72 flex flex-col h-full overflow-y-auto hide-scrollbar shrink-0">
+<div class="p-6">
+<h2 class="font-label-caps text-label-caps text-primary-fixed-dim">ARTIFACT_EXPLORER</h2>
+</div>
+<nav class="flex-1">
+<!-- Executing logic for active navigation: UX/BE Interaction is selected -->
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                    Executive Overview
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+                    BPMN Swimlane
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="rule">rule</span>
+                    Business Rules
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="api">api</span>
+                    API Contract
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 bg-primary-container/20 text-primary-fixed-dim border-r-2 border-primary-fixed-dim font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="developer_board">developer_board</span>
+                    UX/BE Interaction
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+                    Data Model
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+                    Event Bus
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="shield">shield</span>
+                    Security
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all font-code-sm text-code-sm" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+                    UML Sequence
+                </a>
+</nav>
+</aside>
+<!-- Main Interaction Canvas -->
+<main class="flex-1 overflow-auto relative p-node-gutter">
+<!-- Breadcrumbs / Meta -->
+<div class="mb-12 flex justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<span class="font-label-caps text-label-caps text-outline uppercase">Workflow ID: WF-041</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mt-1">UX ↔ Backend Sequential Blueprint</h2>
+</div>
+<div class="flex gap-8 font-code-xs text-code-xs text-on-surface-variant">
+<div class="flex flex-col items-end">
+<span class="text-outline uppercase">Latency Target</span>
+<span class="text-primary-fixed-dim">350ms End-to-End</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-outline uppercase">Protocol</span>
+<span class="text-secondary">gRPC-Web / WebSocket</span>
+</div>
+</div>
+</div>
+<!-- Sequential Blueprint Grid -->
+<div class="grid grid-cols-1 gap-lane-margin relative">
+<!-- STEP 1: EVENT INITIATION -->
+<div class="flex items-start gap-node-gutter">
+<div class="w-12 h-12 rounded-full border border-primary-fixed-dim flex items-center justify-center shrink-0 bg-surface-container-low active-glow">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim">01</span>
+</div>
+<div class="flex-1 grid grid-cols-4 gap-4">
+<div class="col-span-1 bg-surface-container-high border-l-4 border-primary-fixed-dim p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-2">TRIGGER</span>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">Business Event</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">User gesture or threshold breach in external domain.</p>
+</div>
+<div class="col-span-1 flex items-center justify-center">
+<div class="node-connector-horizontal w-full relative">
+<span class="absolute top-[-20px] left-1/2 -translate-x-1/2 font-code-xs text-code-xs text-primary-fixed-dim">Payload.emit()</span>
+</div>
+</div>
+<div class="col-span-1 bg-surface-container-high border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-2">GATEWAY</span>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">API Gateway</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Auth context validation + rate limiting logic applied.</p>
+</div>
+<div class="col-span-1 flex flex-col justify-center gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim" data-icon="check_circle">check_circle</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">JWT Validated</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim" data-icon="dns">dns</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">Route: /v4/forecast</span>
+</div>
+</div>
+</div>
+</div>
+<!-- CONNECTOR -->
+<div class="flex px-[22px]">
+<div class="node-connector-vertical h-12"></div>
+</div>
+<!-- STEP 2: PROCESSING CORE -->
+<div class="flex items-start gap-node-gutter">
+<div class="w-12 h-12 rounded-full border border-secondary flex items-center justify-center shrink-0 bg-surface-container-low">
+<span class="font-label-caps text-label-caps text-secondary">02</span>
+</div>
+<div class="flex-1 grid grid-cols-4 gap-4">
+<div class="col-span-2 bg-surface-container-high border-l-4 border-secondary p-4 relative overflow-hidden">
+<!-- Shader Background placeholder for background process -->
+
+<span class="font-label-caps text-label-caps text-outline block mb-2 z-10 relative">LOGIC_CORE</span>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2 z-10 relative">Forecast Engine ↔ Aura AI</h3>
+<div class="flex gap-4 z-10 relative">
+<div class="bg-surface-container-lowest p-2 border border-outline-variant flex-1">
+<span class="text-[9px] text-outline uppercase block">Vectorization</span>
+<span class="text-code-xs text-secondary">AURA_NODE_v9</span>
+</div>
+<div class="bg-surface-container-lowest p-2 border border-outline-variant flex-1">
+<span class="text-[9px] text-outline uppercase block">Confidence</span>
+<span class="text-code-xs text-secondary">0.982</span>
+</div>
+</div>
+</div>
+<div class="col-span-1 flex items-center justify-center">
+<div class="node-connector-horizontal w-full"></div>
+</div>
+<div class="col-span-1 bg-surface-container-high border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-2">MODEL</span>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">Prediction Engine</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Generating delta metrics for WF-041 instance.</p>
+</div>
+</div>
+</div>
+<!-- CONNECTOR -->
+<div class="flex px-[22px]">
+<div class="node-connector-vertical h-12"></div>
+</div>
+<!-- STEP 3: OUTPUT & FEEDBACK -->
+<div class="flex items-start gap-node-gutter">
+<div class="w-12 h-12 rounded-full border border-tertiary-fixed-dim flex items-center justify-center shrink-0 bg-surface-container-low">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">03</span>
+</div>
+<div class="flex-1 grid grid-cols-4 gap-4">
+<div class="col-span-1 bg-surface-container-high border-l-4 border-tertiary-fixed-dim p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-2">OUTPUT</span>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">Recommendations</h3>
+<div class="space-y-1">
+<div class="h-1 bg-outline-variant w-full"></div>
+<div class="h-1 bg-tertiary-fixed-dim w-3/4"></div>
+<div class="h-1 bg-outline-variant w-1/2"></div>
+</div>
+</div>
+<div class="col-span-1 bg-surface-container-high border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-2">BROADCAST</span>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">Notifications</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Push initiated to Subscriptions: [Admin, Owner].</p>
+</div>
+<div class="col-span-1 bg-surface-container-high border border-outline-variant p-4">
+<span class="font-label-caps text-label-caps text-outline block mb-2">AGGREGATOR</span>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">Executive Insights</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Update global dashboard KPIs.</p>
+</div>
+<div class="col-span-1 bg-primary-container/10 border border-primary-fixed-dim p-4">
+<span class="font-label-caps text-label-caps text-primary-fixed-dim block mb-2">HYDRATION</span>
+<h3 class="font-code-sm text-code-sm text-on-surface mb-2">Frontend Updated</h3>
+<div class="flex items-center gap-2 text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[16px] animate-bounce" data-icon="sync_alt">sync_alt</span>
+<span class="font-code-xs text-code-xs">State: SYNCED</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Telemetry Sub-Panel -->
+<div class="mt-16 grid grid-cols-3 gap-node-gutter">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<h4 class="font-label-caps text-label-caps text-on-surface">Asynchronous Streaming</h4>
+<span class="material-symbols-outlined text-outline" data-icon="stream">stream</span>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-on-surface-variant">Socket Connectivity</span>
+<span class="text-primary-fixed-dim">99.9%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full w-[99.9%]"></div>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-on-surface-variant">Frame Drop Rate</span>
+<span class="text-secondary">0.02%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[2%]"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 relative overflow-hidden group">
+<div class="absolute inset-0 bg-primary-fixed-dim/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-center mb-4 relative z-10">
+<h4 class="font-label-caps text-label-caps text-on-surface">Data Hydration Logic</h4>
+<span class="material-symbols-outlined text-outline" data-icon="water_drop">water_drop</span>
+</div>
+<div class="font-code-xs text-code-xs text-on-surface-variant space-y-2 relative z-10">
+<div class="p-2 border border-outline-variant rounded bg-surface-container/50">
+<span class="text-primary-fixed-dim">INIT</span>: State snapshot requested
+                        </div>
+<div class="p-2 border border-outline-variant rounded bg-surface-container/50">
+<span class="text-secondary">PATCH</span>: Delta updates received
+                        </div>
+<div class="p-2 border border-outline-variant rounded bg-surface-container/50">
+<span class="text-tertiary-fixed-dim">RECONCILE</span>: Virtual DOM diffing
+                        </div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col gap-4">
+<h4 class="font-label-caps text-label-caps text-on-surface mb-2">Logic Audit Stub</h4>
+<div class="flex-1 overflow-y-auto pr-2 space-y-2 max-h-[140px] hide-scrollbar">
+<div class="flex items-center gap-2 border-l-2 border-outline-variant pl-3">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<span class="font-code-xs text-code-xs text-outline">14:22:01.03 - EVENT_RCVD</span>
+</div>
+<div class="flex items-center gap-2 border-l-2 border-primary-fixed-dim pl-3">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+<span class="font-code-xs text-code-xs text-on-surface">14:22:01.12 - AUTH_PASSED</span>
+</div>
+<div class="flex items-center gap-2 border-l-2 border-secondary pl-3">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-code-xs text-code-xs text-on-surface">14:22:01.45 - INFER_START</span>
+</div>
+<div class="flex items-center gap-2 border-l-2 border-outline-variant pl-3">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<span class="font-code-xs text-code-xs text-outline">14:22:02.10 - PERSIST_DB</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant fixed bottom-0 w-full px-node-gutter py-1 flex justify-between items-center z-50">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-secondary-fixed-dim">CORE_LATENCY: 12ms | NODES: 102/102 ACTIVE</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim cursor-crosshair" href="#">v4.2.0-STABLE</a>
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim cursor-crosshair" href="#">HEALTH_REPORT</a>
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary-fixed-dim cursor-crosshair" href="#">LOGS</a>
+</div>
+</footer>
+<!-- Interactive script for micro-telemetry effect -->
+<script>
+        document.addEventListener('mousemove', (e) => {
+            const glow = document.querySelectorAll('.active-glow');
+            glow.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
+                    el.style.borderColor = '#00ff41';
+                } else {
+                    el.style.borderColor = '';
+                }
+            });
+        });
+    </script>
+</body></html>

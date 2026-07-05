@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-039: Artifact J — Test &amp; Acceptance Blueprint</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: absolute;
+            background: #84967e;
+            z-index: 0;
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(18, 33, 49, 0.8);
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 8px;
+        }
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#2c0051",
+                      "surface-dim": "#051424",
+                      "primary-container": "#00ff41",
+                      "tertiary-fixed": "#f0dbff",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "secondary-container": "#0043eb",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-primary-fixed": "#002203",
+                      "on-primary": "#003907",
+                      "error-container": "#93000a",
+                      "on-secondary-fixed": "#001356",
+                      "tertiary-container": "#ecd3ff",
+                      "on-secondary": "#002388",
+                      "surface-variant": "#273647",
+                      "surface-container": "#122131",
+                      "on-surface": "#d4e4fa",
+                      "secondary-fixed": "#dde1ff",
+                      "surface-container-lowest": "#010f1f",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "on-secondary-container": "#c6ceff",
+                      "background": "#051424",
+                      "on-tertiary-container": "#862ed4",
+                      "inverse-primary": "#006e16",
+                      "inverse-on-surface": "#233143",
+                      "primary-fixed": "#72ff70",
+                      "surface-tint": "#00e639",
+                      "inverse-surface": "#d4e4fa",
+                      "secondary": "#b8c3ff",
+                      "on-tertiary": "#490080",
+                      "surface-container-low": "#0d1c2d",
+                      "surface": "#051424",
+                      "primary": "#ebffe2",
+                      "tertiary": "#fff6ff",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-background": "#d4e4fa",
+                      "on-error": "#690005",
+                      "surface-container-highest": "#273647",
+                      "primary-fixed-dim": "#00e639",
+                      "error": "#ffb4ab",
+                      "surface-bright": "#2c3a4c",
+                      "outline-variant": "#3b4b37",
+                      "surface-container-high": "#1c2b3c",
+                      "outline": "#84967e",
+                      "on-primary-container": "#007117",
+                      "on-error-container": "#ffdad6",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-secondary-fixed-variant": "#0035be"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "grid-unit": "8px",
+                      "node-gutter": "24px",
+                      "stack-gap": "4px",
+                      "lane-margin": "32px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="bg-surface-container-lowest text-primary-fixed-dim font-headline-md text-headline-md font-code-sm text-code-sm w-full border-b border-surface-variant flex justify-between items-center px-grid-unit h-16 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">AURA_CORE_ROUTER_V1.0</h1>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<nav class="flex gap-4">
+<a class="text-primary-fixed-dim border-b-2 border-primary-fixed-dim px-2 py-1 transition-colors" href="#">Topology</a>
+<a class="text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-1" href="#">Agent_Market</a>
+<a class="text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-1" href="#">Task_Execution</a>
+</nav>
+<span class="material-symbols-outlined cursor-pointer hover:bg-surface-variant p-2 rounded-full transition-colors">settings_input_component</span>
+</div>
+</header>
+<div class="flex">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 bg-surface-container text-primary-container font-code-sm text-code-sm uppercase h-screen w-64 border-r border-surface-variant hidden md:flex pt-20">
+<div class="px-4 py-2 font-headline-md text-headline-md text-on-surface mb-4">SYSTEM_ARCH</div>
+<div class="flex flex-col gap-1">
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-container-high hover:text-primary transition-all duration-150 ease-in-out flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">account_tree</span> Topology
+                </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-container-high hover:text-primary transition-all duration-150 ease-in-out flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">hub</span> Agent_Market
+                </a>
+<a class="bg-secondary-container text-on-secondary-container border-l-4 border-primary-container px-4 py-3 transition-all duration-150 ease-in-out flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">dynamic_feed</span> Task_Execution
+                </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-container-high hover:text-primary transition-all duration-150 ease-in-out flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">database</span> Vector_Memory
+                </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-container-high hover:text-primary transition-all duration-150 ease-in-out flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">security</span> Zero_Trust
+                </a>
+</div>
+<div class="mt-auto p-4 border-t border-surface-variant">
+<div class="text-code-xs text-on-surface-variant mb-2">SYSTEM STATUS</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 bg-primary-container rounded-full status-pulse"></div>
+<span class="text-code-sm">CORE_UP_039</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 p-grid-unit pb-24 min-h-screen">
+<!-- Hero Dashboard Section -->
+<section class="mb-lane-margin">
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+<!-- Release Scorecard -->
+<div class="lg:col-span-3 bg-surface-container p-6 border border-primary-container relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 bg-primary-container text-on-primary-container font-label-caps text-label-caps">V.1.0_READY</div>
+<h2 class="font-headline-lg text-headline-lg mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined">verified</span> RELEASE READINESS SCORECARD
+                        </h2>
+<div class="flex flex-wrap items-end gap-8">
+<div class="flex flex-col">
+<span class="text-code-xs text-on-surface-variant">GLOBAL PASS RATE</span>
+<span class="text-6xl font-bold text-primary-container">98.4<span class="text-2xl">%</span></span>
+</div>
+<div class="flex-1 min-w-[200px]">
+<div class="w-full bg-surface-variant h-2 mb-2">
+<div class="bg-primary-container h-full w-[98.4%]"></div>
+</div>
+<div class="flex justify-between font-code-xs text-on-surface-variant">
+<span>CRITICAL_THRESHOLD: 98.0%</span>
+<span>STATUS: PASS</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+<div class="border border-surface-variant p-3 bg-surface-container-lowest">
+<div class="text-code-xs text-on-surface-variant">ROUTING</div>
+<div class="text-headline-md text-primary">100%</div>
+</div>
+<div class="border border-surface-variant p-3 bg-surface-container-lowest">
+<div class="text-code-xs text-on-surface-variant">INTEGRATION</div>
+<div class="text-headline-md text-primary">97.8%</div>
+</div>
+<div class="border border-surface-variant p-3 bg-surface-container-lowest">
+<div class="text-code-xs text-on-surface-variant">MEMORY</div>
+<div class="text-headline-md text-primary">99.1%</div>
+</div>
+<div class="border border-surface-variant p-3 bg-surface-container-lowest">
+<div class="text-code-xs text-on-surface-variant">SECURITY</div>
+<div class="text-headline-md text-primary">100%</div>
+</div>
+</div>
+</div>
+<!-- Quick Metrics -->
+<div class="bg-surface-container-low p-4 border border-surface-variant flex flex-col justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-4">QA REGRESSION VECTOR</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-surface-variant pb-2">
+<span class="text-code-sm">TOTAL TEST CASES</span>
+<span class="font-bold text-secondary">2,482</span>
+</div>
+<div class="flex justify-between items-center border-b border-surface-variant pb-2">
+<span class="text-code-sm">FAILURE_POINTS</span>
+<span class="font-bold text-error">42</span>
+</div>
+<div class="flex justify-between items-center border-b border-surface-variant pb-2">
+<span class="text-code-sm">DEBT_LEVEL</span>
+<span class="font-bold text-on-surface">LOW</span>
+</div>
+</div>
+</div>
+<button class="w-full bg-surface-variant py-2 text-label-caps text-on-surface font-label-caps hover:bg-primary-container hover:text-on-primary-container transition-colors">
+                            RE-RUN ALL_VECTORS
+                        </button>
+</div>
+</div>
+</section>
+<!-- Testing Matrices Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Routing Tests -->
+<div class="bg-surface-container p-6 border border-surface-variant">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">route</span> Routing Tests
+                        </h3>
+<span class="text-code-xs bg-surface-variant px-2 py-1 rounded">R-01</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-3 p-3 bg-surface-container-lowest border border-surface-variant">
+<span class="material-symbols-outlined text-primary-container text-sm">check_circle</span>
+<div>
+<div class="text-code-sm font-bold">Latency Threshold Verification</div>
+<div class="text-code-xs text-on-surface-variant">Max p99: 450ms. Current: 382ms.</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-surface-container-lowest border border-surface-variant">
+<span class="material-symbols-outlined text-primary-container text-sm">check_circle</span>
+<div>
+<div class="text-code-sm font-bold">Cluster Balancing</div>
+<div class="text-code-xs text-on-surface-variant">Traffic distribution across nodes verified.</div>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-surface-container-lowest border border-surface-variant">
+<span class="material-symbols-outlined text-primary-container text-sm">check_circle</span>
+<div>
+<div class="text-code-sm font-bold">Dynamic Pathing</div>
+<div class="text-code-xs text-on-surface-variant">Failover redirection operational.</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Tool/n8n Integration -->
+<div class="bg-surface-container p-6 border border-surface-variant">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">extension</span> n8n / Tool Logic
+                        </h3>
+<span class="text-code-xs bg-surface-variant px-2 py-1 rounded">I-42</span>
+</div>
+<div class="space-y-4">
+<div class="relative h-24 border border-dashed border-outline-variant bg-surface-container-lowest overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 opacity-20">
+
+</div>
+<span class="text-code-xs text-on-surface-variant font-label-caps">LIVE_STREAM: API_POLLING</span>
+</div>
+<ul class="text-code-sm space-y-2">
+<li class="flex justify-between"><span class="text-on-surface-variant">Webhook Response</span> <span class="text-primary">OK [201]</span></li>
+<li class="flex justify-between"><span class="text-on-surface-variant">OAuth2 Handshake</span> <span class="text-primary">VALID</span></li>
+<li class="flex justify-between"><span class="text-on-surface-variant">Payload Validation</span> <span class="text-error">FAIL [3]</span></li>
+</ul>
+</div>
+</div>
+<!-- Memory Retrieval Tests -->
+<div class="bg-surface-container p-6 border border-surface-variant lg:row-span-2">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">database</span> Memory Logic
+                        </h3>
+</div>
+<div class="p-4 bg-surface-container-lowest border border-surface-variant mb-4">
+<div class="text-code-xs mb-1 text-on-surface-variant">VEC_SEARCH_ACCURACY</div>
+<div class="flex items-center gap-2">
+<div class="h-1 flex-1 bg-surface-variant"><div class="h-full w-[94%] bg-tertiary-fixed-dim"></div></div>
+<span class="text-code-sm font-bold">0.94</span>
+</div>
+</div>
+<div class="space-y-2 mb-6">
+<div class="text-code-xs text-label-caps text-on-surface-variant">VALIDATION CHECKLIST</div>
+<label class="flex items-center gap-3 p-2 hover:bg-surface-variant cursor-pointer border border-transparent hover:border-outline-variant transition-all">
+<input checked="" class="rounded border-outline bg-surface-container text-primary-container focus:ring-primary-container h-4 w-4" type="checkbox"/>
+<span class="text-code-sm">Cosine Similarity Match &gt; 0.85</span>
+</label>
+<label class="flex items-center gap-3 p-2 hover:bg-surface-variant cursor-pointer border border-transparent hover:border-outline-variant transition-all">
+<input checked="" class="rounded border-outline bg-surface-container text-primary-container focus:ring-primary-container h-4 w-4" type="checkbox"/>
+<span class="text-code-sm">Top-K Retrieval Precision</span>
+</label>
+<label class="flex items-center gap-3 p-2 hover:bg-surface-variant cursor-pointer border border-transparent hover:border-outline-variant transition-all">
+<input class="rounded border-outline bg-surface-container text-primary-container focus:ring-primary-container h-4 w-4" type="checkbox"/>
+<span class="text-code-sm">Cross-Reference Scrubbing</span>
+</label>
+</div>
+<div class="h-40 relative rounded overflow-hidden">
+<div class="w-full h-full bg-cover bg-center opacity-60" data-alt="A dark, high-tech isometric visualization of data nodes connecting within a 3D grid. Deep blue and emerald green lines weave through floating translucent data blocks, creating a sense of complex memory retrieval. The lighting is low-key, with glowing neon edges defining the structures against a deep black background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAxBV_QvVkimKOowUgd5NOZoY4UWuBtzPGco_8nbWDNlnFXeftN7l-gwyGi_IPDoQR2VnbnWg_Ua5N8sWvfx1e0LLClCeDu0CGZ6Oh995N8cmJaKO3B-5qZnmqlo8JXWiRMKVcjPiTEqMTyO4NTdBpcfidPOxaolTA1u4YZcyZIErU3JYYGMJQreL7F6iRU2FC8yUA-GbrxguI-iS7sTeEEaCGRBt97Qt7UjSq7vcmPjrOdwFUonrOJ7zWh_OJalk-Cn8CZ2quPn38')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container to-transparent flex items-end p-4">
+<div class="text-code-xs font-label-caps">INDEXING_COMPLETE_SNAPSHOT</div>
+</div>
+</div>
+</div>
+<!-- Permission & Security -->
+<div class="bg-surface-container p-6 border border-surface-variant">
+<h3 class="font-headline-md text-headline-md mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-error">security</span> Permission Validation
+                    </h3>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container-lowest p-3 border-l-2 border-primary-container">
+<div class="text-code-xs text-on-surface-variant">RBAC</div>
+<div class="text-code-sm font-bold">VERIFIED</div>
+</div>
+<div class="bg-surface-container-lowest p-3 border-l-2 border-primary-container">
+<div class="text-code-xs text-on-surface-variant">TOKEN_EXP</div>
+<div class="text-code-sm font-bold">3600s SET</div>
+</div>
+<div class="bg-surface-container-lowest p-3 border-l-2 border-primary-container">
+<div class="text-code-xs text-on-surface-variant">CORS</div>
+<div class="text-code-sm font-bold">RESTRICTED</div>
+</div>
+<div class="bg-surface-container-lowest p-3 border-l-2 border-error">
+<div class="text-code-xs text-on-surface-variant">SANITY_CHK</div>
+<div class="text-code-sm font-bold text-error">PENDING</div>
+</div>
+</div>
+</div>
+<!-- Fallback & Human Handoff -->
+<div class="bg-surface-container p-6 border border-surface-variant">
+<h3 class="font-headline-md text-headline-md mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-tertiary-container">support_agent</span> Fallback Protocols
+                    </h3>
+<div class="flex items-center gap-4 mb-4">
+<div class="flex-1">
+<div class="text-code-xs text-on-surface-variant">ESCALATION_DELAY</div>
+<div class="text-headline-md font-bold">12s <span class="text-code-xs font-normal">AVG</span></div>
+</div>
+<div class="w-12 h-12 bg-on-tertiary-container rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-container">call_merge</span>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between items-center bg-surface-container-low p-2">
+<span class="text-code-sm">Sentiment Threshold</span>
+<span class="text-code-xs font-label-caps text-secondary">NEG_0.85</span>
+</div>
+<div class="flex justify-between items-center bg-surface-container-low p-2">
+<span class="text-code-sm">Manual Trigger</span>
+<span class="text-code-xs font-label-caps text-primary">ENABLED</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Database & API Validation Checklist -->
+<section class="mt-8">
+<div class="bg-surface-container-lowest border border-surface-variant p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-md text-headline-md">Database &amp; API Checklist</h3>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-surface-variant text-code-xs">LOG_VER: 9.0.2</span>
+<span class="px-2 py-1 bg-primary-container text-on-primary-container text-code-xs">SYNCED</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surface-variant text-code-xs text-on-surface-variant font-label-caps">
+<th class="py-3 px-4">ENDPOINT_ID</th>
+<th class="py-3 px-4">METHOD</th>
+<th class="py-3 px-4">SCHEMA_VALID</th>
+<th class="py-3 px-4">STRESS_TEST</th>
+<th class="py-3 px-4">STATUS</th>
+</tr>
+</thead>
+<tbody class="text-code-sm">
+<tr class="border-b border-surface-variant hover:bg-surface-container transition-colors">
+<td class="py-4 px-4 font-mono">/v1/agent/deploy</td>
+<td class="py-4 px-4">POST</td>
+<td class="py-4 px-4 text-primary">TRUE</td>
+<td class="py-4 px-4">1200 req/s</td>
+<td class="py-4 px-4"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-container"></span> LIVE</span></td>
+</tr>
+<tr class="border-b border-surface-variant hover:bg-surface-container transition-colors">
+<td class="py-4 px-4 font-mono">/v1/vector/upsert</td>
+<td class="py-4 px-4">PUT</td>
+<td class="py-4 px-4 text-primary">TRUE</td>
+<td class="py-4 px-4">4500 req/s</td>
+<td class="py-4 px-4"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-container"></span> LIVE</span></td>
+</tr>
+<tr class="border-b border-surface-variant hover:bg-surface-container transition-colors">
+<td class="py-4 px-4 font-mono">/v1/system/heartbeat</td>
+<td class="py-4 px-4">GET</td>
+<td class="py-4 px-4 text-primary">TRUE</td>
+<td class="py-4 px-4">0.02ms Lat</td>
+<td class="py-4 px-4"><span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-container"></span> LIVE</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Bottom Navigation Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center bg-surface-container-low z-50 px-lane-margin h-12 border-t border-surface-variant">
+<span class="material-symbols-outlined text-on-surface-variant opacity-60 hover:text-primary-container active:scale-95 transition-transform">analytics</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-60 hover:text-primary-container active:scale-95 transition-transform">receipt_long</span>
+<span class="material-symbols-outlined text-primary-fixed-dim scale-110 active:scale-95 transition-transform">memory</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-60 hover:text-primary-container active:scale-95 transition-transform">account_tree</span>
+</nav>
+<!-- Contextual Telemetry Overlay (Bottom Right) -->
+<div class="fixed bottom-16 right-6 z-40 hidden md:block">
+<div class="bg-surface-container-lowest border border-surface-variant p-3 shadow-xl">
+<div class="text-code-xs font-label-caps text-on-surface-variant mb-2">TELEMETRY_LOG</div>
+<div class="space-y-1 max-h-32 overflow-y-auto scroll-hide">
+<div class="text-code-xs flex gap-2"><span class="text-primary-fixed-dim">[OK]</span> <span>ROUTING_ACK_202</span></div>
+<div class="text-code-xs flex gap-2"><span class="text-primary-fixed-dim">[OK]</span> <span>SCHEMA_V_PASS</span></div>
+<div class="text-code-xs flex gap-2"><span class="text-secondary">[SYS]</span> <span>HEARTBEAT_SEC_01</span></div>
+<div class="text-code-xs flex gap-2"><span class="text-error">[ERR]</span> <span>AUTH_RETRY_3</span></div>
+<div class="text-code-xs flex gap-2"><span class="text-primary-fixed-dim">[OK]</span> <span>DEPLOY_SYNC_COMPLETE</span></div>
+</div>
+</div>
+</div>
+<script>
+        // Micro-interaction for hover effects and status simulation
+        document.querySelectorAll('tr').forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                row.style.boxShadow = 'inset 4px 0 0 #00ff41';
+            });
+            row.addEventListener('mouseleave', () => {
+                row.style.boxShadow = 'none';
+            });
+        });
+
+        // Atmospheric terminal logic simulation
+        const consoleLogs = [
+            "Initializing acceptance blueprint...",
+            "Validating agent routing vectors...",
+            "Testing n8n integration points...",
+            "Human handoff protocols active...",
+            "QA Regression 98.4% verified.",
+            "System state: STABLE."
+        ];
+        
+        let logIndex = 0;
+        const logContainer = document.querySelector('.space-y-1.max-h-32');
+        
+        function addLog() {
+            if (logContainer) {
+                const div = document.createElement('div');
+                div.className = 'text-code-xs flex gap-2 opacity-0 transform translate-y-2 transition-all duration-300';
+                div.innerHTML = `<span class="text-primary-fixed-dim">[NEW]</span> <span>${consoleLogs[logIndex % consoleLogs.length]}</span>`;
+                logContainer.appendChild(div);
+                
+                setTimeout(() => {
+                    div.classList.remove('opacity-0', 'translate-y-2');
+                }, 10);
+
+                if (logContainer.children.length > 10) {
+                    logContainer.removeChild(logContainer.children[0]);
+                }
+                
+                logIndex++;
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+        }
+
+        setInterval(addLog, 4000);
+    </script>
+</body></html>

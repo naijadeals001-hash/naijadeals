@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-040 Artifact E - Data Persistence Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-port {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00e639;
+            position: absolute;
+        }
+        .line-grid {
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#122131",
+                        "error-container": "#93000a",
+                        "secondary-container": "#0043eb",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-secondary-fixed": "#001356",
+                        "surface-tint": "#00e639",
+                        "outline-variant": "#3b4b37",
+                        "on-tertiary-container": "#862ed4",
+                        "secondary": "#b8c3ff",
+                        "surface-container-highest": "#273647",
+                        "tertiary": "#fff6ff",
+                        "tertiary-container": "#ecd3ff",
+                        "on-secondary-container": "#c6ceff",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-bright": "#2c3a4c",
+                        "surface-variant": "#273647",
+                        "surface-dim": "#051424",
+                        "on-surface-variant": "#b9ccb2",
+                        "outline": "#84967e",
+                        "on-primary": "#003907",
+                        "on-secondary": "#002388",
+                        "surface": "#051424",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-fixed": "#2c0051",
+                        "primary-fixed-dim": "#00e639",
+                        "on-primary-fixed-variant": "#00530e",
+                        "tertiary-fixed": "#f0dbff",
+                        "primary-fixed": "#72ff70",
+                        "primary": "#ebffe2",
+                        "inverse-primary": "#006e16",
+                        "surface-container-low": "#0d1c2d",
+                        "on-tertiary": "#490080",
+                        "on-background": "#d4e4fa",
+                        "on-surface": "#d4e4fa",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "primary-container": "#00ff41",
+                        "on-primary-fixed": "#002203",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#233143",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#010f1f",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary-container": "#007117",
+                        "background": "#051424",
+                        "surface-container-high": "#1c2b3c",
+                        "tertiary-fixed-dim": "#ddb7ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface overflow-hidden">
+<!-- Top Navigation -->
+<header class="flex justify-between items-center w-full px-lane-margin h-16 z-50 fixed top-0 border-b border-outline-variant bg-surface">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="security">security</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tight text-primary-fixed-dim">GOV-ENGINE v4.02</h1>
+<span class="bg-surface-container-highest text-primary-fixed-dim px-2 py-0.5 rounded text-code-xs border border-primary-fixed-dim/30">LATEST_STABLE</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6">
+<a class="text-primary-fixed-dim font-bold font-label-caps text-label-caps" href="#">SCHEMA_EXPLORER</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary-fixed-dim transition-colors" href="#">QUERY_ENGINE</a>
+<a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary-fixed-dim transition-colors" href="#">SHARD_MAP</a>
+</nav>
+<span class="material-symbols-outlined text-primary-fixed-dim cursor-pointer" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="fixed left-0 top-16 bottom-0 z-40 flex flex-col overflow-y-auto border-r border-outline-variant bg-surface-container w-64">
+<div class="p-4 border-b border-outline-variant/30">
+<span class="text-label-caps font-label-caps text-on-surface-variant">ENGINEERING ARTIFACTS</span>
+</div>
+<nav class="flex-1 py-2">
+<!-- Artifact Items -->
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="dashboard">dashboard</span>
+<span class="font-code-sm text-code-sm">Executive Overview</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="account_tree">account_tree</span>
+<span class="font-code-sm text-code-sm">BPMN Swimlane</span>
+</a>
+<a class="bg-surface-container-highest text-primary-fixed-dim border-l-2 border-primary-fixed-dim flex items-center px-4 py-2 gap-3 scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="database">database</span>
+<span class="font-code-sm text-code-sm">Data Model</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="rule">rule</span>
+<span class="font-code-sm text-code-sm">Business Rules</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="api">api</span>
+<span class="font-code-sm text-code-sm">API Contract</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="hub">hub</span>
+<span class="font-code-sm text-code-sm">Event Bus</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="verified_user">verified_user</span>
+<span class="font-code-sm text-code-sm">Security Blueprint</span>
+</a>
+<a class="text-on-surface-variant flex items-center px-4 py-2 opacity-70 hover:bg-surface-bright hover:opacity-100 transition-colors gap-3" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="report_problem">report_problem</span>
+<span class="font-code-sm text-code-sm">Exception Model</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-surface-container-lowest border-t border-outline-variant/20">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">CLUSTER: NGA-W-01</span>
+</div>
+<div class="text-code-xs text-on-surface-variant opacity-50">v4.02.19-BETA</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-8 h-[calc(100vh-64px)] relative overflow-hidden flex flex-col">
+<!-- Visual Telemetry Header -->
+<div class="flex justify-between items-end mb-8 z-10 relative">
+<div>
+<span class="text-label-caps font-label-caps text-on-surface-variant block mb-1">ARTIFACT E // PERSISTENCE</span>
+<h2 class="text-headline-lg font-headline-lg text-primary">DATA PERSISTENCE MODEL</h2>
+</div>
+<div class="flex gap-4">
+<div class="p-3 border border-outline-variant bg-surface-container-low rounded">
+<span class="block text-code-xs text-on-surface-variant mb-1">TPS_LOAD</span>
+<span class="text-headline-md font-code-sm text-primary-fixed-dim">14.2k</span>
+</div>
+<div class="p-3 border border-outline-variant bg-surface-container-low rounded">
+<span class="block text-code-xs text-on-surface-variant mb-1">SHARD_COUNT</span>
+<span class="text-headline-md font-code-sm text-primary-fixed-dim">64</span>
+</div>
+</div>
+</div>
+<!-- Schema Visualization Area -->
+<div class="flex-1 relative overflow-auto border border-outline-variant bg-surface-container-lowest rounded-lg p-12">
+<!-- ERD Diagram Mockup -->
+<div class="grid grid-cols-4 gap-12 relative">
+<!-- ENTITY: Workflow -->
+<div class="bg-surface border border-primary-fixed-dim/40 rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-primary-fixed-dim/10 border-b border-primary-fixed-dim/40 p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim">TBL_WORKFLOW</span>
+<span class="material-symbols-outlined text-xs text-primary-fixed-dim" data-icon="database">database</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">pk_workflow_id</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">tenant_id</span>
+<span class="text-on-surface-variant opacity-50">INT64</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">wf_definition</span>
+<span class="text-on-surface-variant opacity-50">JSONB</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">created_at</span>
+<span class="text-on-surface-variant opacity-50">TS</span>
+</div>
+</div>
+<div class="node-port -right-1 top-1/2 -translate-y-1/2"></div>
+</div>
+<!-- ENTITY: WorkflowExecution -->
+<div class="bg-surface border border-secondary rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-secondary/10 border-b border-secondary p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-secondary">TBL_EXECUTION</span>
+<span class="material-symbols-outlined text-xs text-secondary" data-icon="bolt">bolt</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">pk_exec_id</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">fk_wf_id</span>
+<span class="text-secondary opacity-80">FK</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">status</span>
+<span class="text-on-surface-variant opacity-50">ENUM</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">start_time</span>
+<span class="text-on-surface-variant opacity-50">TS</span>
+</div>
+</div>
+<div class="node-port -left-1 top-1/2 -translate-y-1/2"></div>
+<div class="node-port -right-1 top-1/2 -translate-y-1/2"></div>
+</div>
+<!-- ENTITY: WorkflowStep -->
+<div class="bg-surface border border-outline rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-outline/10 border-b border-outline p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-on-surface">TBL_STEPS</span>
+<span class="material-symbols-outlined text-xs text-on-surface" data-icon="list_alt">list_alt</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">pk_step_id</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">fk_exec_id</span>
+<span class="text-secondary opacity-80">FK</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">step_type</span>
+<span class="text-on-surface-variant opacity-50">VARCHAR</span>
+</div>
+</div>
+<div class="node-port -left-1 top-1/2 -translate-y-1/2"></div>
+<div class="node-port -bottom-1 left-1/2 -translate-x-1/2"></div>
+</div>
+<!-- ENTITY: Automation -->
+<div class="bg-surface border border-on-tertiary-container rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-on-tertiary-container/10 border-b border-on-tertiary-container p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-on-tertiary-container">TBL_AUTOMATION</span>
+<span class="material-symbols-outlined text-xs text-on-tertiary-container" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">pk_auto_id</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">handler_uri</span>
+<span class="text-on-surface-variant opacity-50">TEXT</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">retry_count</span>
+<span class="text-on-surface-variant opacity-50">INT32</span>
+</div>
+</div>
+</div>
+<!-- Row 2 -->
+<!-- ENTITY: Task -->
+<div class="bg-surface border border-outline rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-outline/10 border-b border-outline p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-on-surface">TBL_TASKS</span>
+<span class="material-symbols-outlined text-xs text-on-surface" data-icon="assignment">assignment</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">pk_task_id</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">assigned_to</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+</div>
+<div class="node-port -top-1 left-1/2 -translate-x-1/2"></div>
+</div>
+<!-- ENTITY: Job -->
+<div class="bg-surface border border-outline rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-outline/10 border-b border-outline p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-on-surface">TBL_JOBS</span>
+<span class="material-symbols-outlined text-xs text-on-surface" data-icon="work">work</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">pk_job_id</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">priority</span>
+<span class="text-on-surface-variant opacity-50">INT16</span>
+</div>
+</div>
+</div>
+<!-- ENTITY: Approval -->
+<div class="bg-surface border border-primary-container rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-primary-container/10 border-b border-primary-container p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-on-primary-container">TBL_APPROVALS</span>
+<span class="material-symbols-outlined text-xs text-on-primary-container" data-icon="how_to_reg">how_to_reg</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">approver_role</span>
+<span class="text-on-surface-variant opacity-50">STRING</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">quorum</span>
+<span class="text-on-surface-variant opacity-50">INT</span>
+</div>
+</div>
+</div>
+<!-- ENTITY: Retry / Exception Logic -->
+<div class="bg-surface border border-error rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-error/10 border-b border-error p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-error">TBL_RETRY_LOG</span>
+<span class="material-symbols-outlined text-xs text-error" data-icon="replay">replay</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">pk_retry_id</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">error_trace</span>
+<span class="text-on-surface-variant opacity-50">TEXT</span>
+</div>
+</div>
+</div>
+<!-- Row 3 -->
+<!-- ENTITY: Compensation -->
+<div class="bg-surface border border-secondary-container rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-secondary-container/10 border-b border-secondary-container p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-secondary-fixed-dim">TBL_COMPENSATION</span>
+<span class="material-symbols-outlined text-xs text-secondary-fixed-dim" data-icon="history">history</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">rollback_action</span>
+<span class="text-on-surface-variant opacity-50">JSON</span>
+</div>
+</div>
+</div>
+<!-- ENTITY: AuditLog -->
+<div class="bg-surface border border-outline-variant rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px] col-span-2">
+<div class="bg-outline-variant/10 border-b border-outline-variant p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-on-surface-variant">TBL_AUDIT_LEDGER</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant" data-icon="description">description</span>
+</div>
+<div class="p-3 grid grid-cols-2 gap-x-4 gap-y-1">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">pk_audit_id</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">actor_id</span>
+<span class="text-on-surface-variant opacity-50">UUID</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">operation_type</span>
+<span class="text-primary-fixed-dim">ENUM</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">ts_sharded</span>
+<span class="text-on-surface-variant opacity-50">BIGINT</span>
+</div>
+</div>
+</div>
+<!-- ENTITY: Notification -->
+<div class="bg-surface border border-outline rounded shadow-2xl relative p-0 overflow-hidden min-w-[220px]">
+<div class="bg-outline/10 border-b border-outline p-2 flex justify-between">
+<span class="text-label-caps font-label-caps text-on-surface">TBL_NOTIFICATIONS</span>
+<span class="material-symbols-outlined text-xs text-on-surface" data-icon="notifications">notifications</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">channel</span>
+<span class="text-on-surface-variant opacity-50">INT</span>
+</div>
+<div class="flex justify-between text-code-sm font-code-sm">
+<span class="text-on-surface">payload</span>
+<span class="text-on-surface-variant opacity-50">BLOB</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Lifecycle Overlay (Right side fixed HUD) -->
+<div class="fixed right-8 top-32 bottom-8 w-80 bg-surface-container-low border border-outline-variant/40 rounded-lg p-6 flex flex-col gap-6">
+<div class="border-b border-outline-variant/30 pb-4">
+<span class="text-label-caps font-label-caps text-primary-fixed-dim mb-2 block">TRANSACTION LIFECYCLE</span>
+<div class="space-y-4">
+<div class="flex items-center gap-4 group">
+<div class="w-8 h-8 rounded border border-primary-container flex items-center justify-center text-primary-container text-xs font-bold bg-primary-container/10">INS</div>
+<div>
+<span class="text-code-sm font-bold block text-on-surface">INSERT</span>
+<span class="text-code-xs text-on-surface-variant">New Step Allocation</span>
+</div>
+</div>
+<div class="flex items-center gap-4 group">
+<div class="w-8 h-8 rounded border border-secondary flex items-center justify-center text-secondary text-xs font-bold bg-secondary/10">UPD</div>
+<div>
+<span class="text-code-sm font-bold block text-on-surface">UPDATE</span>
+<span class="text-code-xs text-on-surface-variant">State Mutation [RUNNING]</span>
+</div>
+</div>
+<div class="flex items-center gap-4 group">
+<div class="w-8 h-8 rounded border border-error flex items-center justify-center text-error text-xs font-bold bg-error/10">DEL</div>
+<div>
+<span class="text-code-sm font-bold block text-on-surface">DELETE</span>
+<span class="text-code-xs text-on-surface-variant">Soft-delete Mark</span>
+</div>
+</div>
+<div class="w-full h-px bg-outline-variant/30 my-4"></div>
+<div class="flex items-center gap-4 group">
+<div class="w-8 h-8 rounded-full border-2 border-dashed border-error flex items-center justify-center text-error text-xs font-bold">RBK</div>
+<div>
+<span class="text-code-sm font-bold block text-error">ROLLBACK</span>
+<span class="text-code-xs text-on-surface-variant">Trigger Compensation TBL</span>
+</div>
+</div>
+<div class="flex items-center gap-4 group">
+<div class="w-8 h-8 rounded-full border-2 border-primary-fixed-dim flex items-center justify-center text-primary-fixed-dim text-xs font-bold bg-primary-fixed-dim/20">CMT</div>
+<div>
+<span class="text-code-sm font-bold block text-primary-fixed-dim">COMMIT</span>
+<span class="text-code-xs text-on-surface-variant">Flush to Shard Ledger</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-3 block">SHARDING STRATEGY</span>
+<div class="bg-surface-container-lowest p-3 rounded border border-outline-variant/20 mb-4">
+<code class="text-code-xs text-primary-fixed-dim">
+                            shard_key = hash(tenant_id) % cluster_size;<br/>
+                            replication_factor = 3;<br/>
+                            consistency = QUORUM;
+                        </code>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-code-xs">
+<span class="text-on-surface-variant">Shard 001-016</span>
+<span class="text-primary-fixed-dim">HEALTHY</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full" style="width: 88%"></div>
+</div>
+<div class="flex justify-between text-code-xs">
+<span class="text-on-surface-variant">Shard 017-032</span>
+<span class="text-primary-fixed-dim">HEALTHY</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full" style="width: 72%"></div>
+</div>
+<div class="flex justify-between text-code-xs">
+<span class="text-on-surface-variant">Shard 033-064</span>
+<span class="text-secondary">BALANCING</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 45%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Orthogonal Connectors (Simulated with CSS) -->
+<svg class="absolute inset-0 pointer-events-none w-full h-full opacity-30 line-grid" xmlns="http://www.w3.org/2000/svg">
+<path d="M 230 180 L 320 180" fill="none" stroke="#b8c3ff" stroke-dasharray="4" stroke-width="2"></path>
+<path d="M 540 180 L 660 180" fill="none" stroke="#84967e" stroke-width="2"></path>
+<path d="M 770 230 L 770 300" fill="none" stroke="#84967e" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Terminal Output / Telemetry Footer -->
+<footer class="mt-6 bg-surface-container-lowest border border-outline-variant p-4 flex gap-8 items-center rounded">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="terminal">terminal</span>
+<span class="text-code-xs text-on-surface-variant font-code-sm">SYSTEM_READY :: Connection established to NGA-PERSISTENCE-GRID</span>
+</div>
+<div class="flex-1 h-2 flex gap-1 items-center">
+<div class="h-1 bg-primary-fixed-dim/20 flex-1 relative overflow-hidden">
+<div class="absolute inset-y-0 left-0 bg-primary-fixed-dim w-1/3 animate-[pulse_2s_infinite]"></div>
+</div>
+</div>
+<div class="flex gap-6 text-code-xs font-label-caps">
+<span class="text-on-surface-variant">DB_VERSION: PG_16.4_SHARDED</span>
+<span class="text-on-surface-variant">LATENCY: <span class="text-primary-fixed-dim">1.2ms</span></span>
+<span class="text-on-surface-variant">IOPS: <span class="text-primary-fixed-dim">442,000</span></span>
+</div>
+</footer>
+</main>
+<script>
+        // Simple interactive simulation for the lifecycle highlights
+        document.querySelectorAll('.group').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                const action = el.querySelector('.text-code-sm').innerText;
+                console.log(`[TELEMETRY] Highlighting data path for: ${action}`);
+            });
+        });
+
+        // Dynamic terminal text
+        const terminalTexts = [
+            "PRAGMA foreign_keys = ON;",
+            "SELECT * FROM tbl_execution WHERE status = 'PENDING';",
+            "BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;",
+            "COMMIT; -- Flush 12.4k rows to Shard 04",
+            "VACUUM ANALYZE tbl_audit_ledger;",
+            "ROLLBACK TO SAVEPOINT sp_step_04;"
+        ];
+        const termElement = document.querySelector('footer span.text-on-surface-variant');
+        let index = 0;
+        setInterval(() => {
+            index = (index + 1) % terminalTexts.length;
+            termElement.innerText = `SYSTEM_READY :: ${terminalTexts[index]}`;
+        }, 4000);
+    </script>
+</body></html>

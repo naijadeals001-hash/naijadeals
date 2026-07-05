@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LOGIC-OS | EVENT BUS MAP WF-042</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-pulse {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { border-color: #3b4b37; box-shadow: 0 0 0px rgba(0, 230, 57, 0); }
+            50% { border-color: #00e639; box-shadow: 0 0 10px rgba(0, 230, 57, 0.2); }
+        }
+        .terminal-scroll::-webkit-scrollbar { width: 4px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: #010f1f; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #122131; border-radius: 2px; }
+        .connector-flow {
+            stroke-dasharray: 8;
+            animation: flow 20s linear infinite;
+        }
+        @keyframes flow {
+            to { stroke-dashoffset: -200; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#051424",
+                        "background": "#051424",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-lowest": "#010f1f",
+                        "on-tertiary-fixed": "#2c0051",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary-fixed": "#dde1ff",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#0043eb",
+                        "on-surface": "#d4e4fa",
+                        "surface-tint": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "on-error-container": "#ffdad6",
+                        "tertiary": "#fff6ff",
+                        "outline": "#84967e",
+                        "on-tertiary": "#490080",
+                        "outline-variant": "#3b4b37",
+                        "on-primary-container": "#007117",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "primary-container": "#00ff41",
+                        "on-surface-variant": "#b9ccb2",
+                        "surface-dim": "#051424",
+                        "inverse-primary": "#006e16",
+                        "primary-fixed": "#72ff70",
+                        "on-secondary-fixed": "#001356",
+                        "on-secondary-container": "#c6ceff",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "primary": "#ebffe2",
+                        "surface-variant": "#273647",
+                        "on-error": "#690005",
+                        "surface-container-low": "#0d1c2d",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary": "#002388",
+                        "surface-container-high": "#1c2b3c",
+                        "on-primary": "#003907",
+                        "primary-fixed-dim": "#00e639",
+                        "on-primary-fixed-variant": "#00530e",
+                        "tertiary-fixed": "#f0dbff",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "inverse-on-surface": "#233143",
+                        "surface-container": "#122131",
+                        "surface-bright": "#2c3a4c",
+                        "on-primary-fixed": "#002203",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-background": "#d4e4fa",
+                        "error-container": "#93000a",
+                        "secondary": "#b8c3ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "4px",
+                        "lane-margin": "32px",
+                        "node-gutter": "24px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex items-center justify-between px-lane-margin h-16 w-full bg-surface border-b border-outline-variant z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-surface-tint" style="font-variation-settings: 'FILL' 1;">memory</span>
+<div class="flex flex-col">
+<h1 class="font-headline-md text-headline-md font-bold text-primary leading-none">ENGINEERING ATLAS | LOGIC-OS</h1>
+<span class="font-label-caps text-label-caps text-surface-tint tracking-tighter">ARTIFACT F: EVENT_BUS_MAP_V4</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4 font-code-sm text-on-surface-variant">
+<span class="hover:bg-surface-container-highest transition-colors px-2 py-1 cursor-pointer">LATENCY: 45ms</span>
+<span class="hover:bg-surface-container-highest transition-colors px-2 py-1 cursor-pointer">HIT_RATE: 98.2%</span>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 font-label-caps rounded active:scale-95 duration-100 transition-all">
+                SYS: ACTIVE
+            </button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="hidden lg:flex flex-col h-full w-64 bg-surface-container-low border-r border-outline-variant py-grid-unit">
+<div class="px-4 py-2 mb-4">
+<h2 class="font-label-caps text-label-caps text-surface-tint">KNOWLEDGE_GRAPH_INDEX</h2>
+</div>
+<nav class="flex-1 overflow-y-auto space-y-1 px-2">
+<!-- Navigation Items map to JSON Artifacts -->
+<a class="flex items-center gap-3 px-3 py-2 font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">account_tree</span> Artifact A
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">database</span> Artifact B
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">schema</span> Artifact C
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">hub</span> Artifact D
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">grain</span> Artifact E
+                </a>
+<!-- ACTIVE Artifact F -->
+<a class="flex items-center gap-3 px-3 py-2 font-code-sm bg-secondary-container text-on-secondary-container border-l-2 border-surface-tint transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">query_stats</span> Artifact F
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">settings_input_component</span> Artifact G
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 font-code-sm text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">polyline</span> Artifact H
+                </a>
+</nav>
+<div class="p-4 border-t border-outline-variant">
+<div class="bg-surface-container-highest p-3 rounded">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-surface-tint">MEMORY_USAGE</span>
+<span class="font-code-xs text-on-surface-variant">64%</span>
+</div>
+<div class="w-full bg-surface h-1 rounded-full overflow-hidden">
+<div class="bg-surface-tint h-full w-[64%]"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content (The Canvas) -->
+<main class="flex-1 relative bg-surface-container-lowest overflow-hidden flex flex-col">
+<!-- Map Toolbar -->
+<div class="absolute top-4 left-4 z-10 flex gap-2">
+<button class="bg-surface p-2 border border-outline-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">zoom_in</span>
+</button>
+<button class="bg-surface p-2 border border-outline-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">zoom_out</span>
+</button>
+<button class="bg-surface p-2 border border-outline-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">center_focus_weak</span>
+</button>
+</div>
+<div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
+<div class="bg-surface p-3 border border-outline-variant flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-surface-tint animate-pulse"></div>
+<span class="font-code-sm text-on-surface">STREAMING_LIVE</span>
+</div>
+</div>
+<!-- SVG Workflow Layer -->
+<div class="flex-1 overflow-auto p-12 relative cursor-grab active:cursor-grabbing">
+<svg class="absolute top-0 left-0 w-[1200px] h-[800px]" style="pointer-events: none;">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#84967e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker></defs>
+<!-- Primary Connection: Storage -> Automation -->
+<path class="connector-flow" d="M 280 200 L 400 200 L 400 350 L 500 350" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Primary Connection: Automation -> Output -->
+<path class="connector-flow" d="M 700 350 L 850 350" fill="none" marker-end="url(#arrowhead)" stroke="#00e639" stroke-width="2"></path>
+<!-- Error Path: Automation -> DLQ -->
+<path d="M 600 400 L 600 600 L 850 600" fill="none" marker-end="url(#arrowhead)" stroke="#ffb4ab" stroke-dasharray="5,5" stroke-width="2"></path>
+<!-- Feedback Path -->
+<path d="M 900 380 L 900 500 L 200 500 L 200 240" fill="none" stroke="#b8c3ff" stroke-dasharray="2,2" stroke-width="1"></path>
+</svg>
+<div class="relative w-[1200px] h-[800px]">
+<!-- Node 1: MemoryStored -->
+<div class="absolute top-[160px] left-[80px] w-48 bg-surface border border-outline-variant p-grid-unit node-pulse">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-surface-tint">EVENT_SOURCE</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant">database</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary mb-1">MemoryStored</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Payload: JSON_BUFFER_B42</p>
+<div class="mt-2 flex gap-1">
+<span class="w-1.5 h-1.5 bg-surface-tint"></span>
+<span class="w-1.5 h-1.5 bg-surface-tint opacity-50"></span>
+<span class="w-1.5 h-1.5 bg-surface-tint opacity-20"></span>
+</div>
+</div>
+<!-- Node 2: KnowledgeUpdated -->
+<div class="absolute top-[310px] left-[500px] w-56 bg-surface border border-surface-tint p-grid-unit">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-secondary-container bg-secondary-container px-1">n8n_WORKFLOW</span>
+<span class="material-symbols-outlined text-sm text-surface-tint" style="font-variation-settings: 'FILL' 1;">automation</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary mb-1">KnowledgeUpdated</h3>
+<div class="space-y-1 border-t border-outline-variant pt-2 mt-2">
+<div class="flex justify-between font-code-xs">
+<span class="text-on-surface-variant">Node_ID:</span>
+<span class="text-secondary">W-Trig_09</span>
+</div>
+<div class="flex justify-between font-code-xs">
+<span class="text-on-surface-variant">Status:</span>
+<span class="text-surface-tint">LISTENING</span>
+</div>
+</div>
+</div>
+<!-- Node 3: ContextLoaded (Destination) -->
+<div class="absolute top-[310px] left-[850px] w-48 bg-surface border border-outline-variant p-grid-unit">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">DESTINATION</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant">input</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-primary mb-1">ContextLoaded</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Receiver: CORE_ENGINE_V2</p>
+</div>
+<!-- Node 4: DLQ Routing -->
+<div class="absolute top-[560px] left-[850px] w-48 bg-surface border border-error p-grid-unit">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-error">DEAD_LETTER_Q</span>
+<span class="material-symbols-outlined text-sm text-error">dangerous</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-error-container mb-1">RetryExceeded</h3>
+<div class="mt-2 py-1 bg-error-container text-on-error-container text-[9px] font-code-xs px-2 rounded-sm">
+                            AUTH_TOKEN_EXPIRED (401)
+                        </div>
+</div>
+</div>
+</div>
+<!-- Terminal Console Stub -->
+<div class="h-48 bg-surface-container-lowest border-t border-outline-variant flex flex-col font-code-xs overflow-hidden">
+<div class="flex items-center justify-between px-4 py-1.5 bg-surface-container-low border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="w-2 h-2 rounded-full bg-surface-tint"></span>
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="ml-2 font-label-caps text-on-surface-variant text-[10px]">EVENT_LOG_STREAM_WF_042</span>
+</div>
+<div class="flex gap-4 text-on-surface-variant text-[10px]">
+<span>LOGS: 2,401</span>
+<span>ERRORS: 0.04%</span>
+<span class="material-symbols-outlined text-sm">filter_list</span>
+</div>
+</div>
+<div class="flex-1 p-4 terminal-scroll overflow-y-auto space-y-1 font-code-xs text-on-surface-variant" id="terminal-content">
+<div class="flex gap-4">
+<span class="text-surface-tint">[14:02:41]</span>
+<span class="text-secondary">INF:</span>
+<span>[Bus] MemoryStored received from Agent_Alpha</span>
+</div>
+<div class="flex gap-4">
+<span class="text-surface-tint">[14:02:42]</span>
+<span class="text-secondary">INF:</span>
+<span>[n8n] Triggering workflow W-Trig_09... SUCCESS</span>
+</div>
+<div class="flex gap-4">
+<span class="text-surface-tint">[14:02:42]</span>
+<span class="text-secondary">INF:</span>
+<span>[Bus] Event KnowledgeUpdated published (CorrelationID: 449x-z)</span>
+</div>
+<div class="flex gap-4">
+<span class="text-surface-tint">[14:02:43]</span>
+<span class="text-error">WRN:</span>
+<span class="text-error">DLQ routing threshold reached for node W-Trig_07</span>
+</div>
+<div class="flex gap-4">
+<span class="text-surface-tint">[14:02:44]</span>
+<span class="text-secondary">INF:</span>
+<span>[Bus] ContextLoaded received by CORE_ENGINE</span>
+</div>
+<!-- Additional lines for scrolling effect -->
+<div class="flex gap-4 opacity-50">
+<span class="text-surface-tint">[14:02:45]</span>
+<span class="text-secondary">INF:</span>
+<span>[Log] Heartbeat received from DLQ_COLLECTOR</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="flex justify-between items-center px-lane-margin py-stack-gap h-10 w-full bg-surface-container-lowest border-t border-outline-variant z-50">
+<span class="font-label-caps text-label-caps text-on-surface">SYSTEM_TELEMETRY_V2.4</span>
+<div class="flex gap-6 font-code-xs text-surface-tint">
+<span class="hover:text-primary cursor-crosshair transition-colors">LATENCY: 45ms</span>
+<span class="hover:text-primary cursor-crosshair transition-colors">HIT_RATE: 98.2%</span>
+<span class="hover:text-primary cursor-crosshair transition-colors">EMBED_DEPTH: 1536</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Auto-scrolling terminal and random log injection
+        const terminal = document.getElementById('terminal-content');
+        const eventTypes = ['MemoryStored', 'KnowledgeUpdated', 'ContextLoaded', 'EventBusSync'];
+        const actors = ['Agent_Alpha', 'n8n_Worker_01', 'Core_Index', 'Storage_A'];
+
+        setInterval(() => {
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const event = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+            const actor = actors[Math.floor(Math.random() * actors.length)];
+            
+            const div = document.createElement('div');
+            div.className = 'flex gap-4 animate-in fade-in slide-in-from-left-2 duration-300';
+            div.innerHTML = `
+                <span class="text-surface-tint">[${time}]</span>
+                <span class="text-secondary">INF:</span>
+                <span>[Log] ${event} processed by ${actor}</span>
+            `;
+            
+            terminal.appendChild(div);
+            if (terminal.childNodes.length > 20) terminal.removeChild(terminal.firstChild);
+            terminal.scrollTop = terminal.scrollHeight;
+        }, 3000);
+
+        // Simple draggable canvas simulation logic would go here
+    </script>
+</body></html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AURA_CORE_ROUTER_V1.0 | DATA_PERSISTENCE_MODEL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(39, 54, 71, 0.3) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .node-connector-line {
+            stroke: #00ff41;
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .node-connector-line-dashed {
+            stroke: #84967e;
+            stroke-width: 1;
+            stroke-dasharray: 4;
+            fill: none;
+        }
+        .blueprint-clip {
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #273647;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#2c0051",
+                      "surface-dim": "#051424",
+                      "primary-container": "#00ff41",
+                      "tertiary-fixed": "#f0dbff",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "secondary-container": "#0043eb",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-primary-fixed": "#002203",
+                      "on-primary": "#003907",
+                      "error-container": "#93000a",
+                      "on-secondary-fixed": "#001356",
+                      "tertiary-container": "#ecd3ff",
+                      "on-secondary": "#002388",
+                      "surface-variant": "#273647",
+                      "surface-container": "#122131",
+                      "on-surface": "#d4e4fa",
+                      "secondary-fixed": "#dde1ff",
+                      "surface-container-lowest": "#010f1f",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "on-secondary-container": "#c6ceff",
+                      "background": "#051424",
+                      "on-tertiary-container": "#862ed4",
+                      "inverse-primary": "#006e16",
+                      "inverse-on-surface": "#233143",
+                      "primary-fixed": "#72ff70",
+                      "surface-tint": "#00e639",
+                      "inverse-surface": "#d4e4fa",
+                      "secondary": "#b8c3ff",
+                      "on-tertiary": "#490080",
+                      "surface-container-low": "#0d1c2d",
+                      "surface": "#051424",
+                      "primary": "#ebffe2",
+                      "tertiary": "#fff6ff",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-background": "#d4e4fa",
+                      "on-error": "#690005",
+                      "surface-container-highest": "#273647",
+                      "primary-fixed-dim": "#00e639",
+                      "error": "#ffb4ab",
+                      "surface-bright": "#2c3a4c",
+                      "outline-variant": "#3b4b37",
+                      "surface-container-high": "#1c2b3c",
+                      "outline": "#84967e",
+                      "on-primary-container": "#007117",
+                      "on-error-container": "#ffdad6",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-secondary-fixed-variant": "#0035be"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "grid-unit": "8px",
+                      "node-gutter": "24px",
+                      "stack-gap": "4px",
+                      "lane-margin": "32px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-xs": ["JetBrains Mono"],
+                      "label-caps": ["JetBrains Mono"],
+                      "code-sm": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-surface custom-scrollbar overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center w-full px-grid-unit h-16 bg-surface-container-lowest border-b border-surface-variant fixed top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim uppercase">AURA_CORE_ROUTER_V1.0</h1>
+</div>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="font-code-sm text-code-sm text-primary-fixed-dim border-b-2 border-primary-fixed-dim py-5 px-1 cursor-pointer" href="#">PERSISTENCE_LAYER</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-variant transition-colors py-1 px-3 rounded" href="#">SCHEMA_GRAPH</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-variant transition-colors py-1 px-3 rounded" href="#">LOG_STREAMS</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end mr-4">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">DB_LATENCY: 12ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">NODE_01: ACTIVE</span>
+</div>
+<button class="material-symbols-outlined text-primary-fixed-dim hover:bg-surface-variant p-2 rounded transition-colors" data-icon="settings_input_component">settings_input_component</button>
+</div>
+</header>
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 h-screen w-64 border-r border-surface-variant bg-surface-container pt-20">
+<div class="px-6 py-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">SYSTEM_ARCH</h2>
+<div class="h-1 w-12 bg-primary-container mt-1"></div>
+</div>
+<nav class="flex-1 space-y-1 mt-4">
+<a class="flex items-center gap-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary-container px-4 py-3 font-code-sm text-code-sm uppercase transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+                Topology
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 font-code-sm text-code-sm uppercase hover:bg-surface-container-high hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+                Agent_Market
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 font-code-sm text-code-sm uppercase hover:bg-surface-container-high hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dynamic_feed">dynamic_feed</span>
+                Task_Execution
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 font-code-sm text-code-sm uppercase hover:bg-surface-container-high hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+                Vector_Memory
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 font-code-sm text-code-sm uppercase hover:bg-surface-container-high hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+                Zero_Trust
+            </a>
+</nav>
+<div class="p-4 border-t border-surface-variant bg-surface-container-lowest">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-on-surface">VECTOR_SYNC: 99.8%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 overflow-hidden">
+<div class="bg-primary-container h-full w-[99%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-lane-margin flex flex-col gap-8 min-h-screen">
+<!-- Header Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary uppercase">Artifact E: Data Persistence Model</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Core relational schema mapping for AI Agent storage and execution state.</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-high p-4 border border-surface-variant flex flex-col min-w-[140px]">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">I/O Load</span>
+<span class="font-headline-md text-headline-md text-primary-container">4.2 GB/s</span>
+</div>
+<div class="bg-surface-container-high p-4 border border-surface-variant flex flex-col min-w-[140px]">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Health Index</span>
+<span class="font-headline-md text-headline-md text-on-secondary-container">99.9%</span>
+</div>
+</div>
+</section>
+<!-- Schema Mapping & Metrics Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1">
+<!-- Left Panel: Operations & Relationships -->
+<div class="lg:col-span-1 flex flex-col gap-6">
+<!-- Operations Terminal -->
+<div class="bg-surface-container-lowest border border-surface-variant p-4 flex flex-col h-fit">
+<h3 class="font-label-caps text-label-caps text-primary-fixed-dim mb-4 border-b border-surface-variant pb-2 uppercase">DATA_OPS_CONTROL</h3>
+<div class="space-y-3">
+<button class="w-full flex items-center justify-between font-code-sm text-code-sm p-2 bg-surface-container hover:bg-surface-variant transition-colors border-l-2 border-primary-container">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]" data-icon="add_box">add_box</span> INSERT</span>
+<span class="text-on-surface-variant text-[10px]">CMD+N</span>
+</button>
+<button class="w-full flex items-center justify-between font-code-sm text-code-sm p-2 bg-surface-container hover:bg-surface-variant transition-colors border-l-2 border-secondary-container">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]" data-icon="edit_square">edit_square</span> UPDATE</span>
+<span class="text-on-surface-variant text-[10px]">CMD+E</span>
+</button>
+<button class="w-full flex items-center justify-between font-code-sm text-code-sm p-2 bg-surface-container hover:bg-surface-variant transition-colors border-l-2 border-error-container">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]" data-icon="delete_forever">delete_forever</span> DELETE</span>
+<span class="text-on-surface-variant text-[10px]">CMD+D</span>
+</button>
+<button class="w-full flex items-center justify-between font-code-sm text-code-sm p-2 bg-surface-container hover:bg-surface-variant transition-colors border-l-2 border-outline">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]" data-icon="archive">archive</span> ARCHIVE</span>
+<span class="text-on-surface-variant text-[10px]">CMD+A</span>
+</button>
+</div>
+</div>
+<!-- Relationship Legend -->
+<div class="bg-surface-container-lowest border border-surface-variant p-4 flex flex-col">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 uppercase">RELATION_LEGEND</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<div class="w-8 h-0.5 bg-primary-container"></div>
+<span class="font-code-sm text-code-sm">1:N (Direct Owner)</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-0.5 border-t border-dashed border-primary-container"></div>
+<span class="font-code-sm text-code-sm">M:N (Shared Association)</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-0.5 border-t-2 border-secondary-container"></div>
+<span class="font-code-sm text-code-sm">M:N (Foreign Key Junction)</span>
+</div>
+</div>
+</div>
+<!-- Performance Card -->
+<div class="bg-surface-container-lowest border border-surface-variant p-4 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase">QUERY_LATENCY</h3>
+<span class="material-symbols-outlined text-primary-fixed-dim text-[18px]" data-icon="insights">insights</span>
+</div>
+<div class="h-24 w-full bg-surface-container relative overflow-hidden flex items-end px-1 gap-1">
+<div class="flex-1 bg-primary-container opacity-20 h-[40%]"></div>
+<div class="flex-1 bg-primary-container opacity-30 h-[60%]"></div>
+<div class="flex-1 bg-primary-container opacity-50 h-[45%]"></div>
+<div class="flex-1 bg-primary-container opacity-40 h-[70%]"></div>
+<div class="flex-1 bg-primary-container h-[55%]"></div>
+<div class="flex-1 bg-primary-container opacity-60 h-[85%]"></div>
+<div class="flex-1 bg-primary-container opacity-20 h-[30%]"></div>
+<div class="flex-1 bg-primary-container opacity-40 h-[50%]"></div>
+</div>
+<div class="flex justify-between font-code-xs text-code-xs text-on-surface-variant">
+<span>P95: 14.2ms</span>
+<span>AVG: 8.7ms</span>
+</div>
+</div>
+</div>
+<!-- Center/Right Panel: Schema Visualization (Bento Grid) -->
+<div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Entity Node: Agent -->
+<div class="bg-[#0F0F0F] border border-primary-container p-4 blueprint-clip hover:bg-surface-container-lowest transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-primary-container px-2 py-0.5 text-on-primary font-label-caps text-[10px]">ENTITY: AGENT</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">UUID_V4</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-primary mb-2">agent_master_record</h4>
+<ul class="space-y-1 font-code-xs text-code-xs text-on-surface-variant">
+<li class="flex justify-between"><span class="text-primary-container">PK</span> id: string</li>
+<li class="flex justify-between"><span>FK</span> org_id: string</li>
+<li>name: varchar(255)</li>
+<li>status: enum</li>
+<li>created_at: timestamp</li>
+</ul>
+<div class="mt-4 pt-2 border-t border-surface-variant flex justify-end">
+<span class="material-symbols-outlined text-primary-fixed-dim opacity-50 group-hover:opacity-100 transition-opacity" data-icon="link">link</span>
+</div>
+</div>
+<!-- Entity Node: Task -->
+<div class="bg-[#0F0F0F] border border-secondary-container p-4 blueprint-clip hover:bg-surface-container-lowest transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-secondary-container px-2 py-0.5 text-on-secondary font-label-caps text-[10px]">ENTITY: TASK</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">1:N RELATION</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-secondary-fixed-dim mb-2">task_definition</h4>
+<ul class="space-y-1 font-code-xs text-code-xs text-on-surface-variant">
+<li class="flex justify-between"><span class="text-secondary-fixed-dim">PK</span> task_id: uuid</li>
+<li class="flex justify-between"><span class="text-primary-container">FK</span> agent_id: uuid</li>
+<li>priority: int</li>
+<li>payload: jsonb</li>
+</ul>
+</div>
+<!-- Entity Node: Execution -->
+<div class="bg-[#0F0F0F] border border-surface-variant p-4 blueprint-clip hover:bg-surface-container-lowest transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-surface-variant px-2 py-0.5 text-on-surface font-label-caps text-[10px]">ENTITY: EXECUTION</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">LOGS_ENABLED</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">execution_runtime_state</h4>
+<ul class="space-y-1 font-code-xs text-code-xs text-on-surface-variant">
+<li class="flex justify-between"><span>PK</span> exec_id: uuid</li>
+<li class="flex justify-between"><span class="text-secondary-fixed-dim">FK</span> task_id: uuid</li>
+<li>latency_ms: float</li>
+<li>outcome: bit</li>
+</ul>
+</div>
+<!-- Entity Node: Memory (Vector) -->
+<div class="md:col-span-2 bg-[#0F0F0F] border-2 border-primary-container p-4 blueprint-clip relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none">
+
+</div>
+<div class="flex justify-between items-start mb-4">
+<div class="bg-primary-container px-2 py-0.5 text-on-primary font-label-caps text-[10px]">ENTITY: VECTOR_MEMORY</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">HNSW_INDEXED</span>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div>
+<h4 class="font-code-sm text-code-sm text-primary mb-2">vector_store_node</h4>
+<ul class="space-y-1 font-code-xs text-code-xs text-on-surface-variant">
+<li class="flex justify-between"><span class="text-primary-container">PK</span> memory_id: uuid</li>
+<li class="flex justify-between"><span class="text-primary-container">FK</span> agent_id: uuid</li>
+<li>embedding: float[1536]</li>
+<li>metadata: jsonb</li>
+</ul>
+</div>
+<div class="flex flex-col justify-end gap-2">
+<div class="text-[10px] text-on-surface-variant font-code-sm uppercase">Storage Capacity</div>
+<div class="h-2 w-full bg-surface-container">
+<div class="bg-primary-container h-full w-[64%]"></div>
+</div>
+<div class="flex justify-between text-[9px] text-primary-container font-code-sm">
+<span>USED: 2.1TB</span>
+<span>REMAINING: 1.2TB</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Entity Node: Context -->
+<div class="bg-[#0F0F0F] border border-outline p-4 blueprint-clip group">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-outline px-2 py-0.5 text-on-surface-variant font-label-caps text-[10px]">ENTITY: CONTEXT</div>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">session_context</h4>
+<ul class="space-y-1 font-code-xs text-code-xs text-on-surface-variant">
+<li>context_key: varchar</li>
+<li>ttl: interval</li>
+<li>layer: int</li>
+</ul>
+</div>
+<!-- Entity Node: Tool & Permissions (Junction) -->
+<div class="md:col-span-3 bg-surface-container-low border border-surface-variant p-4 flex flex-col md:flex-row gap-6">
+<div class="flex-1">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-tertiary-container px-2 py-0.5 text-on-tertiary font-label-caps text-[10px]">ENTITY: TOOL</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">M:N SCHEMA</span>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">capabilities_registry</h4>
+<ul class="space-y-1 font-code-xs text-code-xs text-on-surface-variant">
+<li>tool_name: string</li>
+<li>api_endpoint: url</li>
+<li>auth_method: string</li>
+</ul>
+</div>
+<div class="flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-4xl" data-icon="sync_alt">sync_alt</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-error-container px-2 py-0.5 text-on-error-container font-label-caps text-[10px]">ENTITY: PERMISSION</div>
+</div>
+<h4 class="font-code-sm text-code-sm text-on-surface mb-2">access_control_list</h4>
+<ul class="space-y-1 font-code-xs text-code-xs text-on-surface-variant">
+<li>role_id: uuid</li>
+<li>grant_level: int</li>
+<li>is_revoked: boolean</li>
+</ul>
+</div>
+</div>
+<!-- AuditLog & Conversation Row -->
+<div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-[#0F0F0F] border border-surface-variant p-4 blueprint-clip">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-4 uppercase">SYSTEM_AUDIT_LOG</h4>
+<div class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
+<div class="flex gap-3 font-code-xs text-code-xs border-b border-surface-container py-1">
+<span class="text-primary-container">14:02:11</span>
+<span class="text-on-surface">[INSERT]</span>
+<span class="text-on-surface-variant">AGENT_ID::49fa..</span>
+</div>
+<div class="flex gap-3 font-code-xs text-code-xs border-b border-surface-container py-1">
+<span class="text-primary-container">14:02:15</span>
+<span class="text-error">[DELETE]</span>
+<span class="text-on-surface-variant">TASK_ID::88bb..</span>
+</div>
+<div class="flex gap-3 font-code-xs text-code-xs border-b border-surface-container py-1">
+<span class="text-primary-container">14:02:19</span>
+<span class="text-secondary-fixed-dim">[UPDATE]</span>
+<span class="text-on-surface-variant">PERM_ACL::ROOT</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-surface-variant p-4">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="forum">forum</span>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant uppercase">CONVERSATION_THREAD</h4>
+</div>
+<div class="p-3 bg-surface-container rounded border border-surface-variant font-code-xs text-code-xs text-on-surface-variant italic">
+                            "Tracking thread 12-B for Agent 'Atlas'. Retention policy: 30D. Archive ready."
+                        </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Dynamic Overlay / Tooltip Mockup (Micro-Telemetry) -->
+<div class="fixed bottom-10 right-10 bg-surface-container-highest border border-primary-container p-3 font-code-xs text-code-xs shadow-xl hidden" id="telemetry-toast">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container" data-icon="bolt">bolt</span>
+<span>SCHEMA_RE-SYNC_DETECTED: [OK]</span>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center bg-surface-container-low z-50 px-lane-margin h-12 border-t border-surface-variant">
+<span class="material-symbols-outlined text-on-surface-variant opacity-60 active:scale-95 transition-transform" data-icon="analytics">analytics</span>
+<span class="material-symbols-outlined text-primary-fixed-dim scale-110 active:scale-95 transition-transform" data-icon="receipt_long">receipt_long</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-60 active:scale-95 transition-transform" data-icon="memory">memory</span>
+<span class="material-symbols-outlined text-on-surface-variant opacity-60 active:scale-95 transition-transform" data-icon="account_tree">account_tree</span>
+</nav>
+<script>
+        // Micro-Interaction: Simple Telemetry Toast Toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const toast = document.getElementById('telemetry-toast');
+            
+            setInterval(() => {
+                toast.classList.toggle('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 3000);
+            }, 15000);
+
+            // Interaction for entities
+            const nodes = document.querySelectorAll('.blueprint-clip');
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', () => {
+                    node.style.borderColor = '#72ff70';
+                    node.style.transform = 'translateY(-2px)';
+                });
+                node.addEventListener('mouseleave', () => {
+                    node.style.transform = 'translateY(0)';
+                    // Revert to original based on context if needed
+                    if(!node.classList.contains('border-primary-container')) {
+                         node.style.borderColor = '';
+                    }
+                });
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-039: Artifact K — Developer Implementation Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#2c0051",
+                    "surface-dim": "#051424",
+                    "primary-container": "#00ff41",
+                    "tertiary-fixed": "#f0dbff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "secondary-container": "#0043eb",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-primary-fixed": "#002203",
+                    "on-primary": "#003907",
+                    "error-container": "#93000a",
+                    "on-secondary-fixed": "#001356",
+                    "tertiary-container": "#ecd3ff",
+                    "on-secondary": "#002388",
+                    "surface-variant": "#273647",
+                    "surface-container": "#122131",
+                    "on-surface": "#d4e4fa",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-container-lowest": "#010f1f",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-secondary-container": "#c6ceff",
+                    "background": "#051424",
+                    "on-tertiary-container": "#862ed4",
+                    "inverse-primary": "#006e16",
+                    "inverse-on-surface": "#233143",
+                    "primary-fixed": "#72ff70",
+                    "surface-tint": "#00e639",
+                    "inverse-surface": "#d4e4fa",
+                    "secondary": "#b8c3ff",
+                    "on-tertiary": "#490080",
+                    "surface-container-low": "#0d1c2d",
+                    "surface": "#051424",
+                    "primary": "#ebffe2",
+                    "tertiary": "#fff6ff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-background": "#d4e4fa",
+                    "on-error": "#690005",
+                    "surface-container-highest": "#273647",
+                    "primary-fixed-dim": "#00e639",
+                    "error": "#ffb4ab",
+                    "surface-bright": "#2c3a4c",
+                    "outline-variant": "#3b4b37",
+                    "surface-container-high": "#1c2b3c",
+                    "outline": "#84967e",
+                    "on-primary-container": "#007117",
+                    "on-error-container": "#ffdad6",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-secondary-fixed-variant": "#0035be"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "grid-unit": "8px",
+                    "node-gutter": "24px",
+                    "stack-gap": "4px",
+                    "lane-margin": "32px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(circle, rgba(39, 54, 71, 0.2) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #273647;
+        }
+        .glow-border {
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.05);
+        }
+        .code-block {
+            background-color: #010f1f;
+            border-left: 2px solid #00e639;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- Top Navigation Anchor -->
+<header class="flex justify-between items-center w-full px-grid-unit h-16 bg-surface-container-lowest border-b border-surface-variant z-50 fixed top-0 left-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim">AURA_CORE_ROUTER_V1.0</h1>
+</div>
+<div class="hidden md:flex gap-6 items-center">
+<a class="font-code-sm text-code-sm text-primary-fixed-dim border-b-2 border-primary-fixed-dim py-1" href="#">SPEC_DOCUMENT</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-1" href="#">RUNTIME_LOGS</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:bg-surface-variant transition-colors px-2 py-1" href="#">DEPLOY_V3</a>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80">settings_input_component</button>
+</header>
+<!-- Side Navigation Shell -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 bg-surface-container border-r border-surface-variant w-64 pt-16 hidden md:flex">
+<div class="p-4 border-b border-surface-variant">
+<h2 class="font-headline-md text-headline-md text-on-surface">SYSTEM_ARCH</h2>
+<p class="font-code-xs text-code-xs text-on-surface-variant opacity-60">REL_TAG: STABLE-039</p>
+</div>
+<nav class="flex-1 overflow-y-auto custom-scrollbar mt-2">
+<div class="font-code-sm text-code-sm uppercase text-on-surface-variant px-4 py-3 hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined">account_tree</span> Topology
+            </div>
+<div class="bg-secondary-container text-on-secondary-container border-l-4 border-primary-container px-4 py-3 font-code-sm text-code-sm uppercase flex items-center gap-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hub</span> Agent_Market
+            </div>
+<div class="font-code-sm text-code-sm uppercase text-on-surface-variant px-4 py-3 hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined">dynamic_feed</span> Task_Execution
+            </div>
+<div class="font-code-sm text-code-sm uppercase text-on-surface-variant px-4 py-3 hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined">database</span> Vector_Memory
+            </div>
+<div class="font-code-sm text-code-sm uppercase text-on-surface-variant px-4 py-3 hover:bg-surface-container-high hover:text-primary transition-all cursor-pointer flex items-center gap-3">
+<span class="material-symbols-outlined">security</span> Zero_Trust
+            </div>
+</nav>
+<div class="p-4 border-t border-surface-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-code-xs text-code-xs text-primary-container">CLUSTER_READY</span>
+</div>
+<div class="text-[10px] font-code-xs opacity-40">node-ap-northeast-1-vsh</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-16 pb-12 h-screen overflow-y-auto custom-scrollbar">
+<div class="p-lane-margin max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="mb-8 border-b border-surface-variant pb-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-on-primary-fixed-variant text-primary-fixed font-code-xs text-code-xs rounded">V1.0-K</span>
+<span class="text-on-surface-variant font-code-xs text-code-xs uppercase tracking-widest">SPECIFICATION // MANDATORY</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">WF-039: Artifact K — Developer Implementation Guide</h1>
+<p class="mt-2 text-on-surface-variant font-body-md max-w-2xl">Full-stack handoff documentation for Agent Marketplace integration. This guide details the interaction between routing layers, memory persistence, and the task orchestration engine.</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high border border-surface-variant px-4 py-2 flex items-center gap-2 font-code-sm text-code-sm text-on-surface hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">download</span> EXPORT_YAML
+                        </button>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 flex items-center gap-2 font-code-sm text-code-sm font-bold hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rocket_launch</span> PROVISION_ENV
+                        </button>
+</div>
+</div>
+</div>
+<!-- Bento Implementation Grid -->
+<div class="grid grid-cols-12 gap-grid-unit">
+<!-- Owning Microservices Map -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container border border-surface-variant p-4 rounded-lg">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant">OWNING_MICROSERVICES_TOPOLOGY</h3>
+<span class="text-[10px] font-code-xs text-primary">LATENCY_SLO: &lt; 50ms</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="border border-surface-variant p-3 bg-surface-container-lowest">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-container text-sm">router</span>
+<span class="font-code-sm text-code-sm text-on-surface">Agent Router</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-2">Handles intent classification and dynamic agent dispatching via p2p discovery.</p>
+<div class="flex gap-2 flex-wrap">
+<span class="px-1.5 py-0.5 border border-primary-fixed-dim text-primary-fixed-dim font-code-xs text-[9px]">gRPC</span>
+<span class="px-1.5 py-0.5 border border-primary-fixed-dim text-primary-fixed-dim font-code-xs text-[9px]">Go-Core</span>
+</div>
+</div>
+<div class="border border-surface-variant p-3 bg-surface-container-lowest">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-sm">memory</span>
+<span class="font-code-sm text-code-sm text-on-surface">Memory Service</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-2">L2 Vector persistence and short-term window buffering for RAG context.</p>
+<div class="flex gap-2 flex-wrap">
+<span class="px-1.5 py-0.5 border border-tertiary-fixed-dim text-tertiary-fixed-dim font-code-xs text-[9px]">Postgres/pgvector</span>
+<span class="px-1.5 py-0.5 border border-tertiary-fixed-dim text-tertiary-fixed-dim font-code-xs text-[9px]">Python</span>
+</div>
+</div>
+<div class="border border-surface-variant p-3 bg-surface-container-lowest">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-sm">build</span>
+<span class="font-code-sm text-code-sm text-on-surface">Tool Service</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-2">Sandboxed execution environment for 3rd party API integrations and webhooks.</p>
+<div class="flex gap-2 flex-wrap">
+<span class="px-1.5 py-0.5 border border-secondary text-secondary font-code-xs text-[9px]">WASM</span>
+<span class="px-1.5 py-0.5 border border-secondary text-secondary font-code-xs text-[9px]">Docker-v2</span>
+</div>
+</div>
+<div class="border border-surface-variant p-3 bg-surface-container-lowest">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-error text-sm">bolt</span>
+<span class="font-code-sm text-code-sm text-on-surface">Task Engine</span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-2">Directed Acyclic Graph (DAG) manager for sequential/parallel agent tasks.</p>
+<div class="flex gap-2 flex-wrap">
+<span class="px-1.5 py-0.5 border border-error text-error font-code-xs text-[9px]">Kafka-Events</span>
+<span class="px-1.5 py-0.5 border border-error text-error font-code-xs text-[9px]">Node.js</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Dependency Metadata -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-high border border-surface-variant p-4 rounded-lg flex flex-col justify-between">
+<div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">database</span> DB_DEPENDENCIES
+                        </h3>
+<ul class="space-y-3">
+<li class="flex items-start gap-3">
+<div class="mt-1 w-1.5 h-1.5 bg-primary-container"></div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">Redis Cache (L1)</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Global state &amp; rate-limiting.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<div class="mt-1 w-1.5 h-1.5 bg-primary-container"></div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">Pinecone Cluster (Vector)</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">Production agent personality embedding storage.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<div class="mt-1 w-1.5 h-1.5 bg-secondary-container"></div>
+<div>
+<p class="font-code-sm text-code-sm text-on-surface">n8n Workflow IDs</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">ID: <code>wf_8291_market_settlement</code></p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">ID: <code>wf_9022_agent_validation</code></p>
+</div>
+</li>
+</ul>
+</div>
+<div class="mt-4 pt-4 border-t border-surface-variant">
+<div class="bg-surface-container-lowest p-2 rounded">
+<p class="font-code-xs text-code-xs text-primary-fixed mb-1">API_SECRET_ROTATION</p>
+<div class="h-1 bg-surface-variant w-full rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[75%]"></div>
+</div>
+<p class="text-[9px] font-code-xs mt-1 text-on-surface-variant">Next rotation in 12h 45m</p>
+</div>
+</div>
+</div>
+<!-- YAML Configuration Snippet -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container border border-surface-variant p-0 rounded-lg overflow-hidden flex flex-col">
+<div class="bg-surface-container-highest px-4 py-2 border-b border-surface-variant flex justify-between items-center">
+<span class="font-code-sm text-code-sm text-on-surface">deployment_manifest.yaml</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant cursor-pointer">content_copy</span>
+</div>
+<div class="p-4 code-block flex-1 font-code-sm text-code-sm leading-relaxed overflow-x-auto text-primary-fixed-dim">
+<pre>apiVersion: aura.io/v1alpha1
+kind: AgentMarketplace
+metadata:
+  name: wf-039-artifact-k
+spec:
+  replicas: 12
+  gpu:
+    enabled: true
+    model: nvidia-l40s
+    vram_minimum: 48Gi
+  scaling:
+    min: 2
+    max: 48
+    metrics:
+      - type: Latency
+        threshold: 250ms
+  memory:
+    service: vector-l2
+    persistence: warm-hot
+  environment:
+    - name: SHARED_COMPONENT_ID
+      value: "SC_NAV_DRAWER_01"
+</pre>
+</div>
+</div>
+<!-- Deployment & GPU Specs -->
+<div class="col-span-12 lg:col-span-5 flex flex-col gap-grid-unit">
+<div class="bg-surface-container-high border border-surface-variant p-4 rounded-lg flex-1">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-3">INFRASTRUCTURE_TARGET</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-secondary-container">memory</span>
+<span class="font-code-sm text-code-sm">GPU Architecture</span>
+</div>
+<span class="font-code-sm text-code-sm text-primary">NVIDIA_H100_ADA</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-secondary-container">hub</span>
+<span class="font-code-sm text-code-sm">Cluster Type</span>
+</div>
+<span class="font-code-sm text-code-sm">Bare-Metal_K8s</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-secondary-container">speed</span>
+<span class="font-code-sm text-code-sm">Scaling Mode</span>
+</div>
+<span class="font-code-sm text-code-sm">Predictive_Auto</span>
+</div>
+</div>
+</div>
+<div class="bg-secondary-container/10 border border-secondary-container p-4 rounded-lg">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-secondary-fixed">info</span>
+<span class="font-code-sm text-code-sm font-bold text-secondary-fixed">CRITICAL_DEPLOY_NOTE</span>
+</div>
+<p class="font-code-xs text-code-xs text-secondary-fixed opacity-90">
+                            Zero Trust authentication is required for all Vector Memory calls. Ensure the <code>system_arch</code> secret is injected into the <code>Zero_Trust</code> vault before initializing.
+                        </p>
+</div>
+<div class="bg-surface-container border border-surface-variant p-4 rounded-lg">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">COMPLETION_CRITERIA</span>
+<span class="font-code-xs text-code-xs text-primary">85% COMPLETE</span>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[14px]">check_circle</span>
+<span class="font-code-xs text-code-xs">API Endpoint Handshake Validated</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[14px]">check_circle</span>
+<span class="font-code-xs text-code-xs">Memory Service Persistence Layer Ready</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant opacity-30 text-[14px]">radio_button_unchecked</span>
+<span class="font-code-xs text-code-xs opacity-50">Stress Test GPU Clustering (Pending)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Telemetry Section -->
+<div class="col-span-12 h-48 bg-surface-container-lowest border border-surface-variant rounded-lg relative overflow-hidden">
+
+<div class="absolute inset-0 p-4 pointer-events-none flex flex-col justify-between">
+<div class="flex justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-primary-fixed-variant">NODE_NETWORK_VISUALIZER</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-60">ACTIVE_MESH: 4.1.2-ALPHA</span>
+</div>
+<div class="text-right">
+<span class="font-code-xs text-code-xs block text-primary">Uptime: 99.998%</span>
+<span class="font-code-xs text-code-xs block text-on-surface-variant">Region: US-EAST-1</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="px-2 py-1 bg-surface-container-low border border-surface-variant">
+<span class="font-code-xs text-code-xs text-on-surface-variant">CPU: 42%</span>
+</div>
+<div class="px-2 py-1 bg-surface-container-low border border-surface-variant">
+<span class="font-code-xs text-code-xs text-on-surface-variant">RAM: 128GB/256GB</span>
+</div>
+<div class="px-2 py-1 bg-surface-container-low border border-surface-variant">
+<span class="font-code-xs text-code-xs text-on-surface-variant">IOPS: 12.4k</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Shared Component Inventory -->
+<div class="col-span-12 bg-surface-container border border-surface-variant p-4 rounded-lg mb-12">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">extension</span> SHARED_COMPONENT_INVENTORY
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="flex flex-col gap-2 p-3 border border-surface-variant bg-surface-container-low">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface">TopAppBar</span>
+<span class="material-symbols-outlined text-xs text-primary">link</span>
+</div>
+<img class="w-full h-12 object-cover opacity-60" data-alt="High-contrast UI element showing a dark navigation bar with terminal-style icons and glowing primary accents. The aesthetic is strictly engineering-focused with monospaced labels and a sharp border. The lighting is low-key, evoking a professional development environment. A sense of authority and precision is established through the rigid grid structure." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfNMDMklU6nR0gJPHZfBpTPeyAp42fWbPt4b4PWoaAV201ErPrpbJMZooNLvM3Q1NH9acpzEYY8zHyuZ0t7j0cZ0QAUGU9teNpbRY4Vcdlaxe-Ul2YHY73Xg0WBJPrKUm8DX3Quo0l1RexYSLxOhfX3wL_7UXixDhxT-TPFmg-eTAEhE4MvInDM5n9wiY4JEIGgBxjOaPSdwXGGLjtcs2b5l_ux1SVz6E7vQztQYrXTDP0bQaGhrU1JQWg-LJCZzchtFo96DCrz2Y"/>
+</div>
+<div class="flex flex-col gap-2 p-3 border border-surface-variant bg-surface-container-low">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface">NavDrawer</span>
+<span class="material-symbols-outlined text-xs text-primary">link</span>
+</div>
+<img class="w-full h-12 object-cover opacity-60" data-alt="A vertical side navigation panel for a complex developer platform. The design features a deep blue-black background with subtle green highlights for active states. Icons are minimalist and geometric. Text uses high-legibility monospaced fonts. The overall style is brutalist and efficient, designed for high-density information architecture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbdRIqTLe-x5X6OOsmATxtZTk_kl2WeZAKhW0s4eDXrFv35ITRHN9UpxOCuJjcvjIZTml3QdtOtlZSXKb1qFXX8E6xgvyIQkiriIyPh1PMGG9Xer3VOjxn37AQhK20wG-ZSqBC5hQZhV1oxRVYrIC_osrK28bP4hwZaCKC12Shm119iHPGp6BK40ZbR6LQDe1nZfQE-2C8G2eUNj5nQsHxeNQwbw8jXzKZzZZoQZIl8fx245JDLVWBwRdBznTDidYrbspA_yPKZQs"/>
+</div>
+<div class="flex flex-col gap-2 p-3 border border-surface-variant bg-surface-container-low">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface">BottomNav</span>
+<span class="material-symbols-outlined text-xs text-primary">link</span>
+</div>
+<img class="w-full h-12 object-cover opacity-60" data-alt="Mobile-focused navigation component displaying several abstract system icons like charts and database symbols. The background is a dark translucent surface. Each icon has a subtle glow when selected. The design language matches a technical blueprint with precise 1px lines and minimal padding." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBd6u69eDAz7tg6-u1oQ_FtUfCBmm7Htbw0jQJTw0B2mf1aE_7kuY85nQE8ZvlRGRS_H3vt4dKolmzhzx3kPylH8dAULuA72ryh7dWWxSIRSJYjLFWa1uy9iSLnp7vf-xXbllgdZGzxvHHathMw9lPDGZJbGrfDZdtZu9Dgym99hiwwfex3GqkNPps-86qUfUUBQEyGBOuPR4XYl8EmR25jvniMnSK24Srg1Y-0Z8Abmqwj3m0vtheXYAOaZn_u3CbZ6ves60lIJDc"/>
+</div>
+<div class="flex flex-col gap-2 p-3 border border-surface-variant bg-surface-container-low">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-on-surface">FAB_Action</span>
+<span class="material-symbols-outlined text-xs text-primary">link</span>
+</div>
+<div class="w-full h-12 bg-surface-container-highest flex items-center justify-center opacity-40">
+<span class="material-symbols-outlined">add</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile Navigation Shell (Bottom) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center bg-surface-container-low z-50 h-12 border-t border-surface-variant px-lane-margin">
+<button class="text-on-surface-variant opacity-60 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">analytics</span>
+</button>
+<button class="text-on-surface-variant opacity-60 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">receipt_long</span>
+</button>
+<button class="text-primary-fixed-dim scale-110 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">memory</span>
+</button>
+<button class="text-on-surface-variant opacity-60 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">account_tree</span>
+</button>
+</nav>
+<!-- Micro-Telemetry Logic -->
+<script>
+        // Simple reactive telemetry simulation
+        document.addEventListener('DOMContentLoaded', () => {
+            const updateTelemetry = () => {
+                const logs = [
+                    'REQ: fetch_market_listing -> status: 200',
+                    'MEM: l2_cache_miss -> fetching_pinecone',
+                    'SYS: node_heartbeat_ack -> us-east-1',
+                    'SEC: token_validated -> user_root'
+                ];
+                console.log(`[AURA_TELEMETRY] ${logs[Math.floor(Math.random() * logs.length)]}`);
+            };
+            setInterval(updateTelemetry, 5000);
+
+            // Mock interaction for code copy
+            const copyBtn = document.querySelector('.material-symbols-outlined.cursor-pointer');
+            if(copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    copyBtn.innerText = 'done';
+                    setTimeout(() => copyBtn.innerText = 'content_copy', 2000);
+                });
+            }
+        });
+    </script>
+</body></html>
