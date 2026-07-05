@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Trust Authority HUD | Ecosystem Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#dce1ff",
+                    "on-primary": "#1f2d5e",
+                    "outline-variant": "#45464f",
+                    "on-background": "#e4e1e6",
+                    "on-primary-container": "#435083",
+                    "surface-dim": "#131317",
+                    "tertiary-fixed-dim": "#ffb4a2",
+                    "on-secondary-fixed": "#0b1c2f",
+                    "tertiary-container": "#ffb5a2",
+                    "surface-bright": "#39393d",
+                    "outline": "#90909a",
+                    "secondary-container": "#38485d",
+                    "on-tertiary-fixed": "#360e05",
+                    "on-secondary": "#213145",
+                    "inverse-surface": "#e4e1e6",
+                    "background": "#11131c",
+                    "on-tertiary-container": "#7b4436",
+                    "surface-container-highest": "#343438",
+                    "primary": "#dde1ff",
+                    "on-surface": "#e4e1e6",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "surface-tint": "#b7c4ff",
+                    "surface-container": "#1f1f23",
+                    "surface-container-high": "#292a2d",
+                    "error-container": "#93000a",
+                    "on-surface-variant": "#c6c5d0",
+                    "surface-variant": "#32343f",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-primary-fixed-variant": "#374476",
+                    "on-primary-fixed": "#071749",
+                    "inverse-on-surface": "#303034",
+                    "surface-container-lowest": "#0d0e11",
+                    "error": "#ffb4ab",
+                    "secondary": "#b7c8e1",
+                    "glass-bg": "rgba(29, 31, 41, 0.8)",
+                    "on-secondary-container": "#a6b6cf",
+                    "on-tertiary-fixed-variant": "#6c382b",
+                    "terminal-green": "#00ff41",
+                    "tertiary": "#ffdbd2",
+                    "surface": "#131317",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary": "#512317",
+                    "tertiary-fixed": "#ffdbd2",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "primary-fixed-dim": "#b7c4ff",
+                    "on-error": "#690005",
+                    "primary-container": "#b7c4ff",
+                    "auth-error": "#ffb4ab",
+                    "surface-container-low": "#1b1b1f",
+                    "inverse-primary": "#4f5c90"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "sidebar-width": "288px",
+                    "unit": "4px",
+                    "gutter": "12px",
+                    "stack-tight": "0.5rem",
+                    "stack-default": "1rem",
+                    "header-height": "64px",
+                    "container-padding": "1.5rem"
+            },
+            "fontFamily": {
+                    "micro-tag": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "body-base": ["Inter"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "body-sm": ["Inter"],
+                    "code-terminal": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; filter: blur(8px); }
+            50% { opacity: 1; filter: blur(12px); }
+        }
+        .glow-pulse { animation: pulse-glow 2s infinite ease-in-out; }
+        
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline {
+            position: absolute; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.2), transparent);
+            animation: scanline 4s linear infinite;
+        }
+
+        .glass-panel {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+        
+        .trust-node-active {
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #11131c; }
+        ::-webkit-scrollbar-thumb { background: #434656; border-radius: 2px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-base selection:bg-terminal-green selection:text-background overflow-hidden">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-gutter h-header-height bg-surface dark:bg-surface-dim border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed">grid_view</span>
+<h1 class="text-headline-md font-headline-md font-extrabold text-terminal-green uppercase tracking-tighter">How It Works</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6">
+<a class="text-terminal-green font-bold text-label-caps font-label-caps hover:bg-surface-variant/50 transition-colors px-3 py-2" href="#">Ecosystem</a>
+<a class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-variant/50 transition-colors px-3 py-2" href="#">Flows</a>
+<a class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-variant/50 transition-colors px-3 py-2" href="#">Security</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">help_outline</span>
+</div>
+</header>
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex flex-col fixed left-0 h-full w-sidebar-width py-6 bg-surface-container-highest dark:bg-surface-container-lowest border-r border-outline-variant mt-header-height z-40">
+<div class="px-6 mb-6">
+<p class="text-label-caps font-label-caps text-on-surface-variant opacity-60 uppercase">SYSTEM MODULES</p>
+</div>
+<nav class="flex flex-col gap-1 px-3">
+<div class="flex items-center gap-3 px-3 py-3 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-terminal-green">shopping_bag</span>
+<span class="text-label-caps font-label-caps">NaijaShop</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="text-label-caps font-label-caps">NaijaEats</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded bg-primary-container text-on-primary-container border-l-4 border-terminal-green translate-x-1 transition-transform">
+<span class="material-symbols-outlined text-terminal-green">hub</span>
+<span class="text-label-caps font-label-caps">Trust Map</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-label-caps font-label-caps">NaijaPay</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<span class="material-symbols-outlined">local_post_office</span>
+<span class="text-label-caps font-label-caps">NaijaSend</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<span class="material-symbols-outlined">agriculture</span>
+<span class="text-label-caps font-label-caps">NaijaAgro</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<span class="material-symbols-outlined">work</span>
+<span class="text-label-caps font-label-caps">NaijaGigs</span>
+</div>
+</nav>
+<div class="mt-auto px-6 py-4 border-t border-outline-variant/30">
+<div class="flex items-center gap-3 text-terminal-green mb-2">
+<div class="w-2 h-2 rounded-full bg-terminal-green glow-pulse"></div>
+<span class="font-code-terminal text-micro-tag">CORE_SYSTEM: ONLINE</span>
+</div>
+<p class="font-code-terminal text-micro-tag text-on-surface-variant/50">NODE_AUTH: 0x8F22...E4</p>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-sidebar-width mt-header-height h-[calc(100vh-64px)] overflow-hidden relative">
+<!-- Background Animation -->
+
+<div class="scanline"></div>
+<div class="relative z-10 p-container-padding h-full flex flex-col gap-6">
+<!-- Hero Section: The HUD Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-background">Trust Protocol <span class="text-terminal-green">v4.0</span></h2>
+<p class="text-body-base text-on-surface-variant max-w-xl">Trust Score is the central currency of the ecosystem. It aggregates behavior from all modules to unlock premium features, lower insurance rates, and prioritize logistics.</p>
+</div>
+<div class="glass-panel p-4 rounded-lg flex gap-8 items-center border-l-4 border-l-terminal-green">
+<div class="text-center">
+<p class="text-micro-tag text-on-surface-variant uppercase">Network Health</p>
+<p class="text-headline-md font-headline-md text-terminal-green">99.9%</p>
+</div>
+<div class="text-center">
+<p class="text-micro-tag text-on-surface-variant uppercase">Global Trust Avg</p>
+<p class="text-headline-md font-headline-md text-primary">842</p>
+</div>
+</div>
+</div>
+<!-- Main Layout: Bento Grid & Flow -->
+<div class="flex-1 grid grid-cols-12 grid-rows-6 gap-gutter overflow-hidden">
+<!-- Left: Trust Accumulation Flow -->
+<div class="col-span-12 md:col-span-3 row-span-6 glass-panel rounded p-stack-default flex flex-col gap-4">
+<h3 class="text-label-caps font-label-caps text-on-surface-variant border-b border-outline-variant pb-2">THE ACCUMULATION PIPELINE</h3>
+<!-- Flow Item 1 -->
+<div class="flex flex-col gap-2 relative">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-variant flex items-center justify-center text-primary border border-outline">
+<span class="material-symbols-outlined text-[18px]">fingerprint</span>
+</div>
+<span class="text-label-caps font-label-caps">Identity Verification</span>
+</div>
+<p class="text-body-sm text-on-surface-variant/70 pl-11">Biometric and document hashing for unique human anchoring.</p>
+<div class="absolute left-4 top-8 w-0.5 h-6 bg-terminal-green/30"></div>
+</div>
+<!-- Flow Item 2 -->
+<div class="flex flex-col gap-2 relative mt-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-variant flex items-center justify-center text-primary border border-outline">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+</div>
+<span class="text-label-caps font-label-caps">Transactions</span>
+</div>
+<p class="text-body-sm text-on-surface-variant/70 pl-11">Financial history across Shop, Pay, and Wholesale modules.</p>
+<div class="absolute left-4 top-8 w-0.5 h-6 bg-terminal-green/30"></div>
+</div>
+<!-- Flow Item 3 -->
+<div class="flex flex-col gap-2 relative mt-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-variant flex items-center justify-center text-primary border border-outline">
+<span class="material-symbols-outlined text-[18px]">reviews</span>
+</div>
+<span class="text-label-caps font-label-caps">Reviews</span>
+</div>
+<p class="text-body-sm text-on-surface-variant/70 pl-11">Peer-to-peer verification from Gigs, Stay, and Eats.</p>
+<div class="absolute left-4 top-8 w-0.5 h-6 bg-terminal-green"></div>
+</div>
+<!-- Central Score Display -->
+<div class="mt-auto glass-panel bg-surface-variant p-4 rounded text-center relative overflow-hidden border-terminal-green/50">
+<div class="absolute top-0 left-0 w-full h-1 bg-terminal-green"></div>
+<p class="text-micro-tag font-micro-tag text-terminal-green uppercase tracking-widest">Calculated Trust Score</p>
+<h4 class="text-display-lg font-display-lg text-white my-2">921<span class="text-headline-md font-headline-md text-on-surface-variant">/1k</span></h4>
+<div class="flex justify-between items-center px-4">
+<span class="text-[9px] text-terminal-green font-bold">ALPHA ELITE</span>
+<div class="w-16 h-1 bg-terminal-green/20 rounded-full overflow-hidden">
+<div class="w-[92%] h-full bg-terminal-green"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Center: The Ecosystem Web (Visual Anchor) -->
+<div class="col-span-12 md:col-span-6 row-span-6 glass-panel rounded relative overflow-hidden flex items-center justify-center">
+<div class="absolute top-4 left-4">
+<h3 class="text-label-caps font-label-caps text-on-surface-variant">ECOSYSTEM INFLUENCE MAP</h3>
+<p class="text-micro-tag text-on-surface-variant/50">REAL-TIME PROPAGATION NODES</p>
+</div>
+<!-- SVG Map Simulation -->
+<div class="relative w-full h-full p-8">
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-32 h-32 rounded-full border-2 border-terminal-green/30 flex items-center justify-center relative">
+<div class="w-24 h-24 rounded-full bg-terminal-green/5 flex items-center justify-center glow-pulse">
+<span class="material-symbols-outlined text-[40px] text-terminal-green">shield_person</span>
+</div>
+</div>
+</div>
+<!-- Orbiting Nodes -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-sm max-h-sm border border-outline-variant/20 rounded-full"></div>
+<!-- Manual Nodes (Simulating a map) -->
+<div class="absolute top-[15%] left-[25%] flex flex-col items-center">
+<div class="w-12 h-12 glass-panel rounded-lg flex items-center justify-center border-t-4 border-t-primary trust-node-active">
+<span class="material-symbols-outlined text-primary">shopping_cart</span>
+</div>
+<span class="text-micro-tag mt-1">Shop</span>
+</div>
+<div class="absolute top-[10%] left-[50%] -translate-x-1/2 flex flex-col items-center">
+<div class="w-12 h-12 glass-panel rounded-lg flex items-center justify-center border-t-4 border-t-tertiary">
+<span class="material-symbols-outlined text-tertiary">health_and_safety</span>
+</div>
+<span class="text-micro-tag mt-1">Health</span>
+</div>
+<div class="absolute top-[15%] right-[25%] flex flex-col items-center">
+<div class="w-12 h-12 glass-panel rounded-lg flex items-center justify-center border-t-4 border-t-secondary">
+<span class="material-symbols-outlined text-secondary">local_shipping</span>
+</div>
+<span class="text-micro-tag mt-1">Wholesale</span>
+</div>
+<div class="absolute top-[50%] left-[10%] -translate-y-1/2 flex flex-col items-center">
+<div class="w-12 h-12 glass-panel rounded-lg flex items-center justify-center border-t-4 border-t-primary-fixed">
+<span class="material-symbols-outlined text-primary-fixed">agriculture</span>
+</div>
+<span class="text-micro-tag mt-1">Agro</span>
+</div>
+<div class="absolute top-[50%] right-[10%] -translate-y-1/2 flex flex-col items-center">
+<div class="w-12 h-12 glass-panel rounded-lg flex items-center justify-center border-t-4 border-t-primary">
+<span class="material-symbols-outlined text-primary">work</span>
+</div>
+<span class="text-micro-tag mt-1">Jobs</span>
+</div>
+<div class="absolute bottom-[15%] left-[25%] flex flex-col items-center">
+<div class="w-12 h-12 glass-panel rounded-lg flex items-center justify-center border-t-4 border-t-secondary-fixed">
+<span class="material-symbols-outlined text-secondary-fixed">directions_car</span>
+</div>
+<span class="text-micro-tag mt-1">Drive</span>
+</div>
+<div class="absolute bottom-[10%] left-[50%] -translate-x-1/2 flex flex-col items-center">
+<div class="w-12 h-12 glass-panel rounded-lg flex items-center justify-center border-t-4 border-t-terminal-green">
+<span class="material-symbols-outlined text-terminal-green">verified_user</span>
+</div>
+<span class="text-micro-tag mt-1">Insurance</span>
+</div>
+<div class="absolute bottom-[15%] right-[25%] flex flex-col items-center">
+<div class="w-12 h-12 glass-panel rounded-lg flex items-center justify-center border-t-4 border-t-tertiary-fixed">
+<span class="material-symbols-outlined text-tertiary-fixed">school</span>
+</div>
+<span class="text-micro-tag mt-1">Learn</span>
+</div>
+</div>
+</div>
+<!-- Right: Module Impact Details -->
+<div class="col-span-12 md:col-span-3 row-span-6 flex flex-col gap-gutter">
+<!-- Impact Card 1 -->
+<div class="flex-1 glass-panel rounded p-stack-tight border-l-4 border-l-primary">
+<div class="flex justify-between items-start">
+<h4 class="text-label-caps font-label-caps text-primary">Financial Benefits</h4>
+<span class="material-symbols-outlined text-[16px] text-primary">trending_down</span>
+</div>
+<ul class="mt-2 flex flex-col gap-2">
+<li class="flex items-center gap-2">
+<div class="w-1 h-1 bg-primary rounded-full"></div>
+<span class="text-body-sm">0% Collateral on Wholesale</span>
+</li>
+<li class="flex items-center gap-2">
+<div class="w-1 h-1 bg-primary rounded-full"></div>
+<span class="text-body-sm">Instant Pay Settlements</span>
+</li>
+<li class="flex items-center gap-2">
+<div class="w-1 h-1 bg-primary rounded-full"></div>
+<span class="text-body-sm">NaijaPay Overdraft Access</span>
+</li>
+</ul>
+</div>
+<!-- Impact Card 2 -->
+<div class="flex-1 glass-panel rounded p-stack-tight border-l-4 border-l-secondary">
+<div class="flex justify-between items-start">
+<h4 class="text-label-caps font-label-caps text-secondary">Logistics Priority</h4>
+<span class="material-symbols-outlined text-[16px] text-secondary">bolt</span>
+</div>
+<ul class="mt-2 flex flex-col gap-2">
+<li class="flex items-center gap-2">
+<div class="w-1 h-1 bg-secondary rounded-full"></div>
+<span class="text-body-sm">VIP Driver Matching</span>
+</li>
+<li class="flex items-center gap-2">
+<div class="w-1 h-1 bg-secondary rounded-full"></div>
+<span class="text-body-sm">Same-Day Send Delivery</span>
+</li>
+<li class="flex items-center gap-2">
+<div class="w-1 h-1 bg-secondary rounded-full"></div>
+<span class="text-body-sm">Stay: Early Check-in</span>
+</li>
+</ul>
+</div>
+<!-- Impact Card 3 -->
+<div class="flex-1 glass-panel rounded p-stack-tight border-l-4 border-l-terminal-green">
+<div class="flex justify-between items-start">
+<h4 class="text-label-caps font-label-caps text-terminal-green">Security Clearance</h4>
+<span class="material-symbols-outlined text-[16px] text-terminal-green">verified</span>
+</div>
+<ul class="mt-2 flex flex-col gap-2">
+<li class="flex items-center gap-2">
+<div class="w-1 h-1 bg-terminal-green rounded-full"></div>
+<span class="text-body-sm">Verified Badge on Gigs</span>
+</li>
+<li class="flex items-center gap-2">
+<div class="w-1 h-1 bg-terminal-green rounded-full"></div>
+<span class="text-body-sm">Health: Remote Consultation</span>
+</li>
+<li class="flex items-center gap-2">
+<div class="w-1 h-1 bg-terminal-green rounded-full"></div>
+<span class="text-body-sm">Insurance: Auto-Approvals</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Terminal Feed (Bottom) -->
+<div class="h-24 glass-panel rounded flex flex-col border-t-0">
+<div class="bg-surface-container-highest px-4 py-1 flex justify-between items-center">
+<span class="text-micro-tag text-on-surface-variant font-code-terminal">LIVE_TRUST_LOGS.EXE</span>
+<div class="flex gap-2">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<div class="w-2 h-2 rounded-full bg-terminal-green"></div>
+</div>
+</div>
+<div class="flex-1 p-3 font-code-terminal text-micro-tag overflow-y-auto bg-background">
+<p class="text-terminal-green">[14:22:01] USER_ID_083: Identity Verified via Biometric Mesh</p>
+<p class="text-primary">[14:22:04] SYSTEM: Calculating Transaction Velocity for NaijaShop...</p>
+<p class="text-on-surface-variant">[14:22:09] LOG: Propagation Delay 12ms to Insurance Module</p>
+<p class="text-terminal-green">[14:22:12] SUCCESS: Global Trust Score incremented (+12 pts)</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<footer class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-glass-bg border-t border-outline-variant backdrop-blur-8 shadow-lg">
+<div class="flex flex-col items-center justify-center text-terminal-green font-bold">
+<span class="material-symbols-outlined">hub</span>
+<span class="text-micro-tag font-micro-tag uppercase">Ecosystem</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="text-micro-tag font-micro-tag uppercase">Flows</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">shield_person</span>
+<span class="text-micro-tag font-micro-tag uppercase">Security</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-micro-tag font-micro-tag uppercase">Logistics</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Update terminal logs occasionally
+        const logs = [
+            "[TIMESTAMP] SYNC: Learning Module reported completion (+5 pts)",
+            "[TIMESTAMP] ALERT: High Transaction frequency detected in Wholesale",
+            "[TIMESTAMP] UPDATE: User ID_044 achieved 'TRUSTED PROVIDER' status",
+            "[TIMESTAMP] PROPAGATION: Insurance rates updated for Region_A",
+            "[TIMESTAMP] NODE: New trust anchor established via biometric sync"
+        ];
+        const logContainer = document.querySelector('.overflow-y-auto');
+        
+        setInterval(() => {
+            const now = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const randomLog = logs[Math.floor(Math.random() * logs.length)].replace('[TIMESTAMP]', `[${now}]`);
+            const p = document.createElement('p');
+            p.className = 'text-on-surface-variant opacity-80';
+            p.textContent = randomLog;
+            logContainer.appendChild(p);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            if(logContainer.children.length > 10) logContainer.removeChild(logContainer.firstChild);
+        }, 3000);
+    </script>
+</body></html>

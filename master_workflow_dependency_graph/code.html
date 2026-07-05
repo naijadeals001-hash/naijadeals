@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NAIJADEALS ATLAS | Workflow Dependency Graph</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --grid-size: 24px;
+            --dot-color: rgba(132, 150, 126, 0.1);
+        }
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: var(--grid-size) var(--grid-size);
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-port {
+            width: 6px;
+            height: 6px;
+            background: #00ff41;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .connector-line {
+            position: absolute;
+            background: #3b4b37;
+            z-index: 0;
+        }
+        .vertical-swimlane {
+            border-right: 1px solid #3b4b37;
+        }
+        .workflow-node {
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .workflow-node:hover {
+            border-color: #00ff41;
+            transform: translateY(-2px);
+        }
+        .glow-text {
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "surface-container-low": "#0d1c2d",
+                      "error": "#ffb4ab",
+                      "secondary-fixed": "#dde1ff",
+                      "tertiary": "#fff6ff",
+                      "surface-bright": "#2c3a4c",
+                      "surface-dim": "#051424",
+                      "secondary-container": "#0043eb",
+                      "inverse-surface": "#d4e4fa",
+                      "primary-container": "#00ff41",
+                      "tertiary-fixed": "#f0dbff",
+                      "surface-container": "#122131",
+                      "surface": "#051424",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary-fixed": "#001356",
+                      "on-error-container": "#ffdad6",
+                      "surface-variant": "#273647",
+                      "secondary": "#b8c3ff",
+                      "surface-tint": "#00e639",
+                      "on-primary-container": "#007117",
+                      "on-primary-fixed-variant": "#00530e",
+                      "primary-fixed-dim": "#00e639",
+                      "on-tertiary-fixed": "#2c0051",
+                      "surface-container-high": "#1c2b3c",
+                      "on-tertiary": "#490080",
+                      "outline": "#84967e",
+                      "on-tertiary-container": "#862ed4",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "tertiary-container": "#ecd3ff",
+                      "surface-container-highest": "#273647",
+                      "on-error": "#690005",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "on-secondary-container": "#c6ceff",
+                      "error-container": "#93000a",
+                      "on-primary-fixed": "#002203",
+                      "surface-container-lowest": "#010f1f",
+                      "primary-fixed": "#72ff70",
+                      "primary": "#ebffe2",
+                      "on-primary": "#003907",
+                      "on-background": "#d4e4fa",
+                      "inverse-primary": "#006e16",
+                      "outline-variant": "#3b4b37",
+                      "on-surface-variant": "#b9ccb2",
+                      "on-secondary": "#002388",
+                      "inverse-on-surface": "#233143",
+                      "background": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap": "4px",
+                      "lane-margin": "32px",
+                      "node-gutter": "24px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "code-xs": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface border-b border-outline-variant w-full top-0 sticky z-50 flex justify-between items-center px-lane-margin h-16 w-full">
+<div class="flex items-center gap-grid-unit">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h1 class="font-label-caps text-label-caps text-primary uppercase tracking-widest">NAIJADEALS ATLAS</h1>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden md:flex gap-6 items-center">
+<span class="font-code-sm text-code-sm text-primary font-bold cursor-pointer transition-colors hover:bg-surface-variant px-2 py-1 rounded">Architecture</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant cursor-pointer transition-colors hover:bg-surface-variant px-2 py-1 rounded">Logic</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant cursor-pointer transition-colors hover:bg-surface-variant px-2 py-1 rounded">Data</span>
+</nav>
+<div class="bg-surface-container-high px-3 py-1 rounded border border-outline-variant">
+<span class="font-code-xs text-code-xs text-on-surface-variant">v2.4.1-STABLE</span>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- NavigationDrawer -->
+<aside class="h-full w-64 fixed left-0 top-16 bg-surface-container-lowest border-r border-outline-variant flex flex-col gap-stack-gap py-grid-unit hidden md:flex">
+<div class="px-lane-margin py-4">
+<p class="font-label-caps text-label-caps text-on-surface mb-4">WORKFLOW MODULES</p>
+<div class="space-y-1">
+<button class="w-full flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container border-l-2 border-primary-container transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined text-[20px]" data-icon="grid_view">grid_view</span>
+<span class="font-code-sm text-code-sm">Architecture</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined text-[20px]" data-icon="schema">schema</span>
+<span class="font-code-sm text-code-sm">Logic</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined text-[20px]" data-icon="database">database</span>
+<span class="font-code-sm text-code-sm">Data</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined text-[20px]" data-icon="api">api</span>
+<span class="font-code-sm text-code-sm">API</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined text-[20px]" data-icon="dynamic_feed">dynamic_feed</span>
+<span class="font-code-sm text-code-sm">Events</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined text-[20px]" data-icon="verified_user">verified_user</span>
+<span class="font-code-sm text-code-sm">Security</span>
+</button>
+</div>
+</div>
+<div class="mt-auto px-lane-margin py-4 border-t border-outline-variant">
+<div class="p-4 bg-surface-container rounded border border-outline-variant">
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-2">SYSTEM LOAD</p>
+<div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[42%]"></div>
+</div>
+<p class="font-code-xs text-code-xs text-primary mt-2">OPTIMAL (42.1%)</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 p-lane-margin pb-20 overflow-y-auto relative">
+<!-- Context Header -->
+<div class="mb-12">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 bg-primary-container rounded-full animate-pulse"></span>
+<span class="font-code-xs text-code-xs text-primary-container tracking-[0.2em] uppercase">Core Dependency Matrix</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-primary mb-4 tracking-tight">Logical Workflow Dependency Graph</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl leading-relaxed">
+                    Visualizing the linear dependency chain of core service modules. All high-level business verticals listed below are downstream consumers of these unified core components.
+                </p>
+</div>
+<!-- The Dependency Map Canvas -->
+<div class="relative w-full overflow-x-auto min-h-[800px] bg-surface-container-lowest rounded-xl border border-outline-variant p-8 mb-12">
+<!-- Business Verticals (Consumers) Header -->
+<div class="grid grid-cols-11 gap-2 mb-16 relative z-10">
+<div class="col-span-11 mb-4 flex items-center justify-center">
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+<span class="px-4 font-label-caps text-label-caps text-on-secondary-fixed-variant bg-surface-container-lowest border border-outline-variant py-1 rounded">MAJOR VERTICALS (DOWNSTREAM DEPENDENTS)</span>
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+</div>
+<!-- Vertical Badges -->
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-code-xs text-code-xs text-on-surface">NaijaShop</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="send">send</span>
+<span class="font-code-xs text-code-xs text-on-surface">NaijaSend</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="directions_car">directions_car</span>
+<span class="font-code-xs text-code-xs text-on-surface">NaijaDrive</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="work">work</span>
+<span class="font-code-xs text-code-xs text-on-surface">NaijaGigs</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="hotel">hotel</span>
+<span class="font-code-xs text-code-xs text-on-surface">NaijaStay</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="inventory">inventory</span>
+<span class="font-code-xs text-code-xs text-on-surface">Wholesale</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="agriculture">agriculture</span>
+<span class="font-code-xs text-code-xs text-on-surface">NaijaAgro</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="medical_services">medical_services</span>
+<span class="font-code-xs text-code-xs text-on-surface">NaijaHealth</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="badge">badge</span>
+<span class="font-code-xs text-code-xs text-on-surface">NaijaJobs</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="school">school</span>
+<span class="font-code-xs text-code-xs text-on-surface">NaijaLearn</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 rounded flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="security">security</span>
+<span class="font-code-xs text-code-xs text-on-surface">Insurance</span>
+</div>
+</div>
+<!-- Linear Workflow Chain -->
+<div class="flex flex-col gap-12 relative">
+<!-- Workflow Row 1 -->
+<div class="flex justify-between items-center relative h-32 px-12">
+<!-- Connecting Lines Background SVG -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0;">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#3b4b37" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Linear connections -->
+<line marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2" x1="160" x2="220" y1="64" y2="64"></line>
+<line marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2" x1="380" x2="440" y1="64" y2="64"></line>
+<line marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2" x1="600" x2="660" y1="64" y2="64"></line>
+<line marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2" x1="820" x2="880" y1="64" y2="64"></line>
+</svg>
+<!-- Node WF-001 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-001</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="person_add">person_add</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">Registration</span>
+</div>
+</div>
+<!-- Node WF-002 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-002</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="lock_open">lock_open</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">Authentication</span>
+</div>
+</div>
+<!-- Node WF-003 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-003</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="assignment_ind">assignment_ind</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">KYC</span>
+</div>
+</div>
+<!-- Node WF-004 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-004</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">Wallet Funding</span>
+</div>
+</div>
+<!-- Node WF-005 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-005</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="payments">payments</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">Wallet Withdrawal</span>
+</div>
+</div>
+</div>
+<!-- Middle Connector Row (Vertical Downward) -->
+<div class="flex justify-center h-24 relative">
+<svg class="absolute inset-0 w-full h-full pointer-events-none">
+<path d="M 960 0 L 960 40 L 80 40 L 80 96" fill="none" marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-dasharray="4" stroke-width="2"></path>
+</svg>
+<div class="bg-surface-container-high border border-outline-variant px-4 py-2 rounded-full absolute top-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="sync_alt">sync_alt</span>
+<span class="font-code-xs text-code-xs text-on-surface">CONTINUOUS DATA PIPELINE</span>
+</div>
+</div>
+<!-- Workflow Row 2 -->
+<div class="flex justify-between items-center relative h-32 px-12">
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0;">
+<line marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2" x1="160" x2="220" y1="64" y2="64"></line>
+<line marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2" x1="380" x2="440" y1="64" y2="64"></line>
+<line marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2" x1="600" x2="660" y1="64" y2="64"></line>
+<line marker-end="url(#arrowhead)" stroke="#3b4b37" stroke-width="2" x1="820" x2="880" y1="64" y2="64"></line>
+</svg>
+<!-- Node WF-006 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-006</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="gavel">gavel</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">Escrow Lifecycle</span>
+</div>
+</div>
+<!-- Node WF-007 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-007</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="verified">verified</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">Trust Lifecycle</span>
+</div>
+</div>
+<!-- Node WF-008 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-008</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="notifications_active">notifications_active</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">Notifications</span>
+</div>
+</div>
+<!-- Node WF-009 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-009</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="forum">forum</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">Messaging</span>
+</div>
+</div>
+<!-- Node WF-010 -->
+<div class="workflow-node w-40 h-20 bg-surface border border-outline-variant rounded flex flex-col relative z-10 shadow-lg">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant flex justify-between">
+<span class="font-label-caps text-code-xs text-on-surface-variant">WF-010</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="support_agent">support_agent</span>
+</div>
+<div class="flex-1 flex items-center justify-center p-2 text-center">
+<span class="font-code-sm text-code-sm text-on-surface">Support</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Technical Footer for the Diagram -->
+<div class="mt-20 border-t border-outline-variant pt-8 grid grid-cols-3 gap-8">
+<div class="flex flex-col gap-2">
+<h4 class="font-label-caps text-label-caps text-primary">NODAL INTEGRITY</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">All nodes are atomic and idempotent. Failure in any upstream node (e.g., WF-003) triggers an immediate lock on downstream transactional modules.</p>
+</div>
+<div class="flex flex-col gap-2">
+<h4 class="font-label-caps text-label-caps text-primary">DATA PERSISTENCE</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">State sync across the chain occurs every 250ms via the unified Ledger Sync Protocol. Verticals pull state via gRPC streams.</p>
+</div>
+<div class="flex flex-col gap-2">
+<h4 class="font-label-caps text-label-caps text-primary">ACCESS CONTROL</h4>
+<p class="font-code-xs text-code-xs text-on-surface-variant">OAuth 2.1 scoped tokens are required for vertical interaction. All core workflows are isolated in the Secure Infrastructure Zone.</p>
+</div>
+</div>
+</div>
+<!-- Bento Info Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+<div class="col-span-1 md:col-span-2 bg-surface-container rounded-xl p-6 border border-outline-variant flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined text-primary mb-4" data-icon="hub">hub</span>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Centralized Authority</h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                            The core workflows represent the 'Truth Source' for the entire Atlas ecosystem. By decoupling these from individual verticals, we ensure 100% policy compliance across the platform.
+                        </p>
+</div>
+<div class="mt-6 flex gap-4">
+<div class="flex-1 bg-surface-container-high p-3 rounded border border-outline-variant">
+<span class="block font-label-caps text-code-xs text-primary mb-1">LATENCY</span>
+<span class="font-code-sm text-code-sm text-on-surface">Avg 24.1ms</span>
+</div>
+<div class="flex-1 bg-surface-container-high p-3 rounded border border-outline-variant">
+<span class="block font-label-caps text-code-xs text-primary mb-1">UPTIME</span>
+<span class="font-code-sm text-code-sm text-on-surface">99.9992%</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-6 border border-outline-variant relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-headline-md text-headline-md text-primary mb-4">Vertical Integration</h3>
+<div class="space-y-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-container rounded-full"></span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">NaijaWholesale Adapter</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-container rounded-full"></span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">NaijaAgro Smart Contract</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-container rounded-full"></span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">NaijaLearn Credentialing</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-container rounded-full"></span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">NaijaStay Escrow Hook</span>
+</div>
+</div>
+</div>
+<!-- Faint watermark icon -->
+<span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl text-outline-variant opacity-10 rotate-12" data-icon="schema">schema</span>
+</div>
+<div class="bg-surface-container rounded-xl p-6 border border-outline-variant flex flex-col justify-between">
+<div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Audit Trace</h3>
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-4">Real-time log stream from WF-006</p>
+<div class="bg-surface-container-lowest font-code-xs text-code-xs p-3 rounded space-y-1 text-on-surface-variant border border-outline-variant">
+<div><span class="text-primary">[14:02:11]</span> ESCROW_INIT #9921</div>
+<div><span class="text-primary">[14:02:12]</span> FUND_VFY_SUCCESS</div>
+<div><span class="text-primary">[14:02:15]</span> NOTIF_QUEUED (WF-008)</div>
+<div><span class="text-primary">[14:02:18]</span> MSG_PUSH (WF-009)</div>
+</div>
+</div>
+<button class="mt-4 w-full bg-primary-container text-on-primary-container font-label-caps text-label-caps py-2 rounded transition-opacity active:opacity-80">VIEW FULL LOGS</button>
+</div>
+</div>
+<!-- Footer Telemetry -->
+<footer class="w-full fixed bottom-0 left-0 bg-surface-container-high border-t border-outline-variant flex justify-between items-center px-lane-margin h-8 w-full z-50">
+<div class="flex items-center gap-6">
+<span class="font-code-xs text-code-xs font-bold text-primary">SYSTEM HEALTH: OPTIMAL</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">LATENCY: 24ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">NODE: NG-Lagos-01</span>
+</div>
+<div class="flex items-center gap-4">
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-help" href="#">Documentation</a>
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-help" href="#">Support</a>
+<a class="font-code-xs text-code-xs text-on-surface-variant hover:text-primary transition-colors cursor-help underline decoration-primary" href="#">Telemetry</a>
+</div>
+</footer>
+</main>
+</div>
+<!-- Floating Action for Detail View -->
+<button class="fixed bottom-12 right-8 w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-40">
+<span class="material-symbols-outlined" data-icon="troubleshoot">troubleshoot</span>
+</button>
+<script>
+        // Micro-interaction for nodes
+        document.querySelectorAll('.workflow-node').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                const id = node.querySelector('.font-label-caps').textContent;
+                console.log(`Inspecting workflow node: ${id}`);
+            });
+        });
+
+        // Simple typing effect for terminal look in the audit log
+        const logEntries = [
+            '<div><span class="text-primary">[14:05:01]</span> TRUST_CALC COMPLETE</div>',
+            '<div><span class="text-primary">[14:05:04]</span> API_PUSH TO NaijaShop</div>',
+            '<div><span class="text-primary">[14:05:08]</span> SESSION_RENEWED (WF-002)</div>'
+        ];
+        const logContainer = document.querySelector('.bg-surface-container-lowest.space-y-1');
+        
+        setInterval(() => {
+            const newEntry = document.createElement('div');
+            newEntry.innerHTML = logEntries[Math.floor(Math.random() * logEntries.length)];
+            logContainer.prepend(newEntry);
+            if(logContainer.children.length > 6) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }, 4000);
+    </script>
+</body></html>
