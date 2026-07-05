@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-012 ARTIFACT E: DATA PERSISTENCE MODEL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+
+        .node-border-glow {
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.05);
+        }
+
+        .connector-line {
+            stroke: #3b4b37;
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        .connector-arrow {
+            fill: #3b4b37;
+        }
+
+        .pk-indicator {
+            color: #72ff70;
+            font-size: 10px;
+        }
+
+        .fk-indicator {
+            color: #b8c3ff;
+            font-size: 10px;
+        }
+
+        .relationship-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            fill: #84967e;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #273647;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b4b37;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#051424",
+                        "on-primary-container": "#007117",
+                        "secondary-fixed": "#dde1ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "tertiary": "#fff6ff",
+                        "surface-container-lowest": "#010f1f",
+                        "tertiary-container": "#ecd3ff",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-container-high": "#1c2b3c",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container-highest": "#273647",
+                        "background": "#051424",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#3b4b37",
+                        "secondary": "#b8c3ff",
+                        "primary-container": "#00ff41",
+                        "inverse-primary": "#006e16",
+                        "surface-dim": "#051424",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-tertiary": "#490080",
+                        "surface-variant": "#273647",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-fixed": "#2c0051",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#0043eb",
+                        "primary": "#ebffe2",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "surface-container-low": "#0d1c2d",
+                        "on-error": "#690005",
+                        "primary-fixed": "#72ff70",
+                        "surface-container": "#122131",
+                        "primary-fixed-dim": "#00e639",
+                        "on-secondary": "#002388",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "outline": "#84967e",
+                        "on-secondary-container": "#c6ceff",
+                        "on-primary": "#003907",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-fixed": "#001356",
+                        "inverse-on-surface": "#233143",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-tint": "#00e639"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "stack-gap": "4px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-hidden">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-lane-margin h-16 border-b border-outline-variant bg-surface-container-lowest text-primary dark:text-primary-fixed-dim">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim">account_tree</span>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight">SYSTEM ATLAS : MERCHANT_ONBOARDING_V4</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4 font-label-caps text-label-caps uppercase tracking-widest text-on-surface-variant">
+<span class="text-primary font-bold">Schema</span>
+<span class="hover:text-on-surface transition-colors duration-150 cursor-pointer">Transactions</span>
+<span class="hover:text-on-surface transition-colors duration-150 cursor-pointer">Replication</span>
+</div>
+<span class="material-symbols-outlined cursor-pointer hover:bg-surface-container-high p-2 rounded-sm transition-colors duration-150">settings_input_component</span>
+</div>
+</header>
+<!-- Sidebar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] z-40 flex flex-col pt-stack-gap border-r border-outline-variant bg-surface-container-low w-64">
+<div class="px-6 py-4">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-1">WORKFLOW INDEX</h2>
+<div class="h-1 w-12 bg-primary-container"></div>
+</div>
+<nav class="flex-1 px-3 space-y-1 overflow-y-auto">
+<div class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed-dim cursor-default">
+<span class="material-symbols-outlined text-[18px]">schema</span>
+<span class="font-label-caps text-label-caps">BPMN Flowmaps</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">code_blocks</span>
+<span class="font-label-caps text-label-caps">API Contracts</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">database</span>
+<span class="font-label-caps text-label-caps">Domain Models</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">swap_calls</span>
+<span class="font-label-caps text-label-caps">Sequence Diagrams</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span class="font-label-caps text-label-caps">Compliance Logic</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</div>
+</nav>
+<div class="p-4 border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex justify-between items-center mb-2">
+<span class="text-code-xs font-code-xs text-outline uppercase">Persistence Mode</span>
+<span class="text-code-xs font-code-xs text-primary-fixed-dim">ACID</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-3/4"></div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 mt-16 p-lane-margin h-[calc(100vh-64px-40px)] overflow-auto bg-surface relative">
+<!-- SVG Connector Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="min-width: 1200px; min-height: 800px;">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon class="connector-arrow" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Relationships: Defined by paths -->
+<!-- Merchant -> Profile (1:1) -->
+<path class="connector-line" d="M 420 180 L 480 180" marker-end="url(#arrowhead)"></path>
+<text class="relationship-label" x="430" y="175">1:1</text>
+<!-- Merchant -> Store (1:N) -->
+<path class="connector-line" d="M 300 285 L 300 360" marker-end="url(#arrowhead)"></path>
+<text class="relationship-label" x="310" y="320">1:N</text>
+<!-- Merchant -> Wallet (1:1) -->
+<path class="connector-line" d="M 180 180 L 120 180" marker-end="url(#arrowhead)"></path>
+<text class="relationship-label" x="130" y="175">1:1</text>
+<!-- Store -> ShippingProfile (1:N) -->
+<path class="connector-line" d="M 420 440 L 480 440" marker-end="url(#arrowhead)"></path>
+<text class="relationship-label" x="430" y="435">1:N</text>
+<!-- Merchant -> AuditLog (1:N) -->
+<path class="connector-line" d="M 300 80 L 300 40 L 800 40 L 800 100" marker-end="url(#arrowhead)"></path>
+<text class="relationship-label" x="500" y="35">STREAMING 1:N</text>
+</svg>
+<!-- Operation Toolbar -->
+<div class="fixed right-8 top-24 flex flex-col gap-2 z-30">
+<button class="bg-surface-container-high border border-outline-variant px-4 py-2 font-code-sm text-code-sm text-on-surface hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">add_box</span> INSERT
+            </button>
+<button class="bg-surface-container-high border border-outline-variant px-4 py-2 font-code-sm text-code-sm text-on-surface hover:bg-secondary-container transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">edit</span> UPDATE
+            </button>
+<button class="bg-surface-container-high border border-outline-variant px-4 py-2 font-code-sm text-code-sm text-on-surface hover:bg-error-container transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">delete</span> DELETE
+            </button>
+<div class="h-px bg-outline-variant my-2"></div>
+<button class="bg-surface-container-lowest border border-primary-fixed-dim px-4 py-2 font-code-sm text-code-sm text-primary-fixed-dim hover:bg-primary-fixed-dim hover:text-on-primary transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">lock</span> LOCK
+            </button>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 font-code-sm text-code-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> COMMIT
+            </button>
+<button class="bg-surface-container-high border border-outline-variant px-4 py-2 font-code-sm text-code-sm text-on-surface hover:bg-surface-variant transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">undo</span> ROLLBACK
+            </button>
+</div>
+<!-- Entity Nodes -->
+<div class="grid grid-cols-3 gap-x-32 gap-y-16 relative z-10 w-[1000px]">
+<!-- Wallet Node -->
+<div class="bg-surface-container-lowest border border-outline-variant w-64 node-border-glow">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">ENTITY: WALLET</span>
+<span class="material-symbols-outlined text-[14px] text-primary">account_balance_wallet</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface"><span class="pk-indicator">◆</span> wallet_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface"><span class="fk-indicator">◇</span> merchant_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">balance_amt</span>
+<span class="text-outline">DECIMAL</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">currency_code</span>
+<span class="text-outline">STR(3)</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-2 border-t border-outline-variant">
+<span class="font-code-xs text-code-xs text-outline italic">TTL: INFINITE</span>
+</div>
+</div>
+<!-- Merchant Node (Core) -->
+<div class="bg-surface-container-lowest border-2 border-primary-fixed-dim w-64 node-border-glow">
+<div class="bg-primary-container p-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-primary-container uppercase font-bold">CORE: MERCHANT</span>
+<span class="material-symbols-outlined text-[14px] text-on-primary-container">storefront</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface font-bold"><span class="pk-indicator">◆</span> merchant_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">internal_alias</span>
+<span class="text-outline">STR(64)</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">onboarding_status</span>
+<span class="text-outline">ENUM</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">created_at</span>
+<span class="text-outline">TS_TZ</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-2 border-t border-outline-variant">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim italic">REDUNDANCY: MULTI-REGION</span>
+</div>
+</div>
+<!-- BusinessProfile Node -->
+<div class="bg-surface-container-lowest border border-outline-variant w-64 node-border-glow">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">ENTITY: BUS_PROFILE</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">corporate_fare</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface"><span class="pk-indicator">◆</span> profile_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface"><span class="fk-indicator">◇</span> merchant_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">legal_name</span>
+<span class="text-outline">STR(255)</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">tax_jurisdiction</span>
+<span class="text-outline">STR(2)</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-2 border-t border-outline-variant">
+<span class="font-code-xs text-code-xs text-outline italic">GDPR: SENSITIVE_ENCRYPTED</span>
+</div>
+</div>
+<!-- Empty Grid Space for layout spacing -->
+<div></div>
+<!-- Store Node -->
+<div class="bg-surface-container-lowest border border-outline-variant w-64 node-border-glow">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">ENTITY: STORE</span>
+<span class="material-symbols-outlined text-[14px] text-primary">shopping_basket</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface"><span class="pk-indicator">◆</span> store_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface"><span class="fk-indicator">◇</span> merchant_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">store_url</span>
+<span class="text-outline">URL</span>
+</div>
+</div>
+</div>
+<!-- ShippingProfile Node -->
+<div class="bg-surface-container-lowest border border-outline-variant w-64 node-border-glow">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">ENTITY: SHIPPING</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">local_shipping</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface"><span class="pk-indicator">◆</span> ship_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface"><span class="fk-indicator">◇</span> store_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">carrier_code</span>
+<span class="text-outline">ENUM</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-2 border-t border-outline-variant">
+<span class="font-code-xs text-code-xs text-outline italic">TTL: 7 YEARS</span>
+</div>
+</div>
+<!-- ComplianceRecord Node -->
+<div class="bg-surface-container-lowest border border-outline-variant w-64 node-border-glow">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">ENTITY: COMPLIANCE</span>
+<span class="material-symbols-outlined text-[14px] text-error">gavel</span>
+</div>
+<div class="p-3 space-y-1">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface"><span class="pk-indicator">◆</span> record_id</span>
+<span class="text-outline">UUID</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">kyc_level</span>
+<span class="text-outline">INT</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">aml_flag</span>
+<span class="text-outline">BOOL</span>
+</div>
+</div>
+</div>
+<!-- AuditLog Node (Right side floating) -->
+<div class="bg-surface-container-lowest border border-outline-variant w-72 node-border-glow absolute right-[-40px] top-20">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">SYSTEM: AUDIT_LOG</span>
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">terminal</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm border-b border-outline-variant pb-1">
+<span class="text-primary-fixed-dim">2023-10-24 14:02:11</span>
+<span class="text-on-surface">LOCK: MERCHANT_01</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm border-b border-outline-variant pb-1">
+<span class="text-primary-fixed-dim">2023-10-24 14:02:13</span>
+<span class="text-on-surface">UPDATE: WALLET_BAL</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm border-b border-outline-variant pb-1">
+<span class="text-primary-fixed-dim">2023-10-24 14:02:15</span>
+<span class="text-on-primary-container font-bold">COMMIT</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-2 border-t border-outline-variant">
+<span class="font-code-xs text-code-xs text-outline italic">PARTITIONED BY: MONTHLY</span>
+</div>
+</div>
+</div>
+<!-- Telemetry Data Overlay -->
+<div class="absolute bottom-8 left-8 flex gap-8 z-20">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Active Locks</span>
+<span class="font-code-sm text-headline-md text-primary-fixed-dim">12</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Sync Latency</span>
+<span class="font-code-sm text-headline-md text-secondary">42ms</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Storage Tier</span>
+<span class="font-code-sm text-headline-md text-on-surface">NVMe_R6</span>
+</div>
+</div>
+</main>
+<!-- Bottom Nav Bar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-center gap-lane-margin items-center h-10 px-lane-margin border-t border-outline-variant bg-surface-container-highest text-primary-fixed">
+<div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity duration-150 cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined text-[18px]">query_stats</span>
+<span class="font-code-xs text-code-xs uppercase">Live Metrics</span>
+</div>
+<div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity duration-150 cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined text-[18px]">storage</span>
+<span class="font-code-xs text-code-xs uppercase">Registry</span>
+</div>
+<div class="flex items-center gap-2 bg-on-primary-container text-primary-fixed rounded-sm px-3 py-1 cursor-default">
+<span class="material-symbols-outlined text-[18px]">architecture</span>
+<span class="font-code-xs text-code-xs uppercase">Schema</span>
+</div>
+<div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity duration-150 cursor-pointer scale-95 active:scale-90">
+<span class="material-symbols-outlined text-[18px]">view_headline</span>
+<span class="font-code-xs text-code-xs uppercase">Console</span>
+</div>
+</footer>
+<!-- Transaction Progress Indicator (Bottom Right) -->
+<div class="fixed bottom-14 right-8 bg-surface-container-lowest border border-outline-variant p-4 w-64 shadow-2xl z-50">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-label-caps text-on-surface">TX_STATE: PENDING</span>
+<div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-code-xs font-code-xs">
+<span class="text-outline">Awaiting Consensus</span>
+<span class="text-primary-fixed-dim">80%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1">
+<div class="bg-secondary h-full w-[80%] transition-all duration-700"></div>
+</div>
+</div>
+</div>
+<script>
+        // Micro-interaction for entity nodes
+        document.querySelectorAll('.node-border-glow').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.borderColor = '#00ff41';
+                node.style.transform = 'translateY(-2px)';
+                node.style.transition = 'all 0.2s ease-out';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.borderColor = '#3b4b37';
+                node.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Simulating audit log updates
+        const logs = document.querySelector('.AuditLog .p-3');
+        if (logs) {
+            setInterval(() => {
+                const now = new Date();
+                const timeStr = now.toISOString().slice(0, 19).replace('T', ' ');
+                const actions = ['INSERT: KYC_DOC', 'UPDATE: TAX_ID', 'LOCK: B_PROF', 'DELETE: TMP_01'];
+                const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = 'flex justify-between font-code-sm text-code-sm border-b border-outline-variant pb-1 opacity-0 transition-opacity duration-500';
+                logEntry.innerHTML = `<span class="text-primary-fixed-dim">${timeStr}</span><span class="text-on-surface">${randomAction}</span>`;
+                
+                logs.prepend(logEntry);
+                setTimeout(() => logEntry.classList.remove('opacity-0'), 50);
+                
+                if (logs.children.length > 5) {
+                    logs.removeChild(logs.lastElementChild);
+                }
+            }, 5000);
+        }
+    </script>
+</body></html>

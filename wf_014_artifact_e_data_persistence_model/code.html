@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PIM_ENGINE_V2 | Data Persistence Model WF-014</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            stroke: #84967e;
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .primary-path {
+            stroke: #00e639;
+            stroke-width: 2;
+        }
+        .error-path {
+            stroke: #ffb4ab;
+            stroke-dasharray: 4;
+        }
+        .entity-card {
+            background-color: #0d1c2d;
+            border: 1px solid #3b4b37;
+            transition: all 0.2s ease;
+        }
+        .entity-card:hover {
+            border-color: #00e639;
+            background-color: #122131;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#72ff70",
+                        "secondary-fixed": "#dde1ff",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#007117",
+                        "on-primary": "#003907",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed": "#f0dbff",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary": "#b8c3ff",
+                        "outline-variant": "#3b4b37",
+                        "surface-tint": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "surface-container-high": "#1c2b3c",
+                        "primary-fixed-dim": "#00e639",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-secondary-container": "#c6ceff",
+                        "on-background": "#d4e4fa",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-low": "#0d1c2d",
+                        "background": "#051424",
+                        "inverse-on-surface": "#233143",
+                        "primary-container": "#00ff41",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-container": "#0043eb",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#001356",
+                        "surface-variant": "#273647",
+                        "surface-dim": "#051424",
+                        "surface-container": "#122131",
+                        "on-secondary": "#002388",
+                        "on-tertiary-container": "#862ed4",
+                        "surface": "#051424",
+                        "on-primary-fixed-variant": "#00530e",
+                        "inverse-primary": "#006e16",
+                        "on-error": "#690005",
+                        "primary": "#ebffe2",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-tertiary": "#490080",
+                        "tertiary": "#fff6ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "outline": "#84967e",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-fixed": "#002203"
+                    },
+                    "spacing": {
+                        "grid-unit": "8px",
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-8 h-14">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-dim">account_tree</span>
+<span class="font-label-caps text-label-caps tracking-widest text-primary-fixed-dim uppercase">PIM_ENGINE_V2</span>
+</div>
+<div class="hidden md:flex gap-6 items-center">
+<span class="font-label-caps text-label-caps text-primary cursor-pointer transition-colors hover:bg-surface-container-highest px-3 py-1 rounded">DATA SCHEMA</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer transition-colors hover:bg-surface-container-highest px-3 py-1 rounded">WORKFLOW NODES</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer transition-colors hover:bg-surface-container-highest px-3 py-1 rounded">SYSTEM LOGS</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-surface-container px-2 py-1 flex items-center gap-2 border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">STABLE_REL_14</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed-dim">settings_input_component</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<aside class="h-full w-64 hidden lg:flex flex-col bg-surface-container-low border-r border-outline-variant py-6">
+<div class="px-6 mb-8">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant opacity-50 mb-2">MODULE_INDEX</h2>
+<div class="h-[1px] w-full bg-outline-variant"></div>
+</div>
+<nav class="flex flex-col gap-1 px-3">
+<div class="flex items-center gap-3 px-3 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed-dim transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">database</span>
+<span class="font-label-caps text-label-caps">Data Schema</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">alt_route</span>
+<span class="font-label-caps text-label-caps">Workflow Nodes</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span class="font-label-caps text-label-caps">Asset Mapping</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span class="font-label-caps text-label-caps">System Logs</span>
+</div>
+</nav>
+<div class="mt-auto px-6">
+<div class="bg-surface-container-highest p-4 border border-outline-variant">
+<div class="flex justify-between items-center mb-2">
+<span class="font-code-xs text-code-xs text-on-surface">HEALTH</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">OPTIMAL</span>
+</div>
+<div class="w-full h-1 bg-surface-container-low">
+<div class="h-full bg-primary-fixed-dim w-[94%]"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 relative overflow-auto scrollbar-hide p-node-gutter">
+<!-- Background Grids and Textures -->
+<div class="absolute inset-0 z-0 pointer-events-none opacity-20">
+
+</div>
+<!-- Header Section -->
+<div class="relative z-10 flex flex-col mb-10 border-l-4 border-primary-fixed-dim pl-6">
+<h1 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tight">Persistence Model: WF-014</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant max-w-2xl mt-2">
+                    Visualizing the high-density relational architecture for core inventory management and transactional synchronization. Logical actor: <span class="text-primary-fixed-dim">CORE_ENGINE</span>.
+                </p>
+<div class="flex gap-4 mt-4">
+<div class="flex items-center gap-2 bg-surface-container-high px-3 py-1 border border-outline-variant">
+<span class="font-code-xs text-code-xs text-on-surface-variant">ISOLATION:</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SERIALIZABLE</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high px-3 py-1 border border-outline-variant">
+<span class="font-code-xs text-code-xs text-on-surface-variant">REPLICA:</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">SYNC_ENABLED</span>
+</div>
+</div>
+</div>
+<!-- ER Layout Container -->
+<div class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- ENTITY: INVENTORY -->
+<div class="entity-card p-0 flex flex-col overflow-hidden">
+<div class="bg-outline-variant px-3 py-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-primary">TABLE: INVENTORY</span>
+<span class="material-symbols-outlined text-[14px] text-on-primary">key</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">id</span>
+<span class="text-on-surface-variant opacity-60">UUID [PK]</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">sku_code</span>
+<span class="text-on-surface-variant opacity-60">VARCHAR(50)</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">qty_available</span>
+<span class="text-on-surface-variant opacity-60">DECIMAL(10,2)</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">warehouse_id</span>
+<span class="text-on-surface-variant opacity-60">UUID [FK]</span>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant bg-surface-container-lowest p-2 flex gap-1">
+<span class="font-code-xs text-code-xs px-1 bg-primary-container text-on-primary-container rounded">INDEX: SKU</span>
+</div>
+</div>
+<!-- ENTITY: WAREHOUSE -->
+<div class="entity-card p-0 flex flex-col overflow-hidden">
+<div class="bg-outline-variant px-3 py-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-primary">TABLE: WAREHOUSE</span>
+<span class="material-symbols-outlined text-[14px] text-on-primary">home_storage</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">id</span>
+<span class="text-on-surface-variant opacity-60">UUID [PK]</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">code</span>
+<span class="text-on-surface-variant opacity-60">VARCHAR(10)</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">is_active</span>
+<span class="text-on-surface-variant opacity-60">BOOLEAN</span>
+</div>
+</div>
+</div>
+<!-- ENTITY: STOCK_MOVEMENT -->
+<div class="entity-card p-0 flex flex-col overflow-hidden border-primary-fixed-dim">
+<div class="bg-primary-fixed-dim px-3 py-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-primary-fixed">TABLE: MOVEMENT</span>
+<span class="material-symbols-outlined text-[14px] text-on-primary-fixed">sync_alt</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">id</span>
+<span class="text-on-surface-variant opacity-60">UUID [PK]</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">inv_id</span>
+<span class="text-on-surface-variant opacity-60">UUID [FK]</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">type</span>
+<span class="text-on-surface-variant opacity-60">ENUM</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">txn_ref</span>
+<span class="text-on-surface-variant opacity-60">VARCHAR</span>
+</div>
+</div>
+</div>
+<!-- ENTITY: RESERVATION -->
+<div class="entity-card p-0 flex flex-col overflow-hidden">
+<div class="bg-outline-variant px-3 py-2 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-primary">TABLE: RESERVATION</span>
+<span class="material-symbols-outlined text-[14px] text-on-primary">lock_clock</span>
+</div>
+<div class="p-3 space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-primary-fixed-dim">id</span>
+<span class="text-on-surface-variant opacity-60">UUID [PK]</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">expiry</span>
+<span class="text-on-surface-variant opacity-60">TIMESTAMP</span>
+</div>
+</div>
+</div>
+<!-- ENTITY: AUDIT_LOG (History/Retention focus) -->
+<div class="entity-card p-0 flex flex-col overflow-hidden border-tertiary-fixed-dim lg:col-span-2">
+<div class="bg-surface-container-highest px-3 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-tertiary-fixed-dim">SYSTEM: AUDIT_LOG &amp; RETENTION</span>
+<div class="flex gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">TTL: 365D</span>
+<span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim">history</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 p-4">
+<div class="space-y-2">
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">log_id</span>
+<span class="text-on-surface-variant opacity-60">BIGSERIAL</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">actor</span>
+<span class="text-on-surface-variant opacity-60">VARCHAR</span>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm">
+<span class="text-on-surface">payload_json</span>
+<span class="text-on-surface-variant opacity-60">JSONB</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-dashed border-outline-variant p-3">
+<span class="font-label-caps text-label-caps text-on-surface block mb-2">RETENTION_POLICY</span>
+<div class="space-y-1">
+<p class="font-code-xs text-code-xs text-on-surface-variant">• Transactional data: Permanent</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">• Access logs: 90 days cleanup</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant">• Debug traces: 48 hours</p>
+</div>
+</div>
+</div>
+</div>
+<!-- OPERATION CLUSTER (Dynamic Interactions) -->
+<div class="entity-card p-4 lg:col-span-2 border-secondary-container bg-surface-container">
+<h3 class="font-label-caps text-label-caps text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">terminal</span>
+                        DATABASE_OPERATIONS_FLOW
+                    </h3>
+<div class="grid grid-cols-4 gap-2">
+<button class="bg-surface-container-high border border-outline-variant p-2 font-code-xs text-code-xs hover:border-primary-fixed-dim hover:text-primary-fixed-dim transition-colors text-left flex flex-col">
+<span class="opacity-50">01.</span>
+<span>INSERT</span>
+</button>
+<button class="bg-surface-container-high border border-outline-variant p-2 font-code-xs text-code-xs hover:border-primary-fixed-dim hover:text-primary-fixed-dim transition-colors text-left flex flex-col">
+<span class="opacity-50">02.</span>
+<span>LOCK_EXCLUSIVE</span>
+</button>
+<button class="bg-surface-container-high border border-outline-variant p-2 font-code-xs text-code-xs hover:border-primary-fixed-dim hover:text-primary-fixed-dim transition-colors text-left flex flex-col">
+<span class="opacity-50">03.</span>
+<span>UPDATE_STATE</span>
+</button>
+<button class="bg-surface-container-high border border-outline-variant p-2 font-code-xs text-code-xs hover:border-primary-fixed-dim hover:text-primary-fixed-dim transition-colors text-left flex flex-col">
+<span class="opacity-50">04.</span>
+<span>UNLOCK</span>
+</button>
+<button class="bg-surface-container-high border border-outline-variant p-2 font-code-xs text-code-xs hover:border-primary-fixed-dim hover:text-primary-fixed-dim transition-colors text-left flex flex-col">
+<span class="opacity-50">05.</span>
+<span>COMMIT_ALL</span>
+</button>
+<button class="bg-error-container border border-error p-2 font-code-xs text-code-xs hover:bg-error hover:text-on-error transition-colors text-left flex flex-col col-span-2">
+<span class="opacity-50">ERR.</span>
+<span>ROLLBACK_ON_EXCEPTION</span>
+</button>
+<button class="bg-surface-container-high border border-outline-variant p-2 font-code-xs text-code-xs hover:border-primary-fixed-dim hover:text-primary-fixed-dim transition-colors text-left flex flex-col">
+<span class="opacity-50">06.</span>
+<span>NOTIFY_ASYNC</span>
+</button>
+</div>
+</div>
+<!-- REMAINING SMALL ENTITIES -->
+<div class="entity-card p-3 space-y-3">
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="w-1 h-3 bg-secondary"></span> TRANSFER
+                    </span>
+<div class="font-code-sm text-code-sm text-on-surface opacity-80">
+                        src_warehouse_id [FK]<br/>
+                        dst_warehouse_id [FK]<br/>
+                        status [ENUM]
+                    </div>
+</div>
+<div class="entity-card p-3 space-y-3">
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="w-1 h-3 bg-error"></span> DAMAGE_REPORT
+                    </span>
+<div class="font-code-sm text-code-sm text-on-surface opacity-80">
+                        inv_id [FK]<br/>
+                        qty_damaged [DEC]<br/>
+                        cause [VARCHAR]
+                    </div>
+</div>
+<div class="entity-card p-3 space-y-3">
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="w-1 h-3 bg-primary-fixed-dim"></span> EXPIRY_RECORD
+                    </span>
+<div class="font-code-sm text-code-sm text-on-surface opacity-80">
+                        batch_id [FK]<br/>
+                        expiry_date [TS]<br/>
+                        action_taken [ENUM]
+                    </div>
+</div>
+<div class="entity-card p-3 space-y-3">
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="w-1 h-3 bg-surface-tint"></span> CYCLE_COUNT
+                    </span>
+<div class="font-code-sm text-code-sm text-on-surface opacity-80">
+                        loc_id [FK]<br/>
+                        expected_qty [DEC]<br/>
+                        actual_qty [DEC]
+                    </div>
+</div>
+</div>
+<!-- Visualization Overlay (Connectors simulated) -->
+<svg class="absolute inset-0 pointer-events-none w-full h-full opacity-30">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#84967e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Placeholder connecting lines to evoke ER complexity -->
+<path class="node-connector" d="M 300,400 L 400,400 L 400,500" marker-end="url(#arrowhead)"></path>
+<path class="node-connector" d="M 600,300 L 650,300 L 650,450 L 700,450" marker-end="url(#arrowhead)"></path>
+<path class="node-connector error-path" d="M 1000,600 L 1000,700 L 800,700" marker-end="url(#arrowhead)"></path>
+</svg>
+<!-- Telemetry Overlay -->
+<div class="fixed bottom-12 right-8 flex flex-col gap-2 z-50">
+<div class="bg-surface-container border border-outline-variant p-3 shadow-xl backdrop-blur-md">
+<h4 class="font-label-caps text-label-caps text-primary-fixed-dim mb-2">LIVE_TELEMETRY</h4>
+<div class="space-y-1">
+<div class="flex justify-between items-center gap-8">
+<span class="font-code-xs text-code-xs text-on-surface-variant">DB_CPU_LOAD</span>
+<span class="font-code-xs text-code-xs text-on-surface">14.2%</span>
+</div>
+<div class="flex justify-between items-center gap-8">
+<span class="font-code-xs text-code-xs text-on-surface-variant">ACTIVE_TXN</span>
+<span class="font-code-xs text-code-xs text-on-surface">42</span>
+</div>
+<div class="flex justify-between items-center gap-8">
+<span class="font-code-xs text-code-xs text-on-surface-variant">LOCK_WAIT</span>
+<span class="font-code-xs text-code-xs text-on-surface">0.02ms</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full fixed bottom-0 z-50 bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-6 py-1 h-8">
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CORE_ENGINE_STABLE</span>
+<div class="flex gap-3">
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">LATENCY: 12ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-50">|</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">UPTIME: 99.99%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant opacity-50">|</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">THROUGHPUT: 4.2k/s</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-code-xs text-code-xs text-on-surface-variant">NODE_014_ACTIVE</span>
+<span class="material-symbols-outlined text-[12px] text-primary-fixed-dim animate-pulse">sensors</span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.98)';
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+
+        // Hover effect for entity cards to simulate connectivity highlight
+        document.querySelectorAll('.entity-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                document.querySelector('svg').style.opacity = '0.8';
+            });
+            card.addEventListener('mouseleave', () => {
+                document.querySelector('svg').style.opacity = '0.3';
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CORE_OS_v2.4.1-STABLE | Event Bus WF-014</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#72ff70",
+                    "secondary-fixed": "#dde1ff",
+                    "on-error-container": "#ffdad6",
+                    "on-primary-container": "#007117",
+                    "on-primary": "#003907",
+                    "surface-bright": "#2c3a4c",
+                    "tertiary-fixed": "#f0dbff",
+                    "inverse-surface": "#d4e4fa",
+                    "secondary": "#b8c3ff",
+                    "outline-variant": "#3b4b37",
+                    "surface-tint": "#00e639",
+                    "surface-container-highest": "#273647",
+                    "surface-container-high": "#1c2b3c",
+                    "primary-fixed-dim": "#00e639",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-secondary-container": "#c6ceff",
+                    "on-background": "#d4e4fa",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface-container-low": "#0d1c2d",
+                    "background": "#051424",
+                    "inverse-on-surface": "#233143",
+                    "primary-container": "#00ff41",
+                    "error": "#ffb4ab",
+                    "tertiary-container": "#ecd3ff",
+                    "surface-container-lowest": "#010f1f",
+                    "secondary-container": "#0043eb",
+                    "error-container": "#93000a",
+                    "on-secondary-fixed": "#001356",
+                    "surface-variant": "#273647",
+                    "surface-dim": "#051424",
+                    "surface-container": "#122131",
+                    "on-secondary": "#002388",
+                    "on-tertiary-container": "#862ed4",
+                    "surface": "#051424",
+                    "on-primary-fixed-variant": "#00530e",
+                    "inverse-primary": "#006e16",
+                    "on-error": "#690005",
+                    "primary": "#ebffe2",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-tertiary": "#490080",
+                    "tertiary": "#fff6ff",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "outline": "#84967e",
+                    "on-surface": "#d4e4fa",
+                    "on-primary-fixed": "#002203"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "grid-unit": "8px",
+                    "stack-gap": "4px",
+                    "node-gutter": "24px",
+                    "lane-margin": "32px"
+            },
+            "fontFamily": {
+                    "code-sm": ["JetBrains Mono"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-xs": ["JetBrains Mono"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector {
+            position: absolute;
+            background: #84967e;
+            z-index: 0;
+        }
+        .node-connector.active {
+            background: #72ff70;
+            box-shadow: 0 0 8px #72ff70;
+        }
+        .glow-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .scroll-hide::-webkit-scrollbar { display: none; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-container-lowest text-primary dark:text-primary-fixed w-full top-0 border-b border-outline-variant fixed z-50 flex justify-between items-center px-grid-unit h-12">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">terminal</span>
+<span class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</span>
+</div>
+<nav class="hidden md:flex h-full items-center gap-6">
+<a class="h-full flex items-center px-2 text-primary-fixed border-b-2 border-primary-fixed font-label-caps text-label-caps transition-colors" href="#">WF-014_EVENT_BUS</a>
+<a class="h-full flex items-center px-2 text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors font-label-caps text-label-caps" href="#">MONITORING</a>
+<a class="h-full flex items-center px-2 text-outline hover:bg-surface-container-highest hover:text-primary-fixed transition-colors font-label-caps text-label-caps" href="#">NODES</a>
+</nav>
+<div class="font-label-caps text-label-caps font-bold text-primary-fixed bg-surface-container px-2 py-1 border border-outline-variant">
+            STATUS: OK
+        </div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="bg-surface-container dark:bg-surface-container fixed left-0 top-12 h-[calc(100vh-48px)] w-64 border-r border-outline-variant flex flex-col z-40">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed uppercase">MODULE_INDEX</span>
+</div>
+<nav class="flex-1 overflow-y-auto">
+<div class="p-2 space-y-1">
+<button class="w-full flex items-center gap-3 px-3 py-2 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed font-label-caps text-label-caps transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined">account_tree</span>
+<span>System_Architecture</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined">account_tree</span>
+<span>Workflow_Engine</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined">grid_view</span>
+<span>Logic_Matrices</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined">insights</span>
+<span>Telemetry_Streams</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 text-outline hover:text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps transition-all duration-150 ease-in-out">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span>Node_Registry</span>
+</button>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed glow-pulse"></div>
+<span class="font-code-xs text-code-xs text-on-surface">ENGINE_CONNECTED</span>
+</div>
+<div class="font-code-xs text-code-xs text-outline">v8.42.0-STABLE_PROD</div>
+</div>
+</aside>
+<!-- Main Content: Workflow Engine Canvas -->
+<main class="ml-64 mt-12 mb-8 h-[calc(100vh-80px)] relative overflow-hidden flex flex-col">
+<!-- Canvas Header: Swimlanes -->
+<div class="flex h-12 border-b border-outline-variant bg-surface-container-low">
+<div class="w-1/4 border-r border-outline-variant flex items-center px-4">
+<span class="material-symbols-outlined text-primary-fixed mr-2" style="font-size: 16px;">input</span>
+<span class="font-headline-md text-headline-md font-label-caps text-label-caps">INGRESS_GATEWAY</span>
+</div>
+<div class="w-1/4 border-r border-outline-variant flex items-center px-4">
+<span class="material-symbols-outlined text-primary-fixed mr-2" style="font-size: 16px;">hub</span>
+<span class="font-headline-md text-headline-md font-label-caps text-label-caps">EVENT_PROCESSOR</span>
+</div>
+<div class="w-1/4 border-r border-outline-variant flex items-center px-4">
+<span class="material-symbols-outlined text-primary-fixed mr-2" style="font-size: 16px;">storage</span>
+<span class="font-headline-md text-headline-md font-label-caps text-label-caps">DATA_PERSISTENCE</span>
+</div>
+<div class="w-1/4 flex items-center px-4">
+<span class="material-symbols-outlined text-primary-fixed mr-2" style="font-size: 16px;">forward_to_inbox</span>
+<span class="font-headline-md text-headline-md font-label-caps text-label-caps">EGRESS_NOTIFIER</span>
+</div>
+</div>
+<!-- Node-Link Canvas Body -->
+<div class="flex-1 relative overflow-auto p-8 scroll-hide" id="canvas">
+<!-- Connection Lines (Visual Decorators) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30">
+<path d="M 280 100 L 350 100 L 350 220 L 420 220" fill="none" stroke="#72ff70" stroke-width="1.5"></path>
+<path d="M 280 320 L 350 320 L 350 250 L 420 250" fill="none" stroke="#72ff70" stroke-width="1.5"></path>
+<path d="M 700 235 L 850 235" fill="none" stroke="#72ff70" stroke-dasharray="4" stroke-width="2"></path>
+<path d="M 1120 235 L 1250 235" fill="none" stroke="#72ff70" stroke-width="1.5"></path>
+<path d="M 700 250 L 750 250 L 750 450 L 850 450" fill="none" stroke="#ffb4ab" stroke-dasharray="4" stroke-width="1.5"></path>
+</svg>
+<!-- Column 1: Ingress Gateway -->
+<div class="absolute left-8 top-10 flex flex-col gap-12 w-[250px]">
+<!-- Node 1 -->
+<div class="bg-surface-container-lowest border border-primary-fixed p-3 shadow-sm hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-primary-fixed opacity-70">EVT-001</span>
+<span class="material-symbols-outlined text-primary-fixed" style="font-size: 14px;">bolt</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface font-bold uppercase mb-1">InventoryCreated</h3>
+<div class="text-[9px] font-code-xs text-outline">AUTO_ID: N8N_7741</div>
+<div class="mt-2 flex gap-1">
+<span class="h-1 flex-1 bg-primary-fixed"></span>
+<span class="h-1 flex-1 bg-outline opacity-20"></span>
+<span class="h-1 flex-1 bg-outline opacity-20"></span>
+</div>
+</div>
+<!-- Node 2 -->
+<div class="bg-surface-container-lowest border border-primary-fixed p-3 shadow-sm hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-primary-fixed opacity-70">EVT-002</span>
+<span class="material-symbols-outlined text-primary-fixed" style="font-size: 14px;">inventory</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-on-surface font-bold uppercase mb-1">StockReceived</h3>
+<div class="text-[9px] font-code-xs text-outline">QUE: WHS_MAIN</div>
+</div>
+<!-- Node 3 -->
+<div class="bg-surface-container-lowest border border-outline p-3 shadow-sm hover:bg-surface-container-high transition-colors cursor-pointer group grayscale hover:grayscale-0">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-[9px] text-outline">EVT-003</span>
+<span class="material-symbols-outlined text-outline" style="font-size: 14px;">lock_open</span>
+</div>
+<h3 class="font-code-sm text-code-sm text-outline font-bold uppercase mb-1">StockReleased</h3>
+<div class="text-[9px] font-code-xs text-outline">RETRIES: 0/3</div>
+</div>
+</div>
+<!-- Column 2: Event Processor (n8n Node Style) -->
+<div class="absolute left-[400px] top-[180px] w-[300px]">
+<div class="bg-surface-container-high border-2 border-primary-fixed-dim p-4 relative">
+<div class="absolute -top-3 left-4 bg-primary-fixed text-on-primary-fixed px-2 py-0.5 text-[9px] font-label-caps">EXECUTOR: n8n.WF-014</div>
+<div class="flex items-center gap-4 mb-4">
+<div class="w-10 h-10 bg-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-fixed" style="font-size: 24px;">settings_suggest</span>
+</div>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface font-bold uppercase">Processing_Engine</div>
+<div class="text-[10px] font-code-xs text-primary-fixed">LATENCY: 14ms</div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[10px] font-code-xs border-b border-outline-variant pb-1">
+<span class="text-outline">Active Threads</span>
+<span class="text-on-surface">1,024</span>
+</div>
+<div class="flex justify-between items-center text-[10px] font-code-xs border-b border-outline-variant pb-1">
+<span class="text-outline">Queue Health</span>
+<span class="text-primary-fixed">NOMINAL</span>
+</div>
+<div class="flex justify-between items-center text-[10px] font-code-xs">
+<span class="text-outline">Memory Usage</span>
+<span class="text-on-surface">42%</span>
+</div>
+</div>
+</div>
+<!-- Micro-telemetry labels -->
+<div class="mt-4 flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-fixed rounded-full"></span>
+<span class="text-[9px] font-code-xs text-outline uppercase tracking-wider">PickingStarted: Logged</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary-fixed rounded-full"></span>
+<span class="text-[9px] font-code-xs text-outline uppercase tracking-wider">PackingCompleted: Streamed</span>
+</div>
+</div>
+</div>
+<!-- Column 3: Persistence / DLQ -->
+<div class="absolute left-[800px] top-10 flex flex-col gap-8 w-[280px]">
+<!-- DLQ Node -->
+<div class="bg-surface-container-lowest border border-error p-3 border-dashed relative">
+<div class="absolute -top-2.5 right-2 bg-error text-on-error px-1.5 text-[8px] font-bold">CRITICAL</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">warning</span>
+<div>
+<h4 class="font-code-sm text-code-sm text-error font-bold">Dead Letter Queue</h4>
+<p class="text-[10px] font-code-xs text-outline">Dropped payloads for WF-014</p>
+</div>
+</div>
+<div class="mt-3 bg-error-container p-2">
+<div class="text-[9px] font-code-xs text-on-error-container">ERR: TransferCreated (ID: 99x2)</div>
+<div class="text-[9px] font-code-xs text-on-error-container">REASON: TIMEOUT_UPSTREAM</div>
+</div>
+</div>
+<!-- Persistent Records -->
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<h4 class="font-label-caps text-label-caps text-outline mb-3">PERSISTENCE_LAYER</h4>
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-1 h-4 bg-primary-fixed"></div>
+<span class="text-[11px] font-code-sm">StockReserved</span>
+</div>
+<span class="text-[9px] font-code-xs text-outline">ACK_200</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-1 h-4 bg-primary-fixed"></div>
+<span class="text-[11px] font-code-sm">DispatchCompleted</span>
+</div>
+<span class="text-[9px] font-code-xs text-outline">ACK_200</span>
+</div>
+<div class="flex items-center justify-between opacity-50">
+<div class="flex items-center gap-2">
+<div class="w-1 h-4 bg-outline"></div>
+<span class="text-[11px] font-code-sm">LowStockDetected</span>
+</div>
+<span class="text-[9px] font-code-xs text-outline">PENDING</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 4: Egress / Notifier -->
+<div class="absolute left-[1200px] top-[180px] w-[220px]">
+<div class="bg-surface-container border border-primary-fixed p-4 shadow-xl">
+<div class="flex items-center justify-center h-12 border-b border-outline-variant mb-3">
+<span class="material-symbols-outlined text-primary-fixed" style="font-size: 32px;">notifications_active</span>
+</div>
+<h3 class="text-center font-code-sm text-code-sm mb-4">NotificationSent</h3>
+<div class="grid grid-cols-3 gap-2">
+<div class="aspect-square bg-surface-container-high flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline" style="font-size: 16px;">mail</span>
+</div>
+<div class="aspect-square bg-surface-container-high flex items-center justify-center border border-primary-fixed">
+<span class="material-symbols-outlined text-primary-fixed" style="font-size: 16px;">sms</span>
+</div>
+<div class="aspect-square bg-surface-container-high flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline" style="font-size: 16px;">webhook</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Info Overlay (Bottom Right) -->
+<div class="absolute bottom-6 right-6 w-72 bg-surface-container-lowest border border-outline-variant p-4 z-10">
+<div class="flex items-center gap-2 mb-3">
+<span class="w-2 h-2 bg-primary-fixed rounded-full"></span>
+<span class="font-label-caps text-label-caps">REAL-TIME TELEMETRY</span>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-code-xs text-outline">
+<span>Active Workflow</span>
+<span class="text-on-surface">WF-014_STOCK_CTRL</span>
+</div>
+<div class="flex justify-between text-code-xs text-outline">
+<span>Events/Sec</span>
+<span class="text-primary-fixed">84.2 eps</span>
+</div>
+<div class="flex justify-between text-code-xs text-outline">
+<span>Avg Latency</span>
+<span class="text-on-surface">14.02ms</span>
+</div>
+<div class="flex justify-between text-code-xs text-outline">
+<span>Background Jobs</span>
+<span class="text-on-surface">12 active</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant flex gap-4">
+<div class="flex-1">
+<div class="text-[8px] font-label-caps text-outline mb-1 uppercase">ReorderTriggered</div>
+<div class="h-1 bg-surface-container-high">
+<div class="h-full bg-primary-fixed w-3/4"></div>
+</div>
+</div>
+<div class="flex-1">
+<div class="text-[8px] font-label-caps text-outline mb-1 uppercase">InventoryAdjusted</div>
+<div class="h-1 bg-surface-container-high">
+<div class="h-full bg-secondary w-1/2"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-surface-container-lowest text-primary-fixed w-full bottom-0 border-t border-outline-variant fixed h-8 flex items-center justify-between px-grid-unit z-50">
+<div class="font-code-xs text-code-xs text-outline">
+            SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]
+        </div>
+<div class="flex gap-4">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-opacity opacity-90 hover:opacity-100" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-opacity opacity-90 hover:opacity-100" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-opacity opacity-90 hover:opacity-100" href="#">LOGS</a>
+</div>
+</footer>
+<script>
+        // Micro-interactions for node hovering
+        document.querySelectorAll('.bg-surface-container-lowest').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('border-primary-container');
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('border-primary-container');
+            });
+        });
+
+        // Simple canvas drag simulation for visual aesthetic
+        const canvas = document.getElementById('canvas');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let scrollTop;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - canvas.offsetLeft;
+            startY = e.pageY - canvas.offsetTop;
+            scrollLeft = canvas.scrollLeft;
+            scrollTop = canvas.scrollTop;
+        });
+        canvas.addEventListener('mouseleave', () => isDown = false);
+        canvas.addEventListener('mouseup', () => isDown = false);
+        canvas.addEventListener('mousemove', (e) => {
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - canvas.offsetLeft;
+            const y = e.pageY - canvas.offsetTop;
+            const walkX = (x - startX) * 1.5;
+            const walkY = (y - startY) * 1.5;
+            canvas.scrollLeft = scrollLeft - walkX;
+            canvas.scrollTop = scrollTop - walkY;
+        });
+    </script>
+</body></html>

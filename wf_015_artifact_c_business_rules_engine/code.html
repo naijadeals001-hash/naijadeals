@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ENGINEERING_ORCHESTRATOR_V1.0 | BUSINESS RULES ENGINE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .logic-connector {
+            position: absolute;
+            width: 2px;
+            background-color: #3b4b37;
+            z-index: 0;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #010f1f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+            border-radius: 2px;
+        }
+    </style>
+<!-- Shared Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#c6ceff",
+                    "secondary": "#b8c3ff",
+                    "background": "#051424",
+                    "on-primary-container": "#007117",
+                    "inverse-surface": "#d4e4fa",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-secondary-fixed-variant": "#0035be",
+                    "inverse-primary": "#006e16",
+                    "on-secondary": "#002388",
+                    "surface-dim": "#051424",
+                    "primary": "#ebffe2",
+                    "surface-container-lowest": "#010f1f",
+                    "primary-fixed-dim": "#00e639",
+                    "surface-bright": "#2c3a4c",
+                    "surface": "#051424",
+                    "on-error": "#690005",
+                    "surface-variant": "#273647",
+                    "on-primary-fixed": "#002203",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "on-primary": "#003907",
+                    "on-background": "#d4e4fa",
+                    "tertiary-fixed": "#f0dbff",
+                    "surface-container-high": "#1c2b3c",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed": "#dde1ff",
+                    "outline-variant": "#3b4b37",
+                    "on-surface": "#d4e4fa",
+                    "on-tertiary-fixed": "#2c0051",
+                    "on-tertiary-container": "#862ed4",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "surface-tint": "#00e639",
+                    "primary-fixed": "#72ff70",
+                    "primary-container": "#00ff41",
+                    "tertiary": "#fff6ff",
+                    "surface-container-low": "#0d1c2d",
+                    "inverse-on-surface": "#233143",
+                    "error": "#ffb4ab",
+                    "surface-container": "#122131",
+                    "surface-container-highest": "#273647",
+                    "secondary-container": "#0043eb",
+                    "on-tertiary": "#490080",
+                    "error-container": "#93000a",
+                    "outline": "#84967e",
+                    "tertiary-container": "#ecd3ff",
+                    "on-primary-fixed-variant": "#00530e",
+                    "on-secondary-fixed": "#001356"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lane-margin": "32px",
+                    "grid-unit": "8px",
+                    "stack-gap": "4px",
+                    "node-gutter": "24px"
+            },
+            "fontFamily": {
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-caps": ["JetBrains Mono"],
+                    "code-sm": ["JetBrains Mono"],
+                    "code-xs": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-lane-margin h-12 w-full bg-background dark:bg-background border-b border-outline-variant z-50 fixed top-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<h1 class="font-headline-md text-headline-md tracking-tight text-primary dark:text-primary-fixed-dim">ENGINEERING_ORCHESTRATOR_V1.0</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-primary-container dark:text-primary-container">CORE_SYNC_ACTIVE</span>
+<button class="cursor-pointer active:opacity-80 hover:bg-surface-variant transition-colors p-1 rounded">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings_input_component">settings_input_component</span>
+</button>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<nav class="fixed left-0 top-12 bottom-0 flex flex-col z-40 h-full border-r border-outline-variant w-64 bg-surface-container-lowest dark:bg-surface-container-lowest">
+<div class="p-4 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-secondary mb-2">ARTIFACT_EXPLORER</h2>
+<div class="h-1 w-12 bg-primary-container"></div>
+</div>
+<div class="flex flex-col py-2 flex-grow overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-l-2 border-primary-container transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-code-sm text-code-sm">ROOT_NODES</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-code-sm text-code-sm">FLOW_INDEX</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-code-sm text-code-sm">TELEMETRY_LOGS</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-code-sm text-code-sm">MODEL_SCHEMAS</span>
+</a>
+</div>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="font-code-xs text-code-xs">AUTH_MODE</span>
+<span class="font-code-xs text-code-xs text-primary-container">ROOT_PRIVILEGE</span>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 pb-8 h-[calc(100vh-80px)] overflow-auto relative">
+<!-- Header Banner -->
+<section class="p-8 border-b border-outline-variant bg-surface-container-lowest/50 backdrop-blur-md">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 border border-primary-container text-primary-container font-label-caps text-label-caps">ARTIFACT_C</span>
+<span class="text-on-surface-variant font-code-xs text-code-xs">// LOGIC_DOM_0xCF4</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">BUSINESS RULES ENGINE</h2>
+<p class="text-on-surface-variant font-body-md text-body-md max-w-2xl">Matrix of logic governing commercial calculations. Real-time validation of transactional constraints across distributed services.</p>
+</div>
+</section>
+<!-- Technical Grid Layout -->
+<section class="p-lane-margin">
+<div class="overflow-x-auto rounded border border-outline-variant bg-surface-container-lowest">
+<table class="w-full border-collapse">
+<thead>
+<tr class="bg-surface-container text-on-surface-variant text-left border-b border-outline-variant">
+<th class="p-3 font-label-caps text-label-caps border-r border-outline-variant">Rule ID</th>
+<th class="p-3 font-label-caps text-label-caps border-r border-outline-variant">Logic Gate (Condition)</th>
+<th class="p-3 font-label-caps text-label-caps border-r border-outline-variant">Responsible Service</th>
+<th class="p-3 font-label-caps text-label-caps border-r border-outline-variant">Failure Result</th>
+<th class="p-3 font-label-caps text-label-caps">Automated Recovery Path</th>
+</tr>
+</thead>
+<tbody class="font-code-sm text-code-sm">
+<!-- Rule BR-PR-001 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
+<td class="p-3 border-r border-outline-variant font-bold text-primary">BR-PR-001</td>
+<td class="p-3 border-r border-outline-variant">
+<div class="flex flex-col gap-1">
+<span class="text-on-surface">Minimum Price Floor</span>
+<code class="text-on-surface-variant opacity-60">IF item.price &lt; catalog.base_floor THEN abort()</code>
+</div>
+</td>
+<td class="p-3 border-r border-outline-variant">
+<span class="bg-surface-variant px-2 py-0.5 rounded text-on-surface">Pricing_Svc_V2</span>
+</td>
+<td class="p-3 border-r border-outline-variant text-error">CRITICAL_EXCEPTION</td>
+<td class="p-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="rebase_edit">rebase_edit</span>
+<span>Reset to Catalog_Base</span>
+</td>
+</tr>
+<!-- Rule BR-DC-002 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="p-3 border-r border-outline-variant font-bold text-primary">BR-DC-002</td>
+<td class="p-3 border-r border-outline-variant">
+<div class="flex flex-col gap-1">
+<span class="text-on-surface">Maximum Aggregate Discount</span>
+<code class="text-on-surface-variant opacity-60">SUM(discounts) &lt;= 45% OF gross</code>
+</div>
+</td>
+<td class="p-3 border-r border-outline-variant">
+<span class="bg-surface-variant px-2 py-0.5 rounded text-on-surface">Promo_Validator</span>
+</td>
+<td class="p-3 border-r border-outline-variant text-on-surface-variant">LOG_WARNING_ONLY</td>
+<td class="p-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="bolt">bolt</span>
+<span>Cap at Max_Allowed</span>
+</td>
+</tr>
+<!-- Rule BR-CP-003 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="p-3 border-r border-outline-variant font-bold text-primary">BR-CP-003</td>
+<td class="p-3 border-r border-outline-variant">
+<div class="flex flex-col gap-1">
+<span class="text-on-surface">Coupon Validation</span>
+<code class="text-on-surface-variant opacity-60">crypto.verify(coupon_sig, SHA-256)</code>
+</div>
+</td>
+<td class="p-3 border-r border-outline-variant">
+<span class="bg-surface-variant px-2 py-0.5 rounded text-on-surface">Auth_Orchestrator</span>
+</td>
+<td class="p-3 border-r border-outline-variant text-error">REJECT_TRANSACTION</td>
+<td class="p-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="refresh">refresh</span>
+<span>Retry_Signature_Check</span>
+</td>
+</tr>
+<!-- Rule BR-FS-004 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="p-3 border-r border-outline-variant font-bold text-primary">BR-FS-004</td>
+<td class="p-3 border-r border-outline-variant">
+<div class="flex flex-col gap-1">
+<span class="text-on-surface">Flash Sale Priority</span>
+<code class="text-on-surface-variant opacity-60">LOCK inventory.item_id IF sale_active</code>
+</div>
+</td>
+<td class="p-3 border-r border-outline-variant">
+<span class="bg-surface-variant px-2 py-0.5 rounded text-on-surface">Inventory_Mesh</span>
+</td>
+<td class="p-3 border-r border-outline-variant text-on-surface-variant">QUEUE_REQUEST</td>
+<td class="p-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="timer">timer</span>
+<span>Delay_Processing(500ms)</span>
+</td>
+</tr>
+<!-- Rule BR-WS-005 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="p-3 border-r border-outline-variant font-bold text-primary">BR-WS-005</td>
+<td class="p-3 border-r border-outline-variant">
+<div class="flex flex-col gap-1">
+<span class="text-on-surface">Wholesale Tier Threshold</span>
+<code class="text-on-surface-variant opacity-60">count &gt; 100 ? tier_A : tier_B</code>
+</div>
+</td>
+<td class="p-3 border-r border-outline-variant">
+<span class="bg-surface-variant px-2 py-0.5 rounded text-on-surface">Account_Ledger</span>
+</td>
+<td class="p-3 border-r border-outline-variant text-on-surface-variant">DEFAULT_TO_RETAIL</td>
+<td class="p-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="visibility">visibility</span>
+<span>Notify_Account_Mgr</span>
+</td>
+</tr>
+<!-- Rule BR-TX-006 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="p-3 border-r border-outline-variant font-bold text-primary">BR-TX-006</td>
+<td class="p-3 border-r border-outline-variant">
+<div class="flex flex-col gap-1">
+<span class="text-on-surface">Regional Tax Category</span>
+<code class="text-on-surface-variant opacity-60">GEOIP.lookup(VAT_RULE_DB)</code>
+</div>
+</td>
+<td class="p-3 border-r border-outline-variant">
+<span class="bg-surface-variant px-2 py-0.5 rounded text-on-surface">TaxCloud_API</span>
+</td>
+<td class="p-3 border-r border-outline-variant text-error">SUSPEND_CALC</td>
+<td class="p-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="sync">sync</span>
+<span>Use_Fallback_Rates</span>
+</td>
+</tr>
+<!-- Rule BR-LY-007 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-3 border-r border-outline-variant font-bold text-primary">BR-LY-007</td>
+<td class="p-3 border-r border-outline-variant">
+<div class="flex flex-col gap-1">
+<span class="text-on-surface">Loyalty Member Multiplier</span>
+<code class="text-on-surface-variant opacity-60">points *= user.status.multiplier</code>
+</div>
+</td>
+<td class="p-3 border-r border-outline-variant">
+<span class="bg-surface-variant px-2 py-0.5 rounded text-on-surface">Loyalty_Engine</span>
+</td>
+<td class="p-3 border-r border-outline-variant text-on-surface-variant">MULTIPLIER_0</td>
+<td class="p-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="check_circle">check_circle</span>
+<span>Auto_Grant_Standard</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Dashboard Analytics Grid (Bento Style) -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="md:col-span-2 bg-surface-container-low border border-outline-variant p-6 rounded relative overflow-hidden group">
+
+<div class="relative z-10">
+<span class="font-label-caps text-label-caps text-secondary">TELEMETRY_LATENCY</span>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">12.4ms</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">AVERAGE_GATE_TIME</span>
+</div>
+<div class="mt-4 h-12 flex items-end gap-1">
+<div class="w-full bg-primary-container/20 h-4 rounded-t"></div>
+<div class="w-full bg-primary-container/20 h-8 rounded-t"></div>
+<div class="w-full bg-primary-container/40 h-6 rounded-t"></div>
+<div class="w-full bg-primary-container/20 h-10 rounded-t"></div>
+<div class="w-full bg-primary-container h-12 rounded-t"></div>
+<div class="w-full bg-primary-container/60 h-7 rounded-t"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-6 rounded flex flex-col justify-between">
+<div>
+<span class="font-label-caps text-label-caps text-secondary">ERROR_RATE</span>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-error">0.02%</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="trending_down">trending_down</span>
+<span class="font-code-xs text-code-xs">-4% SINCE_LAST_EPOCH</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-6 rounded flex flex-col justify-between">
+<div>
+<span class="font-label-caps text-label-caps text-secondary">EXEC_COUNT</span>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">4.8M</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-primary-container">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span class="font-code-xs text-code-xs">+12% THROUGHPUT</span>
+</div>
+</div>
+</div>
+<!-- Visualization of the Rule Flow -->
+<div class="mt-8 p-6 bg-surface-container-low border border-outline-variant rounded">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-label-caps text-label-caps text-on-surface">VISUAL_LOGIC_PIPELINE</h3>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-primary-container rounded-full"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">SUCCESS</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-error rounded-full"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">FAIL_PATH</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between relative py-8 px-4 border border-outline-variant/30 bg-background/50">
+<!-- Workflow Nodes -->
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-32 h-16 bg-surface-container border border-primary p-2 flex flex-col justify-center items-center rounded shadow-lg shadow-primary-container/10">
+<span class="font-label-caps text-[9px] text-primary">INGRESS</span>
+<span class="font-code-sm text-on-surface">ORDER_OBJ</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">45ms</span>
+</div>
+<div class="flex-grow h-px bg-outline-variant mx-4 relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-t border-r border-outline-variant rotate-45"></div>
+</div>
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-32 h-16 bg-surface-container border border-primary p-2 flex flex-col justify-center items-center rounded shadow-lg shadow-primary-container/10">
+<span class="font-label-caps text-[9px] text-primary">VAL_001</span>
+<span class="font-code-sm text-on-surface">PRICE_CHK</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">12ms</span>
+</div>
+<div class="flex-grow h-px bg-outline-variant mx-4 relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-t border-r border-outline-variant rotate-45"></div>
+</div>
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-32 h-16 bg-surface-container border border-primary p-2 flex flex-col justify-center items-center rounded shadow-lg shadow-primary-container/10">
+<span class="font-label-caps text-[9px] text-primary">VAL_003</span>
+<span class="font-code-sm text-on-surface">COUPON_CHK</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">210ms</span>
+</div>
+<div class="flex-grow h-px bg-outline-variant mx-4 relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-t border-r border-outline-variant rotate-45"></div>
+<!-- Error Path Branch -->
+<div class="absolute left-1/2 top-0 h-12 w-px border-l border-dashed border-error"></div>
+<div class="absolute left-1/2 -top-16 -translate-x-1/2 w-24 h-12 border border-error bg-error-container/20 p-2 flex items-center justify-center rounded">
+<span class="font-code-xs text-error">RECOVERY_B</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-32 h-16 bg-primary-container text-on-primary-container p-2 flex flex-col justify-center items-center rounded">
+<span class="font-label-caps text-[9px]">EGRESS</span>
+<span class="font-code-sm font-bold">CALC_COMPLETE</span>
+</div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">DONE</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 left-0 w-full h-8 z-50 flex justify-between items-center px-lane-margin bg-surface-container-low dark:bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center gap-6 h-full">
+<div class="flex items-center gap-2 text-primary-container font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-code-xs text-code-xs">HEALTH: OK</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-sm" data-icon="speed">speed</span>
+<span class="font-code-xs text-code-xs">LATENCY: 12ms</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-sm" data-icon="rebase_edit">rebase_edit</span>
+<span class="font-code-xs text-code-xs">NODES: 1,024</span>
+</div>
+</div>
+<div class="flex items-center gap-6 h-full">
+<div class="flex items-center gap-2 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-sm" data-icon="sync">sync</span>
+<span class="font-code-xs text-code-xs">STATUS: SYNC</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-sm" data-icon="timer">timer</span>
+<span class="font-code-xs text-code-xs">UPTIME: 99.9%</span>
+</div>
+</div>
+</footer>
+<!-- Interactive Script for micro-effects -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simulated real-time log updates
+            const statusLabels = ['SYNCING', 'OK', 'BUFFERING', 'STABLE'];
+            const latencyEl = document.querySelector('[data-icon="speed"]').nextElementSibling;
+            
+            setInterval(() => {
+                const randomLat = Math.floor(Math.random() * 5) + 10;
+                latencyEl.textContent = `LATENCY: ${randomLat}ms`;
+            }, 3000);
+
+            // Hover effect on table rows
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    row.style.borderLeft = '2px solid #00e639';
+                });
+                row.addEventListener('mouseleave', () => {
+                    row.style.borderLeft = 'none';
+                });
+            });
+        });
+    </script>
+</body></html>

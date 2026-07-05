@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-015: ARTIFACT J — TEST &amp; ACCEPTANCE BLUEPRINT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(rgba(59, 75, 55, 0.15) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-connector {
+            position: absolute;
+            background-color: #3b4b37;
+            z-index: 0;
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(13, 28, 45, 0.8);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#c6ceff",
+                        "secondary": "#b8c3ff",
+                        "background": "#051424",
+                        "on-primary-container": "#007117",
+                        "inverse-surface": "#d4e4fa",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "inverse-primary": "#006e16",
+                        "on-secondary": "#002388",
+                        "surface-dim": "#051424",
+                        "primary": "#ebffe2",
+                        "surface-container-lowest": "#010f1f",
+                        "primary-fixed-dim": "#00e639",
+                        "surface-bright": "#2c3a4c",
+                        "surface": "#051424",
+                        "on-error": "#690005",
+                        "surface-variant": "#273647",
+                        "on-primary-fixed": "#002203",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-primary": "#003907",
+                        "on-background": "#d4e4fa",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container-high": "#1c2b3c",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#dde1ff",
+                        "outline-variant": "#3b4b37",
+                        "on-surface": "#d4e4fa",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-tertiary-container": "#862ed4",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-tint": "#00e639",
+                        "primary-fixed": "#72ff70",
+                        "primary-container": "#00ff41",
+                        "tertiary": "#fff6ff",
+                        "surface-container-low": "#0d1c2d",
+                        "inverse-on-surface": "#233143",
+                        "error": "#ffb4ab",
+                        "surface-container": "#122131",
+                        "surface-container-highest": "#273647",
+                        "secondary-container": "#0043eb",
+                        "on-tertiary": "#490080",
+                        "error-container": "#93000a",
+                        "outline": "#84967e",
+                        "tertiary-container": "#ecd3ff",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-secondary-fixed": "#001356"
+                    },
+                    "spacing": {
+                        "lane-margin": "32px",
+                        "grid-unit": "8px",
+                        "stack-gap": "4px",
+                        "node-gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full h-12 flex justify-between items-center px-lane-margin bg-background border-b border-outline-variant z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[20px]">terminal</span>
+<h1 class="font-headline-md text-headline-md tracking-tight text-primary">ENGINEERING_ORCHESTRATOR_V1.0</h1>
+<span class="font-label-caps text-label-caps text-primary-container px-2 py-0.5 bg-surface-variant/30 rounded border border-outline-variant">ARTIFACT_J</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-primary font-bold cursor-pointer transition-colors hover:text-primary-container">TEST_MATRIX</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer transition-colors hover:text-on-surface">DEPLOY_PLAN</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer transition-colors hover:text-on-surface">GATE_SIGNOFF</span>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-variant p-1 rounded transition-colors">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 bottom-0 w-64 bg-surface-container-lowest border-r border-outline-variant flex flex-col z-40 hidden md:flex">
+<div class="p-6 border-b border-outline-variant">
+<h2 class="font-label-caps text-label-caps text-secondary">ARTIFACT_EXPLORER</h2>
+</div>
+<nav class="flex-1 py-4 flex flex-col gap-1">
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-code-sm text-code-sm">ROOT_NODES</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 bg-secondary-container text-on-secondary-container border-l-2 border-primary-container transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="font-code-sm text-code-sm">FLOW_INDEX</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+<span class="font-code-sm text-code-sm">TELEMETRY_LOGS</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">schema</span>
+<span class="font-code-sm text-code-sm">MODEL_SCHEMAS</span>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ENV_STATUS</span>
+<span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_8px_rgba(0,255,65,0.6)]"></span>
+</div>
+<p class="font-code-xs text-code-xs text-on-surface-variant">UAT-V4-STABLE</p>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="md:pl-64 pt-12 pb-8 min-h-screen">
+<div class="p-8 space-y-8">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-outline-variant pb-6">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary uppercase">Production Validation Matrix</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Acceptance Blueprint for High-Precision Transaction Engines</p>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-on-surface-variant">READY_FOR_SIGNOFF</span>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-code-sm text-code-sm text-primary-container">GATE: CLEAR</span>
+<span class="material-symbols-outlined text-primary-container text-[16px]">verified</span>
+</div>
+</div>
+<button class="bg-primary-container text-on-primary py-2 px-6 rounded font-label-caps text-label-caps hover:brightness-110 active:opacity-80 transition-all">EXECUTE_RELEASE</button>
+</div>
+</div>
+<!-- Validation Grid (Acceptance & Load Tests) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Acceptance Criteria Node -->
+<div class="bg-surface-container-low border border-outline-variant p-5 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-container"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">AC-01</span>
+<span class="material-symbols-outlined text-primary-container">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Acceptance Criteria</h3>
+<div class="space-y-3">
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+<span class="font-code-sm text-code-sm text-on-surface">Price Accuracy</span>
+<span class="font-code-sm text-code-sm text-primary-container font-bold">98.5% <span class="text-xs text-on-surface-variant ml-1">(PASS)</span></span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+<span class="font-code-sm text-code-sm text-on-surface">Rounding Integrity</span>
+<span class="font-code-sm text-code-sm text-primary-container font-bold">100% <span class="text-xs text-on-surface-variant ml-1">(PASS)</span></span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-code-sm text-code-sm text-on-surface">Audit Compliance</span>
+<span class="font-code-sm text-code-sm text-primary-container font-bold">ACTIVE</span>
+</div>
+</div>
+</div>
+<!-- Load Testing Node -->
+<div class="bg-surface-container-low border border-outline-variant p-5 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary-container"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">LT-04</span>
+<span class="material-symbols-outlined text-secondary">speed</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Pricing Engine Load</h3>
+<div class="flex items-center gap-3 mb-4">
+<div class="h-1 flex-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-4/5"></div>
+</div>
+<span class="font-code-sm text-code-sm text-secondary">10k RPS</span>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-surface-container p-2 border border-outline-variant/30">
+<p class="font-label-caps text-label-caps text-on-surface-variant text-[9px]">P99_LATENCY</p>
+<p class="font-code-sm text-code-sm text-on-surface">124ms</p>
+</div>
+<div class="bg-surface-container p-2 border border-outline-variant/30">
+<p class="font-label-caps text-label-caps text-on-surface-variant text-[9px]">ERROR_RATE</p>
+<p class="font-code-sm text-code-sm text-on-surface">0.001%</p>
+</div>
+</div>
+</div>
+<!-- Sync & Logic Node -->
+<div class="bg-surface-container-low border border-outline-variant p-5 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-tertiary-container"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">AI-SYNC</span>
+<span class="material-symbols-outlined text-tertiary">bolt</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Aura AI Dynamic Sync</h3>
+<div class="space-y-2">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></div>
+<span class="font-code-sm text-code-sm text-on-surface">Vector Weight Sync: OK</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary"></div>
+<span class="font-code-sm text-code-sm text-on-surface">Threshold Validation: 0.94</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary"></div>
+<span class="font-code-sm text-code-sm text-on-surface">Delta Compute: Stable</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Middle Technical Workflow Section -->
+<div class="relative bg-surface-container border border-outline-variant p-6 rounded-lg min-h-[400px]">
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<div class="w-full h-full" style="background-image: repeating-linear-gradient(45deg, #84967e 0, #84967e 1px, transparent 0, transparent 50%); background-size: 16px 16px;"></div>
+</div>
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-secondary">security</span>
+<h3 class="font-headline-md text-headline-md text-secondary">Stress &amp; Conflict Scenarios</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
+<!-- Stress Test Visual -->
+<div class="space-y-6">
+<div class="bg-surface-container-lowest border border-outline p-4 rounded relative">
+<div class="flex justify-between mb-2">
+<span class="font-label-caps text-label-caps text-on-surface">Promotion Conflict Tests</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ITERATION: 512</span>
+</div>
+<div class="h-32 w-full bg-background/50 rounded flex items-center justify-center border border-outline-variant">
+<!-- Mock Waveform for "Conflict" -->
+<div class="flex items-end gap-1 h-12">
+<div class="w-1 bg-primary-container h-8"></div>
+<div class="w-1 bg-primary-container h-12"></div>
+<div class="w-1 bg-error h-20 animate-pulse"></div>
+<div class="w-1 bg-primary-container h-10"></div>
+<div class="w-1 bg-primary-container h-6"></div>
+<div class="w-1 bg-error h-16 animate-pulse"></div>
+<div class="w-1 bg-primary-container h-14"></div>
+</div>
+</div>
+<p class="mt-2 font-code-xs text-code-xs text-on-surface-variant">STRESS_LOG: Detected race condition on multi-stack coupons. Status: Resolved.</p>
+</div>
+<div class="bg-surface-container-lowest border border-outline p-4 rounded relative">
+<div class="flex justify-between mb-2">
+<span class="font-label-caps text-label-caps text-on-surface">Coupon Fraud Stress</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">VECTOR: SYBIL_ATTACK</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 border border-error flex items-center justify-center">
+<span class="material-symbols-outlined text-error">gpp_maybe</span>
+</div>
+<div class="flex-1">
+<div class="h-1.5 w-full bg-surface-variant rounded-full">
+<div class="h-full bg-error w-full"></div>
+</div>
+<p class="mt-1 font-code-xs text-code-xs text-error">THREAT_MITIGATED: Rate-limiting injected at API-Gateway.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Regional Matrix -->
+<div class="bg-surface-container-high p-6 border border-outline-variant rounded">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">Regional Tax Edge-cases</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant underline">VIEW_MAP</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 bg-background p-3 border border-outline-variant/30">
+<span class="font-code-sm text-code-sm text-on-surface-variant w-12 uppercase">EMEA</span>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between">
+<span class="text-[10px] text-on-surface">VAT Compliance</span>
+<span class="text-[10px] text-primary-container">VERIFIED</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-full"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-background p-3 border border-outline-variant/30">
+<span class="font-code-sm text-code-sm text-on-surface-variant w-12 uppercase">APAC</span>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between">
+<span class="text-[10px] text-on-surface">GST Multi-Tier</span>
+<span class="text-[10px] text-primary-container">VERIFIED</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-full"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-background p-3 border border-outline-variant/30 opacity-50">
+<span class="font-code-sm text-code-sm text-on-surface-variant w-12 uppercase">LATAM</span>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between">
+<span class="text-[10px] text-on-surface">Local Surcharge</span>
+<span class="text-[10px] text-on-surface-variant italic">IN_PROGRESS</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container w-1/2"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Checklist & Release Gate Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Developer & QA Checklist -->
+<div class="space-y-6">
+<div class="bg-surface-container-low border border-outline-variant p-6">
+<div class="flex items-center gap-2 mb-6 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary text-[18px]">developer_mode</span>
+<h4 class="font-label-caps text-label-caps text-on-surface">Developer Checklist</h4>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline-variant bg-background text-primary-container focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Linting &amp; Style Guide Alignment</span>
+<span class="ml-auto font-code-xs text-code-xs text-primary-container">PASS</span>
+</li>
+<li class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline-variant bg-background text-primary-container focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Unit Coverage &gt; 94%</span>
+<span class="ml-auto font-code-xs text-code-xs text-primary-container">96.8%</span>
+</li>
+<li class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline-variant bg-background text-primary-container focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Security Patch Scan (CVE)</span>
+<span class="ml-auto font-code-xs text-code-xs text-primary-container">ZERO_CRITICAL</span>
+</li>
+</ul>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-6">
+<div class="flex items-center gap-2 mb-6 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">fact_check</span>
+<h4 class="font-label-caps text-label-caps text-on-surface">QA Checklist</h4>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline-variant bg-background text-secondary focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Regression Test Suite (E2E)</span>
+<span class="ml-auto font-code-xs text-code-xs text-secondary">COMPLETE</span>
+</li>
+<li class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline-variant bg-background text-secondary focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Multicurrency Sync Verification</span>
+<span class="ml-auto font-code-xs text-code-xs text-secondary">COMPLETE</span>
+</li>
+<li class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline-variant bg-background text-secondary focus:ring-0" type="checkbox"/>
+<span class="font-code-sm text-code-sm text-on-surface-variant">UI/UX Visual Regression</span>
+<span class="ml-auto font-code-xs text-code-xs text-secondary">NO_DIFF</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Release Gate Visualization -->
+<div class="bg-surface-container border border-outline-variant p-8 flex flex-col items-center justify-center text-center space-y-6">
+<div class="relative">
+<svg class="w-48 h-48">
+<circle class="text-surface-variant" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary-container" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="0" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-[48px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-headline-lg text-headline-lg text-primary">100%</span>
+</div>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-primary">Release Gate: Ready for Sign-off</h4>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-sm mt-2">All automated tests and manual checklists are locked. The system is stabilized for Artifact J production deployment.</p>
+</div>
+<div class="flex gap-4 w-full">
+<button class="flex-1 bg-surface-variant text-on-surface font-label-caps text-label-caps py-3 border border-outline-variant hover:bg-surface-bright transition-colors">EXPORT_REPORT</button>
+<button class="flex-1 bg-primary-container text-on-primary font-label-caps text-label-caps py-3 hover:brightness-110 active:opacity-80 transition-all">SIGN_OFF_V1.0</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 left-0 w-full h-8 bg-surface-container-low border-t border-outline-variant z-50 flex justify-between items-center px-lane-margin">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 opacity-70">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">check_circle</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">HEALTH: OK</span>
+</div>
+<div class="flex items-center gap-2 opacity-70">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">speed</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">LATENCY: 12ms</span>
+</div>
+<div class="flex items-center gap-2 opacity-70">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">rebase_edit</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">NODES: 1,024</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-primary-container font-bold">
+<span class="material-symbols-outlined text-[14px]">sync</span>
+<span class="font-code-xs text-code-xs">STATUS: SYNC</span>
+</div>
+<div class="flex items-center gap-2 opacity-70">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">timer</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">UPTIME: 99.9%</span>
+</div>
+</div>
+</footer>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.querySelectorAll('.active\\:opacity-80').forEach(button => {
+            button.addEventListener('mousedown', function() {
+                this.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', function() {
+                this.classList.</script></body></html>

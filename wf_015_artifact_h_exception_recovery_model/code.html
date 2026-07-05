@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-015: ARTIFACT H — EXCEPTION &amp; RECOVERY MODEL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .node-connector-line {
+            stroke-dasharray: 4;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+        .error-path {
+            stroke: #ffb4ab;
+            filter: drop-shadow(0 0 2px rgba(255, 180, 171, 0.4));
+        }
+        .success-path {
+            stroke: #00e639;
+        }
+        .glass-panel {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.8);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary-fixed-dim font-headline-md text-headline-md tracking-tight w-full border-b border-outline-variant border-b border-outline-variant bg-background flat no shadows flex justify-between items-center px-lane-margin h-12 w-full fixed top-0 left-0 z-50">
+<div class="flex items-center gap-3 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps text-primary-container dark:text-primary-container">ENGINEERING_ORCHESTRATOR_V1.0</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6 items-center">
+<span class="text-primary font-bold font-label-caps text-label-caps cursor-pointer">DIAGRAM_MODE</span>
+<span class="text-on-surface-variant font-label-caps text-label-caps cursor-pointer hover:bg-surface-variant transition-colors px-2 py-1">SIMULATION_OFF</span>
+</nav>
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-12 bottom-0 flex flex-col z-40 h-full border-r border-outline-variant w-64 bg-surface-container-lowest dark:bg-surface-container-lowest border-r border-outline-variant flat no shadows">
+<div class="p-6">
+<h2 class="font-label-caps text-label-caps text-secondary mb-4">ARTIFACT_EXPLORER</h2>
+</div>
+<nav class="flex-1">
+<div class="flex items-center gap-3 px-6 py-3 transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high cursor-pointer">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-code-sm text-code-sm">ROOT_NODES</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 transition-all duration-150 bg-secondary-container text-on-secondary-container border-l-2 border-primary-container cursor-pointer">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-code-sm text-code-sm">FLOW_INDEX</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high cursor-pointer">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-code-sm text-code-sm">TELEMETRY_LOGS</span>
+</div>
+<div class="flex items-center gap-3 px-6 py-3 transition-all duration-150 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high cursor-pointer">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-code-sm text-code-sm">MODEL_SCHEMAS</span>
+</div>
+</nav>
+<div class="p-4 border-t border-outline-variant">
+<div class="bg-surface-container p-3 rounded">
+<p class="font-code-xs text-code-xs text-on-surface-variant mb-1">CURRENT_ARTIFACT</p>
+<p class="font-code-sm text-code-sm text-primary">WF-015: EXCEPTION_H</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-12 pb-8 px-lane-margin min-h-screen">
+<!-- Header Info -->
+<div class="mt-8 mb-12 flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">WF-015: ARTIFACT H</h1>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-2 max-w-2xl">RESILIENCE ENGINEERING: Mapping 'The Unhappy Path' for commercial logic. Real-time visualization of recursive recalculation and fraud mitigation strategies.</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-primary-container text-on-primary px-4 py-2 rounded font-label-caps text-label-caps flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[16px]" data-icon="play_arrow">play_arrow</span> RUN_STRESS_TEST
+                </button>
+</div>
+</div>
+<!-- Diagram Workspace -->
+<div class="relative w-full overflow-x-auto pb-12">
+<div class="min-w-[1200px] grid grid-cols-5 gap-node-gutter">
+<!-- Swimlane 1: Ingestion & Validation -->
+<div class="flex flex-col gap-6">
+<div class="border-b border-outline-variant pb-2 mb-4">
+<span class="font-label-caps text-label-caps text-secondary flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="input">input</span> I_DATA_INGESTION
+                        </span>
+</div>
+<!-- Node: Transaction Start -->
+<div class="bg-surface-container-low border border-outline p-stack-gap rounded shadow-sm relative">
+<div class="bg-primary-container/10 px-2 py-1 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary">ENTRY_POINT</span>
+</div>
+<div class="p-3">
+<p class="font-code-sm text-code-sm text-on-surface">COMMERCIAL_TX_V2</p>
+<div class="mt-2 flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container shadow-[0_0_5px_#00ff41]"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">READY</span>
+</div>
+</div>
+</div>
+<!-- Connector Line -->
+<div class="h-8 w-px bg-outline-variant mx-auto"></div>
+<!-- Node: Price Validation -->
+<div class="bg-surface-container-low border border-primary-container p-stack-gap rounded relative">
+<div class="bg-surface-variant px-2 py-1 border-b border-outline-variant flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface">PRICE_VALIDATE</span>
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="warning">warning</span>
+</div>
+<div class="p-3">
+<p class="font-code-sm text-code-sm text-on-surface">SCHEMA_CHK: FLOAT_POS</p>
+<div class="mt-2 flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-error">INVALID_PRICE</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ID: 0x44A</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane 2: Exception Handling -->
+<div class="flex flex-col gap-6">
+<div class="border-b border-outline-variant pb-2 mb-4">
+<span class="font-label-caps text-label-caps text-secondary flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="error">error</span> II_EXCEPTION_ROUTING
+                        </span>
+</div>
+<!-- Node: Correction Flow -->
+<div class="bg-surface-container-low border border-error p-stack-gap rounded relative">
+<div class="bg-error-container/20 px-2 py-1 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-error">CORRECTION_FLOW</span>
+</div>
+<div class="p-3">
+<p class="font-code-sm text-code-sm text-on-surface">VALUE_RECOVERY</p>
+<div class="mt-2 space-y-1">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span class="text-on-surface-variant">RETRIES:</span>
+<span class="text-error">2/5</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded overflow-hidden">
+<div class="bg-error w-2/5 h-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Node: Dynamic Pricing Failure -->
+<div class="bg-surface-container-low border border-outline-variant p-stack-gap rounded relative opacity-80">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">DYNAMIC_FAIL</span>
+</div>
+<div class="p-3">
+<p class="font-code-sm text-code-sm text-on-surface">STATIC_FALLBACK_MODE</p>
+<p class="font-code-xs text-code-xs text-primary-container mt-1">INGESTING: CACHE_V3</p>
+</div>
+</div>
+</div>
+<!-- Swimlane 3: Conflict Resolution -->
+<div class="flex flex-col gap-6">
+<div class="border-b border-outline-variant pb-2 mb-4">
+<span class="font-label-caps text-label-caps text-secondary flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="alt_route">alt_route</span> III_RESOLUTION_LOGIC
+                        </span>
+</div>
+<!-- Node: Stacked Priority -->
+<div class="bg-surface-container-low border border-secondary p-stack-gap rounded relative">
+<div class="bg-secondary-container/20 px-2 py-1 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-secondary">PROMO_CONFLICT</span>
+</div>
+<div class="p-3">
+<p class="font-code-sm text-code-sm text-on-surface">STACKED_PRIORITY_RES</p>
+<div class="mt-3 flex flex-wrap gap-1">
+<span class="bg-surface-container-high text-on-surface px-1.5 py-0.5 text-[9px] rounded border border-outline-variant">P0: LOYALTY</span>
+<span class="bg-surface-container-high text-on-surface px-1.5 py-0.5 text-[9px] rounded border border-outline-variant opacity-50">P1: SEASONAL</span>
+</div>
+</div>
+</div>
+<!-- Node: Tax Recalculation -->
+<div class="bg-surface-container-low border border-outline p-stack-gap rounded relative">
+<div class="bg-surface-container px-2 py-1 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface">TAX_ENGINE_FAIL</span>
+</div>
+<div class="p-3">
+<p class="font-code-sm text-code-sm text-on-surface">RECURSIVE_CALC_V2</p>
+<p class="font-code-xs text-code-xs text-on-surface-variant mt-1">ITERATION: 12ms | JITTER: 2ms</p>
+</div>
+</div>
+</div>
+<!-- Swimlane 4: Fraud & Security -->
+<div class="flex flex-col gap-6">
+<div class="border-b border-outline-variant pb-2 mb-4">
+<span class="font-label-caps text-label-caps text-secondary flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="security">security</span> IV_SECURITY_GATE
+                        </span>
+</div>
+<!-- Node: Fraud Review -->
+<div class="bg-surface-container-low border border-error p-stack-gap rounded relative shadow-[0_0_15px_rgba(255,180,171,0.1)]">
+<div class="bg-error-container/40 px-2 py-1 border-b border-outline-variant flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-error">COUPON_ABUSE</span>
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="block">block</span>
+</div>
+<div class="p-3">
+<p class="font-code-sm text-code-sm text-on-surface">FRAUD_REVIEW_ASYNC</p>
+<div class="mt-2 bg-black/40 p-2 rounded border border-outline-variant">
+<p class="font-code-xs text-code-xs text-error uppercase">ACCOUNT_FREEZE: ACTIVE</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Swimlane 5: Recovery & State -->
+<div class="flex flex-col gap-6">
+<div class="border-b border-outline-variant pb-2 mb-4">
+<span class="font-label-caps text-label-caps text-secondary flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="restart_alt">restart_alt</span> V_FINAL_RECOVERY
+                        </span>
+</div>
+<!-- Node: Automated Retry -->
+<div class="bg-surface-container-low border border-primary-container p-stack-gap rounded relative">
+<div class="bg-primary-container/10 px-2 py-1 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary">RETRY_STRATEGY</span>
+</div>
+<div class="p-3">
+<p class="font-code-sm text-code-sm text-on-surface">EXP_BACKOFF_STUB</p>
+<div class="mt-2 space-y-1">
+<p class="font-code-xs text-code-xs text-on-surface-variant italic">Next attempt: 4096ms</p>
+<div class="h-1 bg-surface-variant w-full rounded">
+<div class="h-full bg-primary-container w-[75%] transition-all duration-1000"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Node: Manual Node -->
+<div class="bg-surface-container-low border border-secondary p-stack-gap rounded relative border-dashed">
+<div class="bg-secondary-container/10 px-2 py-1 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-secondary">HUMAN_IN_THE_LOOP</span>
+</div>
+<div class="p-3">
+<p class="font-code-sm text-code-sm text-on-surface">MANUAL_RECOVERY_NODE</p>
+<button class="mt-3 w-full border border-secondary text-secondary font-label-caps text-[9px] py-1 hover:bg-secondary hover:text-on-secondary transition-colors">
+                                ESCALATE_TO_ADMIN
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Absolute SVG Connectors Overlay (Mocked for visual representation) -->
+<svg class="absolute top-[80px] left-0 w-full h-[600px] pointer-events-none z-0 opacity-40">
+<!-- Path from Ingestion to Exception Handling -->
+<path class="node-connector-line error-path" d="M 230 180 H 260 V 140 H 280" fill="none" stroke-width="1.5"></path>
+<!-- Path from Ingestion to Fallback -->
+<path class="node-connector-line success-path" d="M 230 180 H 260 V 300 H 280" fill="none" stroke-width="1.5"></path>
+<!-- More complex routing -->
+<path class="node-connector-line error-path" d="M 460 140 H 490 V 160 H 520" fill="none" stroke-width="1.5"></path>
+<path class="node-connector-line success-path" d="M 700 160 H 730 V 220 H 760" fill="none" stroke-width="1.5"></path>
+<circle cx="230" cy="180" fill="#ffb4ab" r="3"></circle>
+<circle cx="280" cy="140" fill="#ffb4ab" r="3"></circle>
+</svg>
+</div>
+<!-- Telemetry & Log Drawer (Asymmetric Bento Section) -->
+<div class="grid grid-cols-12 gap-node-gutter mt-12">
+<div class="col-span-8 bg-surface-container p-6 rounded border border-outline-variant">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-label-caps text-label-caps text-primary">REAL_TIME_ERROR_METRICS</h3>
+<div class="flex gap-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-error"></span> CRITICAL</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary"></span> RESOLVED</span>
+</div>
+</div>
+<div class="h-48 flex items-end gap-2 border-b border-l border-outline-variant p-4">
+<!-- Fake Histogram -->
+<div class="flex-1 bg-error/20 border-t border-error h-[40%] rounded-t-sm relative group">
+<div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-container-highest px-2 py-1 text-[10px] font-code-sm z-10">T-5m: 12 err</div>
+</div>
+<div class="flex-1 bg-error/40 border-t border-error h-[65%] rounded-t-sm"></div>
+<div class="flex-1 bg-error/10 border-t border-error h-[20%] rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/30 border-t border-secondary h-[80%] rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/10 border-t border-secondary h-[95%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary-container/20 border-t border-primary-container h-[45%] rounded-t-sm"></div>
+<div class="flex-1 bg-error/60 border-t border-error h-[15%] rounded-t-sm"></div>
+<div class="flex-1 bg-error/30 border-t border-error h-[55%] rounded-t-sm"></div>
+<div class="flex-1 bg-secondary/40 border-t border-secondary h-[70%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary-container/10 border-t border-primary-container h-[90%] rounded-t-sm"></div>
+</div>
+<div class="flex justify-between mt-2 px-4">
+<span class="font-code-xs text-code-xs text-on-surface-variant">T-10m</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant">NOW</span>
+</div>
+</div>
+<div class="col-span-4 flex flex-col gap-node-gutter">
+<div class="bg-surface-container-high p-4 rounded border border-outline-variant flex-1 overflow-hidden">
+<h3 class="font-label-caps text-label-caps text-secondary mb-3">RECURSION_LOGS</h3>
+<div class="space-y-3 font-code-xs text-code-xs">
+<div class="flex gap-2">
+<span class="text-on-surface-variant">12:04:31</span>
+<span class="text-error">[FAIL]</span>
+<span class="truncate">Tax recal failed - retry 3</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant">12:04:32</span>
+<span class="text-secondary">[INFO]</span>
+<span class="truncate">Fallback price injected</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant">12:04:33</span>
+<span class="text-primary-container">[OK]</span>
+<span class="truncate">Promo conflict resolved (L)</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant">12:04:35</span>
+<span class="text-error">[WARN]</span>
+<span class="truncate">Account 0xEF.. freeze triggered</span>
+</div>
+<div class="flex gap-2">
+<span class="text-on-surface-variant">12:04:38</span>
+<span class="text-secondary">[INFO]</span>
+<span class="truncate">Manual escalation requested</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded border border-primary-container/30 relative">
+<div class="absolute top-2 right-2">
+<span class="material-symbols-outlined text-primary-container animate-pulse" data-icon="terminal">terminal</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary-container mb-2">SYSTEM_HEALTH</h3>
+<div class="flex items-end gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">99.8%</span>
+<span class="font-code-xs text-code-xs text-on-surface-variant pb-1">Uptime</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Status Bar) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-lane-margin bg-surface-container-low dark:bg-surface-container-low text-primary dark:text-primary-fixed-dim font-code-xs text-code-xs h-8 border-t border-outline-variant flat no shadows">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-primary-container font-bold">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+<span>HEALTH: OK</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-[14px]" data-icon="speed">speed</span>
+<span>LATENCY: 12ms</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-[14px]" data-icon="rebase_edit">rebase_edit</span>
+<span>NODES: 1,024</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-[14px]" data-icon="sync">sync</span>
+<span>STATUS: SYNC</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-[14px]" data-icon="timer">timer</span>
+<span>UPTIME: 99.9%</span>
+</div>
+</div>
+</footer>
+<!-- Micro-Interactions Script -->
+<script>
+        // Simple pulsing interaction for nodes
+        document.querySelectorAll('.bg-surface-container-low').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.classList.add('scale-[1.02]');
+                node.style.borderColor = 'var(--tw-border-opacity, 1)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.classList.remove('scale-[1.02]');
+            });
+        });
+
+        // Simulating log scroll
+        const logContainer = document.querySelector('.space-y-3');
+        setInterval(() => {
+            if(logContainer) {
+                const first = logContainer.firstElementChild;
+                logContainer.appendChild(first.cloneNode(true));
+                if(logContainer.children.length > 8) {
+                    logContainer.removeChild(logContainer.firstElementChild);
+                }
+            }
+        }, 4000);
+    </script>
+</body></html>

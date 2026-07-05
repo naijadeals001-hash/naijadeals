@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-012 ARTIFACT K: DEVELOPER IMPLEMENTATION GUIDE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(59, 75, 55, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .code-container::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .code-container::-webkit-scrollbar-thumb {
+            background: #3b4b37;
+        }
+        .node-connector {
+            position: relative;
+        }
+        .node-connector::after {
+            content: '';
+            position: absolute;
+            background: #84967e;
+            opacity: 0.3;
+        }
+        .sharding-viz {
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0, 255, 65, 0.05) 10px, rgba(0, 255, 65, 0.05) 20px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#051424",
+                      "on-primary-container": "#007117",
+                      "secondary-fixed": "#dde1ff",
+                      "on-surface-variant": "#b9ccb2",
+                      "tertiary": "#fff6ff",
+                      "surface-container-lowest": "#010f1f",
+                      "tertiary-container": "#ecd3ff",
+                      "secondary-fixed-dim": "#b8c3ff",
+                      "surface-container-high": "#1c2b3c",
+                      "tertiary-fixed": "#f0dbff",
+                      "surface-container-highest": "#273647",
+                      "background": "#051424",
+                      "on-error-container": "#ffdad6",
+                      "outline-variant": "#3b4b37",
+                      "secondary": "#b8c3ff",
+                      "primary-container": "#00ff41",
+                      "inverse-primary": "#006e16",
+                      "surface-dim": "#051424",
+                      "on-tertiary-fixed-variant": "#6900b3",
+                      "on-primary-fixed-variant": "#00530e",
+                      "on-tertiary": "#490080",
+                      "surface-variant": "#273647",
+                      "on-background": "#d4e4fa",
+                      "on-tertiary-fixed": "#2c0051",
+                      "error-container": "#93000a",
+                      "error": "#ffb4ab",
+                      "secondary-container": "#0043eb",
+                      "primary": "#ebffe2",
+                      "on-secondary-fixed-variant": "#0035be",
+                      "surface-container-low": "#0d1c2d",
+                      "on-error": "#690005",
+                      "primary-fixed": "#72ff70",
+                      "surface-container": "#122131",
+                      "primary-fixed-dim": "#00e639",
+                      "on-secondary": "#002388",
+                      "surface-bright": "#2c3a4c",
+                      "tertiary-fixed-dim": "#ddb7ff",
+                      "outline": "#84967e",
+                      "on-secondary-container": "#c6ceff",
+                      "on-primary": "#003907",
+                      "on-surface": "#d4e4fa",
+                      "on-primary-fixed": "#002203",
+                      "on-tertiary-container": "#862ed4",
+                      "on-secondary-fixed": "#001356",
+                      "inverse-on-surface": "#233143",
+                      "inverse-surface": "#d4e4fa",
+                      "surface-tint": "#00e639"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "node-gutter": "24px",
+                      "lane-margin": "32px",
+                      "stack-gap": "4px",
+                      "grid-unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "code-sm": ["JetBrains Mono"],
+                      "code-xs": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-lane-margin h-16 border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="account_tree">account_tree</span>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-primary">SYSTEM ATLAS : MERCHANT_ONBOARDING_V4</span>
+<span class="font-label-caps text-[9px] text-primary-fixed tracking-widest uppercase">ARTIFACT_K // PROTOCOL_SECURE</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8 items-center">
+<a class="font-label-caps text-label-caps text-primary font-bold hover:bg-surface-container-high transition-colors px-2 py-1" href="#">SPEC_012</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors px-2 py-1" href="#">INFRA_MAP</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors px-2 py-1" href="#">SCHEMA_V4</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high p-2 rounded transition-all" data-icon="settings_input_component">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer (Left) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] z-40 flex flex-col pt-stack-gap border-r border-outline-variant bg-surface-container-low w-64 overflow-y-auto">
+<div class="px-6 py-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-60">WORKFLOW INDEX</span>
+</div>
+<nav class="flex-1">
+<div class="px-2 space-y-1">
+<div class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed-dim cursor-default">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="font-label-caps text-label-caps">BPMN Flowmaps</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="code_blocks">code_blocks</span>
+<span class="font-label-caps text-label-caps">API Contracts</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps">Domain Models</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="swap_calls">swap_calls</span>
+<span class="font-label-caps text-label-caps">Sequence Diagrams</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-label-caps">Compliance Logic</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</div>
+</div>
+</nav>
+<div class="p-4 border-t border-outline-variant/30">
+<div class="flex items-center gap-2 text-primary-fixed-dim">
+<span class="h-2 w-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-code-xs text-[10px]">CLUSTER: K8S-PROD-01</span>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 pt-16 pb-12 px-lane-margin min-h-screen">
+<!-- Header Hero -->
+<div class="py-12 border-b border-outline-variant mb-12">
+<div class="flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">WF-012 ARTIFACT K</h1>
+<p class="text-on-surface-variant max-w-2xl font-body-md">Architectural Implementation Guide for Version 4.0 Merchant Onboarding Ecosystem. This document serves as the "Source of Truth" for engineering teams during high-density microservice orchestration.</p>
+</div>
+<div class="flex gap-2">
+<div class="bg-surface-container-high border border-outline-variant px-3 py-2 flex flex-col">
+<span class="font-label-caps text-[9px] text-on-surface-variant">DOC_VERSION</span>
+<span class="font-code-sm text-primary">v4.0.1-STABLE</span>
+</div>
+<div class="bg-surface-container-high border border-outline-variant px-3 py-2 flex flex-col">
+<span class="font-label-caps text-[9px] text-on-surface-variant">STATUS</span>
+<span class="font-code-sm text-on-primary-container flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span> APPROVED
+                        </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento Grid Sections -->
+<div class="grid grid-cols-12 gap-6 mb-12">
+<!-- Owning Microservices -->
+<section class="col-span-12 lg:col-span-8 bg-surface-container-low border border-outline-variant p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-5">
+<span class="material-symbols-outlined text-8xl" data-icon="settings_b_roll">settings_b_roll</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="hub">hub</span> OWNING MICROSERVICES
+                </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- Service Node -->
+<div class="border border-outline-variant bg-surface p-4 hover:border-primary-container transition-colors group cursor-crosshair">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim">SRV-MCH</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="dns">dns</span>
+</div>
+<h4 class="font-code-sm text-on-surface mb-2">Merchant Service</h4>
+<p class="font-code-xs text-on-surface-variant/70 leading-tight">Master record management for merchant entities and KYC hooks.</p>
+</div>
+<!-- Service Node -->
+<div class="border border-outline-variant bg-surface p-4 hover:border-primary-container transition-colors group cursor-crosshair">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim">SRV-STR</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="store">store</span>
+</div>
+<h4 class="font-code-sm text-on-surface mb-2">Store Service</h4>
+<p class="font-code-xs text-on-surface-variant/70 leading-tight">Branch and terminal configuration across global regions.</p>
+</div>
+<!-- Service Node -->
+<div class="border border-outline-variant bg-surface p-4 hover:border-primary-container transition-colors group cursor-crosshair">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim">SRV-WLT</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<h4 class="font-code-sm text-on-surface mb-2">Wallet Service</h4>
+<p class="font-code-xs text-on-surface-variant/70 leading-tight">Ledger accounting and settlement gateway provisioning.</p>
+</div>
+<!-- Service Node -->
+<div class="border border-outline-variant bg-surface p-4 hover:border-primary-container transition-colors group cursor-crosshair">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim">SRV-TRS</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="verified">verified</span>
+</div>
+<h4 class="font-code-sm text-on-surface mb-2">Trust Service</h4>
+<p class="font-code-xs text-on-surface-variant/70 leading-tight">Risk scoring and fraud prevention telemetry analysis.</p>
+</div>
+<!-- Service Node -->
+<div class="border border-outline-variant bg-surface p-4 hover:border-primary-container transition-colors group cursor-crosshair">
+<div class="flex justify-between items-start mb-3">
+<span class="font-label-caps text-[10px] text-primary-fixed-dim">SRV-CMP</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="policy">policy</span>
+</div>
+<h4 class="font-code-sm text-on-surface mb-2">Compliance Service</h4>
+<p class="font-code-xs text-on-surface-variant/70 leading-tight">GDPR/CCPA/SOC2 data residency and audit trail logic.</p>
+</div>
+</div>
+</section>
+<!-- Deployment Sidebar -->
+<section class="col-span-12 lg:col-span-4 bg-surface-container border border-outline-variant p-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="rocket_launch">rocket_launch</span> DEPLOYMENT REQUIREMENTS
+                </h3>
+<ul class="space-y-4">
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim mt-1" data-icon="grid_view">grid_view</span>
+<div>
+<span class="block font-code-sm text-on-surface">Kubernetes Cluster v1.25+</span>
+<span class="font-code-xs text-on-surface-variant">Namespace: <code>infra-core-v4</code></span>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim mt-1" data-icon="memory">memory</span>
+<div>
+<span class="block font-code-sm text-on-surface">Redis Cache Layer</span>
+<span class="font-code-xs text-on-surface-variant">Cluster Mode enabled, min 3 shards.</span>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim mt-1" data-icon="lock">lock</span>
+<div>
+<span class="block font-code-sm text-on-surface">Vault Secrets Management</span>
+<span class="font-code-xs text-on-surface-variant">TLS 1.3 enforced for all internal RPC.</span>
+</div>
+</li>
+</ul>
+<div class="mt-8 pt-6 border-t border-outline-variant">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase">Workflow IDs</span>
+<span class="bg-primary-container/20 text-primary-fixed text-[10px] px-2 py-0.5 rounded-full">ACTIVE</span>
+</div>
+<div class="space-y-2">
+<code class="block bg-surface p-2 text-xs border-l-2 border-primary">WF-MCH-ACT-01</code>
+<code class="block bg-surface p-2 text-xs border-l-2 border-primary/40">WF-STR-CFG-09</code>
+</div>
+</div>
+</section>
+<!-- Dependencies & Sharding -->
+<section class="col-span-12 lg:col-span-6 bg-surface-container-low border border-outline-variant p-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="account_tree">account_tree</span> CORE DEPENDENCIES
+                </h3>
+<div class="space-y-6">
+<div class="flex items-center gap-6 group">
+<div class="w-16 h-16 bg-surface border border-outline-variant flex items-center justify-center shrink-0 group-hover:border-primary transition-all">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant" data-icon="fingerprint">fingerprint</span>
+</div>
+<div>
+<h4 class="font-code-sm text-on-surface">Shared IDP (Identity Provider)</h4>
+<p class="font-body-md text-on-surface-variant text-sm">OAuth2/OIDC centralized session management for all administrative portals.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 group">
+<div class="w-16 h-16 bg-surface border border-outline-variant flex items-center justify-center shrink-0 group-hover:border-primary transition-all">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant" data-icon="psychology">psychology</span>
+</div>
+<div>
+<h4 class="font-code-sm text-on-surface">Aura AI Agent</h4>
+<p class="font-body-md text-on-surface-variant text-sm">LLM-based validation for merchant documentation and risk assessment.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 group">
+<div class="w-16 h-16 bg-surface border border-outline-variant flex items-center justify-center shrink-0 group-hover:border-primary transition-all">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant" data-icon="conversion_path">conversion_path</span>
+</div>
+<div>
+<h4 class="font-code-sm text-on-surface">n8n Core Pipeline</h4>
+<p class="font-body-md text-on-surface-variant text-sm">Primary workflow engine for long-running asynchronous processes.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Database Sharding logic -->
+<section class="col-span-12 lg:col-span-6 bg-surface-container border border-outline-variant p-6 sharding-viz">
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="view_quilt">view_quilt</span> DATABASE SHARDING LOGIC
+                </h3>
+<div class="bg-surface/80 backdrop-blur-sm border border-outline-variant p-4 font-code-sm mb-6">
+<pre class="text-primary-fixed-dim text-[11px] overflow-x-auto code-container">[
+  { "shard": "US-EAST-01", "range": "0x000-0x3FF", "primary": "pg-mch-01" },
+  { "shard": "EU-WEST-01", "range": "0x400-0x7FF", "primary": "pg-mch-02" },
+  { "shard": "AP-SOUTH-01", "range": "0x800-0xFFF", "primary": "pg-mch-03" }
+]
+                    </pre>
+</div>
+<div class="flex items-center gap-2 font-code-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]" data-icon="info">info</span>
+<span>Consistent hashing utilized for non-deterministic shard distribution across 3 nodes.</span>
+</div>
+<div class="mt-8 flex gap-2">
+<div class="flex-1 h-2 bg-primary-container/20 border border-primary/30 relative">
+<div class="absolute inset-y-0 left-0 w-1/3 bg-primary-container shadow-[0_0_10px_rgba(0,255,65,0.4)]"></div>
+</div>
+<div class="flex-1 h-2 bg-primary-container/10 border border-primary/20"></div>
+<div class="flex-1 h-2 bg-primary-container/10 border border-primary/20"></div>
+</div>
+<div class="flex justify-between mt-2 font-code-xs text-primary-fixed-dim/60">
+<span>SHARD_01 (42%)</span>
+<span>SHARD_02 (28%)</span>
+<span>SHARD_03 (30%)</span>
+</div>
+</section>
+<!-- Required APIs -->
+<section class="col-span-12 bg-surface-container-lowest border border-outline-variant p-6">
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="api">api</span> REQUIRED API CONTRACTS
+                </h3>
+<div class="overflow-x-auto code-container">
+<table class="w-full text-left font-code-sm border-collapse">
+<thead>
+<tr class="border-b border-outline-variant text-on-surface-variant">
+<th class="pb-3 px-4 uppercase tracking-tighter text-[10px]">Method</th>
+<th class="pb-3 px-4 uppercase tracking-tighter text-[10px]">Endpoint</th>
+<th class="pb-3 px-4 uppercase tracking-tighter text-[10px]">Payload (Required)</th>
+<th class="pb-3 px-4 uppercase tracking-tighter text-[10px]">Auth Scope</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<tr>
+<td class="py-4 px-4"><span class="bg-primary-container/10 text-primary-fixed px-2 py-0.5">POST</span></td>
+<td class="py-4 px-4 text-on-surface"><code>/v4/merchant/provision</code></td>
+<td class="py-4 px-4 text-on-surface-variant"><code>{ merchant_id, region, tier }</code></td>
+<td class="py-4 px-4 text-on-surface-variant"><code>write:merchants</code></td>
+</tr>
+<tr>
+<td class="py-4 px-4"><span class="bg-secondary-container/20 text-secondary px-2 py-0.5">GET</span></td>
+<td class="py-4 px-4 text-on-surface"><code>/v4/trust/score/:id</code></td>
+<td class="py-4 px-4 text-on-surface-variant"><code>query: history=true</code></td>
+<td class="py-4 px-4 text-on-surface-variant"><code>read:trust</code></td>
+</tr>
+<tr>
+<td class="py-4 px-4"><span class="bg-primary-container/10 text-primary-fixed px-2 py-0.5">PATCH</span></td>
+<td class="py-4 px-4 text-on-surface"><code>/v4/wallet/ledger/lock</code></td>
+<td class="py-4 px-4 text-on-surface-variant"><code>{ reason, duration_ms }</code></td>
+<td class="py-4 px-4 text-on-surface-variant"><code>admin:wallet</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Definition of Done -->
+<section class="col-span-12 lg:col-span-12 bg-surface-container-high border border-outline-variant p-8">
+<div class="flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="max-w-md">
+<h3 class="font-headline-md text-headline-md text-primary mb-4 flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="assignment_turned_in">assignment_turned_in</span> Completion Criteria (DoD)
+                        </h3>
+<p class="text-on-surface-variant font-body-md">Final engineering sign-off requires 100% adherence to the implementation checklist before promotion to <code>STAGING-BLUE</code>.</p>
+</div>
+<div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+<div class="flex items-center gap-3 bg-surface p-4 border border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="check_box">check_box</span>
+<span class="font-code-sm">Unit Test Coverage > 85%</span>
+</div>
+<div class="flex items-center gap-3 bg-surface p-4 border border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="check_box">check_box</span>
+<span class="font-code-sm">Load Balancer Readiness Checked</span>
+</div>
+<div class="flex items-center gap-3 bg-surface p-4 border border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="check_box">check_box</span>
+<span class="font-code-sm">OpenAPI Documentation Published</span>
+</div>
+<div class="flex items-center gap-3 bg-surface p-4 border border-outline-variant">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="check_box">check_box</span>
+<span class="font-code-sm">GRPC Protobuf Mappings Validated</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-center gap-lane-margin items-center h-10 px-lane-margin border-t border-outline-variant bg-surface-container-highest">
+<div class="flex items-center gap-8">
+<button class="flex items-center gap-2 opacity-70 hover:opacity-100 transition-all scale-95 active:scale-90 group">
+<span class="material-symbols-outlined text-sm" data-icon="query_stats">query_stats</span>
+<span class="font-code-xs text-code-xs uppercase">Live Metrics</span>
+</button>
+<button class="flex items-center gap-2 opacity-70 hover:opacity-100 transition-all scale-95 active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="storage">storage</span>
+<span class="font-code-xs text-code-xs uppercase">Registry</span>
+</button>
+<button class="flex items-center gap-2 bg-on-primary-container text-primary-fixed rounded-sm px-3 py-1 scale-95 active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="architecture">architecture</span>
+<span class="font-code-xs text-code-xs uppercase">Schema</span>
+</button>
+<button class="flex items-center gap-2 opacity-70 hover:opacity-100 transition-all scale-95 active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="view_headline">view_headline</span>
+<span class="font-code-xs text-code-xs uppercase">Console</span>
+</button>
+</div>
+<div class="absolute right-lane-margin text-on-surface-variant font-code-xs text-[9px] flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+            SYNCED WITH REPO: MAIN/V4.0.1
+        </div>
+</footer>
+<!-- Interactive Node Tooltip Logic -->
+<script>
+        // Simple micro-interaction for nodes
+        document.querySelectorAll('.cursor-crosshair').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.transform = 'translateY(-2px)';
+                node.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.3)';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = 'translateY(0)';
+                node.style.boxShadow = 'none';
+            });
+        });
+        
+        // Console simulation effect
+        console.log("%c WF-012 ARTIFACT K SYSTEM READY ", "background: #00ff41; color: #000; font-weight: bold; padding: 4px;");
+    </script>
+</body></html>

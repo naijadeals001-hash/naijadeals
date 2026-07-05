@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WF-014 | Exception &amp; Recovery Model</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#1c2b3c 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .node-connector {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .glow-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .swimlane-border {
+            border-right: 1px solid #3b4b37;
+        }
+        /* Custom scrollbar for high-density feel */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #010f1f; }
+        ::-webkit-scrollbar-thumb { background: #84967e; border-radius: 2px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#72ff70",
+                        "secondary-fixed": "#dde1ff",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#007117",
+                        "on-primary": "#003907",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed": "#f0dbff",
+                        "inverse-surface": "#d4e4fa",
+                        "secondary": "#b8c3ff",
+                        "outline-variant": "#3b4b37",
+                        "surface-tint": "#00e639",
+                        "surface-container-highest": "#273647",
+                        "surface-container-high": "#1c2b3c",
+                        "primary-fixed-dim": "#00e639",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-secondary-container": "#c6ceff",
+                        "on-background": "#d4e4fa",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "surface-container-low": "#0d1c2d",
+                        "background": "#051424",
+                        "inverse-on-surface": "#233143",
+                        "primary-container": "#00ff41",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#ecd3ff",
+                        "surface-container-lowest": "#010f1f",
+                        "secondary-container": "#0043eb",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#001356",
+                        "surface-variant": "#273647",
+                        "surface-dim": "#051424",
+                        "surface-container": "#122131",
+                        "on-secondary": "#002388",
+                        "on-tertiary-container": "#862ed4",
+                        "surface": "#051424",
+                        "on-primary-fixed-variant": "#00530e",
+                        "inverse-primary": "#006e16",
+                        "on-error": "#690005",
+                        "primary": "#ebffe2",
+                        "on-tertiary-fixed": "#2c0051",
+                        "on-tertiary": "#490080",
+                        "tertiary": "#fff6ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "outline": "#84967e",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-fixed": "#002203"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "grid-unit": "8px",
+                        "stack-gap": "4px",
+                        "node-gutter": "24px",
+                        "lane-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-xs": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 z-50 flex justify-between items-center px-grid-unit h-12 w-full bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps font-bold tracking-tighter text-primary-fixed">CORE_OS_v2.4.1-STABLE</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-outline">LATENCY: 14ms</span>
+<span class="font-label-caps text-label-caps text-primary-fixed cursor-pointer active:opacity-80">STATUS: OK</span>
+</div>
+</header>
+<!-- Navigation Drawer (Sidebar) -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container border-r border-outline-variant flex flex-col z-40">
+<div class="p-4 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary-fixed opacity-60">MODULE_INDEX</span>
+</div>
+<nav class="flex-1 py-2">
+<div class="flex items-center px-4 py-3 gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">System_Architecture</span>
+</div>
+<div class="flex items-center px-4 py-3 gap-3 bg-surface-container-highest text-primary-fixed border-l-2 border-primary-fixed transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps">Workflow_Engine</span>
+</div>
+<div class="flex items-center px-4 py-3 gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-label-caps text-label-caps">Logic_Matrices</span>
+</div>
+<div class="flex items-center px-4 py-3 gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-label-caps text-label-caps">Telemetry_Streams</span>
+</div>
+<div class="flex items-center px-4 py-3 gap-3 text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-label-caps">Node_Registry</span>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-low border-t border-outline-variant">
+<div class="flex flex-col gap-1">
+<span class="font-code-xs text-code-xs text-primary-fixed">UPTIME: 1,422H</span>
+<div class="h-1 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed w-3/4"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 mt-12 pb-8 h-[calc(100vh-48px-32px)] overflow-auto relative">
+<!-- Dashboard Header -->
+<div class="sticky top-0 z-30 bg-surface/80 backdrop-blur-md px-lane-margin py-4 border-b border-outline-variant flex justify-between items-end">
+<div>
+<span class="font-label-caps text-label-caps text-outline uppercase">Inventory Lifecycle</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">WF-014: Exception &amp; Recovery Model</h2>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col items-end">
+<span class="font-code-xs text-code-xs text-error">ERR_THRESHOLD: 0.04%</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">AUTO_RECOVERY: ENABLED</span>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 font-label-caps text-label-caps rounded flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+                    SIMULATE FLOW
+                </button>
+</div>
+</div>
+<!-- Workflow Visualization -->
+<div class="p-lane-margin flex gap-12 min-w-max relative h-full">
+<!-- Lane 1: Identification & Trigger -->
+<div class="flex flex-col gap-node-gutter w-72 swimlane-border pr-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary" data-icon="radar">radar</span>
+<h3 class="font-headline-md text-headline-md">EVENT SOURCE</h3>
+</div>
+<!-- Node: Order Validation -->
+<div class="bg-surface-container-lowest border border-outline p-3 rounded relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="font-label-caps text-label-caps text-outline">VALIDATION_UNIT</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed glow-pulse"></span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Incoming Order Stream [O-442]</p>
+<div class="mt-4 flex justify-end">
+<div class="w-2 h-2 bg-primary-fixed"></div>
+</div>
+</div>
+<!-- Node: Inventory Check -->
+<div class="bg-surface-container-lowest border border-outline p-3 rounded relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="font-label-caps text-label-caps text-outline">STOCK_AUDIT_V2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Quantity Verification Logic</p>
+<div class="mt-4 flex justify-between items-center">
+<span class="font-code-xs text-code-xs text-error">TRIGGER_EXC</span>
+<div class="w-2 h-2 bg-error"></div>
+</div>
+</div>
+</div>
+<!-- Lane 2: Exception Handling (The Unhappy Path) -->
+<div class="flex flex-col gap-node-gutter w-80 swimlane-border pr-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-error" data-icon="report_problem">report_problem</span>
+<h3 class="font-headline-md text-headline-md">EXCEPTION MATRIX</h3>
+</div>
+<!-- Node: Out of Stock -->
+<div class="bg-[#0F0F0F] border border-error p-3 rounded group cursor-pointer hover:border-primary-fixed transition-colors">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="font-label-caps text-label-caps text-error">EXC_01: SKU_DEPLETED</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="inventory_2">inventory_2</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Local Stock: 0 Units</p>
+<div class="mt-2 text-outline font-code-xs text-code-xs">Prob: 12.5%</div>
+</div>
+<!-- Node: Damaged Goods -->
+<div class="bg-[#0F0F0F] border border-error p-3 rounded group cursor-pointer">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="font-label-caps text-label-caps text-error">EXC_02: QC_FAILURE</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="broken_image">broken_image</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Visual/Functional Defect Detected</p>
+</div>
+<!-- Node: Lost Inventory -->
+<div class="bg-[#0F0F0F] border border-error p-3 rounded group cursor-pointer">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="font-label-caps text-label-caps text-error">EXC_03: PHANTOM_STOCK</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="search_off">search_off</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">DB Match 0: Physical Count</p>
+</div>
+<!-- Node: Capacity Full -->
+<div class="bg-[#0F0F0F] border border-error p-3 rounded group cursor-pointer">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<span class="font-label-caps text-label-caps text-error">EXC_04: VOL_MAX</span>
+<span class="material-symbols-outlined text-error text-sm" data-icon="door_back">door_back</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Zone Storage @ 99.8% Efficiency</p>
+</div>
+</div>
+<!-- Lane 3: Recovery Logic -->
+<div class="flex flex-col gap-node-gutter w-96 swimlane-border pr-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="settings_backup_restore">settings_backup_restore</span>
+<h3 class="font-headline-md text-headline-md">RECOVERY_ENGINE</h3>
+</div>
+<!-- Recovery Path 1 -->
+<div class="bg-surface-container border border-outline-variant p-3 rounded border-l-4 border-l-primary-fixed">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed">FALLBACK_A: DIST_SEARCH</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Querying Regional Warehouse Cluster</p>
+<div class="mt-2 flex items-center gap-4">
+<div class="flex flex-col">
+<span class="font-code-xs text-code-xs text-outline">WH_SEATTLE</span>
+<span class="font-code-xs text-code-xs text-primary-fixed">MATCH FOUND</span>
+</div>
+<div class="flex flex-col">
+<span class="font-code-xs text-code-xs text-outline">LATENCY</span>
+<span class="font-code-xs text-code-xs">840ms</span>
+</div>
+</div>
+</div>
+<!-- Recovery Path 2 -->
+<div class="bg-surface-container border border-outline-variant p-3 rounded border-l-4 border-l-tertiary">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-tertiary">ACTION_B: QC_REDIRECT</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Initiate Manual Inspection &amp; RTV</p>
+<div class="mt-2 p-2 bg-surface-container-low rounded border border-outline-variant">
+<span class="font-code-xs text-code-xs text-outline">TICKET: #INC-8892-ADJ</span>
+</div>
+</div>
+<!-- Recovery Path 3 -->
+<div class="bg-surface-container border border-outline-variant p-3 rounded border-l-4 border-l-secondary">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-secondary">FALLBACK_C: CYCLE_COUNT</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Audit Lock on Aisle 4-9; Immediate Re-count</p>
+</div>
+<!-- Recovery Path 4 -->
+<div class="bg-surface-container border border-outline-variant p-3 rounded border-l-4 border-l-primary-fixed">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-label-caps text-primary-fixed">ACTION_D: OVERFLOW_TRNS</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface">Route to Tier-2 Satellite Hub (Jersey City)</p>
+</div>
+</div>
+<!-- Lane 4: Final State -->
+<div class="flex flex-col gap-node-gutter w-64">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-outline" data-icon="check_circle">check_circle</span>
+<h3 class="font-headline-md text-headline-md">RESOLUTION</h3>
+</div>
+<div class="bg-surface-container-high border border-primary-fixed/30 p-4 rounded-lg flex flex-col items-center justify-center text-center h-full max-h-96">
+<span class="material-symbols-outlined text-primary-fixed text-4xl mb-4" data-icon="task_alt">task_alt</span>
+<h4 class="font-label-caps text-label-caps text-primary-fixed mb-2">RECOVERY SUCCESS</h4>
+<p class="font-code-xs text-code-xs text-outline">All exceptions mitigated. Process re-entry at Node [WH_PICK_09]</p>
+<div class="mt-6 w-full space-y-2">
+<div class="flex justify-between font-code-xs text-code-xs">
+<span>SLA_MAINTAINED</span>
+<span class="text-primary-fixed">98.2%</span>
+</div>
+<div class="h-1 bg-surface-container-lowest w-full rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed w-[98%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG Connector Layer (Absolute Positioned) -->
+<svg class="absolute inset-0 pointer-events-none" height="100%" width="100%">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#84967e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead-error" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#ffb4ab" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Orthogonal Connections -->
+<path d="M 288 120 L 320 120" fill="none" marker-end="url(#arrowhead)" stroke="#84967e" stroke-width="1"></path>
+<!-- Exception Paths -->
+<path d="M 288 230 L 304 230 L 304 180 L 320 180" fill="none" marker-end="url(#arrowhead-error)" stroke="#ffb4ab" stroke-dasharray="4,2" stroke-width="1"></path>
+<path d="M 288 230 L 304 230 L 304 310 L 320 310" fill="none" marker-end="url(#arrowhead-error)" stroke="#ffb4ab" stroke-dasharray="4,2" stroke-width="1"></path>
+<path d="M 288 230 L 304 230 L 304 440 L 320 440" fill="none" marker-end="url(#arrowhead-error)" stroke="#ffb4ab" stroke-dasharray="4,2" stroke-width="1"></path>
+<path d="M 288 230 L 304 230 L 304 570 L 320 570" fill="none" marker-end="url(#arrowhead-error)" stroke="#ffb4ab" stroke-dasharray="4,2" stroke-width="1"></path>
+<!-- Recovery Connections -->
+<path d="M 640 180 L 680 180" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="2"></path>
+<path d="M 640 310 L 680 310" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="2"></path>
+<path d="M 640 440 L 680 440" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="2"></path>
+<path d="M 640 570 L 680 570" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="2"></path>
+<!-- Resolution Merge -->
+<path d="M 1064 180 L 1084 180 L 1084 350 L 1104 350" fill="none" marker-end="url(#arrowhead)" stroke="#72ff70" stroke-width="1"></path>
+<path d="M 1064 570 L 1084 570 L 1084 350 L 1104 350" fill="none" stroke="#72ff70" stroke-width="1"></path>
+</svg>
+</div>
+<!-- Metric Tooltip Overlay -->
+<div class="fixed bottom-12 right-8 w-80 bg-surface-container-high border border-outline-variant p-4 shadow-2xl rounded-lg backdrop-blur-xl">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-caps text-label-caps text-primary-fixed">REAL-TIME TELEMETRY</span>
+<span class="flex h-2 w-2 rounded-full bg-primary-fixed"></span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<span class="font-code-xs text-code-xs text-outline">WF_EFFICIENCY</span>
+<p class="font-headline-md text-headline-md">94.8%</p>
+</div>
+<div>
+<span class="font-code-xs text-code-xs text-outline">AUTO_REC_RATE</span>
+<p class="font-headline-md text-headline-md">82.1%</p>
+</div>
+<div class="col-span-2">
+<span class="font-code-xs text-code-xs text-outline">ACTIVE_FALLBACKS</span>
+<div class="flex gap-1 mt-1">
+<div class="h-2 w-8 bg-primary-fixed rounded-full"></div>
+<div class="h-2 w-8 bg-primary-fixed rounded-full"></div>
+<div class="h-2 w-8 bg-surface-container-lowest rounded-full border border-outline"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Audit Log Stubs (Footer) -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-grid-unit z-50 bg-surface-container-lowest border-t border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="font-code-xs text-code-xs text-outline">SYS_HEALTH: NOMINAL [LATENCY: 14ms] [REGION: US-EAST-1]</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">DOCS</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">API</a>
+<a class="font-code-xs text-code-xs text-outline hover:text-primary-fixed transition-colors" href="#">LOGS</a>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed"></div>
+<span class="font-code-xs text-code-xs text-primary-fixed">CONNECTED</span>
+</div>
+</div>
+</footer>
+<!-- Atmosphere/Micro-interaction Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Slight parallax effect on grid based on mouse
+            const main = document.querySelector('main');
+            main.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+                main.style.backgroundPosition = `${moveX}px ${moveY}px`;
+            });
+
+            // Node interaction
+            const nodes = document.querySelectorAll('.group');
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', () => {
+                    node.classList.add('scale-[1.02]');
+                });
+                node.addEventListener('mouseleave', () => {
+                    node.classList.remove('scale-[1.02]');
+                });
+            });
+        });
+    </script>
+</body></html>

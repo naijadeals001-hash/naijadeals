@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SYSTEM ATLAS : OPERATIONAL MONITORING</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #051424;
+            background-image: radial-gradient(#122131 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #d4e4fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .node-border {
+            border: 1px solid rgba(0, 230, 57, 0.2);
+        }
+        .node-border:hover {
+            border-color: #00e639;
+        }
+        .glow-green {
+            box-shadow: 0 0 10px rgba(0, 230, 57, 0.15);
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 255, 65, 0.1);
+            position: absolute;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#051424",
+                        "on-primary-container": "#007117",
+                        "secondary-fixed": "#dde1ff",
+                        "on-surface-variant": "#b9ccb2",
+                        "tertiary": "#fff6ff",
+                        "surface-container-lowest": "#010f1f",
+                        "tertiary-container": "#ecd3ff",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "surface-container-high": "#1c2b3c",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface-container-highest": "#273647",
+                        "background": "#051424",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#3b4b37",
+                        "secondary": "#b8c3ff",
+                        "primary-container": "#00ff41",
+                        "inverse-primary": "#006e16",
+                        "surface-dim": "#051424",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "on-primary-fixed-variant": "#00530e",
+                        "on-tertiary": "#490080",
+                        "surface-variant": "#273647",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-fixed": "#2c0051",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#0043eb",
+                        "primary": "#ebffe2",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "surface-container-low": "#0d1c2d",
+                        "on-error": "#690005",
+                        "primary-fixed": "#72ff70",
+                        "surface-container": "#122131",
+                        "primary-fixed-dim": "#00e639",
+                        "on-secondary": "#002388",
+                        "surface-bright": "#2c3a4c",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "outline": "#84967e",
+                        "on-secondary-container": "#c6ceff",
+                        "on-primary": "#003907",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-fixed": "#002203",
+                        "on-tertiary-container": "#862ed4",
+                        "on-secondary-fixed": "#001356",
+                        "inverse-on-surface": "#233143",
+                        "inverse-surface": "#d4e4fa",
+                        "surface-tint": "#00e639"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "node-gutter": "24px",
+                        "lane-margin": "32px",
+                        "stack-gap": "4px",
+                        "grid-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "code-sm": ["JetBrains Mono"],
+                        "code-xs": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "code-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-lane-margin h-16 border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-primary">SYSTEM ATLAS : MERCHANT_ONBOARDING_V4</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-primary-fixed tracking-widest uppercase">NODE_STATUS</span>
+<span class="font-code-xs text-code-xs text-on-primary-container">OPERATIONAL // L7_SECURE</span>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80 transition-colors duration-150 hover:bg-surface-container-high p-2 rounded-sm">settings_input_component</span>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] z-40 flex flex-col pt-stack-gap border-r border-outline-variant bg-surface-container-low w-64 hidden md:flex">
+<div class="px-6 py-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">WORKFLOW INDEX</h2>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container border-r-2 border-primary-fixed-dim font-label-caps text-label-caps transition-all duration-75" href="#">
+<span class="material-symbols-outlined">schema</span>
+                BPMN Flowmaps
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest font-label-caps text-label-caps transition-all duration-75" href="#">
+<span class="material-symbols-outlined">code_blocks</span>
+                API Contracts
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest font-label-caps text-label-caps transition-all duration-75" href="#">
+<span class="material-symbols-outlined">database</span>
+                Domain Models
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest font-label-caps text-label-caps transition-all duration-75" href="#">
+<span class="material-symbols-outlined">swap_calls</span>
+                Sequence Diagrams
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest font-label-caps text-label-caps transition-all duration-75" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+                Compliance Logic
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest font-label-caps text-label-caps transition-all duration-75" href="#">
+<span class="material-symbols-outlined">terminal</span>
+                Audit Logs
+            </a>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant">
+<div class="bg-surface-container-high p-3 rounded-sm">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[9px] text-on-surface-variant">SYSTEM_LOAD</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">12%</span>
+</div>
+<div class="w-full bg-surface-container-lowest h-1">
+<div class="bg-primary-container h-full" style="width: 12%"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:pl-64 pt-16 pb-12 min-h-screen">
+<div class="p-lane-margin max-w-[1600px] mx-auto">
+<!-- Header Metrics Bar -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-node-gutter">
+<!-- KPI: Merchant Applications -->
+<div class="bg-surface-container p-4 node-border relative overflow-hidden group">
+<div class="scanline opacity-0 group-hover:opacity-100"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Merchant Applications</span>
+<span class="font-code-xs text-code-xs text-primary-fixed-dim">+4.2%</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">12,482</span>
+<span class="font-label-caps text-[9px] text-outline">MTD_COUNT</span>
+</div>
+<div class="mt-4 h-8 flex items-end gap-1">
+<!-- Simulated Sparkline -->
+<div class="bg-primary-container/20 w-full h-2 rounded-t-sm"></div>
+<div class="bg-primary-container/40 w-full h-4 rounded-t-sm"></div>
+<div class="bg-primary-container/30 w-full h-3 rounded-t-sm"></div>
+<div class="bg-primary-container/60 w-full h-6 rounded-t-sm"></div>
+<div class="bg-primary-container/80 w-full h-5 rounded-t-sm"></div>
+<div class="bg-primary-container/50 w-full h-4 rounded-t-sm"></div>
+<div class="bg-primary-container w-full h-8 rounded-t-sm"></div>
+</div>
+</div>
+<!-- KPI: Approval Rate -->
+<div class="bg-surface-container p-4 node-border relative overflow-hidden group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Approval Rate</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm">trending_up</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">94.2%</span>
+<span class="font-label-caps text-[9px] text-outline">SYSTEM_MEAN</span>
+</div>
+<div class="mt-4 flex flex-col gap-1">
+<div class="flex justify-between text-[9px] font-code-xs">
+<span class="text-on-surface-variant">AUTO_PASS: 82%</span>
+<span class="text-on-surface-variant">MANUAL: 12.2%</span>
+</div>
+<div class="w-full bg-surface-container-lowest h-1.5 flex rounded-full overflow-hidden">
+<div class="bg-primary-container h-full" style="width: 82%"></div>
+<div class="bg-secondary-container h-full" style="width: 12.2%"></div>
+</div>
+</div>
+</div>
+<!-- KPI: Avg Onboarding Time -->
+<div class="bg-surface-container p-4 node-border relative overflow-hidden group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Avg Onboarding Time</span>
+<span class="material-symbols-outlined text-on-error-container text-sm">alarm</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">4.2h</span>
+<span class="font-label-caps text-[9px] text-outline">E2E_LATENCY</span>
+</div>
+<div class="mt-4 h-8 flex items-center justify-center border border-dashed border-outline-variant bg-surface-container-low">
+<span class="font-code-xs text-code-xs text-on-surface-variant">P95: 12.1h | P50: 1.8h</span>
+</div>
+</div>
+<!-- KPI: Merchant Readiness Score -->
+<div class="bg-surface-container p-4 node-border relative overflow-hidden group">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Readiness Score</span>
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">8.8/10</span>
+<span class="font-label-caps text-[9px] text-outline">MEAN_HEALTH</span>
+</div>
+<div class="mt-4 flex gap-1">
+<div class="h-1 flex-1 bg-primary-container"></div>
+<div class="h-1 flex-1 bg-primary-container"></div>
+<div class="h-1 flex-1 bg-primary-container"></div>
+<div class="h-1 flex-1 bg-primary-container"></div>
+<div class="h-1 flex-1 bg-primary-container"></div>
+<div class="h-1 flex-1 bg-primary-container"></div>
+<div class="h-1 flex-1 bg-primary-container"></div>
+<div class="h-1 flex-1 bg-primary-container"></div>
+<div class="h-1 flex-1 bg-outline-variant"></div>
+<div class="h-1 flex-1 bg-outline-variant"></div>
+</div>
+</div>
+</div>
+<!-- Pipeline Visualizer -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left: Funnel Detail -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<!-- Workflow Monitor -->
+<div class="bg-surface-container-low border border-outline-variant rounded-sm p-6 relative">
+<div class="absolute top-4 right-6 flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ACTIVE_NODE</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="font-code-xs text-code-xs text-on-surface-variant">ERROR_NODE</span>
+</div>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary mb-8 border-b border-outline-variant pb-2 inline-block">ONBOARDING_PIPELINE_FLOW_V4.2</h3>
+<div class="relative flex flex-wrap gap-8 items-start py-8">
+<!-- Node 1 -->
+<div class="w-40 bg-surface-container-highest border border-primary-container p-3 rounded-sm glow-green">
+<div class="font-label-caps text-[9px] text-primary mb-1">AUTH_GATEWAY</div>
+<div class="font-code-sm text-code-sm truncate">Merchant Login</div>
+<div class="mt-2 flex justify-between">
+<span class="text-[8px] text-outline">LOAD: 45%</span>
+<span class="text-[8px] text-primary-fixed-dim">OK</span>
+</div>
+</div>
+<div class="flex items-center text-primary/30 h-16">
+<span class="material-symbols-outlined">trending_flat</span>
+</div>
+<!-- Node 2 -->
+<div class="w-40 bg-surface-container-highest border border-outline-variant p-3 rounded-sm">
+<div class="font-label-caps text-[9px] text-on-surface-variant mb-1">KYC_ENGINE</div>
+<div class="font-code-sm text-code-sm truncate text-on-surface">ID Verification</div>
+<div class="mt-2 flex justify-between">
+<span class="text-[8px] text-outline">SUCCESS: 98%</span>
+<span class="text-[8px] text-primary-fixed-dim">OK</span>
+</div>
+</div>
+<div class="flex items-center text-primary/30 h-16">
+<span class="material-symbols-outlined">trending_flat</span>
+</div>
+<!-- Node 3: Error State -->
+<div class="w-40 bg-surface-container-highest border border-error p-3 rounded-sm">
+<div class="font-label-caps text-[9px] text-error mb-1">BANK_BRIDGE</div>
+<div class="font-code-sm text-code-sm truncate">Account Validation</div>
+<div class="mt-2 flex justify-between">
+<span class="text-[8px] text-outline">RETRY: 12</span>
+<span class="text-[8px] text-error">FAIL</span>
+</div>
+</div>
+<div class="flex items-center text-error/30 h-16">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<!-- Node 4 -->
+<div class="w-40 bg-surface-container-highest border border-outline-variant p-3 rounded-sm opacity-50">
+<div class="font-label-caps text-[9px] text-on-surface-variant mb-1">CRM_SYNC</div>
+<div class="font-code-sm text-code-sm truncate">Store Activation</div>
+<div class="mt-2 flex justify-between">
+<span class="text-[8px] text-outline">PENDING</span>
+<span class="text-[8px] text-outline">--</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary KPI row -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="bg-surface-container p-3 border-l-2 border-primary-container">
+<div class="font-label-caps text-[10px] text-on-surface-variant">COMPLIANCE QUEUE</div>
+<div class="font-headline-md text-headline-md text-on-surface">412</div>
+</div>
+<div class="bg-surface-container p-3 border-l-2 border-primary-container">
+<div class="font-label-caps text-[10px] text-on-surface-variant">KYC COMPLETION</div>
+<div class="font-headline-md text-headline-md text-on-surface">88.4%</div>
+</div>
+<div class="bg-surface-container p-3 border-l-2 border-error">
+<div class="font-label-caps text-[10px] text-on-surface-variant">BANK FAILURES</div>
+<div class="font-headline-md text-headline-md text-error">3.1%</div>
+</div>
+<div class="bg-surface-container p-3 border-l-2 border-secondary-container">
+<div class="font-label-caps text-[10px] text-on-surface-variant">STORE ACTIVATION</div>
+<div class="font-headline-md text-headline-md text-on-surface">92.1%</div>
+</div>
+</div>
+</div>
+<!-- Right: Microservice Health -->
+<div class="bg-surface-container p-6 node-border flex flex-col">
+<h3 class="font-label-caps text-label-caps text-primary-fixed mb-6 border-b border-outline-variant pb-2">MICROSERVICES_HEALTH</h3>
+<div class="space-y-4 flex-1">
+<!-- Service Item -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low border border-outline-variant/30">
+<div class="flex items-center gap-3">
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Identity-Svc-01</div>
+<div class="font-code-xs text-code-xs text-outline">Uptime: 99.98%</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">12ms</div>
+<div class="font-label-caps text-[8px] text-outline">LATENCY</div>
+</div>
+</div>
+<!-- Service Item -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low border border-outline-variant/30">
+<div class="flex items-center gap-3">
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Kyc-Validator-Node</div>
+<div class="font-code-xs text-code-xs text-outline">Uptime: 99.95%</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">45ms</div>
+<div class="font-label-caps text-[8px] text-outline">LATENCY</div>
+</div>
+</div>
+<!-- Service Item (Warning) -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low border border-error/50">
+<div class="flex items-center gap-3">
+<div class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></div>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Bank-API-Adapter</div>
+<div class="font-code-xs text-code-xs text-error">Latency Spike Detected</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-code-xs text-code-xs text-error">890ms</div>
+<div class="font-label-caps text-[8px] text-outline">LATENCY</div>
+</div>
+</div>
+<!-- Service Item -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low border border-outline-variant/30">
+<div class="flex items-center gap-3">
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+<div>
+<div class="font-code-sm text-code-sm text-on-surface">Notification-Relay</div>
+<div class="font-code-xs text-code-xs text-outline">Uptime: 100%</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-code-xs text-code-xs text-primary-fixed-dim">4ms</div>
+<div class="font-label-caps text-[8px] text-outline">LATENCY</div>
+</div>
+</div>
+<div class="mt-6">
+<div class="w-full h-32 bg-cover bg-center opacity-30 grayscale hover:grayscale-0 transition-all" data-alt="A stylized engineering data visualization showing a 3D isometric representation of a microservice mesh network in deep tech dark mode. The nodes are connected by glowing green and blue logic threads, with occasional red pulses indicating alert states. The aesthetic is high-density NOC monitoring with monospaced data callouts and architectural precision." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC6Gy_1zzRDb7Eghb7VokWz2D4z8wEjvK6Q2Wtu0mccyhbLwtWES_NrfEpcX11PVTZ5ZK0k0AypREIAYnbh1LPWMUbHw6uxJZ30ushovT1bs6EXsFIOUuiKXKd-OFQ48RJv287qBVDGccxygUpIhvTMQgT3xN3OT1kvJKZTk5gyEg8ttO-zFlhDQxqxa-tZsBQBwDjBrbIZIG5CfgNezQw18gVQEcvfceA5X2cFJoA0tyYtGcQ5Y245ILcY_TseN9sQjLyZo60i55c')"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Terminal Audit Log -->
+<div class="mt-6 bg-surface-container-lowest border border-outline-variant p-4 font-code-xs">
+<div class="flex justify-between items-center mb-2 text-on-surface-variant">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">terminal</span>
+                        AUDIT_STREAM_LIVE
+                    </span>
+<span>SESSION_ID: FF09-X2-8921</span>
+</div>
+<div class="space-y-1 text-outline">
+<div><span class="text-primary-fixed-dim">[14:22:01]</span> <span class="text-on-surface">SYSTEM:</span> New application registered ID_88219 (Region: EU-WEST-1)</div>
+<div><span class="text-primary-fixed-dim">[14:22:05]</span> <span class="text-on-surface">KYC:</span> Document scan completed for ID_88219. OCR confidence 0.98.</div>
+<div><span class="text-primary-fixed-dim">[14:22:09]</span> <span class="text-on-surface">BANK:</span> Initiating account validation with Partner_V3...</div>
+<div class="text-error"><span class="text-error">[14:22:15]</span> <span class="text-error">ERROR:</span> Partner_V3 timeout exception. Re-queueing ID_88219.</div>
+<div><span class="text-primary-fixed-dim">[14:22:18]</span> <span class="text-on-surface">SYSTEM:</span> Load balancer adjusted to node_04. Current throughput 450 req/s.</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-center gap-lane-margin items-center h-10 px-lane-margin border-t border-outline-variant bg-surface-container-highest md:hidden">
+<a class="flex items-center gap-2 bg-on-primary-container text-primary-fixed rounded-sm px-3 py-1 font-code-xs text-code-xs uppercase transition-all duration-75 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-[16px]">query_stats</span>
+            Live
+        </a>
+<a class="flex items-center gap-2 text-on-surface-variant opacity-70 font-code-xs text-code-xs uppercase hover:opacity-100 transition-all duration-75 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-[16px]">storage</span>
+            Registry
+        </a>
+<a class="flex items-center gap-2 text-on-surface-variant opacity-70 font-code-xs text-code-xs uppercase hover:opacity-100 transition-all duration-75 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-[16px]">architecture</span>
+            Schema
+        </a>
+<a class="flex items-center gap-2 text-on-surface-variant opacity-70 font-code-xs text-code-xs uppercase hover:opacity-100 transition-all duration-75 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-[16px]">view_headline</span>
+            Console
+        </a>
+</nav>
+<script>
+        // Micro-interaction for audit log simulation
+        const logContainer = document.querySelector('.space-y-1');
+        const logs = [
+            "KYC: Background check passed for ID_9901.",
+            "SYSTEM: Registry sync completed (0.1ms).",
+            "ONBOARD: Merchant Readiness Score updated to 9.2.",
+            "AUTH: Session token rotation for user_admin.",
+            "WARN: High CPU detected on Node_03."
+        ];
+
+        setInterval(() => {
+            const newLog = document.createElement('div');
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            newLog.innerHTML = `<span class="text-primary-fixed-dim">[${time}]</span> <span class="text-on-surface">UPDATE:</span> ${logs[Math.floor(Math.random() * logs.length)]}`;
+            logContainer.appendChild(newLog);
+            if (logContainer.children.length > 8) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }, 3000);
+    </script>
+</body></html>
