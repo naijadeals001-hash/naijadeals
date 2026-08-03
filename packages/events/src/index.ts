@@ -23,7 +23,10 @@ export interface EventBus {
 }
 
 export class NoopEventBus implements EventBus {
-  public async publish(): Promise<void> {
+  public async publish<TPayload extends Record<string, unknown>>(
+    _event: DomainEvent<TPayload>,
+    _options?: PublishOptions
+  ): Promise<void> {
     return Promise.resolve();
   }
 }

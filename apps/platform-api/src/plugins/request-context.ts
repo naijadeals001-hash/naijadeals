@@ -17,7 +17,19 @@ const resolveHeader = (request: FastifyRequest, headerName: string): string | un
 };
 
 export const requestContextPlugin = fp(async (fastify) => {
-  fastify.decorateRequest('requestContext', null);
+  fastify.decorateRequest('requestContext', {
+    getter(this: FastifyRequest) {
+      return (
+        (this as FastifyRequest & { __requestContext?: FastifyRequest['requestContext'] }).__requestContext ?? {
+          requestId: '',
+          correlationId: ''
+        }
+      );
+    },
+    setter(this: FastifyRequest, value: FastifyRequest['requestContext']) {
+      (this as FastifyRequest & { __requestContext?: FastifyRequest['requestContext'] }).__requestContext = value;
+    }
+  });
 
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
     const requestId = resolveHeader(request, 'x-request-id') ?? uuidv4();
