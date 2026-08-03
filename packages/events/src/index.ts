@@ -27,6 +27,8 @@ export class NoopEventBus implements EventBus {
     _event: DomainEvent<TPayload>,
     _options?: PublishOptions
   ): Promise<void> {
+    void _event;
+    void _options;
     return Promise.resolve();
   }
 }
