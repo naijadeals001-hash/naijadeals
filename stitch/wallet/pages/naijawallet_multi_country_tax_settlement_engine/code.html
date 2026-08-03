@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaWallet: Multi-Country Tax Settlement Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #bfc9c3; border-radius: 10px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline-variant": "#bfc9c3",
+                      "on-tertiary-fixed": "#002114",
+                      "tertiary-fixed-dim": "#68dba9",
+                      "tertiary-fixed": "#85f8c4",
+                      "primary": "#003527",
+                      "on-primary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "error-container": "#ffdad6",
+                      "tertiary": "#003623",
+                      "on-tertiary-fixed-variant": "#005137",
+                      "on-error": "#ffffff",
+                      "secondary-fixed-dim": "#b9c7e0",
+                      "on-secondary": "#ffffff",
+                      "background": "#f8f9ff",
+                      "surface-bright": "#f8f9ff",
+                      "tertiary-container": "#004f35",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#d3e4fe",
+                      "surface-container-high": "#dce9ff",
+                      "on-secondary-fixed": "#0d1c2f",
+                      "on-primary-fixed-variant": "#0b513d",
+                      "on-surface": "#0b1c30",
+                      "on-primary-fixed": "#002117",
+                      "on-background": "#0b1c30",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-secondary-fixed-variant": "#3a485c",
+                      "on-surface-variant": "#404944",
+                      "secondary": "#515f74",
+                      "on-primary-container": "#80bea6",
+                      "error": "#ba1a1a",
+                      "secondary-container": "#d5e3fd",
+                      "surface": "#f8f9ff",
+                      "surface-container": "#e5eeff",
+                      "primary-container": "#064e3b",
+                      "on-secondary-container": "#57657b",
+                      "inverse-primary": "#95d3ba",
+                      "primary-fixed-dim": "#95d3ba",
+                      "surface-dim": "#cbdbf5",
+                      "secondary-fixed": "#d5e3fd",
+                      "surface-tint": "#2b6954",
+                      "surface-variant": "#d3e4fe",
+                      "surface-container-low": "#eff4ff",
+                      "on-tertiary-container": "#51c695",
+                      "inverse-surface": "#213145",
+                      "primary-fixed": "#b0f0d6",
+                      "outline": "#707974",
+                      "surface-container-lowest": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "margin-desktop": "40px",
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "container-max": "1440px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "label-sm": ["JetBrains Mono"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background overflow-hidden h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-margin-desktop py-unit max-w-container-max mx-auto bg-primary dark:bg-primary border-b border-outline-variant fixed top-0 z-50 h-16">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-on-primary">Pan-African Authority Shell</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-primary-fixed font-bold border-b-2 border-primary-fixed pb-1 font-label-sm text-label-sm" href="#">Compliance</a>
+<a class="text-on-primary/70 font-medium pb-1 font-label-sm text-label-sm hover:text-primary-fixed transition-colors duration-200" href="#">Infrastructure</a>
+<a class="text-on-primary/70 font-medium pb-1 font-label-sm text-label-sm hover:text-primary-fixed transition-colors duration-200" href="#">Law Enforcement</a>
+<a class="text-on-primary/70 font-medium pb-1 font-label-sm text-label-sm hover:text-primary-fixed transition-colors duration-200" href="#">Audit Logs</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3 text-on-primary/80">
+<span class="material-symbols-outlined cursor-pointer hover:text-on-primary transition-all">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-on-primary transition-all">shield_with_heart</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-on-primary transition-all">account_balance_wallet</span>
+</div>
+<button class="bg-on-primary text-primary px-4 py-1.5 rounded-lg font-bold text-sm hover:opacity-90 active:scale-95 transition-all">Secure Portal</button>
+<img alt="Chief Administrative Officer Profile" class="w-8 h-8 rounded-full border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHeQ5xdRCXYMFAL2k_nL_nCUJKFKfIAutEh_6ubZzDb9AA5YCM5fchfqAT-WkUGC1chdTaFW3cHdDHtx-1xczKy_b1f5eTFZYzv3bUP0ANq2sagjWOcBI1Ganuev6ZyXMjVcP1l4wYJk2jgSEC5ePnB5_ghfXM3KKyz4rWUr_psLh4HnGqTv7Ff2Gk-vrqcL8llgjgFmfNMQY1WKArnbnUHnJW_qIhASkCpnOwLnSOdZKOAu4iIg4KArfvQJiJWTl01hb0gplpVYqH"/>
+</div>
+</header>
+<div class="flex flex-1 pt-16 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-full w-64 flex flex-col p-unit border-r border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface z-40">
+<div class="p-4 border-b border-outline-variant/30 mb-4">
+<h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Admin Core</h2>
+<p class="font-label-sm text-label-sm text-secondary uppercase tracking-widest mt-1">Level 5 Clearance</p>
+</div>
+<nav class="flex-1 px-2 space-y-1 overflow-y-auto">
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-3 py-2 transition-all duration-150 ease-in-out font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span> Command Center
+                </a>
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim px-3 py-2 font-label-sm text-label-sm hover:bg-secondary-container/20 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span> Residency Manager
+                </a>
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim px-3 py-2 font-label-sm text-label-sm hover:bg-secondary-container/20 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span> Regulatory Hub
+                </a>
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim px-3 py-2 font-label-sm text-label-sm hover:bg-secondary-container/20 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="handshake">handshake</span> Agency Handoff
+                </a>
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim px-3 py-2 font-label-sm text-label-sm hover:bg-secondary-container/20 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="policy">policy</span> Safety Protocol
+                </a>
+<a class="flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim px-3 py-2 font-label-sm text-label-sm hover:bg-secondary-container/20 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span> System Health
+                </a>
+</nav>
+<div class="px-2 py-4 border-t border-outline-variant space-y-1">
+<button class="w-full flex items-center gap-3 text-secondary px-3 py-2 font-label-sm text-label-sm hover:bg-secondary-container/20 rounded-lg">
+<span class="material-symbols-outlined">settings</span> Settings
+                </button>
+<button class="w-full flex items-center gap-3 text-secondary px-3 py-2 font-label-sm text-label-sm hover:bg-secondary-container/20 rounded-lg">
+<span class="material-symbols-outlined">help</span> Support
+                </button>
+<button class="w-full mt-4 bg-primary text-on-primary py-2 font-label-sm text-label-sm rounded-lg hover:opacity-90">System Audit</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 overflow-y-auto custom-scrollbar bg-surface-container-low p-margin-desktop">
+<!-- Authority Level Header -->
+<section class="bg-primary text-on-primary p-6 rounded-xl flex justify-between items-end mb-gutter shadow-sm">
+<div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm opacity-80 uppercase tracking-widest mb-1">
+<span class="material-symbols-outlined text-[14px]">shield</span> Clearance: Level 5 Executive
+                    </div>
+<h1 class="font-display-lg text-display-lg">Fiscal Settlement Dashboard</h1>
+<div class="flex items-center gap-4 mt-2">
+<span class="font-label-sm text-label-sm bg-primary-container text-on-primary-container px-3 py-1 rounded-full border border-primary-fixed/20">System ID: NW-SETTLE-0092</span>
+<span class="font-label-sm text-label-sm opacity-60">Last Audit: Oct 24, 2023 14:22 WAT</span>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="bg-error text-on-error px-4 py-2 font-label-sm text-label-sm flex items-center gap-2 hover:opacity-90 transition-all">
+<span class="material-symbols-outlined text-[18px]">lock_reset</span> Revoke Authority
+                    </button>
+<button class="bg-tertiary-fixed text-on-tertiary-fixed px-6 py-2 font-headline-md text-headline-md font-bold flex items-center gap-2 hover:opacity-90 transition-all">
+<span class="material-symbols-outlined">payments</span> Settle Funds
+                    </button>
+</div>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Cross-Border Settlement Ledger -->
+<div class="col-span-8 bg-surface-container-lowest border border-outline-variant p-6 rounded-lg shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-lg text-headline-lg flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-primary">swap_horiz</span>
+                            Cross-Border Settlement Ledger
+                        </h3>
+<button class="text-secondary font-label-sm text-label-sm border border-outline-variant px-3 py-1.5 flex items-center gap-2 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span> Download Fiscal Audit
+                        </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-low border-y border-outline-variant">
+<th class="px-3 py-3 font-label-sm text-label-sm uppercase text-secondary">Transaction ID</th>
+<th class="px-3 py-3 font-label-sm text-label-sm uppercase text-secondary">Corridor</th>
+<th class="px-3 py-3 font-label-sm text-label-sm uppercase text-secondary">Amount</th>
+<th class="px-3 py-3 font-label-sm text-label-sm uppercase text-secondary">Currency Pair</th>
+<th class="px-3 py-3 font-label-sm text-label-sm uppercase text-secondary">Tax Withheld</th>
+<th class="px-3 py-3 font-label-sm text-label-sm uppercase text-secondary text-right">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<tr class="hover:bg-tertiary-fixed/5 transition-colors group h-[40px]">
+<td class="px-3 py-3 font-label-sm text-label-sm font-bold text-primary">#TXN-882-01</td>
+<td class="px-3 py-3 font-body-md text-body-md">Lagos → Libreville</td>
+<td class="px-3 py-3 font-body-md text-body-md">4,250,000</td>
+<td class="px-3 py-3 font-label-sm text-label-sm text-secondary">NGN / XAF</td>
+<td class="px-3 py-3 font-body-md text-body-md text-error">318,750 (7.5%)</td>
+<td class="px-3 py-3 text-right">
+<span class="bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-tighter">Settled</span>
+</td>
+</tr>
+<tr class="hover:bg-tertiary-fixed/5 transition-colors group h-[40px]">
+<td class="px-3 py-3 font-label-sm text-label-sm font-bold text-primary">#TXN-882-02</td>
+<td class="px-3 py-3 font-body-md text-body-md">Douala → Lagos</td>
+<td class="px-3 py-3 font-body-md text-body-md">1,800,000</td>
+<td class="px-3 py-3 font-label-sm text-label-sm text-secondary">XAF / NGN</td>
+<td class="px-3 py-3 font-body-md text-body-md text-error">90,000 (5.0%)</td>
+<td class="px-3 py-3 text-right">
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-tighter">Pending</span>
+</td>
+</tr>
+<tr class="hover:bg-tertiary-fixed/5 transition-colors group h-[40px]">
+<td class="px-3 py-3 font-label-sm text-label-sm font-bold text-primary">#TXN-882-03</td>
+<td class="px-3 py-3 font-body-md text-body-md">Lagos → Libreville</td>
+<td class="px-3 py-3 font-body-md text-body-md">12,400,000</td>
+<td class="px-3 py-3 font-label-sm text-label-sm text-secondary">NGN / XAF</td>
+<td class="px-3 py-3 font-body-md text-body-md text-error">930,000 (7.5%)</td>
+<td class="px-3 py-3 text-right">
+<span class="bg-error-container text-on-error-container px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-tighter">Audit Flag</span>
+</td>
+</tr>
+<tr class="hover:bg-tertiary-fixed/5 transition-colors group h-[40px]">
+<td class="px-3 py-3 font-label-sm text-label-sm font-bold text-primary">#TXN-882-04</td>
+<td class="px-3 py-3 font-body-md text-body-md">Port Harcourt → Bata</td>
+<td class="px-3 py-3 font-body-md text-body-md">920,000</td>
+<td class="px-3 py-3 font-label-sm text-label-sm text-secondary">NGN / XAF</td>
+<td class="px-3 py-3 font-body-md text-body-md text-error">69,000 (7.5%)</td>
+<td class="px-3 py-3 text-right">
+<span class="bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-tighter">Settled</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Compliance Health Audit -->
+<div class="col-span-4 bg-surface-container-lowest border border-outline-variant p-6 rounded-lg shadow-sm">
+<h3 class="font-headline-lg text-headline-lg flex items-center gap-2 text-primary mb-6">
+<span class="material-symbols-outlined text-primary">fact_check</span>
+                        Compliance Audit
+                    </h3>
+<div class="space-y-6">
+<div class="relative pt-1">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm font-bold text-secondary uppercase">Regional Fiscal Treaty</span>
+<span class="font-label-sm text-label-sm text-primary">98.2%</span>
+</div>
+<div class="overflow-hidden h-2 text-xs flex rounded bg-surface-container-high">
+<div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary" style="width:98.2%"></div>
+</div>
+</div>
+<div class="relative pt-1">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm font-bold text-secondary uppercase">International AML/KYC</span>
+<span class="font-label-sm text-label-sm text-primary">94.5%</span>
+</div>
+<div class="overflow-hidden h-2 text-xs flex rounded bg-surface-container-high">
+<div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-tertiary-container" style="width:94.5%"></div>
+</div>
+</div>
+<div class="mt-8 p-4 bg-surface-container-low border border-outline-variant rounded">
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+<h4 class="font-headline-md text-headline-md text-primary">Entity Verified</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Cryptographic proof for last 24h of transactions available for validation.</p>
+<button class="w-full border border-primary text-primary font-label-sm text-label-sm py-2 hover:bg-primary hover:text-on-primary transition-all uppercase tracking-wider">
+                                Click to Validate Proof
+                            </button>
+</div>
+</div>
+</div>
+<!-- National Authority Handover -->
+<div class="col-span-5 bg-inverse-surface text-inverse-on-surface p-6 rounded-lg">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-tertiary-fixed">account_balance</span>
+                        National Authority Handover
+                    </h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white/5 p-4 rounded border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+<p class="font-label-sm text-label-sm text-white/60 uppercase mb-1">Central Bank of Nigeria</p>
+<p class="font-headline-lg text-headline-lg font-bold">₦142.8M</p>
+<div class="flex items-center gap-2 mt-4">
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed animate-pulse"></div>
+<span class="font-label-sm text-label-sm text-tertiary-fixed">Scheduled (18:00)</span>
+</div>
+</div>
+<div class="bg-white/5 p-4 rounded border border-white/10 hover:border-white/30 transition-all cursor-pointer">
+<p class="font-label-sm text-label-sm text-white/60 uppercase mb-1">BEAC (Gabon/Cameroon)</p>
+<p class="font-headline-lg text-headline-lg font-bold">₣289.4M</p>
+<div class="flex items-center gap-2 mt-4 text-secondary-fixed-dim">
+<span class="material-symbols-outlined text-[16px]">pending</span>
+<span class="font-label-sm text-label-sm">In Verification</span>
+</div>
+</div>
+</div>
+<div class="mt-6 flex flex-col gap-2">
+<div class="flex justify-between items-center py-2 border-b border-white/10">
+<span class="font-body-md text-body-md">Settlement Threshold</span>
+<span class="mono text-label-sm">85% Capacity</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-body-md text-body-md">Liquidity Pool Health</span>
+<span class="font-label-sm text-label-sm text-tertiary-fixed">OPTIMAL</span>
+</div>
+</div>
+</div>
+<!-- Corridor Tariff Control -->
+<div class="col-span-7 bg-surface-container-lowest border border-outline-variant p-6 rounded-lg shadow-sm">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2 text-primary mb-6">
+<span class="material-symbols-outlined text-primary">toll</span>
+                        Corridor Tariff Control
+                    </h3>
+<div class="grid grid-cols-2 gap-8">
+<div>
+<label class="block font-label-sm text-label-sm uppercase text-secondary mb-2">Active Logistics Corridor</label>
+<select class="w-full bg-surface border border-outline-variant rounded p-2 font-body-md text-body-md focus:ring-2 focus:ring-primary-container focus:border-primary outline-none">
+<option>Lagos - Libreville (Marine)</option>
+<option>Lagos - Douala (Terrestrial)</option>
+<option>Bata - Port Harcourt (Air)</option>
+</select>
+<div class="mt-6 space-y-4">
+<div class="flex justify-between">
+<span class="font-body-md text-body-md font-bold">Dynamic Tax Rate</span>
+<span class="font-headline-md text-headline-md text-primary">7.50%</span>
+</div>
+<input class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary" type="range"/>
+<div class="flex justify-between font-label-sm text-label-sm text-secondary">
+<span>Min: 2.0%</span>
+<span>Max: 15.0%</span>
+</div>
+</div>
+</div>
+<div class="border-l border-outline-variant pl-8 space-y-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary">info</span>
+<div>
+<p class="font-body-md text-body-md font-bold">Tariff Impact Analysis</p>
+<p class="font-label-sm text-label-sm text-secondary mt-1">Adjusting rate to 7.5% will increase forecasted revenue by 1.2M USD but may reduce trade volume by 0.4%.</p>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary py-3 rounded-lg font-bold font-headline-md text-headline-md flex items-center justify-center gap-2 active:scale-95 transition-all">
+<span class="material-symbols-outlined">publish</span> Apply New Rates
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Multi-Step Progress Tracker (Authorization Flow) -->
+<section class="mt-gutter bg-surface-container-lowest border border-outline-variant p-6 rounded-lg">
+<h3 class="font-headline-md text-headline-md mb-6">Current Settlement Authorization Flow</h3>
+<div class="flex items-center justify-between">
+<!-- Step 1 -->
+<div class="flex flex-col items-center gap-2 flex-1 relative">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center z-10">
+<span class="material-symbols-outlined">done</span>
+</div>
+<div class="absolute top-5 left-1/2 w-full h-0.5 bg-primary"></div>
+<div class="text-center">
+<p class="font-label-sm text-label-sm font-bold">Verification</p>
+<p class="text-[10px] text-secondary opacity-70">OFFICER: ID-992<br/>10:14 AM</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center gap-2 flex-1 relative">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center z-10">
+<span class="material-symbols-outlined">done</span>
+</div>
+<div class="absolute top-5 left-1/2 w-full h-0.5 bg-outline-variant"></div>
+<div class="text-center">
+<p class="font-label-sm text-label-sm font-bold">Tax Calculation</p>
+<p class="text-[10px] text-secondary opacity-70">SYSTEM: AUTO-GEN<br/>10:15 AM</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex flex-col items-center gap-2 flex-1 relative">
+<div class="w-10 h-10 rounded-full bg-inverse-surface text-inverse-on-surface border-2 border-primary flex items-center justify-center z-10 ring-4 ring-primary/10">
+<span class="material-symbols-outlined text-[18px]">priority_high</span>
+</div>
+<div class="absolute top-5 left-1/2 w-full h-0.5 bg-outline-variant"></div>
+<div class="text-center">
+<p class="font-label-sm text-label-sm font-bold text-primary">Authority Sign-off</p>
+<p class="text-[10px] text-secondary opacity-70">AWAITING LEVEL 5</p>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="flex flex-col items-center gap-2 flex-1 relative">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-secondary flex items-center justify-center z-10">
+<span class="material-symbols-outlined">pending</span>
+</div>
+<div class="text-center">
+<p class="font-label-sm text-label-sm font-bold text-secondary">Final Handoff</p>
+<p class="text-[10px] text-secondary opacity-70">SCHEDULED</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Floating Action Feedback (Toast-like) -->
+<div class="fixed bottom-margin-desktop right-margin-desktop bg-inverse-surface text-inverse-on-surface px-6 py-4 rounded-lg shadow-xl flex items-center gap-4 border border-white/10 translate-y-24 transition-transform duration-500 ease-out z-[100]" id="status-toast">
+<div class="w-10 h-10 bg-tertiary-fixed rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-fixed" data-weight="fill">verified</span>
+</div>
+<div>
+<p class="font-headline-md text-headline-md">Session Verified</p>
+<p class="font-body-md text-body-md opacity-70">Continuous encryption handshake successful.</p>
+</div>
+</div>
+<script>
+        // Micro-interaction for status toast
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('status-toast').classList.remove('translate-y-24');
+            }, 1000);
+            
+            setTimeout(() => {
+                document.getElementById('status-toast').classList.add('translate-y-24');
+            }, 8000);
+        });
+
+        // Toggle Active State logic
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Simulated UI update logic
+                navLinks.forEach(l => {
+                    l.className = "flex items-center gap-3 text-secondary dark:text-secondary-fixed-dim px-3 py-2 font-label-sm text-label-sm hover:bg-secondary-container/20 transition-all duration-150";
+                });
+                link.className = "flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-3 py-2 transition-all duration-150 ease-in-out font-label-sm text-label-sm";
+            });
+        });
+    </script>
+</body></html>

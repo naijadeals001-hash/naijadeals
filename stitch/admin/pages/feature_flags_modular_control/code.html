@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Feature Flags &amp; Modular Control - GOV_OS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#d8e3fb",
+                      "outline-variant": "#3d4a3e",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "tertiary-fixed": "#e0e3e5",
+                      "secondary-fixed-dim": "#bcc7de",
+                      "background": "#031427",
+                      "inverse-on-surface": "#213145",
+                      "on-surface-variant": "#bbcbbb",
+                      "on-secondary-fixed-variant": "#3c475a",
+                      "outline": "#869486",
+                      "surface-container-low": "#0b1c30",
+                      "primary": "#54e98a",
+                      "primary-container": "#2ecc71",
+                      "on-background": "#d3e4fe",
+                      "error": "#ffb4ab",
+                      "secondary": "#bcc7de",
+                      "primary-fixed": "#6bfe9c",
+                      "on-error": "#690005",
+                      "on-primary-container": "#005027",
+                      "on-secondary": "#263143",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#102034",
+                      "primary-fixed-dim": "#4ae183",
+                      "surface-container-high": "#1b2b3f",
+                      "on-surface": "#d3e4fe",
+                      "on-primary-fixed": "#00210c",
+                      "on-tertiary-fixed": "#191c1e",
+                      "on-secondary-fixed": "#111c2d",
+                      "inverse-primary": "#006d37",
+                      "on-tertiary-container": "#424547",
+                      "tertiary": "#cccfd1",
+                      "on-primary": "#003919",
+                      "on-primary-fixed-variant": "#005228",
+                      "surface-dim": "#031427",
+                      "inverse-surface": "#d3e4fe",
+                      "on-secondary-container": "#aeb9d0",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "surface-tint": "#4ae183",
+                      "tertiary-container": "#b0b3b5",
+                      "surface-container-highest": "#26364a",
+                      "surface-bright": "#2a3a4f",
+                      "surface-container-lowest": "#000f21",
+                      "surface-variant": "#26364a",
+                      "on-tertiary": "#2d3133",
+                      "surface": "#031427",
+                      "error-container": "#93000a",
+                      "secondary-container": "#3e495d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "unit": "4px",
+                      "margin-desktop": "32px",
+                      "margin-mobile": "16px",
+                      "panel-padding": "20px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": [
+                              "IBM Plex Sans"
+                      ],
+                      "headline-xl": [
+                              "IBM Plex Sans"
+                      ],
+                      "data-display": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-lg": [
+                              "IBM Plex Sans"
+                      ],
+                      "label-caps": [
+                              "JetBrains Mono"
+                      ],
+                      "body-md": [
+                              "IBM Plex Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-xl": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "data-display": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #54e98a;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #54e98a;
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(100%);
+            border-color: white;
+        }
+      </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col md:flex-row overflow-x-hidden">
+<!-- SideNavBar (Desktop) / Implicitly hidden on mobile via flex-col to flex-row and hidden md:flex if we wanted, but instructions say use Responsive Pivot. For simplicity, we implement SideNavBar for desktop. -->
+<nav class="hidden md:flex bg-surface-container-low dark:bg-surface-container-low text-primary dark:text-primary-fixed docked left-0 h-full w-72 border-r border-outline-variant flex-col h-screen py-panel-padding z-50 fixed">
+<div class="px-panel-padding mb-8">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">GOV_OS</h1>
+<div class="mt-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant flex-shrink-0">
+<img alt="Super Admin Avatar" class="w-full h-full object-cover" data-alt="A futuristic, hyper-realistic portrait of a system administrator in a dark, tech-focused control room setting. Cinematic lighting, deep shadows, and subtle green monitor glows illuminating the face. High resolution, intense focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXoqO0sP9N4TMAg2gaVUOqsn_tRq4STImDLWdfubry7u-Nqt8BtldNTDNIVhHtXs1K11oYTlTPVZjoIEd9LuxX8tcV_TG4z9t-tbACGLkQDrhYpkcgMgk2Blti7kvdlPjI8xmjTvPfDd-1XumfDYzXfPGOnRf5TeXX_7QHqDmH2XeeL3l013vmHAWhQedWtx2LO8vD_seg08679RcdGnMcJnTdtEl4-JIhxy6Kkr_gLGtCJRanLBqte_ubzOlg8HAhqZ-S-T4ZR8Bv"/>
+</div>
+<div>
+<div class="font-label-caps text-label-caps font-data-display text-data-display text-on-surface">System Control</div>
+<div class="font-data-display text-data-display text-on-surface-variant text-[10px]">v4.0.2-STABLE</div>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<ul class="space-y-2 px-4">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-on-surface scale-98 transition-transform duration-75" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-caps text-label-caps font-data-display text-data-display">Core Registry</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-on-surface scale-98 transition-transform duration-75" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-label-caps text-label-caps font-data-display text-data-display">Regional Rollouts</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary-container text-on-secondary-container border-l-4 border-primary font-bold scale-98 transition-transform duration-75" href="#">
+<span class="material-symbols-outlined" data-icon="flag">flag</span>
+<span class="font-label-caps text-label-caps font-data-display text-data-display">Feature Flags</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-on-surface scale-98 transition-transform duration-75" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-label-caps font-data-display text-data-display">Compliance Audits</span>
+</a>
+</li>
+</ul>
+</div>
+<div class="px-4 mt-auto space-y-4">
+<button class="w-full py-3 bg-primary/10 text-primary border border-primary/30 rounded-DEFAULT font-label-caps text-label-caps hover:bg-primary/20 transition-colors">INITIATE DEPLOYMENT</button>
+<ul class="space-y-2">
+<li>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-on-surface" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-caps text-label-caps font-data-display text-data-display">Settings</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-on-surface" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-label-caps text-label-caps font-data-display text-data-display">System Logs</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- TopNavBar (Mobile only for this structure, or fixed top on desktop if side nav is collapsed, but layout is side nav desktop, top nav mobile. Keeping it simple as requested by instructions 'Responsive Pivot') -->
+<header class="md:hidden bg-surface-container-high dark:bg-surface-container-high border-b border-outline-variant dark:border-outline-variant flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-40">
+<div class="font-headline-lg-mobile text-headline-lg-mobile font-black tracking-tighter text-primary dark:text-primary-fixed">GOV_OS</div>
+<div class="flex gap-4 text-primary dark:text-primary-fixed">
+<button class="hover:bg-surface-container-highest transition-colors duration-150 p-2 rounded-full active:opacity-80 transition-all"><span class="material-symbols-outlined" data-icon="hub">hub</span></button>
+<button class="hover:bg-surface-container-highest transition-colors duration-150 p-2 rounded-full active:opacity-80 transition-all"><span class="material-symbols-outlined" data-icon="analytics">analytics</span></button>
+<button class="hover:bg-surface-container-highest transition-colors duration-150 p-2 rounded-full active:opacity-80 transition-all"><span class="material-symbols-outlined" data-icon="account_circle">account_circle</span></button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 md:ml-72 min-h-screen bg-surface flex flex-col">
+<!-- Header -->
+<div class="px-margin-mobile md:px-margin-desktop py-8 border-b border-outline-variant/30 bg-surface-container-lowest">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface">Feature Flags &amp; Modular Control</h2>
+<p class="font-data-display text-data-display text-on-surface-variant mt-2">Manage ecosystem-wide functionality toggles and deployment segments.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 border border-outline-variant rounded-DEFAULT font-label-caps text-label-caps text-on-surface hover:bg-surface-container-highest transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="history">history</span>
+                        View History
+                    </button>
+<button class="px-4 py-2 bg-error/10 border border-error/30 rounded-DEFAULT font-label-caps text-label-caps text-error hover:bg-error/20 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="emergency">emergency</span>
+                        Global Rollback
+                    </button>
+</div>
+</div>
+<!-- Global Metrics -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+<div class="bg-surface-container border border-outline-variant/50 p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-on-surface-variant">Active Flags</div>
+<div class="font-headline-lg text-headline-lg text-primary mt-1">142</div>
+</div>
+<div class="bg-surface-container border border-outline-variant/50 p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-on-surface-variant">System Latency Delta</div>
+<div class="font-headline-lg text-headline-lg text-error mt-1">+12ms</div>
+</div>
+<div class="bg-surface-container border border-outline-variant/50 p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-on-surface-variant">Recent Changes (24h)</div>
+<div class="font-headline-lg text-headline-lg text-on-surface mt-1">8</div>
+</div>
+<div class="bg-surface-container border border-outline-variant/50 p-4 rounded-lg">
+<div class="font-label-caps text-label-caps text-on-surface-variant">Rollback Readiness</div>
+<div class="font-headline-lg text-headline-lg text-primary mt-1">100%</div>
+</div>
+</div>
+</div>
+<div class="p-margin-mobile md:p-margin-desktop flex-1 space-y-8">
+<!-- Flag Categories -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Financial Core -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden col-span-1 lg:col-span-2 flex flex-col">
+<div class="p-4 border-b border-outline-variant/50 flex justify-between items-center bg-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="account_balance">account_balance</span>
+<h3 class="font-label-caps text-label-caps text-on-surface">Financial Core</h3>
+</div>
+<div class="font-data-display text-[10px] bg-primary/20 text-primary px-2 py-1 rounded-sm border border-primary/30">[ ACTIVE ]</div>
+</div>
+<div class="p-0 flex-1 overflow-x-auto">
+<table class="w-full text-left font-data-display text-data-display border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/50 bg-surface-container-highest/30">
+<th class="py-3 px-4 font-normal text-on-surface-variant">Flag Key</th>
+<th class="py-3 px-4 font-normal text-on-surface-variant">Beta</th>
+<th class="py-3 px-4 font-normal text-on-surface-variant">Merchants</th>
+<th class="py-3 px-4 font-normal text-on-surface-variant">Enterprise</th>
+<th class="py-3 px-4 font-normal text-on-surface-variant text-right">Latency</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<tr class="hover:bg-surface-container-highest/20 transition-colors">
+<td class="py-4 px-4">
+<div class="text-on-surface">Escrow Version 2.0</div>
+<div class="text-on-surface-variant text-[11px] mt-1">flag_escrow_v2_engine</div>
+</td>
+<td class="py-4 px-4">
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant" for="toggle1"></label>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant" for="toggle2"></label>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle3" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant" for="toggle3"></label>
+</div>
+</td>
+<td class="py-4 px-4 text-right text-error">+4ms</td>
+</tr>
+<tr class="hover:bg-surface-container-highest/20 transition-colors bg-surface-container-lowest/50">
+<td class="py-4 px-4">
+<div class="text-on-surface">Crypto Remittance - Lagos</div>
+<div class="text-on-surface-variant text-[11px] mt-1">flag_remit_crypto_los</div>
+</td>
+<td class="py-4 px-4">
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle4" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant" for="toggle4"></label>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle5" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant" for="toggle5"></label>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle6" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant" for="toggle6"></label>
+</div>
+</td>
+<td class="py-4 px-4 text-right text-primary">0ms</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Performance Impact Graph (Mockup) -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-4 flex flex-col">
+<div class="flex justify-between items-center mb-4 border-b border-outline-variant/50 pb-2">
+<div class="font-label-caps text-label-caps text-on-surface">Impact Analysis</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]" data-icon="monitoring">monitoring</span>
+</div>
+<div class="flex-1 relative min-h-[200px] flex items-end gap-2 pb-6 px-2">
+<!-- Abstract bars for graph -->
+<div class="w-1/6 bg-surface-container-highest h-[40%] rounded-t-sm relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-data-display text-[10px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">40ms</div>
+</div>
+<div class="w-1/6 bg-primary/40 h-[60%] rounded-t-sm border-t border-primary relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-data-display text-[10px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">60ms</div>
+</div>
+<div class="w-1/6 bg-surface-container-highest h-[35%] rounded-t-sm relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-data-display text-[10px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">35ms</div>
+</div>
+<div class="w-1/6 bg-error/40 h-[85%] rounded-t-sm border-t border-error relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-data-display text-[10px] text-error opacity-0 group-hover:opacity-100 transition-opacity">85ms</div>
+</div>
+<div class="w-1/6 bg-surface-container-highest h-[45%] rounded-t-sm relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-data-display text-[10px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">45ms</div>
+</div>
+<div class="w-1/6 bg-surface-container-highest h-[50%] rounded-t-sm relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 font-data-display text-[10px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">50ms</div>
+</div>
+<!-- X-axis line -->
+<div class="absolute bottom-4 left-0 right-0 h-[1px] bg-outline-variant"></div>
+<div class="absolute bottom-0 left-0 right-0 flex justify-between font-data-display text-[10px] text-on-surface-variant px-2">
+<span>-6h</span>
+<span>-3h</span>
+<span>Now</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Security & Identity -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden flex flex-col mt-6">
+<div class="p-4 border-b border-outline-variant/50 flex justify-between items-center bg-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="fingerprint">fingerprint</span>
+<h3 class="font-label-caps text-label-caps text-on-surface">Identity Verification</h3>
+</div>
+<div class="font-data-display text-[10px] bg-error/20 text-error px-2 py-1 rounded-sm border border-error/30">[ WARN ]</div>
+</div>
+<div class="p-0 overflow-x-auto">
+<table class="w-full text-left font-data-display text-data-display border-collapse">
+<tbody class="divide-y divide-outline-variant/30">
+<tr class="hover:bg-surface-container-highest/20 transition-colors">
+<td class="py-4 px-4 w-[40%]">
+<div class="text-on-surface">Biometric Vetting - High Risk</div>
+<div class="text-on-surface-variant text-[11px] mt-1">flag_id_bio_high_risk</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-4">
+<div class="flex flex-col gap-1 items-center">
+<div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle7" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant" for="toggle7"></label>
+</div>
+<span class="text-[10px] text-on-surface-variant">Beta</span>
+</div>
+<div class="flex flex-col gap-1 items-center">
+<div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle8" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant" for="toggle8"></label>
+</div>
+<span class="text-[10px] text-on-surface-variant">Merchants</span>
+</div>
+<div class="flex flex-col gap-1 items-center">
+<div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle9" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant" for="toggle9"></label>
+</div>
+<span class="text-[10px] text-on-surface-variant">Enterprise</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-right">
+<button class="text-[11px] border border-outline-variant px-2 py-1 rounded hover:bg-surface-container-highest">Configure Rules</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Activation Audit Logs -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden mt-6">
+<div class="p-4 border-b border-outline-variant/50 bg-surface-container">
+<h3 class="font-label-caps text-label-caps text-on-surface">Recent Audits</h3>
+</div>
+<div class="p-4 bg-surface-dim/50 font-data-display text-[12px]">
+<div class="flex justify-between py-2 border-b border-outline-variant/20 text-on-surface-variant">
+<span class="w-1/4">Timestamp</span>
+<span class="w-1/4">Admin</span>
+<span class="w-1/4">Action</span>
+<span class="w-1/4 text-right">Target</span>
+</div>
+<div class="flex justify-between py-2 border-b border-outline-variant/20">
+<span class="w-1/4 text-on-surface-variant">2023-10-27 14:32:01 UTC</span>
+<span class="w-1/4 text-primary">sysadmin_chidi</span>
+<span class="w-1/4 text-on-surface">ENABLE [Merchants]</span>
+<span class="w-1/4 text-right text-on-surface-variant">flag_escrow_v2_engine</span>
+</div>
+<div class="flex justify-between py-2 border-b border-outline-variant/20">
+<span class="w-1/4 text-on-surface-variant">2023-10-27 11:15:44 UTC</span>
+<span class="w-1/4 text-primary">auto_deploy_bot</span>
+<span class="w-1/4 text-error">DISABLE [Enterprise]</span>
+<span class="w-1/4 text-right text-on-surface-variant">flag_id_bio_high_risk</span>
+</div>
+<div class="flex justify-between py-2">
+<span class="w-1/4 text-on-surface-variant">2023-10-26 09:00:12 UTC</span>
+<span class="w-1/4 text-primary">sysadmin_chidi</span>
+<span class="w-1/4 text-on-surface">ENABLE [Beta]</span>
+<span class="w-1/4 text-right text-on-surface-variant">flag_remit_crypto_los</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,2 @@
+-- Placeholder migration file. Generate authoritative SQL with:
+-- npm run db:migrate:diff

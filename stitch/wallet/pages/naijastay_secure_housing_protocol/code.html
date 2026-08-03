@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaStay | Secure Housing Framework</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #11131c;
+            color: #e4e1e6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+            transition: all 0.2s ease;
+        }
+
+        .glass-card:hover {
+            border-color: #b7c4ff;
+            background: rgba(43, 46, 62, 0.9);
+        }
+
+        .terminal-glow {
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .status-pulse {
+            position: relative;
+        }
+
+        .status-pulse::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #00ff41;
+            opacity: 0.5;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 12px;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .map-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #00ff41;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00ff41;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#dce1ff",
+                        "on-primary": "#1f2d5e",
+                        "outline-variant": "#45464f",
+                        "on-background": "#e4e1e6",
+                        "on-primary-container": "#435083",
+                        "surface-dim": "#131317",
+                        "tertiary-fixed-dim": "#ffb4a2",
+                        "on-secondary-fixed": "#0b1c2f",
+                        "tertiary-container": "#ffb5a2",
+                        "surface-bright": "#39393d",
+                        "outline": "#90909a",
+                        "secondary-container": "#38485d",
+                        "on-tertiary-fixed": "#360e05",
+                        "on-secondary": "#213145",
+                        "inverse-surface": "#e4e1e6",
+                        "background": "#11131c",
+                        "on-tertiary-container": "#7b4436",
+                        "surface-container-highest": "#343438",
+                        "primary": "#dde1ff",
+                        "on-surface": "#e4e1e6",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "surface-tint": "#b7c4ff",
+                        "surface-container": "#1f1f23",
+                        "surface-container-high": "#292a2d",
+                        "error-container": "#93000a",
+                        "on-surface-variant": "#c6c5d0",
+                        "surface-variant": "#32343f",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-primary-fixed-variant": "#374476",
+                        "on-primary-fixed": "#071749",
+                        "inverse-on-surface": "#303034",
+                        "surface-container-lowest": "#0d0e11",
+                        "error": "#ffb4ab",
+                        "secondary": "#b7c8e1",
+                        "glass-bg": "rgba(29, 31, 41, 0.8)",
+                        "on-secondary-container": "#a6b6cf",
+                        "on-tertiary-fixed-variant": "#6c382b",
+                        "terminal-green": "#00ff41",
+                        "tertiary": "#ffdbd2",
+                        "surface": "#131317",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#512317",
+                        "tertiary-fixed": "#ffdbd2",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#690005",
+                        "primary-container": "#b7c4ff",
+                        "auth-error": "#ffb4ab",
+                        "surface-container-low": "#1b1b1f",
+                        "inverse-primary": "#4f5c90"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sidebar-width": "288px",
+                        "unit": "4px",
+                        "gutter": "12px",
+                        "stack-tight": "0.5rem",
+                        "stack-default": "1rem",
+                        "header-height": "64px",
+                        "container-padding": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "micro-tag": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "body-base": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "code-terminal": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-gutter h-header-height bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-terminal-green">shield_lock</span>
+<h1 class="text-headline-md font-headline-md font-extrabold text-terminal-green uppercase tracking-tighter">NAIJASTAY</h1>
+</div>
+<div class="hidden lg:flex items-center gap-8">
+<nav class="flex gap-6">
+<a class="text-terminal-green font-bold text-label-caps font-label-caps" href="#">SECURE FRAMEWORK</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 transition-colors text-label-caps font-label-caps p-1" href="#">PROPERTIES</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 transition-colors text-label-caps font-label-caps p-1" href="#">SAFETY NODES</a>
+</nav>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg text-label-caps font-label-caps hover:scale-95 duration-150">AUTH_ACCESS</button>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">info</span>
+<span class="lg:hidden material-symbols-outlined text-on-surface-variant cursor-pointer">menu</span>
+</div>
+</header>
+<!-- Side Navigation (Desktop Only) -->
+<aside class="hidden lg:flex fixed left-0 top-header-height h-[calc(100vh-64px)] w-sidebar-width flex-col py-6 bg-surface-container-highest border-r border-outline-variant z-40">
+<div class="px-6 mb-8">
+<span class="text-micro-tag font-micro-tag text-on-surface-variant uppercase tracking-widest">CORE PROTOCOLS</span>
+</div>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="text-label-caps font-label-caps">NaijaShop</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="text-label-caps font-label-caps">NaijaEats</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 bg-primary-container text-on-primary-container border-l-4 border-terminal-green cursor-pointer translate-x-1 transition-transform">
+<span class="material-symbols-outlined">home_work</span>
+<span class="text-label-caps font-label-caps">NaijaStay</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-label-caps font-label-caps">NaijaPay</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="text-label-caps font-label-caps">IdentityHub</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="pt-[80px] pb-[100px] lg:pl-sidebar-width px-container-padding min-h-screen">
+<!-- Header Hero -->
+<section class="mb-8 relative overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low p-8">
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="w-2 h-2 rounded-full bg-terminal-green status-pulse"></span>
+<span class="text-micro-tag text-terminal-green font-code-terminal">SYSTEM: SECURE_HOUSING_FRAMEWORK_v5.0</span>
+</div>
+<h2 class="text-display-lg font-display-lg mb-4 text-white max-w-2xl">High-Security Housing Infrastructure.</h2>
+<p class="text-on-surface-variant max-w-xl text-body-base leading-relaxed">
+                NaijaStay enforces a proprietary trust framework combining biometric identity, physical site audits, and smart-contract escrow to eliminate rental fraud across Nigeria.
+            </p>
+</div>
+</section>
+<!-- Regional Trust Map Snippet -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">map</span>
+<h3 class="text-headline-md font-headline-md">REGIONAL TRUST MAP</h3>
+</div>
+<span class="text-code-terminal text-terminal-green text-[10px]">LIVE_NODES: 1,402 ACTIVE</span>
+</div>
+<div class="glass-card h-48 rounded-xl overflow-hidden relative border-dashed border-outline-variant flex items-center justify-center">
+<div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+<!-- Map placeholders -->
+<div class="relative w-full h-full">
+<!-- Nigeria map silhouette simulated with dots -->
+<div class="map-dot" style="top: 30%; left: 45%;"></div>
+<div class="map-dot" style="top: 70%; left: 55%;"></div>
+<div class="map-dot" style="top: 80%; left: 40%;"></div>
+<div class="map-dot" style="top: 40%; left: 60%;"></div>
+<div class="map-dot" style="top: 60%; left: 30%;"></div>
+<div class="absolute bottom-4 left-6 flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-terminal-green"></span>
+<span class="text-[9px] font-code-terminal uppercase">Lagos_Cluster</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-terminal-green"></span>
+<span class="text-[9px] font-code-terminal uppercase">Abuja_Core</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-terminal-green"></span>
+<span class="text-[9px] font-code-terminal uppercase">PH_Zone</span>
+</div>
+</div>
+<div class="absolute top-4 right-6 text-[10px] font-code-terminal text-on-surface-variant flex flex-col items-end">
+<span>LAT: 9.0820 N</span>
+<span>LNG: 8.6753 E</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Multi-Layer Verification Bento -->
+<div class="mb-6 flex items-center justify-between">
+<h3 class="text-headline-md font-headline-md border-l-4 border-primary-container pl-4">MULTI-LAYER VERIFICATION</h3>
+<span class="text-micro-tag text-on-surface-variant bg-surface-variant px-2 py-1 rounded">DEEP_AUDIT_v1</span>
+</div>
+<div class="bento-grid mb-12">
+<!-- Layer 1: Biometric -->
+<div class="col-span-12 md:col-span-4 glass-card p-6 flex flex-col gap-4 border-t-2 border-t-primary">
+<div class="flex justify-between items-start">
+<div class="bg-primary/10 p-2 rounded">
+<span class="material-symbols-outlined text-primary">fingerprint</span>
+</div>
+<span class="text-code-terminal text-primary">LAYER_01</span>
+</div>
+<div>
+<span class="text-micro-tag font-code-terminal text-primary uppercase">Biometric Auth</span>
+<h4 class="text-headline-md font-headline-md mt-1">Host Identity</h4>
+<p class="text-body-sm text-on-surface-variant mt-2">Hosts must complete liveness detection and 3D facial mapping before property listing is authorized.</p>
+</div>
+</div>
+<!-- Layer 2: BVN -->
+<div class="col-span-12 md:col-span-4 glass-card p-6 flex flex-col gap-4 border-t-2 border-t-primary">
+<div class="flex justify-between items-start">
+<div class="bg-primary/10 p-2 rounded">
+<span class="material-symbols-outlined text-primary">id_card</span>
+</div>
+<span class="text-code-terminal text-primary">LAYER_02</span>
+</div>
+<div>
+<span class="text-micro-tag font-code-terminal text-primary uppercase">Financial Link</span>
+<h4 class="text-headline-md font-headline-md mt-1">BVN Validation</h4>
+<p class="text-body-sm text-on-surface-variant mt-2">Direct API integration with NIBSS to verify Bank Verification Numbers for all transacting parties.</p>
+</div>
+</div>
+<!-- Layer 3: Physical -->
+<div class="col-span-12 md:col-span-4 glass-card p-6 flex flex-col gap-4 border-t-2 border-t-terminal-green bg-terminal-green/5">
+<div class="flex justify-between items-start">
+<div class="bg-terminal-green/10 p-2 rounded">
+<span class="material-symbols-outlined text-terminal-green">visibility</span>
+</div>
+<span class="text-code-terminal text-terminal-green">LAYER_03</span>
+</div>
+<div>
+<span class="text-micro-tag font-code-terminal text-terminal-green uppercase">On-Site Proof</span>
+<h4 class="text-headline-md font-headline-md mt-1">Site Inspection</h4>
+<p class="text-body-sm text-on-surface-variant mt-2">Authorized NaijaStay agents conduct physical site visits to verify GPS coordinates and property condition.</p>
+</div>
+</div>
+</div>
+<!-- Escrow Protection Section -->
+<div class="mb-6">
+<h3 class="text-headline-md font-headline-md border-l-4 border-tertiary-container pl-4 uppercase">ESCROW PROTECTION LAYER</h3>
+</div>
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+<div class="glass-card p-8 flex flex-col gap-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/20 flex items-center justify-center border border-tertiary-container">
+<span class="material-symbols-outlined text-tertiary-container">lock_reset</span>
+</div>
+<div>
+<h4 class="font-bold">Security Deposits</h4>
+<span class="text-micro-tag font-code-terminal text-on-surface-variant">VAULT_REF: SD-902</span>
+</div>
+</div>
+<p class="text-body-base text-on-surface-variant">
+                Security deposits are held in a ring-fenced digital vault. These funds are never accessible to the Host until after a successful checkout and property clearance.
+            </p>
+<div class="flex items-center gap-2 p-2 bg-surface-container-lowest rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-terminal-green status-pulse"></span>
+<span class="text-code-terminal text-[10px]">ESCROW_ENGINE: OPERATIONAL</span>
+</div>
+</div>
+<div class="glass-card p-8 flex flex-col gap-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center border border-primary-container">
+<span class="material-symbols-outlined text-primary-container">account_balance_wallet</span>
+</div>
+<div>
+<h4 class="font-bold">Stay Fee Protection</h4>
+<span class="text-micro-tag font-code-terminal text-on-surface-variant">VAULT_REF: SF-114</span>
+</div>
+</div>
+<p class="text-body-base text-on-surface-variant">
+                Total stay fees are protected via smart contract. Payment is released to the Host automatically 24 hours after check-in, provided no disputes are raised.
+            </p>
+<button class="w-full py-2 bg-surface-variant border border-outline-variant text-label-caps font-label-caps rounded hover:bg-surface-bright transition-colors">
+                VIEW DISPUTE RESOLUTION PROTOCOL
+            </button>
+</div>
+</section>
+<!-- Trust Footer Info -->
+<section class="glass-card p-6 border-l-4 border-l-terminal-green flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-4xl text-terminal-green">verified</span>
+<div>
+<h5 class="font-bold">Fully Audited Infrastructure</h5>
+<p class="text-body-sm text-on-surface-variant">Compliance with NDPR and Nigerian housing safety standards.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<span class="px-3 py-1 bg-surface-container-high rounded text-code-terminal text-[10px]">ISO_27001_ALIGNED</span>
+<span class="px-3 py-1 bg-surface-container-high rounded text-code-terminal text-[10px]">BVN_CERTIFIED</span>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Mobile only) -->
+<footer class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-glass-bg border-t border-outline-variant backdrop-blur-8 shadow-lg">
+<div class="flex flex-col items-center justify-center text-terminal-green font-bold scale-90">
+<span class="material-symbols-outlined">shield</span>
+<span class="text-micro-tag font-micro-tag uppercase">Security</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">map</span>
+<span class="text-micro-tag font-micro-tag uppercase">Map</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">lock_clock</span>
+<span class="text-micro-tag font-micro-tag uppercase">Escrow</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">help_center</span>
+<span class="text-micro-tag font-micro-tag uppercase">Support</span>
+</div>
+</footer>
+<script>
+    // Micro-interactions for status pips
+    setInterval(() => {
+        const pips = document.querySelectorAll('.map-dot');
+        pips.forEach(pip => {
+            pip.style.opacity = Math.random() > 0.5 ? '1' : '0.5';
+        });
+    }, 2000);
+
+    // Simple terminal log cycle
+    const statusText = document.querySelector('.status-pulse + span');
+    if (statusText) {
+        setInterval(() => {
+            const nodes = ['1,402', '1,405', '1,398', '1,410'];
+            const randomNodes = nodes[Math.floor(Math.random() * nodes.length)];
+            statusText.textContent = `SYSTEM: SECURE_HOUSING_FRAMEWORK_v5.0 [ACTIVE_NODES: ${randomNodes}]`;
+        }, 4000);
+    }
+</script>
+</body></html>

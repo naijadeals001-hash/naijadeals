@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaPay | Ledger Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#b7c4ff",
+                    "surface-variant": "#343438",
+                    "secondary": "#b7c8e1",
+                    "primary": "#dde1ff",
+                    "on-background": "#e4e1e6",
+                    "secondary-container": "#38485d",
+                    "on-primary-container": "#435083",
+                    "on-primary-fixed-variant": "#374476",
+                    "glass-bg": "rgba(29, 31, 41, 0.8)",
+                    "surface-container-highest": "#343438",
+                    "tertiary-container": "#ffb5a2",
+                    "outline-variant": "#45464f",
+                    "surface-container": "#1d1f29",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "on-tertiary-fixed-variant": "#6c382b",
+                    "tertiary": "#ffdbd2",
+                    "on-primary": "#1f2d5e",
+                    "inverse-primary": "#4f5c90",
+                    "on-secondary": "#213145",
+                    "on-surface": "#e4e1e6",
+                    "error": "#ffb4ab",
+                    "primary-container": "#b7c4ff",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-container": "#a6b6cf",
+                    "outline": "#90909a",
+                    "on-tertiary": "#512317",
+                    "surface-bright": "#39393d",
+                    "tertiary-fixed": "#ffdbd2",
+                    "auth-error": "#ffb4ab",
+                    "on-tertiary-container": "#7b4436",
+                    "surface-container-low": "#1b1b1f",
+                    "surface-dim": "#131317",
+                    "surface-container-lowest": "#0d0e11",
+                    "inverse-on-surface": "#303034",
+                    "on-primary-fixed": "#071749",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-secondary-fixed": "#0b1c2f",
+                    "on-tertiary-fixed": "#360e05",
+                    "inverse-surface": "#e4e1e6",
+                    "on-surface-variant": "#c3c5d9",
+                    "error-container": "#93000a",
+                    "background": "#11131c",
+                    "surface": "#131317",
+                    "primary-fixed": "#dce1ff",
+                    "tertiary-fixed-dim": "#ffb4a2",
+                    "terminal-green": "#00ff41",
+                    "surface-container-high": "#292a2d",
+                    "surface-tint": "#b7c4ff",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "on-error": "#690005"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "stack-tight": "0.5rem",
+                    "sidebar-width": "288px",
+                    "stack-default": "1rem",
+                    "header-height": "64px",
+                    "unit": "4px",
+                    "container-padding": "1.5rem",
+                    "gutter": "12px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "micro-tag": ["Inter"],
+                    "body-base": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "code-terminal": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                    "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+        .status-pulse {
+            box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 255, 65, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); }
+        }
+        .terminal-scroll::-webkit-scrollbar { width: 4px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: #11131c; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #434656; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #11131c;
+            color: #e4e1e6;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full h-header-height z-50 bg-background border-b border-outline-variant flex items-center justify-between px-gutter">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-terminal-green">terminal</span>
+<h1 class="font-code-terminal text-headline-md font-bold tracking-tighter text-terminal-green">ND-OPERATIONS-HUB</h1>
+</div>
+<div class="hidden md:flex gap-6 items-center">
+<nav class="flex gap-4">
+<a class="font-label-caps text-primary border-b-2 border-primary py-1" href="#">REGISTRY</a>
+<a class="font-label-caps text-on-surface-variant hover:bg-surface-variant/50 transition-colors py-1" href="#">RECONCILIATION</a>
+<a class="font-label-caps text-on-surface-variant hover:bg-surface-variant/50 transition-colors py-1" href="#">ESCROW</a>
+</nav>
+<button class="bg-primary-container text-on-primary-container font-label-caps px-4 py-2 rounded-lg active:scale-95 duration-100">ROOT_ACCESS</button>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="fixed left-0 top-header-height h-[calc(100vh-64px)] w-sidebar-width bg-surface-container border-r border-outline-variant hidden md:flex flex-col py-stack-default">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-variant border border-primary/20">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a technical lead architect, lit with dramatic blue and green neon rim lighting in a high-tech obsidian office setting. The style is futuristic cyberpunk with a focus on authority and precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2xv9rB7E98zxCfsl0JbasNd98kGrbW-HigZOfkISpeU27OszFeJsD4xhcEnSs_CxDZ-V2De0v3oQVaDbBwt8mQr086Lj9VXrlx6VVxQ6I_hFaekzqNKzUpuOPch_qKPJdWSDEKraz3LHw-arYICKoxRGn2SmL60ltnIfDQhYAbXJk5vEMyWWIusn4HVVbw3lOBZhgM7-PP1H7IsQev9zN3_3NUgFHT-UsabpP06voelex5RFpbl4Dp6DWSNrGtYqpS4hYk1b-eCw"/>
+</div>
+<div>
+<p class="font-headline-md text-primary text-sm">Lead Architect</p>
+<p class="font-code-terminal text-on-surface-variant text-[10px]">ND-ECOSYSTEM-SUPERUSER</p>
+</div>
+</div>
+<p class="mt-4 font-code-terminal text-terminal-green text-[10px] bg-terminal-green/10 p-1 rounded inline-block">ACTIVE_SESSION:04:12:01</p>
+</div>
+<nav class="flex flex-col">
+<a class="flex items-center gap-4 bg-secondary-container/30 border-l-4 border-primary-container text-primary-container font-bold px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps">Registry</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 transition-all" href="#">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="font-label-caps">API Monitor</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 transition-all" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps">Dependency Map</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps">Health Metrics</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 transition-all" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-caps">Admin Terminal</span>
+</a>
+</nav>
+<div class="mt-auto px-6 py-4 border-t border-outline-variant">
+<div class="flex items-center justify-between text-[10px] font-code-terminal text-on-surface-variant">
+<span>SYSTEM STATUS</span>
+<span class="text-terminal-green flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-terminal-green status-pulse"></span>
+                    STABLE
+                </span>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-sidebar-width mt-header-height h-[calc(100vh-64px)] overflow-y-auto bg-background p-6">
+<div class="max-w-7xl mx-auto space-y-6">
+<!-- Hero Stats: Wallet Balances & Real-Time Recon -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+<div class="glass-card p-4 border-t-4 border-primary">
+<p class="font-label-caps text-on-surface-variant mb-1">TOTAL_LIQUIDITY</p>
+<div class="flex items-end gap-2">
+<span class="font-display-lg text-primary">₦2.48B</span>
+<span class="font-code-terminal text-terminal-green text-[10px] mb-2">+0.04%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 mt-4 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[72%]"></div>
+</div>
+</div>
+<div class="glass-card p-4 border-t-4 border-secondary">
+<p class="font-label-caps text-on-surface-variant mb-1">ESCROW_LOCKED</p>
+<div class="flex items-end gap-2">
+<span class="font-display-lg text-secondary">₦842.1M</span>
+<span class="font-code-terminal text-on-surface-variant text-[10px] mb-2">ACTIVE_LOCK</span>
+</div>
+<div class="w-full bg-surface-variant h-1 mt-4 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[45%]"></div>
+</div>
+</div>
+<div class="glass-card p-4 border-t-4 border-tertiary">
+<p class="font-label-caps text-on-surface-variant mb-1">SETTLEMENT_QUEUE</p>
+<div class="flex items-end gap-2">
+<span class="font-display-lg text-tertiary">₦12.5M</span>
+<span class="font-code-terminal text-on-surface-variant text-[10px] mb-2">124_ITEMS</span>
+</div>
+<div class="w-full bg-surface-variant h-1 mt-4 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[12%]"></div>
+</div>
+</div>
+<div class="glass-card p-4 border-t-4 border-terminal-green bg-terminal-green/5">
+<p class="font-label-caps text-on-surface-variant mb-1">RECONCILIATION_TIMER</p>
+<div class="flex items-center gap-2">
+<span class="font-code-terminal text-2xl text-terminal-green" id="recon-counter">00:00:45</span>
+</div>
+<p class="font-code-terminal text-[10px] text-terminal-green mt-4">SYNCING_BLOCK: 4,921,003</p>
+</div>
+</div>
+<!-- Bento Grid: Ledger Views -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Centerpiece: Live Ledger Flow -->
+<div class="md:col-span-8 glass-card flex flex-col h-[500px]">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container/50">
+<h3 class="font-headline-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+                            Institutional Ledger
+                        </h3>
+<div class="flex gap-2">
+<span class="bg-primary/10 text-primary px-2 py-1 rounded text-micro-tag">REALTIME_STREAM</span>
+<span class="bg-surface-variant text-on-surface-variant px-2 py-1 rounded text-micro-tag">LAYER_2_SETTLEMENT</span>
+</div>
+</div>
+<div class="flex-1 overflow-hidden relative">
+<!-- Abstract Background Shader for Atmosphere -->
+
+<div class="relative z-10 p-4 h-full overflow-y-auto terminal-scroll">
+<table class="w-full text-left border-separate border-spacing-y-2">
+<thead class="sticky top-0 bg-surface-container z-20">
+<tr class="text-on-surface-variant font-label-caps text-[10px]">
+<th class="pb-2">TX_ID</th>
+<th class="pb-2">TIMESTAMP</th>
+<th class="pb-2">SOURCE_WALLET</th>
+<th class="pb-2">DESTINATION</th>
+<th class="pb-2 text-right">AMOUNT_NGN</th>
+<th class="pb-2 text-right">STATUS</th>
+</tr>
+</thead>
+<tbody class="font-code-terminal text-[11px]">
+<tr class="bg-surface-variant/20 hover:bg-surface-variant/40 transition-colors">
+<td class="p-3 text-primary">#ND-82104</td>
+<td class="p-3">14:02:11.044</td>
+<td class="p-3">MAIN_ESCROW_A1</td>
+<td class="p-3">USER_W_9921</td>
+<td class="p-3 text-right text-terminal-green">450,000.00</td>
+<td class="p-3 text-right"><span class="text-terminal-green bg-terminal-green/10 px-1">COMMITTED</span></td>
+</tr>
+<tr class="bg-surface-variant/20 hover:bg-surface-variant/40 transition-colors">
+<td class="p-3 text-primary">#ND-82103</td>
+<td class="p-3">14:02:10.891</td>
+<td class="p-3">PARTNER_PAY_X</td>
+<td class="p-3">SYSTEM_LIQUIDITY</td>
+<td class="p-3 text-right text-terminal-green">1,200,000.00</td>
+<td class="p-3 text-right"><span class="text-terminal-green bg-terminal-green/10 px-1">COMMITTED</span></td>
+</tr>
+<tr class="bg-surface-variant/20 hover:bg-surface-variant/40 transition-colors">
+<td class="p-3 text-primary">#ND-82102</td>
+<td class="p-3">14:02:09.112</td>
+<td class="p-3">USER_W_4412</td>
+<td class="p-3">MERCHANT_W_12</td>
+<td class="p-3 text-right text-secondary">24,500.00</td>
+<td class="p-3 text-right"><span class="text-secondary bg-secondary/10 px-1">PENDING</span></td>
+</tr>
+<tr class="bg-surface-variant/20 hover:bg-surface-variant/40 transition-colors">
+<td class="p-3 text-primary">#ND-82101</td>
+<td class="p-3">14:02:08.554</td>
+<td class="p-3">ESCROW_HOLD_02</td>
+<td class="p-3">SYSTEM_FEES</td>
+<td class="p-3 text-right text-terminal-green">1,125.00</td>
+<td class="p-3 text-right"><span class="text-terminal-green bg-terminal-green/10 px-1">COMMITTED</span></td>
+</tr>
+<!-- Dynamic rows would insert here -->
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Side Panel: Audit Trail -->
+<div class="md:col-span-4 glass-card flex flex-col h-[500px]">
+<div class="p-4 border-b border-outline-variant bg-surface-container/50">
+<h3 class="font-headline-md text-tertiary flex items-center gap-2">
+<span class="material-symbols-outlined">history_edu</span>
+                            Audit Trail
+                        </h3>
+</div>
+<div class="flex-1 p-4 overflow-y-auto terminal-scroll bg-surface-container-lowest font-code-terminal space-y-3">
+<div class="border-l-2 border-primary pl-3 py-1">
+<p class="text-primary text-[10px]">14:02:11 - RECON_ENGINE</p>
+<p class="text-on-surface-variant text-[11px]">Checksum verified for Block 4,921,003. Variance 0.0000 NGN.</p>
+</div>
+<div class="border-l-2 border-tertiary pl-3 py-1">
+<p class="text-tertiary text-[10px]">14:01:55 - SYSTEM_ALERT</p>
+<p class="text-on-surface-variant text-[11px]">Threshold warning: High volume on Merchant_ID #8821. No action required.</p>
+</div>
+<div class="border-l-2 border-secondary pl-3 py-1">
+<p class="text-secondary text-[10px]">14:01:32 - SECURITY_LAYER</p>
+<p class="text-on-surface-variant text-[11px]">New IP access detected for Root Admin. Key matched. Authorized.</p>
+</div>
+<div class="border-l-2 border-terminal-green pl-3 py-1">
+<p class="text-terminal-green text-[10px]">14:01:00 - CRON_SETTLE</p>
+<p class="text-on-surface-variant text-[11px]">Morning batch payout initiated. 1,402 entries queued for processing.</p>
+</div>
+<div class="border-l-2 border-primary pl-3 py-1 opacity-50">
+<p class="text-primary text-[10px]">13:59:58 - NODE_SYNC</p>
+<p class="text-on-surface-variant text-[11px]">Distributed ledger node #4 rejoined the cluster after maintenance.</p>
+</div>
+</div>
+<div class="p-3 bg-surface-container border-t border-outline-variant">
+<div class="flex items-center gap-2">
+<div class="w-full bg-surface-variant rounded flex items-center px-2 py-1">
+<span class="text-terminal-green mr-2">&gt;</span>
+<input class="bg-transparent border-none focus:ring-0 text-terminal-green font-code-terminal text-[11px] w-full p-0" placeholder="QUERY_LEDGER..." type="text"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Row: Infrastructure Health & Maps -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="glass-card p-4 flex flex-col gap-4">
+<p class="font-label-caps text-on-surface-variant">NODE_DISTRIBUTION</p>
+<div class="h-40 relative rounded overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A futuristic digital dark world map with neon glowing blue and green data connection lines radiating from Lagos, Abuja, and Port Harcourt. Minimalist tech aesthetic with high contrast and bokeh effects in a cyberpunk 2077 style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTJ3AQRZiehUPLWAL4MW4lUl3Cbnrh1PhFbMIUOy9yecDf-XbhIwKELkF7B2VJk3F-bRi4jLIiedXf7gjL8-5zsz3tUynStS45Csz9Qbi1PFAIbHeqRlUQ2t26mEMkjfO47OEmf53Axc7xB94fYV9GSmzHsAnvbHobUw6p0ERtzd-sojUm-1hLLSRasR4bbN0_brUDKGSONaujIhKrR3tW9MAybLmo7Ok_a1BgjZfxVOAJ7XB08gBovJWa2e8Pk9psXTJPX5lZGUE"/>
+<div class="absolute top-2 right-2 flex gap-1">
+<div class="w-2 h-2 rounded-full bg-terminal-green status-pulse"></div>
+<div class="w-2 h-2 rounded-full bg-terminal-green"></div>
+<div class="w-2 h-2 rounded-full bg-terminal-green"></div>
+</div>
+</div>
+</div>
+<div class="glass-card p-4">
+<p class="font-label-caps text-on-surface-variant mb-4">SYSTEM_LOAD</p>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="font-code-terminal text-[10px]">CPU_ARCH_1</span>
+<span class="font-code-terminal text-terminal-green text-[10px]">24%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-terminal-green h-full w-[24%]"></div>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-code-terminal text-[10px]">LEDGER_IO</span>
+<span class="font-code-terminal text-primary text-[10px]">88%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[88%]"></div>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-code-terminal text-[10px]">MEM_LEAK_CHECK</span>
+<span class="font-code-terminal text-terminal-green text-[10px]">OK</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-terminal-green h-full w-[5%]"></div>
+</div>
+</div>
+</div>
+<div class="glass-card p-4 relative flex flex-col justify-center items-center text-center overflow-hidden">
+
+<div class="relative z-10">
+<span class="material-symbols-outlined text-4xl text-primary mb-2">security</span>
+<h4 class="font-headline-md text-primary">VAULT_LOCK</h4>
+<p class="text-body-sm text-on-surface-variant max-w-[200px] mx-auto mt-2">Physical hardware module active. Keys are rotated every 24h.</p>
+<button class="mt-4 border border-primary text-primary font-label-caps px-4 py-1 hover:bg-primary/10 transition-colors">INIT_ROTATION</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full z-50 md:hidden backdrop-blur-md bg-glass-bg border-t border-outline-variant flex justify-around items-center h-16 px-4 shadow-lg">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 scale-110" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-micro-tag">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary" href="#">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-micro-tag">Ledger</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-micro-tag">Nodes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary" href="#">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-micro-tag">Config</span>
+</a>
+</nav>
+<script>
+        // Real-time counter simulation
+        const counterEl = document.getElementById('recon-counter');
+        let seconds = 45;
+        setInterval(() => {
+            seconds++;
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            counterEl.textContent = `${h}:${m}:${s}`;
+        }, 1000);
+
+        // Micro-interaction for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.add('scale-98', 'bg-primary/10');
+                setTimeout(() => row.classList.remove('scale-98', 'bg-primary/10'), 200);
+            });
+        });
+    </script>
+</body></html>

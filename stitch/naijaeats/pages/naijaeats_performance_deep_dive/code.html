@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaEats Admin | Performance Deep-Dive</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-surface": "#2e3132",
+                    "on-background": "#191c1e",
+                    "tertiary-fixed-dim": "#b4c5ff",
+                    "secondary-fixed-dim": "#c0c6db",
+                    "on-primary-fixed": "#00210d",
+                    "on-error": "#ffffff",
+                    "surface-tint": "#006d38",
+                    "secondary": "#575e70",
+                    "on-secondary-fixed-variant": "#404758",
+                    "trust-amber-surface": "#FEF3C7",
+                    "tertiary-container": "#638cff",
+                    "secondary-fixed": "#dce2f7",
+                    "outline": "#6d7b6e",
+                    "surface-container-high": "#e7e8ea",
+                    "security-crimson-surface": "#FEE2E2",
+                    "text-muted": "#4B5563",
+                    "on-tertiary-container": "#00256c",
+                    "error-container": "#ffdad6",
+                    "surface-variant": "#e1e2e4",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f8f9fb",
+                    "inverse-on-surface": "#f0f1f3",
+                    "trust-amber": "#F59E0B",
+                    "inverse-primary": "#59df89",
+                    "surface-container-low": "#f3f4f6",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#dbe1ff",
+                    "secondary-container": "#d9dff5",
+                    "outline-variant": "#bccabc",
+                    "canvas-pure": "#FFFFFF",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#59df89",
+                    "on-tertiary-fixed": "#00174b",
+                    "on-primary-fixed-variant": "#005228",
+                    "primary-fixed": "#77fca3",
+                    "on-primary-container": "#003317",
+                    "primary-container": "#00a859",
+                    "tertiary": "#0053db",
+                    "background": "#f8f9fb",
+                    "on-error-container": "#93000a",
+                    "security-crimson": "#EF4444",
+                    "on-secondary-fixed": "#141b2b",
+                    "surface-dim": "#d9dadc",
+                    "on-surface-variant": "#3d4a3f",
+                    "surface-bright": "#f8f9fb",
+                    "on-tertiary-fixed-variant": "#003ea8",
+                    "primary": "#006d38",
+                    "surface-container-highest": "#e1e2e4",
+                    "surface-container": "#edeef0",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#191c1e",
+                    "on-secondary-container": "#5c6274",
+                    "on-secondary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "margin-mobile": "16px",
+                    "lg": "24px",
+                    "gutter-mobile": "16px",
+                    "xl": "32px",
+                    "touch-target-primary": "52px",
+                    "touch-target-min": "48px",
+                    "xs": "4px",
+                    "sm": "8px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Inter"],
+                    "body-base": ["Inter"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-bold": ["Inter"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "price-display": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "display-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-bold": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "price-display": ["20px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .chart-gradient-blue { background: linear-gradient(180deg, rgba(99, 140, 255, 0.2) 0%, rgba(99, 140, 255, 0) 100%); }
+        .chart-gradient-green { background: linear-gradient(180deg, rgba(0, 168, 89, 0.2) 0%, rgba(0, 168, 89, 0) 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-base overflow-x-hidden">
+<!-- Sidebar Navigation -->
+<aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-surface-container-low dark:bg-inverse-surface border-r border-outline-variant dark:border-outline flex flex-col py-md px-sm z-50 hidden md:flex">
+<div class="px-md mb-xl">
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">NaijaEats</h1>
+<p class="text-on-surface-variant font-label-caps uppercase tracking-widest text-[10px]">Super-App Admin</p>
+</div>
+<nav class="flex-grow space-y-1">
+<div class="group cursor-pointer flex items-center gap-md px-md py-sm rounded-lg hover:text-primary transition-all text-on-surface-variant">
+<span class="material-symbols-outlined">apps</span>
+<span class="font-body-base">Ecosystem</span>
+</div>
+<div class="group cursor-pointer flex items-center gap-md px-md py-sm rounded-lg hover:text-primary transition-all text-on-surface-variant">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="font-body-base">Shop</span>
+</div>
+<!-- Active Tab: Eats -->
+<div class="group cursor-pointer flex items-center gap-md px-md py-sm rounded-lg text-primary dark:text-primary-fixed-dim border-r-4 border-primary dark:border-primary-fixed-dim bg-primary-container/10">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="font-body-bold">Eats</span>
+</div>
+<div class="group cursor-pointer flex items-center gap-md px-md py-sm rounded-lg hover:text-primary transition-all text-on-surface-variant">
+<span class="material-symbols-outlined">work</span>
+<span class="font-body-base">Gigs</span>
+</div>
+<div class="group cursor-pointer flex items-center gap-md px-md py-sm rounded-lg hover:text-primary transition-all text-on-surface-variant">
+<span class="material-symbols-outlined">apartment</span>
+<span class="font-body-base">Stay</span>
+</div>
+<div class="group cursor-pointer flex items-center gap-md px-md py-sm rounded-lg hover:text-primary transition-all text-on-surface-variant">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-body-base">Logistics</span>
+</div>
+<div class="group cursor-pointer flex items-center gap-md px-md py-sm rounded-lg hover:text-primary transition-all text-on-surface-variant">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-base">Analytics</span>
+</div>
+</nav>
+<div class="mt-auto px-md pt-lg space-y-4">
+<button class="w-full bg-primary text-on-primary py-sm rounded-xl font-body-bold hover:brightness-110 active:scale-95 transition-all shadow-lg">
+                Generate Reports
+            </button>
+<div class="space-y-1 border-t border-outline-variant pt-md">
+<div class="group cursor-pointer flex items-center gap-md py-sm text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">contact_support</span>
+<span class="font-body-base">Support</span>
+</div>
+<div class="group cursor-pointer flex items-center gap-md py-sm text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-base">Logout</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 min-h-screen flex flex-col">
+<!-- Top Navbar -->
+<header class="w-full h-16 sticky top-0 z-40 bg-canvas-pure dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center px-lg w-full max-w-full">
+<div class="flex items-center gap-md">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container rounded-full border-none focus:ring-2 focus:ring-primary w-64 text-sm" placeholder="Search insights..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<div class="flex gap-md text-on-surface-variant">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">settings</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">help</span>
+</div>
+<div class="h-8 w-8 rounded-full bg-surface-container-highest overflow-hidden cursor-pointer active:scale-95 transition-transform">
+<img alt="Administrator Profile Avatar" class="w-full h-full object-cover" data-alt="A professional close-up of a high-resolution 3D character avatar wearing a crisp white collared shirt and modern glasses. The background is a clean, neutral gradient of soft grays and whites, reflecting a corporate professional aesthetic. The avatar has a friendly yet authoritative expression suitable for a system administrator or executive role." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwu9s0guE0askp3hjcr-pH6LLG7Y3AlnnxkToklvRkhXPGT0c8oIRWSK27YV6BTatEaVma0hQDNr3gGISTFExJIbFDqQ9W4_3Hb6EFWMQ6sAmhtVYLjqerxVu6-59181X7XUBrCB9nHm5gW6TE7kVXM72FfQdftW2AhvV2qQ_jn5OUoZlrqu2GHgtMLA2GDhHDJD5sjpNodTcMKb243WhaSrpRX2DZuEwuZ6tknKo8_HtSxpi7d-36N_zvvglJBn5V4J2GnnyaKiN0"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<div class="p-lg md:p-xl space-y-xl max-w-[1600px] mx-auto w-full">
+<!-- Executive Summary Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div>
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-background">Eats Vertical Performance</h2>
+<p class="text-on-surface-variant font-body-base">Consolidated real-time analytics for the NaijaEats ecosystem.</p>
+</div>
+<div class="flex gap-sm">
+<button class="flex items-center gap-xs px-md py-2 bg-white border border-outline-variant rounded-lg font-body-bold text-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                        Last 30 Days
+                    </button>
+<button class="flex items-center gap-xs px-md py-2 bg-primary text-on-primary rounded-lg font-body-bold text-sm hover:brightness-110 shadow-md">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Export PDF
+                    </button>
+</div>
+</div>
+<!-- KPI Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg">
+<!-- GMV Card -->
+<div class="bg-canvas-pure p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-md">
+<div class="p-2 bg-primary-container/10 rounded-lg">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<span class="text-primary font-body-bold text-xs flex items-center">+24% ↑</span>
+</div>
+<p class="text-on-surface-variant font-label-caps uppercase text-[10px]">Vertical GMV</p>
+<h3 class="font-price-display text-price-display text-on-background">₦2.8B</h3>
+</div>
+<!-- Orders Card -->
+<div class="bg-canvas-pure p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-2 bg-tertiary-container/10 rounded-lg">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+</div>
+<span class="text-on-surface-variant font-body-base text-xs">Total</span>
+</div>
+<p class="text-on-surface-variant font-label-caps uppercase text-[10px]">Total Orders</p>
+<h3 class="font-price-display text-price-display text-on-background">840,291</h3>
+</div>
+<!-- Delivery Time Card -->
+<div class="bg-canvas-pure p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-2 bg-secondary-container/10 rounded-lg">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">timer</span>
+</div>
+<span class="text-security-crimson font-body-bold text-xs">-2.1% ↓</span>
+</div>
+<p class="text-on-surface-variant font-label-caps uppercase text-[10px]">Avg. Delivery Time</p>
+<h3 class="font-price-display text-price-display text-on-background">28 mins</h3>
+</div>
+<!-- Restaurants Card -->
+<div class="bg-canvas-pure p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-2 bg-trust-amber-surface rounded-lg">
+<span class="material-symbols-outlined text-trust-amber" style="font-variation-settings: 'FILL' 1;">storefront</span>
+</div>
+<span class="text-primary font-body-bold text-xs">+120 new</span>
+</div>
+<p class="text-on-surface-variant font-label-caps uppercase text-[10px]">Active Restaurants</p>
+<h3 class="font-price-display text-price-display text-on-background">4,215</h3>
+</div>
+</section>
+<!-- Main Analytics Row -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Category Analysis (Left/Center) -->
+<div class="lg:col-span-2 bg-canvas-pure rounded-xl border border-outline-variant p-lg flex flex-col">
+<div class="flex justify-between items-center mb-xl">
+<h4 class="font-body-bold text-lg">Category Performance Analysis</h4>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">more_horiz</span>
+</div>
+<div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-lg items-center">
+<!-- Custom Chart Simulation -->
+<div class="relative h-64 flex items-end gap-4 pb-4 px-2">
+<div class="absolute inset-0 flex flex-col justify-between py-4 text-[10px] text-on-surface-variant opacity-50 border-l border-b border-outline-variant">
+<span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+</div>
+<!-- Bar 1 -->
+<div class="flex-1 flex flex-col justify-end group relative">
+<div class="bg-primary rounded-t-lg transition-all duration-700 h-[85%]" style="width: 100%;"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">₦1.2B</div>
+</div>
+<!-- Bar 2 -->
+<div class="flex-1 flex flex-col justify-end group relative">
+<div class="bg-primary-container rounded-t-lg transition-all duration-700 h-[65%]" style="width: 100%;"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">₦780M</div>
+</div>
+<!-- Bar 3 -->
+<div class="flex-1 flex flex-col justify-end group relative">
+<div class="bg-secondary rounded-t-lg transition-all duration-700 h-[40%]" style="width: 100%;"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">₦320M</div>
+</div>
+<!-- Bar 4 -->
+<div class="flex-1 flex flex-col justify-end group relative">
+<div class="bg-outline-variant rounded-t-lg transition-all duration-700 h-[30%]" style="width: 100%;"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">₦210M</div>
+</div>
+</div>
+<div class="space-y-md">
+<div class="flex items-center justify-between p-md border border-outline-variant rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-md">
+<div class="h-3 w-3 rounded-full bg-primary"></div>
+<span class="font-body-bold">Local Favorites</span>
+</div>
+<span class="font-price-display text-sm">45%</span>
+</div>
+<div class="flex items-center justify-between p-md border border-outline-variant rounded-lg">
+<div class="flex items-center gap-md">
+<div class="h-3 w-3 rounded-full bg-primary-container"></div>
+<span class="font-body-base">Fast Food</span>
+</div>
+<span class="font-price-display text-sm">28%</span>
+</div>
+<div class="flex items-center justify-between p-md border border-outline-variant rounded-lg">
+<div class="flex items-center gap-md">
+<div class="h-3 w-3 rounded-full bg-secondary"></div>
+<span class="font-body-base">Groceries</span>
+</div>
+<span class="font-price-display text-sm">15%</span>
+</div>
+<div class="flex items-center justify-between p-md border border-outline-variant rounded-lg">
+<div class="flex items-center gap-md">
+<div class="h-3 w-3 rounded-full bg-outline-variant"></div>
+<span class="font-body-base">Healthy &amp; Salads</span>
+</div>
+<span class="font-price-display text-sm">12%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- CSAT & Satisfaction (Right) -->
+<div class="bg-canvas-pure rounded-xl border border-outline-variant p-lg flex flex-col items-center justify-center text-center relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+<h4 class="font-body-bold text-lg mb-xl w-full text-left">Customer Pulse (CSAT)</h4>
+<div class="relative flex items-center justify-center w-48 h-48 mb-lg">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container" cx="96" cy="96" fill="transparent" r="80" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary" cx="96" cy="96" fill="transparent" r="80" stroke="currentColor" stroke-dasharray="502" stroke-dashoffset="100" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-display-lg text-display-lg text-on-background leading-none">4.6</span>
+<span class="text-on-surface-variant font-label-caps text-[10px]">Out of 5.0</span>
+</div>
+</div>
+<div class="w-full space-y-sm">
+<div class="flex justify-between text-xs font-body-base">
+<span class="text-on-surface-variant">Exceptional Satisfaction</span>
+<span class="text-primary font-body-bold">+0.2 vs LW</span>
+</div>
+<p class="text-sm text-on-surface-variant">Highest sentiment in <strong>Victoria Island</strong> and <strong>Lekki</strong> zones.</p>
+</div>
+</div>
+</div>
+<!-- Delivery & Logistics Row -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-lg">
+<!-- Peak Hour Volume -->
+<div class="bg-canvas-pure rounded-xl border border-outline-variant p-lg">
+<div class="flex justify-between items-center mb-xl">
+<h4 class="font-body-bold text-lg">Peak Hour Volume</h4>
+<div class="flex gap-2">
+<span class="text-[10px] font-label-caps px-2 py-1 bg-surface-container rounded">Today</span>
+<span class="text-[10px] font-label-caps px-2 py-1 bg-primary-container/20 text-on-primary-container rounded">Projection</span>
+</div>
+</div>
+<div class="h-64 w-full relative group">
+<!-- Simulated Line Chart -->
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 100">
+<path class="text-primary" d="M0,80 Q50,75 100,60 T200,30 T300,70 T400,20" fill="none" stroke="currentColor" stroke-width="2"></path>
+<path d="M0,80 Q50,75 100,60 T200,30 T300,70 T400,20 L400,100 L0,100 Z" fill="url(#grad)" opacity="0.1"></path>
+<defs>
+<lineargradient id="grad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:var(--tw-color-primary);stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:var(--tw-color-primary);stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="absolute inset-0 flex justify-between items-end text-[10px] text-on-surface-variant opacity-60">
+<span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>00:00</span>
+</div>
+<div class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none group-hover:opacity-100 opacity-0 transition-opacity">
+<div class="bg-inverse-surface text-white py-1 px-3 rounded-lg shadow-xl text-xs">Lunch Surge: 24.5k/hr</div>
+<div class="w-1 h-20 bg-primary/20 mt-1"></div>
+</div>
+</div>
+</div>
+<!-- Delivery Efficiency Matrix -->
+<div class="bg-canvas-pure rounded-xl border border-outline-variant p-lg overflow-hidden">
+<h4 class="font-body-bold text-lg mb-xl">Regional Performance Matrix</h4>
+<div class="space-y-md">
+<div class="flex items-center gap-md">
+<div class="w-24 text-sm font-body-bold">Lekki</div>
+<div class="flex-grow h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 94%;"></div>
+</div>
+<div class="w-12 text-right text-sm font-price-display">94%</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-24 text-sm font-body-bold">Ikeja</div>
+<div class="flex-grow h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 88%;"></div>
+</div>
+<div class="w-12 text-right text-sm font-price-display">88%</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-24 text-sm font-body-bold">Surulere</div>
+<div class="flex-grow h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-trust-amber" style="width: 72%;"></div>
+</div>
+<div class="w-12 text-right text-sm font-price-display">72%</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-24 text-sm font-body-bold">VI</div>
+<div class="flex-grow h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 91%;"></div>
+</div>
+<div class="w-12 text-right text-sm font-price-display">91%</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-24 text-sm font-body-bold">Yaba</div>
+<div class="flex-grow h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-security-crimson" style="width: 58%;"></div>
+</div>
+<div class="w-12 text-right text-sm font-price-display">58%</div>
+</div>
+</div>
+<div class="mt-lg pt-md border-t border-outline-variant flex justify-between items-center text-xs text-on-surface-variant">
+<span>Grid traffic impact detected in <strong>Mainland</strong> sectors.</span>
+<button class="text-primary font-body-bold hover:underline">Re-route Logistics</button>
+</div>
+</div>
+</div>
+<!-- Restaurant Leaderboard -->
+<section class="bg-canvas-pure rounded-xl border border-outline-variant overflow-hidden">
+<div class="p-lg flex justify-between items-center border-b border-outline-variant">
+<h4 class="font-body-bold text-lg">Top Restaurant Partners</h4>
+<button class="text-sm font-body-bold text-primary flex items-center gap-1">
+                        View All Partners <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-caps text-[10px]">
+<th class="px-lg py-md">Partner Name</th>
+<th class="px-lg py-md">Vertical GMV</th>
+<th class="px-lg py-md">Order Volume</th>
+<th class="px-lg py-md">Satisfaction</th>
+<th class="px-lg py-md">Status</th>
+<th class="px-lg py-md text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded-lg bg-surface-container-highest overflow-hidden">
+<img alt="Vendor Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZ2RVJ25eMmghGDmGTyjeeDyD0ptgX60YWE8pXqeTqW6AjAGblOgVei7Z60-nGpYnaZoj2S1_yHl-G-Lme_wkl_14amkWFbtrWaMbUcwNF72kg5j67kiNLNhbkVRxbM2MFwpnnCt61TosQ1O1SvtQcKQc9ihvkCgtg2zZjaM5bIR8puq2Ecqg7rzPigXyri1gE0maOMIpEsPnGIfToGkBcMiMXfDSzDCQYAYZzsT4_JwZuNs3sC-7_fzy-SX_qYiPs6lKFnUKUSHJa"/>
+</div>
+<div>
+<p class="font-body-bold text-on-background">Mama Cass</p>
+<p class="text-xs text-on-surface-variant">Local Staples</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md font-price-display text-sm">₦142,500,000</td>
+<td class="px-lg py-md font-body-base text-sm">42.8k</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-1 text-trust-amber">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-body-bold text-sm">4.8</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-label-caps">Elite Partner</span>
+</td>
+<td class="px-lg py-md text-right">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">settings_suggest</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded-lg bg-surface-container-highest overflow-hidden">
+<img alt="Vendor Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrfmeCt42QRJ3-F-5i4RFTfTlx788XfAp11W7pBRyodH1pK2OEh8zCJwFyNZUfYXJ2ovExzIeplsRPO_p2ajsGkU4TOdtAMHaD_qF2rTZpSJPV5Q0CGTA-56HZZuRk9NZ2LbRrIjrtXcUVbsVjehgQxIDMMlaNijS0m58yLk51FVYBcRDhXxgDeIavJyPqd70wdvkGmO33LzqBivn6cUpDLED_6WBtFnToQeUMQHUuU6EeZjB9Pwk3_bp0MiWdU6LntOwj23uEMunS"/>
+</div>
+<div>
+<p class="font-body-bold text-on-background">The Place</p>
+<p class="text-xs text-on-surface-variant">Quick Service</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md font-price-display text-sm">₦128,900,000</td>
+<td class="px-lg py-md font-body-base text-sm">58.2k</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-1 text-trust-amber">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-body-bold text-sm">4.6</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-label-caps">Elite Partner</span>
+</td>
+<td class="px-lg py-md text-right">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">settings_suggest</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded-lg bg-surface-container-highest overflow-hidden">
+<img alt="Vendor Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtA_WRc2H1E6QK_AecLIV3zwtARFY9Q14hiuM4UUv25_cKzxpkxRsFrHpH2iaxTLRVTKotjIBXCCoA5vHCYolL6nHGbe0ezyy_mZsxuMv0tUHILBTZcp2sjmg_vzjkz6BJLj9I_-wOX8L4kfMCXnAZKyuBPyGBgqYc7N0AoH5QDqWK84bRlHt08W9svUJsxJY-ou3Rrr7rxPLzdsihewoANX2Fax98VCGyAP53xG57w8F2shMK9XU0fjBnOoVOaPxNRF1u8mZupOh7"/>
+</div>
+<div>
+<p class="font-body-bold text-on-background">Mega Chicken</p>
+<p class="text-xs text-on-surface-variant">Fast Food &amp; Pastries</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md font-price-display text-sm">₦95,400,000</td>
+<td class="px-lg py-md font-body-base text-sm">31.5k</td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-1 text-trust-amber">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-body-bold text-sm">4.5</span>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="px-2 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-label-caps">Premium</span>
+</td>
+<td class="px-lg py-md text-right">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">settings_suggest</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Footer / Global Stats -->
+<footer class="mt-auto p-lg bg-surface-container-low border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-md">
+<div class="flex items-center gap-md">
+<div class="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
+<span class="text-xs text-on-surface-variant font-body-base">System Status: <strong>Live &amp; Optimal</strong></span>
+<span class="text-xs text-on-surface-variant opacity-50 px-md border-l border-outline-variant">Lagos Server Sync: 22ms</span>
+</div>
+<div class="flex items-center gap-lg text-[10px] font-label-caps uppercase text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">System Logs</a>
+<a class="hover:text-primary transition-colors" href="#">API Console</a>
+<span>© 2024 NaijaEats Admin Console</span>
+</div>
+</footer>
+</main>
+<!-- Interactive Layer: FAB for Quick Actions -->
+<button class="fixed bottom-8 right-8 h-14 w-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group">
+<span class="material-symbols-outlined text-3xl">bolt</span>
+<div class="absolute right-16 bg-inverse-surface text-white px-3 py-1 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            Emergency Dispatch Override
+        </div>
+</button>
+<script>
+        // Simple micro-interaction for KPI counts
+        document.querySelectorAll('.font-price-display').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                el.classList.add('scale-105', 'text-primary');
+            });
+            el.addEventListener('mouseleave', () => {
+                el.classList.remove('scale-105', 'text-primary');
+            });
+        });
+    </script>
+</body></html>

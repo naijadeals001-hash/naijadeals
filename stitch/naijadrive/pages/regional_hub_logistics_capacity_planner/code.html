@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Regional Hub Logistics Capacity Planner</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#dce9ff",
+                      "surface": "#f8f9ff",
+                      "error-container": "#ffdad6",
+                      "tertiary-fixed": "#85f8c4",
+                      "on-tertiary-container": "#51c695",
+                      "secondary-fixed": "#d5e3fd",
+                      "outline": "#707974",
+                      "on-secondary": "#ffffff",
+                      "surface-container": "#e5eeff",
+                      "secondary-container": "#d5e3fd",
+                      "on-primary-fixed": "#002117",
+                      "on-surface-variant": "#404944",
+                      "inverse-primary": "#95d3ba",
+                      "secondary-fixed-dim": "#b9c7e0",
+                      "on-secondary-container": "#57657b",
+                      "tertiary": "#003623",
+                      "primary-fixed": "#b0f0d6",
+                      "on-tertiary-fixed-variant": "#005137",
+                      "tertiary-container": "#004f35",
+                      "surface-bright": "#f8f9ff",
+                      "primary-container": "#064e3b",
+                      "outline-variant": "#bfc9c3",
+                      "on-primary": "#ffffff",
+                      "primary": "#003527",
+                      "surface-tint": "#2b6954",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface-container-low": "#eff4ff",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-surface": "#0b1c30",
+                      "background": "#f8f9ff",
+                      "on-secondary-fixed-variant": "#3a485c",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed-variant": "#0b513d",
+                      "surface-variant": "#d3e4fe",
+                      "primary-fixed-dim": "#95d3ba",
+                      "on-background": "#0b1c30",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#68dba9",
+                      "on-secondary-fixed": "#0d1c2f",
+                      "on-primary-container": "#80bea6",
+                      "on-tertiary-fixed": "#002114",
+                      "surface-dim": "#cbdbf5",
+                      "secondary": "#515f74",
+                      "on-tertiary": "#ffffff",
+                      "inverse-surface": "#213145"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "container-max": "1440px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "label-sm": ["JetBrains Mono"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #bfc9c3; border-radius: 10px; }
+        .heatmap-cell { transition: all 0.2s ease; }
+        .heatmap-cell:hover { transform: scale(1.1); z-index: 10; border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col py-margin-desktop bg-surface dark:bg-inverse-surface border-r border-outline-variant dark:border-outline z-50">
+<div class="px-6 mb-8">
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed">NaijaDeals</h1>
+<p class="font-label-sm text-label-sm uppercase tracking-widest text-secondary mt-1">Ecosystem Logistics</p>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center px-4 py-3 rounded text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-body-md text-body-md">Command Center</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded text-primary dark:text-primary-fixed border-r-4 border-primary dark:border-primary-fixed bg-secondary-container dark:bg-on-tertiary-fixed-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">local_shipping</span>
+<span class="font-body-md text-body-md">Logistics Hub</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">inventory_2</span>
+<span class="font-body-md text-body-md">Media Rights</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">account_balance</span>
+<span class="font-body-md text-body-md">Financial Audit</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">security</span>
+<span class="font-body-md text-body-md">System Security</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+<div class="px-4 mt-auto border-t border-outline-variant pt-6 space-y-1">
+<div class="flex items-center px-4 py-2 mb-4 bg-primary/5 rounded border border-primary/10">
+<span class="material-symbols-outlined text-primary text-sm mr-2" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-sm text-label-sm text-primary">Clearance: L1 Alpha</span>
+</div>
+<a class="flex items-center px-4 py-2 text-secondary hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-sm">help</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+<a class="flex items-center px-4 py-2 text-error hover:bg-error-container/20 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-sm">logout</span>
+<span class="font-body-md text-body-md">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 h-screen overflow-y-auto custom-scrollbar flex flex-col">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-40 bg-primary dark:bg-primary-container text-on-primary dark:text-on-primary-container px-margin-desktop h-16 flex justify-between items-center shadow-sm">
+<div class="flex items-center gap-8">
+<h2 class="font-headline-md text-headline-md">Hub Logistics Capacity Planner</h2>
+<nav class="hidden md:flex gap-6">
+<a class="font-label-sm text-label-sm text-on-primary-container opacity-80 hover:opacity-100 border-b-2 border-transparent hover:border-on-primary" href="#">Network Status</a>
+<a class="font-label-sm text-label-sm text-on-primary dark:text-on-primary-container border-b-2 border-on-primary dark:border-on-primary-container pb-1" href="#">Audits</a>
+<a class="font-label-sm text-label-sm text-on-primary-container opacity-80 hover:opacity-100 border-b-2 border-transparent hover:border-on-primary" href="#">Logs</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2">
+<button class="material-symbols-outlined p-2 hover:bg-white/10 rounded-full transition-colors">notifications</button>
+<button class="material-symbols-outlined p-2 hover:bg-white/10 rounded-full transition-colors">history</button>
+<button class="material-symbols-outlined p-2 hover:bg-white/10 rounded-full transition-colors">admin_panel_settings</button>
+</div>
+<div class="h-8 w-[1px] bg-on-primary/20 mx-2"></div>
+<button class="bg-surface text-primary px-4 py-2 font-label-sm text-label-sm rounded-lg hover:bg-surface-container-high transition-transform active:scale-95">Execute Command</button>
+<img alt="Chief Administrator" class="w-10 h-10 rounded-full border-2 border-on-primary/30 object-cover" data-alt="A professional headshot of a senior African logistics administrator in his late 40s. He has a focused, authoritative expression and is wearing a sleek, dark charcoal business suit. The background is a clean, minimalist corporate setting with soft architectural lighting in cool blue and white tones. The photography is high-key, cinematic, and emphasizes technical expertise and institutional trust." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZRQd3SXKU8KVXdfQZ97zdBp-9wLa4PQI204p3ljgS8ouBTA3zwoDESMoP6s-MWUreebd_T7N1Vo9OT6b3mlo7w7VTENxETrTsFSAt0yjctolf5Z-yIU38E8KBfCCzdW3-lWGXkqov45mQ8AeaQ0lvYcINZwdOE2UzQNL_TOX4FzsKH8bftuadMLevRKfchvrwP7GYK3tWkdqtd9Bx2-49-k06HLfbB-kRxNCTuCgEadlAH7c_9hiRGwVJp963gw-LiT5rDjj17M4c"/>
+</div>
+</header>
+<!-- Authority Level Header -->
+<section class="bg-inverse-surface px-margin-desktop py-6 flex justify-between items-center text-white border-b border-white/10">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-tertiary px-2 py-0.5 font-label-sm text-label-sm rounded uppercase tracking-widest text-tertiary-fixed">Level 1 Alpha</span>
+<nav class="text-white/60 font-label-sm text-label-sm flex items-center gap-2">
+<span>Regional Hubs</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-white">Capacity Planner</span>
+</nav>
+</div>
+<h3 class="font-headline-lg text-headline-lg font-bold">Logistics Throughput Management</h3>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-white/60 uppercase mb-1">Last Audited</p>
+<p class="font-label-sm text-label-sm text-tertiary-fixed font-bold">2023-11-24 08:14:22 UTC</p>
+</div>
+</section>
+<!-- Dashboard Canvas -->
+<div class="p-margin-desktop grid grid-cols-12 gap-gutter">
+<!-- Hub Throughput Monitor -->
+<div class="col-span-12 lg:col-span-8 space-y-gutter">
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-lg shadow-sm">
+<div class="flex justify-between items-end mb-6">
+<h4 class="font-headline-md text-headline-md">Hub Throughput Monitor</h4>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 bg-primary rounded-full"></span>
+<span class="font-label-sm text-label-sm text-secondary">Actual</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 bg-surface-container-high rounded-full"></span>
+<span class="font-label-sm text-label-sm text-secondary">Buffer Capacity</span>
+</div>
+</div>
+</div>
+<div class="space-y-8">
+<!-- Hub 01 -->
+<div>
+<div class="flex justify-between mb-2">
+<span class="font-body-md text-body-md font-bold">Lagos Central-01</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">14,200 / 18,000 TEUs/Day</span>
+</div>
+<div class="h-8 w-full bg-surface-container rounded-full overflow-hidden flex">
+<div class="bg-primary h-full transition-all duration-1000" style="width: 78.8%"></div>
+<div class="bg-primary-container/20 h-full transition-all duration-1000" style="width: 11.2%"></div>
+</div>
+<div class="mt-2 flex justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center"><span class="material-symbols-outlined text-[14px] mr-1 text-tertiary-container">trending_up</span>+4.2% from previous cycle</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Utilization: 79%</span>
+</div>
+</div>
+<!-- Hub 02 -->
+<div>
+<div class="flex justify-between mb-2">
+<span class="font-body-md text-body-md font-bold">Libreville Hub-04</span>
+<span class="font-label-sm text-label-sm text-error font-bold">8,950 / 9,200 TEUs/Day</span>
+</div>
+<div class="h-8 w-full bg-surface-container rounded-full overflow-hidden flex">
+<div class="bg-error h-full transition-all duration-1000" style="width: 97.2%"></div>
+</div>
+<div class="mt-2 flex justify-between">
+<span class="font-label-sm text-label-sm text-error flex items-center"><span class="material-symbols-outlined text-[14px] mr-1">warning</span>Critical threshold reached</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Utilization: 97%</span>
+</div>
+</div>
+<!-- Hub 03 -->
+<div>
+<div class="flex justify-between mb-2">
+<span class="font-body-md text-body-md font-bold">Port Harcourt-S2</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">6,100 / 12,000 TEUs/Day</span>
+</div>
+<div class="h-8 w-full bg-surface-container rounded-full overflow-hidden flex">
+<div class="bg-primary h-full transition-all duration-1000" style="width: 50.8%"></div>
+</div>
+<div class="mt-2 flex justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center"><span class="material-symbols-outlined text-[14px] mr-1">check_circle</span>Operational headroom available</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Utilization: 51%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Node Utilization Heatmap -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-lg shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline-md text-headline-md">Node Utilization Heatmap</h4>
+<div class="flex gap-2 p-1 bg-surface-container rounded">
+<button class="px-3 py-1 font-label-sm text-label-sm bg-white shadow-sm rounded">Daily</button>
+<button class="px-3 py-1 font-label-sm text-label-sm text-secondary hover:bg-white/50 rounded">Weekly</button>
+</div>
+</div>
+<div class="grid grid-cols-24 gap-1">
+<!-- Hour markers -->
+<div class="col-span-1"></div>
+<div class="col-span-23 grid grid-cols-12 mb-2">
+<span class="text-[10px] text-secondary font-label-sm">00:00</span>
+<span class="text-[10px] text-secondary font-label-sm text-center">06:00</span>
+<span class="text-[10px] text-secondary font-label-sm text-center">12:00</span>
+<span class="text-[10px] text-secondary font-label-sm text-right">18:00</span>
+</div>
+<!-- Row: Lagos -->
+<div class="col-span-1 self-center"><span class="font-label-sm text-[10px] text-secondary">L-01</span></div>
+<div class="col-span-23 grid grid-cols-24 gap-1 h-6">
+<script>
+                                for(let i=0; i<24; i++) {
+                                    const opacity = Math.floor(Math.random() * 80) + 20;
+                                    document.write(`<div class="heatmap-cell bg-primary" style="opacity: ${opacity}%" title="Hour ${i}: ${opacity}% load"></div>`);
+                                }
+                            </script>
+</div>
+<!-- Row: Lib-04 -->
+<div class="col-span-1 self-center mt-1"><span class="font-label-sm text-[10px] text-secondary">LB-04</span></div>
+<div class="col-span-23 grid grid-cols-24 gap-1 h-6 mt-1">
+<script>
+                                for(let i=0; i<24; i++) {
+                                    const opacity = Math.floor(Math.random() * 50) + 50;
+                                    document.write(`<div class="heatmap-cell bg-error" style="opacity: ${opacity}%" title="Hour ${i}: ${opacity}% load"></div>`);
+                                }
+                            </script>
+</div>
+</div>
+<p class="mt-4 font-label-sm text-label-sm text-secondary italic">Note: High peak activity corresponds to regional Market Days (Mon, Wed, Fri).</p>
+</div>
+</div>
+<!-- Side Controls: Simulator & Queue -->
+<div class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Load Balancing Simulator -->
+<div class="bg-primary dark:bg-primary-container text-on-primary p-6 rounded-lg shadow-sm border border-primary-container">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined">analytics</span>
+<h4 class="font-headline-md text-headline-md">Load Balancing</h4>
+</div>
+<p class="font-body-md text-body-md text-on-primary-container mb-6">Adjust routing weights for high-growth corridors.</p>
+<div class="space-y-6">
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-label-sm text-label-sm">West-South Bypass</span>
+<span class="font-label-sm text-label-sm font-bold text-tertiary-fixed">45%</span>
+</div>
+<input class="w-full h-1.5 bg-on-primary-container/20 accent-tertiary-fixed rounded-lg cursor-pointer" type="range" value="45"/>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-label-sm text-label-sm">Central Hub Direct</span>
+<span class="font-label-sm text-label-sm font-bold text-tertiary-fixed">30%</span>
+</div>
+<input class="w-full h-1.5 bg-on-primary-container/20 accent-tertiary-fixed rounded-lg cursor-pointer" type="range" value="30"/>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="font-label-sm text-label-sm">Coastline Transit</span>
+<span class="font-label-sm text-label-sm font-bold text-tertiary-fixed">25%</span>
+</div>
+<input class="w-full h-1.5 bg-on-primary-container/20 accent-tertiary-fixed rounded-lg cursor-pointer" type="range" value="25"/>
+</div>
+</div>
+<button class="w-full mt-8 py-3 bg-tertiary-fixed text-on-tertiary-fixed font-bold font-label-sm text-label-sm rounded uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all">Apply Weights</button>
+</div>
+<!-- Priority Cargo Queue -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm overflow-hidden">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container">
+<h4 class="font-label-sm text-label-sm font-bold uppercase tracking-tight">Priority Cargo Queue</h4>
+<span class="bg-error text-white font-label-sm text-[10px] px-2 py-0.5 rounded-full">3 Critical</span>
+</div>
+<div class="divide-y divide-outline-variant">
+<!-- Queue Item 1 -->
+<div class="p-4 hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-500 text-lg" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+<span class="font-body-md text-body-md font-bold">Gold Reserve-XJ</span>
+</div>
+<span class="font-label-sm text-[10px] bg-secondary-container px-1.5 py-0.5 rounded uppercase">High Val</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Dest: Cairo North</span>
+<button class="text-primary font-label-sm text-label-sm font-bold hover:underline">Allocate</button>
+</div>
+</div>
+<!-- Queue Item 2 -->
+<div class="p-4 hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-500 text-lg" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+<span class="font-body-md text-body-md font-bold">Vaccine Kit Batch-09</span>
+</div>
+<span class="font-label-sm text-[10px] bg-error-container text-on-error-container px-1.5 py-0.5 rounded uppercase font-bold">Time Sens</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Dest: Gaborone S</span>
+<button class="text-primary font-label-sm text-label-sm font-bold hover:underline">Allocate</button>
+</div>
+</div>
+<!-- Queue Item 3 -->
+<div class="p-4 hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">memory</span>
+<span class="font-body-md text-body-md font-bold">Server Cluster U-11</span>
+</div>
+<span class="font-label-sm text-[10px] bg-secondary-container px-1.5 py-0.5 rounded uppercase">Industrial</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Dest: Lagos C-01</span>
+<button class="text-primary font-label-sm text-label-sm font-bold hover:underline">Allocate</button>
+</div>
+</div>
+</div>
+<a class="block text-center py-3 font-label-sm text-label-sm text-primary bg-surface-container-low hover:bg-surface-container transition-colors" href="#">View All Assignments (42)</a>
+</div>
+</div>
+<!-- Bottom Stats / Capacity Trend Lines -->
+<div class="col-span-12">
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-lg shadow-sm">
+<h4 class="font-headline-md text-headline-md mb-6">Continental Capacity Trends</h4>
+<div class="relative h-48 w-full bg-surface-container/30 rounded flex items-end px-2 overflow-hidden">
+<!-- Grid Lines -->
+<div class="absolute inset-0 grid grid-rows-4 pointer-events-none">
+<div class="border-b border-outline-variant/30 w-full"></div>
+<div class="border-b border-outline-variant/30 w-full"></div>
+<div class="border-b border-outline-variant/30 w-full"></div>
+<div class="border-b border-outline-variant/30 w-full"></div>
+</div>
+<!-- Trend Visualization (SVG Path) -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 1000 200">
+<path d="M0,180 L50,160 L100,170 L150,130 L200,140 L250,110 L300,90 L350,105 L400,80 L450,70 L500,85 L550,60 L600,40 L650,55 L700,30 L750,20 L800,45 L850,25 L900,15 L950,20 L1000,10" fill="none" stroke="#003527" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<path d="M0,180 L50,160 L100,170 L150,130 L200,140 L250,110 L300,90 L350,105 L400,80 L450,70 L500,85 L550,60 L600,40 L650,55 L700,30 L750,20 L800,45 L850,25 L900,15 L950,20 L1000,10 V200 H0 Z" fill="url(#gradient)" opacity="0.1"></path>
+<defs>
+<lineargradient id="gradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#003527;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#003527;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<!-- Interactivity: Trend Tooltip (Simulated) -->
+<div class="absolute left-3/4 top-1/4 group cursor-help">
+<div class="w-3 h-3 bg-primary border-2 border-white rounded-full"></div>
+<div class="hidden group-hover:block absolute bottom-6 left-1/2 -translate-x-1/2 bg-inverse-surface text-white text-[10px] p-2 rounded whitespace-nowrap z-20 shadow-lg">
+<p class="font-bold">Forecast: 28,400 TEUs</p>
+<p class="text-white/60">Date: Dec 12, 2023</p>
+</div>
+</div>
+</div>
+<div class="flex justify-between mt-4 font-label-sm text-label-sm text-secondary">
+<span>OCT 23</span>
+<span>NOV 23</span>
+<span>DEC 23 (PROJECTION)</span>
+<span>JAN 24</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Micro-interaction Scripts -->
+<script>
+        // Simple slider interaction logic (visual only)
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                const label = e.target.parentElement.querySelector('span:last-child');
+                label.textContent = e.target.value + '%';
+            });
+        });
+
+        // Hover effect for heatmap
+        document.querySelectorAll('.heatmap-cell').forEach(cell => {
+            cell.addEventListener('mouseenter', () => {
+                cell.style.boxShadow = '0 0 10px rgba(0, 53, 39, 0.4)';
+            });
+            cell.addEventListener('mouseleave', () => {
+                cell.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body></html>

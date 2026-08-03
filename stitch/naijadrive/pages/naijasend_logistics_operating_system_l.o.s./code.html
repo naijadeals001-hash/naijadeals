@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaSend | Logistics Operating System (L.O.S.)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#360e05",
+                        "surface-dim": "#131317",
+                        "error": "#ffb4ab",
+                        "secondary": "#b7c8e1",
+                        "on-tertiary": "#512317",
+                        "inverse-primary": "#4f5c90",
+                        "tertiary-fixed": "#ffdbd2",
+                        "primary-container": "#b7c4ff",
+                        "on-surface-variant": "#c6c5d0",
+                        "glass-bg": "rgba(29, 31, 41, 0.8)",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface-container": "#1d1f29",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed-variant": "#374476",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "outline-variant": "#45464f",
+                        "tertiary": "#ffdbd2",
+                        "on-secondary": "#213145",
+                        "on-primary": "#1f2d5e",
+                        "tertiary-fixed-dim": "#ffb4a2",
+                        "tertiary-container": "#ffb5a2",
+                        "inverse-surface": "#e4e1e6",
+                        "surface-tint": "#b7c4ff",
+                        "on-secondary-fixed": "#0b1c2f",
+                        "on-error": "#690005",
+                        "on-tertiary-container": "#7b4436",
+                        "on-surface": "#e4e1e6",
+                        "outline": "#90909a",
+                        "surface-container-highest": "#343438",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#435083",
+                        "primary": "#dde1ff",
+                        "on-secondary-container": "#a6b6cf",
+                        "surface-variant": "#343438",
+                        "primary-fixed": "#dce1ff",
+                        "on-tertiary-fixed-variant": "#6c382b",
+                        "on-primary-fixed": "#071749",
+                        "surface-bright": "#39393d",
+                        "inverse-on-surface": "#303034",
+                        "on-background": "#e4e1e6",
+                        "surface-container-high": "#292a2d",
+                        "surface": "#131317",
+                        "secondary-container": "#38485d",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "background": "#11131c",
+                        "surface-container-low": "#1b1b1f",
+                        "terminal-green": "#00ff41",
+                        "surface-container-lowest": "#0d0e11",
+                        "auth-error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sidebar-width": "288px",
+                        "header-height": "64px",
+                        "unit": "4px",
+                        "stack-default": "1rem",
+                        "gutter": "12px",
+                        "stack-tight": "0.5rem",
+                        "container-padding": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-base": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-terminal": ["JetBrains Mono"],
+                        "micro-tag": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; filter: blur(4px); }
+            50% { opacity: 0.8; filter: blur(8px); }
+        }
+        .pulse-node { animation: pulse-glow 2s infinite ease-in-out; }
+        
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 255, 65, 0.05);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 50;
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+        }
+        @keyframes scan {
+            from { transform: translateY(-100px); }
+            to { transform: translateY(100vh); }
+        }
+
+        .hud-grid {
+            background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .terminal-border {
+            border: 1px solid rgba(144, 144, 154, 0.2);
+            position: relative;
+        }
+        .terminal-border::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px; width: 10px; height: 10px;
+            border-top: 2px solid #00ff41; border-left: 2px solid #00ff41;
+        }
+        .terminal-border::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; right: -1px; width: 10px; height: 10px;
+            border-bottom: 2px solid #00ff41; border-right: 2px solid #00ff41;
+        }
+
+        .flow-line {
+            stroke-dasharray: 4;
+            animation: flow 20s linear infinite;
+        }
+        @keyframes flow {
+            to { stroke-dashoffset: -100; }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-base overflow-hidden h-screen selection:bg-terminal-green selection:text-black">
+<div class="scanline"></div>
+<!-- Header -->
+<header class="fixed top-0 w-full z-[60] flex items-center justify-between px-gutter h-header-height bg-surface/80 backdrop-blur-md border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 flex items-center justify-center border border-terminal-green text-terminal-green">
+<span class="material-symbols-outlined text-sm">terminal</span>
+</div>
+<div>
+<h1 class="text-label-caps font-label-caps text-terminal-green tracking-widest">NAIJASEND // L.O.S.</h1>
+<p class="text-[10px] font-code-terminal text-on-surface-variant opacity-60">KERNEL VERSION 4.0.2-STABLE</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden sm:flex items-center gap-4 px-4 border-x border-outline-variant/30">
+<div class="text-right">
+<p class="text-micro-tag font-micro-tag text-on-surface-variant uppercase">Uptime</p>
+<p class="text-code-terminal text-terminal-green">99.9982%</p>
+</div>
+<div class="text-right border-l border-outline-variant/30 pl-4">
+<p class="text-micro-tag font-micro-tag text-on-surface-variant uppercase">Nodes</p>
+<p class="text-code-terminal text-primary">1,422 ACTIVE</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-terminal-green cursor-pointer">settings_input_component</span>
+</div>
+</header>
+<div class="flex h-full pt-header-height pb-16 md:pb-0">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex flex-col h-full py-6 bg-surface-container-lowest border-r border-outline-variant w-sidebar-width shrink-0">
+<div class="px-6 mb-8">
+<p class="text-label-caps font-label-caps text-on-surface-variant opacity-50 mb-2">SYSTEM COMMANDS</p>
+<div class="h-[1px] w-full bg-outline-variant/30 relative">
+<div class="absolute top-0 left-0 h-[1px] w-1/3 bg-terminal-green"></div>
+</div>
+</div>
+<nav class="flex flex-col gap-1 px-2">
+<button class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant/30 group transition-all">
+<span class="material-symbols-outlined text-xl group-hover:text-primary">monitoring</span>
+<span class="text-label-caps font-label-caps">Fleet Telemetry</span>
+</button>
+<button class="flex items-center gap-3 px-4 py-3 bg-surface-variant/50 border-l-2 border-terminal-green text-terminal-green group transition-all">
+<span class="material-symbols-outlined text-xl">hub</span>
+<span class="text-label-caps font-label-caps">Ecosystem Sync</span>
+</button>
+<button class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant/30 group transition-all">
+<span class="material-symbols-outlined text-xl group-hover:text-primary">route</span>
+<span class="text-label-caps font-label-caps">Routing Engine</span>
+</button>
+<button class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant/30 group transition-all">
+<span class="material-symbols-outlined text-xl group-hover:text-primary">security</span>
+<span class="text-label-caps font-label-caps">Security Protocol</span>
+</button>
+</nav>
+<div class="mt-auto p-6">
+<div class="terminal-border bg-surface-container-low p-4 space-y-3">
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="text-micro-tag font-micro-tag text-on-surface-variant uppercase">Cpu Load</span>
+<span class="text-micro-tag font-micro-tag text-terminal-green">42%</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full overflow-hidden">
+<div class="h-full bg-terminal-green w-[42%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="text-micro-tag font-micro-tag text-on-surface-variant uppercase">Memory</span>
+<span class="text-micro-tag font-micro-tag text-primary">68%</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full overflow-hidden">
+<div class="h-full bg-primary w-[68%]"></div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="flex-1 relative hud-grid overflow-hidden flex flex-col">
+<!-- Diagram Layer -->
+<div class="absolute inset-0 z-0 opacity-40">
+<svg class="w-full h-full" fill="none" viewbox="0 0 800 600">
+<circle class="text-terminal-green/20" cx="400" cy="300" r="120" stroke="currentColor" stroke-dasharray="4 4" stroke-width="1"></circle>
+<circle class="text-primary/10" cx="400" cy="300" r="220" stroke="currentColor" stroke-width="1"></circle>
+<!-- Connection Lines -->
+<g class="flow-line stroke-terminal-green/30" stroke-width="1">
+<line x1="400" x2="200" y1="300" y2="150"></line>
+<line x1="400" x2="600" y1="300" y2="150"></line>
+<line x1="400" x2="200" y1="300" y2="450"></line>
+<line x1="400" x2="600" y1="300" y2="450"></line>
+</g>
+</svg>
+</div>
+<!-- Content Area -->
+<div class="relative z-10 flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
+<!-- Top Metrics Row -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="terminal-border bg-surface-container/60 backdrop-blur-md p-4">
+<p class="text-micro-tag font-micro-tag text-on-surface-variant uppercase mb-1">Global Dispatch Capacity</p>
+<div class="flex items-baseline justify-between">
+<h3 class="text-headline-md font-display-lg text-primary">12.4K</h3>
+<span class="text-micro-tag font-code-terminal text-terminal-green">+4.2%</span>
+</div>
+</div>
+<div class="terminal-border bg-surface-container/60 backdrop-blur-md p-4">
+<p class="text-micro-tag font-micro-tag text-on-surface-variant uppercase mb-1">Routing Efficiency</p>
+<div class="flex items-baseline justify-between">
+<h3 class="text-headline-md font-display-lg text-tertiary">94.8%</h3>
+<span class="text-micro-tag font-code-terminal text-terminal-green">OPTIMIZED</span>
+</div>
+</div>
+<div class="terminal-border bg-surface-container/60 backdrop-blur-md p-4">
+<p class="text-micro-tag font-micro-tag text-on-surface-variant uppercase mb-1">Heavy-Freight Active</p>
+<div class="flex items-baseline justify-between">
+<h3 class="text-headline-md font-display-lg text-on-primary-container">842</h3>
+<span class="text-micro-tag font-code-terminal text-primary">IN TRANSIT</span>
+</div>
+</div>
+<div class="terminal-border bg-surface-container/60 backdrop-blur-md p-4">
+<p class="text-micro-tag font-micro-tag text-on-surface-variant uppercase mb-1">Last-Mile Nodes</p>
+<div class="flex items-baseline justify-between">
+<h3 class="text-headline-md font-display-lg text-terminal-green">3.1K</h3>
+<span class="text-micro-tag font-code-terminal text-on-surface-variant">ONLINE</span>
+</div>
+</div>
+</div>
+<!-- Industrial Connections View -->
+<div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[400px]">
+<!-- Left: Industrial-Scale Hubs -->
+<div class="lg:col-span-4 flex flex-col gap-4">
+<div class="terminal-border bg-surface-container-high/80 p-4 flex-1">
+<div class="flex items-center gap-2 mb-4 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-primary text-sm">factory</span>
+<h4 class="text-label-caps font-label-caps">Industrial Scale Hubs</h4>
+</div>
+<div class="space-y-4">
+<!-- Agro -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-center mb-1">
+<span class="text-body-sm font-bold text-on-surface">Agro-Supply Chain</span>
+<span class="text-micro-tag bg-terminal-green/10 text-terminal-green px-1">ACTIVE</span>
+</div>
+<p class="text-[10px] font-code-terminal text-on-surface-variant mb-2">COLD-CHAIN VERIFIED // 450T CAPACITY</p>
+<div class="h-1 bg-surface-container-highest w-full rounded-full">
+<div class="h-full bg-terminal-green w-3/4 group-hover:w-full transition-all duration-700"></div>
+</div>
+</div>
+<!-- Wholesale -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-center mb-1">
+<span class="text-body-sm font-bold text-on-surface">Wholesale Freight</span>
+<span class="text-micro-tag bg-tertiary/10 text-tertiary px-1">QUEUED</span>
+</div>
+<p class="text-[10px] font-code-terminal text-on-surface-variant mb-2">B2B LOGISTICS // BULK ROUTING</p>
+<div class="h-1 bg-surface-container-highest w-full rounded-full">
+<div class="h-full bg-tertiary w-1/2 group-hover:w-2/3 transition-all duration-700"></div>
+</div>
+</div>
+<!-- Health -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-center mb-1">
+<span class="text-body-sm font-bold text-on-surface">Health Deliveries</span>
+<span class="text-micro-tag bg-error/10 text-error px-1">PRIORITY</span>
+</div>
+<p class="text-[10px] font-code-terminal text-on-surface-variant mb-2">TEMP-SENSITIVE // DRONE DISPATCH</p>
+<div class="h-1 bg-surface-container-highest w-full rounded-full">
+<div class="h-full bg-error w-1/4 group-hover:w-1/2 transition-all duration-700"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Center: Visual Workflow HUD -->
+<div class="lg:col-span-5 relative flex items-center justify-center">
+<div class="relative w-64 h-64 border-2 border-terminal-green/20 rounded-full flex items-center justify-center">
+<div class="absolute inset-0 border border-dashed border-terminal-green/40 rounded-full animate-[spin_30s_linear_infinite]"></div>
+<div class="absolute -inset-4 border border-dotted border-primary/20 rounded-full animate-[spin_20s_linear_infinite_reverse]"></div>
+<div class="text-center z-20">
+<span class="material-symbols-outlined text-5xl text-terminal-green pulse-node">local_post_office</span>
+<p class="text-label-caps font-bold text-terminal-green mt-2">CORE L.O.S.</p>
+<p class="text-[9px] font-code-terminal text-on-surface-variant">PROTOCOL: OMNI-LINK</p>
+</div>
+<!-- Floating Node Indicators -->
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 terminal-border bg-surface p-2 text-center w-32 backdrop-blur-lg">
+<p class="text-micro-tag text-primary">HEAVY-FREIGHT</p>
+<div class="flex justify-center gap-1 mt-1">
+<div class="w-1 h-3 bg-primary"></div>
+<div class="w-1 h-3 bg-primary"></div>
+<div class="w-1 h-3 bg-primary/30"></div>
+</div>
+</div>
+<div class="absolute -bottom-10 left-1/2 -translate-x-1/2 terminal-border bg-surface p-2 text-center w-32 backdrop-blur-lg">
+<p class="text-micro-tag text-terminal-green">LAST-MILE</p>
+<div class="flex justify-center gap-1 mt-1">
+<div class="w-1 h-3 bg-terminal-green"></div>
+<div class="w-1 h-3 bg-terminal-green"></div>
+<div class="w-1 h-3 bg-terminal-green"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Live Terminal Log -->
+<div class="lg:col-span-3 flex flex-col">
+<div class="terminal-border bg-black/40 p-4 flex-1 font-code-terminal text-[10px] flex flex-col">
+<div class="flex items-center justify-between mb-3 border-b border-outline-variant/30 pb-2">
+<span class="text-terminal-green">LIVE_TRAFFIC_LOG</span>
+<span class="animate-pulse">●</span>
+</div>
+<div class="flex-1 space-y-2 overflow-hidden opacity-80">
+<p><span class="text-on-surface-variant">[14:22:01]</span> <span class="text-primary">TRK_9921</span> dispatched Hub-B</p>
+<p><span class="text-on-surface-variant">[14:22:05]</span> Route optimization +12% applied</p>
+<p><span class="text-on-surface-variant">[14:22:12]</span> <span class="text-terminal-green">AGRO_SYNC</span> verified cold-chain</p>
+<p><span class="text-on-surface-variant">[14:22:18]</span> <span class="text-error">MED_PRIORITY</span> drone-2 launched</p>
+<p><span class="text-on-surface-variant">[14:22:25]</span> Port-Harcourt node synchronized</p>
+<p><span class="text-on-surface-variant">[14:22:31]</span> <span class="text-primary">TRK_8842</span> re-routed (heavy traffic)</p>
+<p><span class="text-on-surface-variant">[14:22:38]</span> Last-mile cluster Lagos-West active</p>
+<p><span class="text-on-surface-variant">[14:22:45]</span> Wholesale-04 capacity threshold 80%</p>
+<p class="animate-pulse">_</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Telemetry -->
+<footer class="h-12 bg-surface-container-lowest border-t border-outline-variant px-6 flex items-center justify-between z-20">
+<div class="flex gap-8 text-[10px] font-code-terminal text-on-surface-variant">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 bg-terminal-green rounded-full"></div>
+<span>NETWORK: OPTIMAL</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 bg-primary rounded-full"></div>
+<span>SYNC: 12ms</span>
+</div>
+</div>
+<div class="text-[10px] font-code-terminal text-on-surface-variant">
+                    AUTHORIZED SESSION: ADMIN_001
+                </div>
+</footer>
+</main>
+</div>
+<!-- Mobile Navigation -->
+<nav class="md:hidden fixed bottom-0 w-full z-[70] flex justify-around items-center px-4 py-2 bg-glass-bg border-t border-outline-variant backdrop-blur-md h-16">
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">hub</span>
+<span class="text-micro-tag">CORE</span>
+</div>
+<div class="flex flex-col items-center text-terminal-green">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="text-micro-tag">L.O.S.</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">route</span>
+<span class="text-micro-tag">ROUTES</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">security</span>
+<span class="text-micro-tag">SEC</span>
+</div>
+</nav>
+</body></html>

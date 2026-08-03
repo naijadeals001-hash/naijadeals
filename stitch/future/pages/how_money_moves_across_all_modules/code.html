@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Module Flow | Cyber-Authority HUD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#dce1ff",
+                        "on-primary": "#1f2d5e",
+                        "outline-variant": "#45464f",
+                        "on-background": "#e4e1e6",
+                        "on-primary-container": "#435083",
+                        "surface-dim": "#131317",
+                        "tertiary-fixed-dim": "#ffb4a2",
+                        "on-secondary-fixed": "#0b1c2f",
+                        "tertiary-container": "#ffb5a2",
+                        "surface-bright": "#39393d",
+                        "outline": "#90909a",
+                        "secondary-container": "#38485d",
+                        "on-tertiary-fixed": "#360e05",
+                        "on-secondary": "#213145",
+                        "inverse-surface": "#e4e1e6",
+                        "background": "#11131c",
+                        "on-tertiary-container": "#7b4436",
+                        "surface-container-highest": "#343438",
+                        "primary": "#dde1ff",
+                        "on-surface": "#e4e1e6",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "surface-tint": "#b7c4ff",
+                        "surface-container": "#1f1f23",
+                        "surface-container-high": "#292a2d",
+                        "error-container": "#93000a",
+                        "on-surface-variant": "#c6c5d0",
+                        "surface-variant": "#32343f",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-primary-fixed-variant": "#374476",
+                        "on-primary-fixed": "#071749",
+                        "inverse-on-surface": "#303034",
+                        "surface-container-lowest": "#0d0e11",
+                        "error": "#ffb4ab",
+                        "secondary": "#b7c8e1",
+                        "glass-bg": "rgba(29, 31, 41, 0.8)",
+                        "on-secondary-container": "#a6b6cf",
+                        "on-tertiary-fixed-variant": "#6c382b",
+                        "terminal-green": "#00ff41",
+                        "tertiary": "#ffdbd2",
+                        "surface": "#131317",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#512317",
+                        "tertiary-fixed": "#ffdbd2",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#690005",
+                        "primary-container": "#b7c4ff",
+                        "auth-error": "#ffb4ab",
+                        "surface-container-low": "#1b1b1f",
+                        "inverse-primary": "#4f5c90"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sidebar-width": "288px",
+                        "unit": "4px",
+                        "gutter": "12px",
+                        "stack-tight": "0.5rem",
+                        "stack-default": "1rem",
+                        "header-height": "64px",
+                        "container-padding": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "micro-tag": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "body-base": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "code-terminal": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 255, 65, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 65, 0.6); }
+        }
+        .animate-pulse-glow { animation: pulse-glow 2s infinite; }
+        
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(0, 255, 65, 0.1);
+            animation: scanline 8s linear infinite;
+        }
+
+        .glass-panel {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+
+        .flow-line {
+            background: linear-gradient(90deg, transparent, #00ff41, transparent);
+            background-size: 200% 100%;
+            animation: flow-move 3s linear infinite;
+        }
+
+        @keyframes flow-move {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-base selection:bg-terminal-green selection:text-black overflow-hidden h-screen flex">
+<!-- Navigation Drawer (Mandatory Component) -->
+<aside class="hidden lg:flex flex-col h-full py-6 bg-surface-container-highest dark:bg-surface-container-lowest border-r border-outline-variant w-sidebar-width shrink-0 z-40">
+<div class="px-6 mb-8">
+<h1 class="text-terminal-green font-code-terminal text-headline-md font-extrabold tracking-tighter uppercase">SYSTEM MODULES</h1>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all group" href="#">
+<span class="material-symbols-outlined mr-3">shopping_bag</span>
+<span class="text-label-caps font-label-caps">NaijaShop</span>
+</a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">restaurant</span>
+<span class="text-label-caps font-label-caps">NaijaEats</span>
+</a>
+<div class="bg-primary-container text-on-primary-container border-l-4 border-terminal-green flex items-center px-6 py-3 transition-transform translate-x-1">
+<span class="material-symbols-outlined mr-3">payments</span>
+<span class="text-label-caps font-label-caps">NaijaPay</span>
+</div>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">local_post_office</span>
+<span class="text-label-caps font-label-caps">NaijaSend</span>
+</a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">directions_car</span>
+<span class="text-label-caps font-label-caps">NaijaDrive</span>
+</a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">agriculture</span>
+<span class="text-label-caps font-label-caps">NaijaAgro</span>
+</a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">inventory_2</span>
+<span class="text-label-caps font-label-caps">NaijaWholesale</span>
+</a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">work</span>
+<span class="text-label-caps font-label-caps">NaijaGigs</span>
+</a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">play_circle</span>
+<span class="text-label-caps font-label-caps">NaijaStream</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<div class="p-4 bg-surface-variant/30 border border-outline-variant rounded-lg">
+<div class="flex items-center justify-between mb-2">
+<span class="text-micro-tag font-micro-tag uppercase text-terminal-green">System Health</span>
+<div class="w-2 h-2 rounded-full bg-terminal-green animate-pulse"></div>
+</div>
+<div class="h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="w-[94%] h-full bg-terminal-green"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 flex flex-col relative overflow-hidden">
+<!-- Top App Bar (Mandatory Component) -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-gutter h-header-height bg-surface dark:bg-surface-dim border-b border-outline-variant lg:left-sidebar-width lg:w-[calc(100%-288px)]">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary dark:text-primary-fixed hover:bg-surface-variant/50 p-2 transition-colors active:scale-95 duration-150">grid_view</button>
+<h2 class="text-headline-md font-headline-md text-primary dark:text-primary-fixed">How It Works</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-6 items-center">
+<span class="text-terminal-green font-bold text-label-caps font-label-caps">Flows</span>
+<span class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-variant/50 transition-colors cursor-pointer px-2 py-1 rounded">Ecosystem</span>
+<span class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-variant/50 transition-colors cursor-pointer px-2 py-1 rounded">Security</span>
+</div>
+<button class="material-symbols-outlined text-primary dark:text-primary-fixed hover:bg-surface-variant/50 p-2 transition-colors active:scale-95 duration-150">help_outline</button>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 mt-header-height p-6 overflow-y-auto scanline relative">
+<!-- Hero Section: Transaction Protocol HUD -->
+<section class="mb-12">
+<div class="glass-panel p-8 relative overflow-hidden border-t-4 border-terminal-green">
+
+<div class="relative z-10 flex flex-col md:flex-row justify-between items-end gap-6">
+<div class="max-w-2xl">
+<span class="text-terminal-green text-micro-tag font-micro-tag uppercase tracking-widest mb-2 block">Core Protocol v4.2.0</span>
+<h3 class="text-display-lg font-display-lg mb-4 leading-none">ZERO-FRICTION<br/><span class="text-terminal-green">PAYMENT FLOW</span></h3>
+<p class="text-on-surface-variant text-body-base font-body-base max-w-md">
+                                A high-authority orchestration layer managing real-time settlement, automated escrow, and instant payouts across the entire Naija Ecosystem.
+                            </p>
+</div>
+<div class="flex gap-4">
+<div class="text-right">
+<p class="text-micro-tag font-micro-tag uppercase text-on-surface-variant">Live Volume</p>
+<p class="text-headline-md font-code-terminal text-terminal-green">₦4.2M/sec</p>
+</div>
+<div class="text-right border-l border-outline-variant pl-4">
+<p class="text-micro-tag font-micro-tag uppercase text-on-surface-variant">Active Nodes</p>
+<p class="text-headline-md font-code-terminal">12,842</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- The Flow Map: Bento Grid Interface -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-12">
+<!-- Stage 1: Entry -->
+<div class="glass-panel p-6 flex flex-col items-center text-center relative">
+<div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 border border-primary/30">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+</div>
+<h4 class="text-label-caps font-label-caps mb-1">NaijaPay</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Transaction Initiation &amp; Verification</p>
+<!-- Flow Connection -->
+<div class="hidden md:block absolute top-1/2 -right-6 w-12 h-[2px] flow-line z-0"></div>
+</div>
+<!-- Stage 2: Hold -->
+<div class="glass-panel p-6 flex flex-col items-center text-center relative border-t-4 border-primary">
+<div class="w-12 h-12 bg-primary-container/20 rounded-full flex items-center justify-center mb-4 border border-primary-container/50">
+<span class="material-symbols-outlined text-primary-container">lock</span>
+</div>
+<h4 class="text-label-caps font-label-caps mb-1">Escrow Holding</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Smart Contract Automated Locking</p>
+<div class="hidden md:block absolute top-1/2 -right-6 w-12 h-[2px] flow-line z-0"></div>
+</div>
+<!-- Stage 3: Clear -->
+<div class="glass-panel p-6 flex flex-col items-center text-center relative">
+<div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mb-4 border border-secondary/30">
+<span class="material-symbols-outlined text-secondary">fact_check</span>
+</div>
+<h4 class="text-label-caps font-label-caps mb-1">Settlement</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Verification of Service Fulfillment</p>
+<div class="hidden md:block absolute top-1/2 -right-6 w-12 h-[2px] flow-line z-0"></div>
+</div>
+<!-- Stage 4: Exit -->
+<div class="glass-panel p-6 flex flex-col items-center text-center relative border-t-4 border-terminal-green animate-pulse-glow">
+<div class="w-12 h-12 bg-terminal-green/10 rounded-full flex items-center justify-center mb-4 border border-terminal-green/30">
+<span class="material-symbols-outlined text-terminal-green">output</span>
+</div>
+<h4 class="text-label-caps font-label-caps mb-1 text-terminal-green">Final Payout</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Instant Wallet Credit</p>
+</div>
+</div>
+<!-- Module Specific Examples -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Example 1: Shop -->
+<div class="glass-panel overflow-hidden flex flex-col group">
+<div class="h-32 w-full relative">
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10"></div>
+<img class="w-full h-full object-cover" data-alt="A futuristic logistics hub with neon-lit automated delivery drones and sleek cargo vehicles. The scene is shot with high-contrast, cinematic lighting, dominated by deep blues and electric green accents, representing a high-tech retail ecosystem in a dark-mode cyberpunk setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOQFW1vLrmQHOg3Je4aoq1XezL4GNJihEz1_4AwEOVqXalDz_wqajB375FxKoHIyYLek5AZIwSwnTFh1hjXOGfKwggm7UA6-M4ERgp3Foa7NUN7HPANsMqOOv_TNYvJ_hrD-F-cwwsxSD1zzFVZd9Yjah4C_fJyuJ4xKp8Rt739Ss5bKiyIJjLj8IQmeh5nLuMEjuPFGXh_lHzrSrE_6oje8N8gLqmxIUUuW4i9ZzqgA_ZwPmq2vWYgZP0noKSzTh2w4DkCs6Hd1g"/>
+<div class="absolute top-4 left-4 z-20 flex items-center gap-2 px-2 py-1 bg-black/50 backdrop-blur rounded">
+<span class="material-symbols-outlined text-terminal-green text-[14px]">shopping_bag</span>
+<span class="text-micro-tag font-micro-tag uppercase">NaijaShop</span>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h5 class="text-label-caps font-label-caps">Item Purchase</h5>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Funds locked until delivery confirmed by Geo-Tag.</p>
+</div>
+<span class="text-code-terminal text-terminal-green">₦45,000</span>
+</div>
+<div class="bg-surface-container-low p-3 space-y-2">
+<div class="flex justify-between text-micro-tag font-micro-tag uppercase text-outline">
+<span>Status</span>
+<span class="text-on-surface">Escrow Active</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="w-2/3 h-full bg-primary"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Example 2: Gigs -->
+<div class="glass-panel overflow-hidden flex flex-col group">
+<div class="h-32 w-full relative">
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10"></div>
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist high-tech workspace with multiple holographic displays and floating digital interfaces. The lighting is sophisticated and cool-toned, with sharp focus on technical details and data visualizations, evoking a sense of professional authority and remote gig-work precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARFwtOzxTT6mEbxnkOTPV77HNqntx6OQhOrj70YHuIrR5Vq4CYiQBEHqvaYvxKaalD1ueVWmpcGzeKTDh5FOjcB_EyxtDXvAeYueCCLuud_2RXLv7Uq3Wn-vGXNMlZD5hoyp_vgJdo5FngSUKDjKg13V53twuc_tgN1b6vk5c1DaGpnZeAB6p1ZUR6vQahudIX7lBA1hSTNn1wuRX0Z_P-tBTBHbkFiGXjXQOjVOOINY_2cj9aLrP9M0Je28xWeg2oTKjFZUUQWaA"/>
+<div class="absolute top-4 left-4 z-20 flex items-center gap-2 px-2 py-1 bg-black/50 backdrop-blur rounded">
+<span class="material-symbols-outlined text-terminal-green text-[14px]">work</span>
+<span class="text-micro-tag font-micro-tag uppercase">NaijaGigs</span>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h5 class="text-label-caps font-label-caps">Dev Sprint #4</h5>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Milestone-based release upon PR approval.</p>
+</div>
+<span class="text-code-terminal text-terminal-green">₦280,000</span>
+</div>
+<div class="bg-surface-container-low p-3 space-y-2">
+<div class="flex justify-between text-micro-tag font-micro-tag uppercase text-outline">
+<span>Status</span>
+<span class="text-on-surface">Review Pending</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="w-1/2 h-full bg-tertiary"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Example 3: Agro -->
+<div class="glass-panel overflow-hidden flex flex-col group">
+<div class="h-32 w-full relative">
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10"></div>
+<img class="w-full h-full object-cover" data-alt="A vertical hydroponic farm of the future, with rows of vibrant green crops glowing under purple and white LED spectrums. Tech-forward agricultural drones hover between columns. The atmosphere is crisp, clean, and highly technological, emphasizing data-driven farming and sustainability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoXCNQ_UqYyJUxF_BEb78fQF5CMIlh2J6f3WipHBmj6axzRpngUjdhg68Zgl7l5or5_LLWNsNCxc5iiURLMC8Rx_8H48aRX36h7j8rL47ZgYnjyrr8Sf1JEVV6z9O1wqYx2CF4e1i94xFs9KGQuXIPvO56-HE2FLJ4pgbKbWHEBF9twiyOED4ahd1wzTO-OdALQyRmp9QqkHwF-E2snM8Yz94wC1h3RaybwcsBzrbk5UhRb2_xTUkxEOHU_v3I8ozAsYk_maSQXU0"/>
+<div class="absolute top-4 left-4 z-20 flex items-center gap-2 px-2 py-1 bg-black/50 backdrop-blur rounded">
+<span class="material-symbols-outlined text-terminal-green text-[14px]">agriculture</span>
+<span class="text-micro-tag font-micro-tag uppercase">NaijaAgro</span>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h5 class="text-label-caps font-label-caps">Batch 09-Corn</h5>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Bulk purchase clearing via logistics proof.</p>
+</div>
+<span class="text-code-terminal text-terminal-green">₦1.2M</span>
+</div>
+<div class="bg-surface-container-low p-3 space-y-2">
+<div class="flex justify-between text-micro-tag font-micro-tag uppercase text-outline">
+<span>Status</span>
+<span class="text-on-surface text-terminal-green">Completed</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="w-full h-full bg-terminal-green"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Terminal Log Overlay -->
+<div class="mt-gutter glass-panel bg-surface-container-lowest font-code-terminal text-body-sm overflow-hidden border-t-4 border-outline">
+<div class="bg-surface-container p-2 flex items-center justify-between border-b border-outline-variant">
+<span class="text-micro-tag font-micro-tag uppercase px-2">PROTOCOL_LOGS_STREAM</span>
+<span class="text-micro-tag font-micro-tag uppercase px-2 text-terminal-green">REAL-TIME</span>
+</div>
+<div class="p-4 h-32 overflow-y-auto space-y-1">
+<p class="text-primary opacity-80">[INFO] - 14:02:11 - NaijaPay node-72 verified transaction TX_829283</p>
+<p class="text-tertiary opacity-80">[WARN] - 14:02:15 - Network latency spike detected in Lagos-Zone-B</p>
+<p class="text-terminal-green">[SUCCESS] - 14:02:18 - Escrow release for Order #9283 - NaijaEats</p>
+<p class="text-primary opacity-80">[INFO] - 14:02:22 - Settlement protocol initiated for NaijaWholesale bulk order</p>
+<p class="text-error opacity-80">[FAIL] - 14:02:25 - Fraud detection flagged TX_9921 - Originating IP: BLOCKED</p>
+<p class="text-terminal-green">[SUCCESS] - 14:02:30 - Final Payout credited to WalletID: 0x291...382</p>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-glass-bg border-t border-outline-variant backdrop-blur-8 shadow-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined">hub</span>
+<span class="text-micro-tag font-micro-tag uppercase">Ecosystem</span>
+</div>
+<div class="flex flex-col items-center justify-center text-terminal-green font-bold">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="text-micro-tag font-micro-tag uppercase">Flows</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined">shield_person</span>
+<span class="text-micro-tag font-micro-tag uppercase">Security</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-micro-tag font-micro-tag uppercase">Logistics</span>
+</div>
+</nav>
+</main>
+<script>
+        // Micro-interactions for hovering cards
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'scale(0.99)';
+                card.style.transition = 'transform 0.3s ease';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+
+        // Simple Terminal Scroll Simulation
+        const logContainer = document.querySelector('.overflow-y-auto.h-32');
+        setInterval(() => {
+            if(logContainer) {
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+        }, 3000);
+    </script>
+</body></html>

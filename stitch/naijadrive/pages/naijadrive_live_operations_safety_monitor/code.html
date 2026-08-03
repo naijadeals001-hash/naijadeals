@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaDrive | Live Ops &amp; Safety Monitor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .pulse-red {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .scanline {
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 109, 56, 0.05) 50%);
+            background-size: 100% 4px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-dim": "#d9dadc",
+                      "surface-container": "#edeef0",
+                      "secondary-fixed-dim": "#c0c6db",
+                      "trust-amber-surface": "#FEF3C7",
+                      "on-surface-variant": "#3d4a3f",
+                      "on-background": "#191c1e",
+                      "inverse-on-surface": "#f0f1f3",
+                      "on-primary-fixed": "#00210d",
+                      "canvas-pure": "#FFFFFF",
+                      "on-primary-fixed-variant": "#005228",
+                      "on-primary": "#ffffff",
+                      "background": "#f8f9fb",
+                      "on-secondary-container": "#5c6274",
+                      "tertiary": "#0053db",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-container": "#003317",
+                      "tertiary-fixed": "#dbe1ff",
+                      "outline-variant": "#bccabc",
+                      "security-crimson-surface": "#FEE2E2",
+                      "primary-fixed-dim": "#59df89",
+                      "on-tertiary-fixed": "#00174b",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "surface-container-high": "#e7e8ea",
+                      "secondary": "#575e70",
+                      "secondary-container": "#d9dff5",
+                      "on-secondary-fixed-variant": "#404758",
+                      "on-surface": "#191c1e",
+                      "inverse-primary": "#59df89",
+                      "tertiary-container": "#638cff",
+                      "primary-fixed": "#77fca3",
+                      "surface-container-low": "#f3f4f6",
+                      "on-error-container": "#93000a",
+                      "trust-amber": "#F59E0B",
+                      "surface-container-lowest": "#ffffff",
+                      "error": "#ba1a1a",
+                      "surface-variant": "#e1e2e4",
+                      "tertiary-fixed-dim": "#b4c5ff",
+                      "surface": "#f8f9fb",
+                      "surface-tint": "#006d38",
+                      "primary-container": "#00a859",
+                      "inverse-surface": "#2e3132",
+                      "on-secondary-fixed": "#141b2b",
+                      "text-muted": "#4B5563",
+                      "security-crimson": "#EF4444",
+                      "on-tertiary-container": "#00256c",
+                      "outline": "#6d7b6e",
+                      "secondary-fixed": "#dce2f7",
+                      "on-tertiary-fixed-variant": "#003ea8",
+                      "primary": "#006d38",
+                      "surface-bright": "#f8f9fb",
+                      "surface-container-highest": "#e1e2e4",
+                      "error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "margin-mobile": "16px",
+                      "sm": "8px",
+                      "lg": "24px",
+                      "touch-target-min": "48px",
+                      "touch-target-primary": "52px",
+                      "unit": "4px",
+                      "gutter-mobile": "16px"
+              },
+              "fontFamily": {
+                      "price-display": ["Plus Jakarta Sans"],
+                      "display-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-base": ["Inter"],
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "body-bold": ["Inter"],
+                      "label-caps": ["Inter"],
+                      "headline-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "price-display": ["20px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "800"}],
+                      "display-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                      "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-bold": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600"}],
+                      "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-base antialiased">
+<!-- Top Navigation Bar -->
+<header class="w-full sticky top-0 z-50 bg-canvas-pure border-b border-outline-variant flex justify-between items-center px-margin-mobile md:px-lg h-touch-target-primary">
+<div class="flex items-center gap-md">
+<span class="text-headline-md font-headline-md font-extrabold text-primary">NaijaDrive</span>
+<span class="hidden md:block px-2 py-0.5 bg-primary-container text-on-primary-container text-[10px] font-bold rounded uppercase tracking-wider">Live Ops</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden md:flex items-center bg-surface-container rounded-full px-md py-1 border border-outline-variant">
+<span class="material-symbols-outlined text-primary mr-sm text-lg" data-icon="security" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="text-label-caps text-on-surface-variant">SECURE NODE: LAGOS-HQ-04</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="notifications">notifications</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="help">help</span>
+</button>
+<img alt="Partner profile avatar" class="w-8 h-8 rounded-full border border-outline-variant object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv_BB711tLxP3Rp3Z0xFcMyN6R98EY4uoJSio_Pi9Rwt1znDnGvu2Dv1mKulNcUzhZNQKZMfWOr-nRso-iTY4Yofy4KalNEm68eLw1DxthHKqq-r2iWrVf4ez2FwAFSkvP3DsuvTuv2kFzmFKUkoqp3HkEa63QrLj-KvOUu-3N2dKVoYxX6tROYRLdKG1gy46Qcn1XmRjKaQqS-RpsBZWdCQKfJXtTzbiDeM6zl-VS9PRxfkQNx-OyMTTs01tNeq0YyFcc3dl_KjJh"/>
+</div>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-52px)]">
+<!-- Side Navigation (Desktop) -->
+<aside class="h-[calc(100vh-52px)] w-64 fixed left-0 top-13 hidden md:flex flex-col bg-surface-container-lowest border-r border-outline-variant py-lg z-40">
+<div class="px-md mb-lg">
+<div class="flex items-center gap-md mb-xs">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary" data-icon="hub">hub</span>
+</div>
+<div>
+<h2 class="font-body-bold text-on-surface">Fleet Command</h2>
+<p class="text-xs text-on-surface-variant">Partner Level: Gold</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg mx-2 my-1 px-3 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-body-base">Discovery</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg mx-2 my-1 px-3 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="directions_car">directions_car</span>
+<span class="font-body-base">Fleet Command</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg mx-2 my-1 px-3 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-body-base">Intelligence</span>
+</a>
+<a class="bg-primary-container text-on-primary-container font-body-bold rounded-lg mx-2 my-1 px-3 py-2 flex items-center gap-md" href="#">
+<span class="material-symbols-outlined" data-icon="hub" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="font-body-base">Live Ops</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg mx-2 my-1 px-3 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="emergency">emergency</span>
+<span class="font-body-base">Safety</span>
+</a>
+</nav>
+<div class="px-md mt-auto pt-lg space-y-md">
+<button class="w-full bg-security-crimson text-white font-body-bold py-3 rounded-xl flex items-center justify-center gap-sm shadow-lg active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="emergency_share" style="font-variation-settings: 'FILL' 1;">emergency_share</span>
+                    Emergency Dispatch
+                </button>
+<div class="border-t border-outline-variant pt-md">
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg py-2 px-3 transition-all mb-1" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-base">Settings</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high rounded-lg py-2 px-3 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+<span class="font-body-base">Support</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 p-margin-mobile md:p-lg pb-32 md:pb-lg">
+<div class="grid grid-cols-12 gap-lg h-full">
+<!-- Left Column: Global Mission Monitor (Bento Grid Style) -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-lg">
+<!-- Real-time Map / Mission Monitor -->
+<div class="relative w-full h-[400px] rounded-2xl overflow-hidden border border-outline-variant bg-surface-dim shadow-sm group">
+<img class="w-full h-full object-cover filter brightness-50 contrast-125" data-alt="A sophisticated dark-mode digital map of Lagos city at night, showing intricate street networks with glowing green and red traces representing active vehicle telemetry. The aesthetic is ultra-modern and cinematic, with high contrast and a focus on urban infrastructure and technology." data-location="Lagos, Nigeria" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWzJa9fngJOxLWIX5C9rd07xbdeI18GMmw2KooX8Oxdof05VBBwz7-AvA1UHMxVZF9MFErQoYpPPE5gKSZCGTO1VbXLVMr2nNgjn0DdmeAq2Op2EzISmYVbdiGFVSnApxlQQsHJzmjLvju6GcyleH_O9Szyt2wccimrxI6JCUynWc6N3ZOUzUpf6wgzqBkzfn6U61agGdn6bc3tn6PQmYB9CNYQNKfQUH8OYu8gcZHztyLkfZRmrJ2VWB31G-UTU0EQN_ifOlooJvk"/>
+<div class="absolute inset-0 scanline opacity-30 pointer-events-none"></div>
+<!-- Map Overlays -->
+<div class="absolute top-md left-md flex flex-col gap-sm">
+<div class="glass-panel px-md py-sm rounded-lg border border-white/20 flex items-center gap-sm">
+<div class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></div>
+<span class="text-label-caps text-on-background">4,892 MISSIONS ACTIVE</span>
+</div>
+<div class="glass-panel px-md py-sm rounded-lg border border-white/20 flex items-center gap-sm">
+<span class="material-symbols-outlined text-trust-amber text-sm" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="text-label-caps text-on-background">3 HIGH-RISK ZONES DETECTED</span>
+</div>
+</div>
+<!-- Active Mission Floating Card -->
+<div class="absolute bottom-md left-md right-md lg:right-auto lg:w-96 glass-panel p-md rounded-xl border border-white/20 shadow-xl translate-y-0 opacity-100 transition-all duration-500">
+<div class="flex justify-between items-start mb-md">
+<div>
+<span class="text-[10px] font-bold text-primary uppercase tracking-tighter bg-primary/10 px-1 rounded">Executive Mission</span>
+<h3 class="font-body-bold text-on-surface">ND-EXEC-0922</h3>
+</div>
+<div class="text-right">
+<span class="text-label-caps text-on-surface-variant block">ETA</span>
+<span class="font-price-display text-primary">04:12</span>
+</div>
+</div>
+<div class="flex items-center gap-md mb-md">
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden border border-outline">
+<img alt="Driver Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoMyNw-PoHGRxx7IBQCRnacqnE8FPKH7VjFWd0K2tnLblE3wd_75oDoamRB-gJH88Aa8v_WUJV8BuW-9CqHDTntFTg5tv7QladInzRDHw09Y0tiCwK4amc8iaQxt0RX5BR8jaAk4H-8c2_jHczGbLzZ-lp_hhUbpk5chMIp0rxTkajK2sAXzRHn_0NGFWayEa6r_RbQz_tYkPedWSWQ_V25kLinb2LJbYwFAPdDPCeYSYpg33ZwyhJ1a0TASii6LWVaYmeah4QBS6J"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="text-sm font-body-bold">Musa Ibrahim</span>
+<div class="flex gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+</div>
+</div>
+<p class="text-[11px] text-on-surface-variant">Lexus GX 460 • ABC-123-XY</p>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-sm">
+<div class="bg-surface-container-low p-2 rounded-lg text-center">
+<span class="text-[9px] text-on-surface-variant block">SPEED</span>
+<span class="text-sm font-bold">82<span class="text-[10px]">km/h</span></span>
+</div>
+<div class="bg-surface-container-low p-2 rounded-lg text-center">
+<span class="text-[9px] text-on-surface-variant block">FUEL</span>
+<span class="text-sm font-bold">64%</span>
+</div>
+<div class="bg-surface-container-low p-2 rounded-lg text-center border-l-2 border-primary">
+<span class="text-[9px] text-on-surface-variant block">SIGNAL</span>
+<span class="text-sm font-bold">100%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Alerts & Intelligence Feed -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- High-Risk Corridor Alerts -->
+<div class="bg-canvas-pure rounded-2xl p-md border border-outline-variant shadow-sm">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-body-bold text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-security-crimson" data-icon="route">route</span>
+                                    High-Risk Corridors
+                                </h3>
+<span class="text-[10px] font-bold text-security-crimson animate-pulse">LIVE</span>
+</div>
+<div class="space-y-md">
+<div class="p-sm rounded-xl bg-security-crimson-surface border border-error/10 flex gap-md">
+<div class="flex-1">
+<p class="text-sm font-body-bold text-on-error-container">Third Mainland (Northbound)</p>
+<p class="text-[11px] text-on-surface-variant">Congestion &amp; Stalled Vehicle Report</p>
+</div>
+<button class="px-3 py-1 bg-white rounded-lg text-[10px] font-bold shadow-sm self-center">REROUTE</button>
+</div>
+<div class="p-sm rounded-xl bg-trust-amber-surface border border-trust-amber/10 flex gap-md">
+<div class="flex-1">
+<p class="text-sm font-body-bold text-on-background">Ikorodu Road - Fadeyi</p>
+<p class="text-[11px] text-on-surface-variant">Unscheduled Road Maintenance</p>
+</div>
+<button class="px-3 py-1 bg-white rounded-lg text-[10px] font-bold shadow-sm self-center">AVOID</button>
+</div>
+</div>
+</div>
+<!-- Biometric & Security Feed -->
+<div class="bg-canvas-pure rounded-2xl p-md border border-outline-variant shadow-sm">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-body-bold text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="fingerprint">fingerprint</span>
+                                    Identity Verification
+                                </h3>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="refresh">refresh</span>
+</div>
+<div class="space-y-md">
+<div class="flex items-center gap-md p-sm bg-surface-container-low rounded-xl border-l-4 border-security-crimson">
+<div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-dim relative">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0vYN7JXOBT3mrxMjz3j3RqZtpPTRzJRONXX7TshYttGHIAy11Z1B54hwvLwXWthZsYnS5xc1Bl-X4VrQDdQF2eT6QSHRe0CdmhatGzcq7VcHcyaqy1IDUttUQbAYkMO6H-oyutIQXXGt2OuLBwu6U5iBr11kGh9XZzCWwToM4XdTef4W3RFxBTNQ8QZ2h2V_SPVjsS6SYWZ4p8szGTr9aM9Gd-Pj8SLZ-eA5zlRZ4rDEYx-lR4EyMC0NN5AmCQgcYuP2SyPjZ2wun"/>
+<div class="absolute inset-0 bg-security-crimson/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-lg" data-icon="close">close</span>
+</div>
+</div>
+<div class="flex-1">
+<p class="text-sm font-body-bold text-security-crimson uppercase">Mismatch Detected</p>
+<p class="text-[11px] text-on-surface-variant">Vehicle: GGE-772-AR • Rider ID Error</p>
+</div>
+<button class="text-security-crimson p-1">
+<span class="material-symbols-outlined" data-icon="call_log">call_log</span>
+</button>
+</div>
+<div class="flex items-center gap-md p-sm bg-surface-container-low rounded-xl">
+<div class="w-10 h-10 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="task_alt">task_alt</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-body-bold">FaceMatch Success</p>
+<p class="text-[11px] text-on-surface-variant">Vehicle: APP-212-KM • Verified 2m ago</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Emergency & Telemetry -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-lg">
+<!-- Emergency Response Panel -->
+<div class="bg-inverse-surface text-inverse-on-surface rounded-2xl p-lg border border-white/10 shadow-2xl pulse-red">
+<div class="flex items-center gap-md mb-lg">
+<div class="w-12 h-12 bg-security-crimson rounded-full flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-white text-2xl" data-icon="emergency_home" style="font-variation-settings: 'FILL' 1;">emergency_home</span>
+</div>
+<div>
+<h2 class="text-headline-md font-headline-md">Rapid Intervention</h2>
+<p class="text-sm opacity-70">Direct Law Enforcement Link</p>
+</div>
+</div>
+<div class="bg-white/10 rounded-xl p-md mb-lg border border-white/5">
+<p class="text-xs font-bold opacity-60 mb-sm uppercase tracking-widest">Active Incident</p>
+<h4 class="font-body-bold text-lg mb-xs">Panic Trigger: ND-9921</h4>
+<p class="text-sm opacity-80">Location: Ojuelegba Bridge • Lat: 6.5160, Long: 3.3615</p>
+</div>
+<div class="grid grid-cols-1 gap-md">
+<button class="w-full bg-security-crimson hover:bg-red-600 text-white font-body-bold py-4 rounded-xl flex items-center justify-center gap-md transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="local_police" style="font-variation-settings: 'FILL' 1;">local_police</span>
+                                One-Click LEA Handoff
+                            </button>
+<div class="flex gap-md">
+<button class="flex-1 bg-white/10 hover:bg-white/20 text-white font-body-bold py-3 rounded-xl flex items-center justify-center gap-sm transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="medical_services">medical_services</span>
+                                    EMS
+                                </button>
+<button class="flex-1 bg-white/10 hover:bg-white/20 text-white font-body-bold py-3 rounded-xl flex items-center justify-center gap-sm transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="fire_truck">fire_truck</span>
+                                    Fire Dept
+                                </button>
+</div>
+</div>
+</div>
+<!-- Executive Telemetry -->
+<div class="bg-canvas-pure rounded-2xl border border-outline-variant shadow-sm overflow-hidden flex-1">
+<div class="p-md border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-body-bold text-on-surface">Mission Telemetry</h3>
+<span class="px-2 py-0.5 bg-trust-amber-surface text-trust-amber text-[10px] font-extrabold rounded-full">GOLD PRIORITY</span>
+</div>
+<div class="p-md space-y-lg">
+<div class="relative pt-1">
+<div class="flex mb-2 items-center justify-between">
+<div>
+<span class="text-[10px] font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary bg-primary-fixed">
+                                            Fleet Integrity
+                                        </span>
+</div>
+<div class="text-right">
+<span class="text-sm font-body-bold inline-block text-primary">
+                                            98.4%
+                                        </span>
+</div>
+</div>
+<div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-surface-container">
+<div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary" style="width:98.4%"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div class="p-md bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="speed">speed</span>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase">Avg Vel</p>
+<p class="text-xl font-price-display">64.2 <span class="text-xs">km/h</span></p>
+</div>
+<div class="p-md bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-tertiary mb-sm" data-icon="network_check">network_check</span>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase">Latency</p>
+<p class="text-xl font-price-display">22 <span class="text-xs">ms</span></p>
+</div>
+</div>
+<div class="space-y-md">
+<div class="flex items-center justify-between py-sm border-b border-outline-variant border-dashed">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="car_repair">car_repair</span>
+<span class="text-sm">Health Sensors</span>
+</div>
+<span class="text-sm font-body-bold text-primary">NOMINAL</span>
+</div>
+<div class="flex items-center justify-between py-sm border-b border-outline-variant border-dashed">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="satellite_alt">satellite_alt</span>
+<span class="text-sm">GNSS Sync</span>
+</div>
+<span class="text-sm font-body-bold text-primary">LOCKED</span>
+</div>
+<div class="flex items-center justify-between py-sm">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="shield_with_heart">shield_with_heart</span>
+<span class="text-sm">Passenger Vitals</span>
+</div>
+<span class="text-sm font-body-bold text-trust-amber">DETECTING...</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="fixed bottom-0 w-full z-50 md:hidden bg-canvas-pure border-t border-outline-variant shadow-lg h-16 flex justify-around items-center pb-safe px-4">
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined" data-icon="home_app_logo">home_app_logo</span>
+<span class="text-label-caps">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined" data-icon="local_taxi">local_taxi</span>
+<span class="text-label-caps">Fleet</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="text-label-caps">Intel</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 mt-1">
+<span class="material-symbols-outlined" data-icon="sensors" style="font-variation-settings: 'FILL' 1;">sensors</span>
+<span class="text-label-caps">Live</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-caps">Account</span>
+</button>
+</nav>
+<!-- Micro-interactions Script -->
+<script>
+        // Simple logic to simulate real-time data shifts
+        setInterval(() => {
+            const telemetryValues = document.querySelectorAll('.font-price-display');
+            telemetryValues.forEach(el => {
+                if(el.textContent.includes('ms')) {
+                    const base = 22;
+                    const shift = Math.floor(Math.random() * 5) - 2;
+                    el.innerHTML = `${base + shift} <span class="text-xs">ms</span>`;
+                }
+            });
+        }, 3000);
+
+        // Emergency button visual feedback
+        const emergencyBtn = document.querySelector('.bg-security-crimson');
+        if(emergencyBtn) {
+            emergencyBtn.addEventListener('mousedown', () => {
+                emergencyBtn.classList.add('scale-95');
+            });
+            emergencyBtn.addEventListener('mouseup', () => {
+                emergencyBtn.classList.remove('scale-95');
+            });
+        }
+    </script>
+</body></html>

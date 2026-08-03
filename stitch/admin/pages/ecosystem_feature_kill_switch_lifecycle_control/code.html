@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ecosystem Lifecycle &amp; Kill-Switch Console</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#dce9ff",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "on-tertiary-container": "#51c695",
+                        "outline": "#707974",
+                        "on-tertiary-fixed-variant": "#005137",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-container": "#80bea6",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-container": "#57657b",
+                        "background": "#f8f9ff",
+                        "on-primary-fixed": "#002117",
+                        "surface-dim": "#cbdbf5",
+                        "primary-fixed": "#b0f0d6",
+                        "surface": "#f8f9ff",
+                        "inverse-primary": "#95d3ba",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-container": "#e5eeff",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "secondary-fixed": "#d5e3fd",
+                        "primary-container": "#064e3b",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "on-background": "#0b1c30",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#2b6954",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#404944",
+                        "tertiary-container": "#004f35",
+                        "tertiary": "#003623",
+                        "outline-variant": "#bfc9c3",
+                        "on-tertiary-fixed": "#002114",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#68dba9",
+                        "surface-container-low": "#eff4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#d5e3fd",
+                        "primary": "#003527",
+                        "secondary": "#515f74",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#95d3ba",
+                        "tertiary-fixed": "#85f8c4",
+                        "on-surface": "#0b1c30",
+                        "on-primary-fixed-variant": "#0b513d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "container-max": "1440px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Toggle Switch CSS for structural clarity without arbitrary values */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #003527; /* primary */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #003527; /* primary */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- SideNavBar Component -->
+<nav class="bg-surface dark:bg-inverse-surface h-screen w-64 fixed left-0 top-0 border-r border-outline-variant dark:border-outline flex flex-col h-full py-spacing-margin-desktop z-40 transition-colors duration-200">
+<!-- Header Info -->
+<div class="px-6 mb-8 flex flex-col gap-2">
+<div aria-label="Administrative Officer Profile" class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline-md text-headline-md font-bold">
+                AO
+            </div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Command Center</h1>
+<p class="font-label-sm text-label-sm uppercase text-on-surface-variant mt-1">Institutional Authority</p>
+</div>
+</div>
+<!-- Main Tabs -->
+<div class="flex-1 overflow-y-auto">
+<ul class="flex flex-col gap-1 px-4">
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-secondary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+<span class="font-body-md text-body-md">Core Platform</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-secondary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+<span class="font-body-md text-body-md">Commerce</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-secondary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">restaurant</span>
+<span class="font-body-md text-body-md">Food</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-secondary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+<span class="font-body-md text-body-md">Transportation</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-secondary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">agriculture</span>
+<span class="font-body-md text-body-md">Agriculture</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-secondary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+<span class="font-body-md text-body-md">Financial Services</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Footer Tabs -->
+<div class="mt-auto px-4 pt-4 border-t border-outline-variant dark:border-outline">
+<ul class="flex flex-col gap-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-surface-container-low text-primary dark:text-primary-fixed-dim font-bold border-l-4 border-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-body-md text-body-md">System Settings</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-secondary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">security</span>
+<span class="font-body-md text-body-md">Audit Logs</span>
+</a>
+</li>
+</ul>
+<button class="mt-6 w-full py-2 px-4 bg-primary text-on-primary font-label-sm text-label-sm uppercase tracking-widest rounded-DEFAULT hover:bg-primary/90 transition-colors">
+                Security Console
+            </button>
+</div>
+</nav>
+<!-- TopAppBar Component -->
+<header class="bg-primary dark:bg-primary-container docked full-width top-0 shadow-sm flex justify-between items-center w-full px-spacing-margin-desktop h-16 ml-64 fixed z-30 transition-opacity duration-150">
+<div class="flex items-center gap-8">
+<span class="font-headline-lg text-headline-lg font-black text-on-primary">Pan-African OS</span>
+<nav class="hidden lg:flex gap-6">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-primary/70 hover:bg-primary-container/20 px-2 py-1 cursor-default transition-colors">Network Health: 99.9%</span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-primary border-b-2 border-on-primary px-2 py-1 cursor-default">System: Operational</span>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4 items-center">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-primary bg-primary-container px-3 py-1 rounded-sm">Clearance: Level 4</span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-primary/70">Last Audited: 12:40 UTC</span>
+</div>
+<div class="flex items-center gap-3 border-l border-on-primary/20 pl-6">
+<button class="text-on-primary hover:bg-primary-container/20 p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-primary hover:bg-primary-container/20 p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">verified_user</span>
+</button>
+<div aria-label="Chief Administrator" class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-on-primary/30 overflow-hidden ml-2">
+<img alt="Admin Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate executive in a modern, well-lit office setting. The lighting is crisp and bright, aligning with a high-end corporate identity. The mood is authoritative yet approachable, featuring a diverse male subject in formal business attire against a slightly blurred background of a glass-walled boardroom. The image employs a cool, high-key lighting scheme suitable for a sleek digital operating system profile placeholder." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp8sVyadZZm1TzzKyeb0RtSiK3cyMyVdvBP-VwSi3_LudqP7htxbgZCx9PqjBjfyse7I1hwwR26b5PN01_w9-dEM1mAXIi_4pVnfDkTDU1aQo8fC07vTV_K4WwvhJonWvnw4bn6dXpOqbeWReoMA8M03DGq9hDhNkwAFpGydukcTkxqpwmKyS_cpLzJIx4X4h6v7gy3GIrtyvBIgVIC25jyDajGmDF7HziojvHUp4L4tdgPdwNrkwpuFYNnRkaCCUrpuY93WO3OZtL"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-spacing-margin-desktop max-w-[1600px]">
+<!-- Page Header & Kill Switch Row -->
+<div class="flex flex-col lg:flex-row gap-gutter items-start justify-between mb-8">
+<div class="max-w-2xl">
+<h2 class="font-display-lg text-display-lg font-bold text-on-surface tracking-tight mb-2">Ecosystem Lifecycle &amp; Feature Control</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Manage production availability for all Pan-African verticals and sub-services. All actions are logged and require biometric authorization.</p>
+</div>
+<!-- Global Kill-Switch Module -->
+<div class="bg-error-container/20 border-2 border-error-container p-6 rounded-lg shadow-sm flex flex-col gap-4 min-w-[320px] relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[80px] text-error">warning</span>
+</div>
+<div class="flex items-center justify-between z-10">
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Global Status</h3>
+<p class="font-label-sm text-label-sm uppercase text-on-surface-variant mt-1">Ecosystem: Live</p>
+</div>
+<!-- Master Toggle (Visual Only) -->
+<div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface border-4 border-primary appearance-none cursor-pointer z-10" id="toggle-master" name="toggle-master" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer" for="toggle-master"></label>
+</div>
+</div>
+<div class="border-t border-error-container/50 pt-4 mt-2 z-10">
+<button class="w-full bg-error hover:bg-error/90 text-on-error font-label-sm text-label-sm uppercase tracking-widest py-3 px-4 rounded-DEFAULT transition-colors flex items-center justify-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">lock_clock</span>
+                        Emergency Lockdown
+                    </button>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-3 text-center opacity-70 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+                        Requires Level 4 Authorization
+                    </p>
+</div>
+</div>
+</div>
+<!-- Main Grid Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-gutter items-start">
+<!-- Left Column: Vertical Availability Matrix (col-span-8) -->
+<div class="xl:col-span-8 bg-surface border border-outline-variant rounded-lg shadow-sm overflow-hidden flex flex-col">
+<div class="p-4 border-b border-outline-variant bg-surface-bright flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Vertical Availability Matrix</h3>
+<button class="font-label-sm text-label-sm uppercase text-primary border border-primary px-3 py-1.5 rounded-DEFAULT hover:bg-primary-container/10 transition-colors">
+                        Export Matrix Logs
+                    </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="p-3 font-label-sm text-label-sm uppercase text-on-surface-variant tracking-wider w-1/4">Service</th>
+<th class="p-3 font-label-sm text-label-sm uppercase text-on-surface-variant tracking-wider">Global Status</th>
+<th class="p-3 font-label-sm text-label-sm uppercase text-on-surface-variant tracking-wider text-center">Nigeria</th>
+<th class="p-3 font-label-sm text-label-sm uppercase text-on-surface-variant tracking-wider text-center">Gabon</th>
+<th class="p-3 font-label-sm text-label-sm uppercase text-on-surface-variant tracking-wider text-center">Ghana</th>
+<th class="p-3 font-label-sm text-label-sm uppercase text-on-surface-variant tracking-wider text-right">Scheduled Launch</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant bg-surface">
+<!-- Row 1: Commerce -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="p-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-sm bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">NaijaShop</span>
+</div>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-container/30 text-on-primary-fixed text-[11px] font-bold uppercase tracking-wider border border-primary-container">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                        Live
+                                    </span>
+</td>
+<td class="p-3 text-center">
+<span class="material-symbols-outlined text-primary text-[20px] icon-fill">toggle_on</span>
+</td>
+<td class="p-3 text-center">
+<span class="material-symbols-outlined text-primary text-[20px] icon-fill">toggle_on</span>
+</td>
+<td class="p-3 text-center">
+<span class="material-symbols-outlined text-outline text-[20px]">toggle_off</span>
+</td>
+<td class="p-3 text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant">-</span>
+</td>
+</tr>
+<!-- Row 2: Food -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="p-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-sm bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">restaurant</span>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">NaijaEats</span>
+</div>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold uppercase tracking-wider border border-outline-variant">
+                                        Beta
+                                    </span>
+</td>
+<td class="p-3 text-center">
+<span class="material-symbols-outlined text-primary text-[20px] icon-fill">toggle_on</span>
+</td>
+<td class="p-3 text-center">
+<span class="material-symbols-outlined text-outline text-[20px]">toggle_off</span>
+</td>
+<td class="p-3 text-center">
+<span class="material-symbols-outlined text-outline text-[20px]">toggle_off</span>
+</td>
+<td class="p-3 text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Q3 2024 (GH)</span>
+</td>
+</tr>
+<!-- Row 3: Finance -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="p-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-sm bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">account_balance</span>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">NaijaPay</span>
+</div>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-container/30 text-on-primary-fixed text-[11px] font-bold uppercase tracking-wider border border-primary-container">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                        Live
+                                    </span>
+</td>
+<td class="p-3 text-center">
+<span class="material-symbols-outlined text-primary text-[20px] icon-fill">toggle_on</span>
+</td>
+<td class="p-3 text-center">
+<span class="material-symbols-outlined text-primary text-[20px] icon-fill">toggle_on</span>
+</td>
+<td class="p-3 text-center">
+<span class="material-symbols-outlined text-primary text-[20px] icon-fill">toggle_on</span>
+</td>
+<td class="p-3 text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant">-</span>
+</td>
+</tr>
+<!-- Row 4: Ride -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group bg-surface-variant/30">
+<td class="p-3">
+<div class="flex items-center gap-3 opacity-60">
+<div class="w-8 h-8 rounded-sm bg-surface-variant text-on-surface-variant flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">local_shipping</span>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface-variant">NaijaDrive</span>
+</div>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-variant text-on-surface-variant text-[11px] font-bold uppercase tracking-wider border border-outline-variant opacity-80">
+                                        Offline
+                                    </span>
+</td>
+<td class="p-3 text-center opacity-50">
+<span class="material-symbols-outlined text-outline text-[20px]">toggle_off</span>
+</td>
+<td class="p-3 text-center opacity-50">
+<span class="material-symbols-outlined text-outline text-[20px]">toggle_off</span>
+</td>
+<td class="p-3 text-center opacity-50">
+<span class="material-symbols-outlined text-outline text-[20px]">toggle_off</span>
+</td>
+<td class="p-3 text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Maintenance</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-3 border-t border-outline-variant bg-surface-bright flex justify-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">info</span>
+                        Click a row to manage granular features
+                    </span>
+</div>
+</div>
+<!-- Right Column: Sidebar Actions (col-span-4) -->
+<div class="xl:col-span-4 flex flex-col gap-gutter">
+<!-- System Health Signal -->
+<div class="bg-surface border border-outline-variant rounded-lg p-5 shadow-sm">
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-4 flex items-center justify-between">
+                        System Health Signals
+                        <span class="material-symbols-outlined text-primary text-[20px]">monitoring</span>
+</h3>
+<div class="space-y-5">
+<!-- Uptime -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Global API Uptime</span>
+<span class="font-body-lg text-body-lg font-bold text-primary">99.98%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[99.98%]"></div>
+</div>
+</div>
+<!-- Error Rate -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Aggregated Error Rate</span>
+<span class="font-body-lg text-body-lg font-bold text-on-surface">0.02%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-fixed-dim w-[2%]"></div>
+</div>
+</div>
+<div class="pt-3 border-t border-outline-variant flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Last ping: 2s ago</span>
+<a class="font-label-sm text-label-sm uppercase text-primary hover:underline" href="#">View Telemetry</a>
+</div>
+</div>
+</div>
+<!-- Granular Feature Toggles (Contextual to selected row) -->
+<div class="bg-surface border border-primary/20 rounded-lg shadow-sm flex flex-col overflow-hidden relative">
+<!-- Active Context Header -->
+<div class="bg-primary-container/10 border-b border-primary/20 p-4">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-[18px]">shopping_bag</span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-bold">NaijaShop Selected</span>
+</div>
+<h4 class="font-headline-md text-headline-md font-bold text-on-surface">Granular Feature Toggles</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 text-sm">Manage sub-services independently.</p>
+</div>
+<div class="p-0 flex-1 flex flex-col divide-y divide-outline-variant">
+<!-- Feature 1 -->
+<div class="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div>
+<h5 class="font-body-md text-body-md font-bold text-on-surface">B2B Wholesale Portal</h5>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Bulk ordering &amp; invoicing</p>
+</div>
+<div class="relative inline-block w-10 h-5 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-surface border-4 border-primary appearance-none cursor-pointer z-10" id="toggle-1" name="toggle-1" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary cursor-pointer" for="toggle-1"></label>
+</div>
+</div>
+<!-- Feature 2 -->
+<div class="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div>
+<h5 class="font-body-md text-body-md font-bold text-on-surface">Live Auctions</h5>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Real-time bidding engine</p>
+</div>
+<div class="relative inline-block w-10 h-5 align-middle select-none">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-surface border-4 border-outline-variant appearance-none cursor-pointer z-10" id="toggle-2" name="toggle-2" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-variant cursor-pointer" for="toggle-2"></label>
+</div>
+</div>
+<!-- Feature 3 -->
+<div class="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div>
+<div class="flex items-center gap-2">
+<h5 class="font-body-md text-body-md font-bold text-on-surface">Cross-border Shipping</h5>
+<span class="material-symbols-outlined text-[14px] text-error" title="Requires Auth">lock</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Integration with NaijaDrive logistics</p>
+</div>
+<div class="relative inline-block w-10 h-5 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-surface border-4 border-primary appearance-none cursor-pointer z-10" id="toggle-3" name="toggle-3" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary cursor-pointer" for="toggle-3"></label>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant bg-surface-bright">
+<button class="w-full py-2 bg-surface text-primary border border-primary font-label-sm text-label-sm uppercase tracking-widest rounded-DEFAULT hover:bg-primary-container/10 transition-colors">
+                            Save Sub-Service State
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

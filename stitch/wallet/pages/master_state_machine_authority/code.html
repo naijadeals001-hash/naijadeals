@@ -1,0 +1,546 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Master State Machine Authority | Ecosystem Workflow Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .glass-card {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+
+        .pulse-glow {
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.4); }
+            70% { transform: scale(1.1); opacity: 0.8; box-shadow: 0 0 0 10px rgba(0, 255, 65, 0); }
+            100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); }
+        }
+
+        .connector-line {
+            background: linear-gradient(to bottom, #434656 0%, #b7c4ff 50%, #434656 100%);
+            width: 2px;
+            position: relative;
+        }
+
+        .connector-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, #00ff41, transparent);
+            background-size: 100% 200%;
+            animation: flow 3s linear infinite;
+        }
+
+        @keyframes flow {
+            0% { background-position: 0% -100%; }
+            100% { background-position: 0% 100%; }
+        }
+
+        .hud-scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 255, 65, 0.1);
+            position: absolute;
+            top: 0;
+            z-index: 10;
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #11131c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #434656;
+            border-radius: 2px;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-container": "#435083",
+                    "surface-container": "#1d1f29",
+                    "primary-container": "#b7c4ff",
+                    "on-primary": "#1f2d5e",
+                    "inverse-surface": "#e4e1e6",
+                    "primary-fixed": "#dce1ff",
+                    "on-surface-variant": "#c3c5d9",
+                    "outline": "#90909a",
+                    "on-tertiary-container": "#7b4436",
+                    "surface-container-high": "#292a2d",
+                    "on-secondary": "#213145",
+                    "tertiary-fixed": "#ffdbd2",
+                    "tertiary-fixed-dim": "#ffb4a2",
+                    "on-surface": "#e4e1e6",
+                    "surface-variant": "#32343f",
+                    "surface": "#131317",
+                    "secondary-container": "#38485d",
+                    "surface-container-highest": "#343438",
+                    "on-secondary-fixed": "#0b1c2f",
+                    "on-secondary-container": "#a6b6cf",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-error-container": "#ffdad6",
+                    "inverse-primary": "#4f5c90",
+                    "outline-variant": "#45464f",
+                    "surface-tint": "#b7c4ff",
+                    "on-tertiary": "#512317",
+                    "surface-container-low": "#1b1b1f",
+                    "auth-error": "#ffb4ab",
+                    "error-container": "#93000a",
+                    "terminal-green": "#00ff41",
+                    "tertiary": "#ffdbd2",
+                    "surface-bright": "#39393d",
+                    "on-background": "#e4e1e6",
+                    "glass-bg": "rgba(29, 31, 41, 0.8)",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "on-tertiary-fixed-variant": "#6c382b",
+                    "on-error": "#690005",
+                    "on-primary-fixed": "#071749",
+                    "inverse-on-surface": "#303034",
+                    "background": "#11131c",
+                    "tertiary-container": "#ffb5a2",
+                    "secondary": "#b7c8e1",
+                    "surface-container-lowest": "#0d0e11",
+                    "primary": "#dde1ff",
+                    "on-primary-fixed-variant": "#374476",
+                    "on-tertiary-fixed": "#360e05",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "surface-dim": "#131317",
+                    "primary-fixed-dim": "#b7c4ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "gutter": "12px",
+                    "unit": "4px",
+                    "stack-tight": "0.5rem",
+                    "stack-default": "1rem",
+                    "header-height": "64px",
+                    "sidebar-width": "288px",
+                    "container-padding": "1.5rem"
+            },
+            "fontFamily": {
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "micro-tag": ["Inter"],
+                    "body-base": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "code-terminal": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                    "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-base selection:bg-terminal-green/30">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full border-b border-outline-variant bg-glass-bg backdrop-blur-md flex justify-between items-center h-header-height px-container-padding z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-terminal-green">terminal</span>
+<h1 class="font-code-terminal text-headline-md tracking-tighter text-terminal-green">MASTER_STATE</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-green opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-terminal-green"></span>
+</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">SYSTEM_ONLINE</span>
+</div>
+<span class="material-symbols-outlined text-primary">sensors</span>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="fixed left-0 top-header-height h-[calc(100vh-header-height)] w-sidebar-width bg-surface-container border-r border-outline-variant hidden md:flex flex-col py-stack-default gap-stack-tight z-40">
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-variant border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">account_circle</span>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-primary">NaijaDeals Admin</p>
+<p class="font-body-sm text-on-surface-variant">Root Operator</p>
+</div>
+</div>
+<nav class="flex flex-col">
+<a class="px-6 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary flex items-center gap-3 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data Architecture</span>
+</a>
+<a class="px-6 py-3 text-on-surface-variant hover:bg-surface-variant flex items-center gap-3 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">System Workflows</span>
+</a>
+<a class="px-6 py-3 text-on-surface-variant hover:bg-surface-variant flex items-center gap-3 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Infra Topology</span>
+</a>
+<a class="px-6 py-3 text-on-surface-variant hover:bg-surface-variant flex items-center gap-3 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">lan</span>
+<span class="font-label-caps text-label-caps">Handoff Protocol</span>
+</a>
+</nav>
+<div class="mt-auto px-6 py-4 border-t border-outline-variant/30">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caps text-micro-tag text-on-surface-variant">CPU_LOAD</span>
+<span class="font-code-terminal text-micro-tag text-terminal-green">14.2%</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-terminal-green h-full" style="width: 14.2%"></div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-sidebar-width pt-header-height min-h-screen relative overflow-hidden">
+<div class="hud-scanline"></div>
+<section class="p-container-padding max-w-[1600px] mx-auto">
+<header class="mb-10">
+<div class="flex items-center gap-2 text-primary mb-2">
+<span class="material-symbols-outlined text-sm">schema</span>
+<span class="font-label-caps text-label-caps tracking-[0.2em]">ENG_PROTOCOL_v4.0.2</span>
+</div>
+<h2 class="font-display-lg text-display-lg text-on-surface">Master State Machine Authority</h2>
+<p class="text-on-surface-variant font-body-base mt-2 max-w-2xl">Visual authority engine for monitoring critical ecosystem transitions. Real-time state synchronization across distributed ledgers and order management protocols.</p>
+</header>
+<!-- State Machine Tracks -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-gutter h-full">
+<!-- Track 1: Wallet -->
+<div class="glass-card rounded-lg p-stack-default border-t-4 border-primary">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+<h3 class="font-label-caps text-label-caps text-primary">WALLET_LIFECYCLE</h3>
+</div>
+<span class="font-code-terminal text-micro-tag bg-primary/10 px-2 py-1 text-primary">ACTIVE</span>
+</div>
+<div class="flex flex-col items-center gap-0">
+<!-- Wallet Nodes -->
+<div class="group flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4 transition-all hover:bg-surface-variant/50 cursor-pointer">
+<div class="w-3 h-3 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-body-sm">Created</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="group flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4 transition-all hover:bg-surface-variant/50 cursor-pointer">
+<div class="w-3 h-3 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-body-sm">Funded</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="group flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4 transition-all hover:bg-surface-variant/50 cursor-pointer">
+<div class="w-3 h-3 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-body-sm">Available</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="group flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card border-primary/50 rounded-lg flex items-center gap-4 transition-all hover:bg-surface-variant/50 cursor-pointer scale-[1.02] shadow-xl">
+<div class="w-3 h-3 rounded-full bg-primary animate-pulse"></div>
+<span class="font-code-terminal text-body-sm text-primary">Held</span>
+</div>
+<div class="connector-line h-8 opacity-50"></div>
+</div>
+<div class="group flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Settled</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="group flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Payout</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="group flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Completed</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Track 2: Escrow -->
+<div class="glass-card rounded-lg p-stack-default border-t-4 border-tertiary">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary">security</span>
+<h3 class="font-label-caps text-label-caps text-tertiary">ESCROW_LIFECYCLE</h3>
+</div>
+<span class="font-code-terminal text-micro-tag bg-tertiary/10 px-2 py-1 text-tertiary">SYNCING</span>
+</div>
+<div class="flex flex-col items-center gap-0">
+<div class="flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-body-sm">Created</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-body-sm">Funded</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-body-sm">Held</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<!-- Split Logic -->
+<div class="relative w-full">
+<div class="w-full py-4 px-3 glass-card border-tertiary/50 rounded-lg flex items-center gap-4 scale-[1.02]">
+<div class="w-3 h-3 rounded-full bg-tertiary animate-pulse"></div>
+<span class="font-code-terminal text-body-sm text-tertiary">Milestone</span>
+</div>
+<!-- Branch Line -->
+<div class="absolute -right-4 top-1/2 w-8 border-t-2 border-dashed border-error/50"></div>
+<div class="absolute -right-[152px] top-1/2 -translate-y-1/2 w-32 p-3 glass-card border-error/30 rounded bg-error/5">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-xs text-error">gavel</span>
+<span class="font-label-caps text-[8px] text-error">DISPUTE_INVESTIGATION</span>
+</div>
+<p class="font-code-terminal text-[9px] text-on-surface-variant">Waiting for Decision...</p>
+</div>
+<div class="flex justify-center">
+<div class="connector-line h-8"></div>
+</div>
+</div>
+<div class="flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Review</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Release</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Completed</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Track 3: Commerce Order -->
+<div class="glass-card rounded-lg p-stack-default border-t-4 border-secondary">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">shopping_cart</span>
+<h3 class="font-label-caps text-label-caps text-secondary">ORDER_PROTOCOL</h3>
+</div>
+<span class="font-code-terminal text-micro-tag bg-secondary/10 px-2 py-1 text-secondary">LIVE_HUB</span>
+</div>
+<div class="flex flex-col items-center gap-0">
+<div class="flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-body-sm">Created</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-body-sm">Paid</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card border-secondary/50 rounded-lg flex items-center gap-4 scale-[1.02]">
+<div class="w-3 h-3 rounded-full bg-secondary animate-pulse"></div>
+<span class="font-code-terminal text-body-sm text-secondary">Packed</span>
+</div>
+<div class="connector-line h-8 opacity-50"></div>
+</div>
+<div class="flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Shipped</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Delivered</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Completed</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Track 4: Job Lifecycle -->
+<div class="glass-card rounded-lg p-stack-default border-t-4 border-on-surface-variant">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">work</span>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant">JOB_EXECUTION</h3>
+</div>
+<span class="font-code-terminal text-micro-tag bg-surface-variant px-2 py-1 text-on-surface-variant">STANDBY</span>
+</div>
+<div class="flex flex-col items-center gap-0">
+<div class="flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-body-sm">Application</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4 border-on-surface-variant/50">
+<div class="w-3 h-3 rounded-full bg-on-surface-variant animate-pulse"></div>
+<span class="font-code-terminal text-body-sm text-on-surface">Screening</span>
+</div>
+<div class="connector-line h-8 opacity-50"></div>
+</div>
+<div class="flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Interview</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Offer</span>
+</div>
+<div class="connector-line h-8"></div>
+</div>
+<div class="flex flex-col items-center w-full opacity-40">
+<div class="w-full py-4 px-3 glass-card rounded-lg flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-outline"></div>
+<span class="font-code-terminal text-body-sm">Hired</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Global Activity Log (Terminal Overlay) -->
+<div class="mt-gutter glass-card rounded-lg overflow-hidden flex flex-col border border-primary/20">
+<div class="bg-surface-container px-4 py-2 flex items-center justify-between border-b border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="w-2 h-2 rounded-full bg-terminal-green"></span>
+<span class="ml-4 font-code-terminal text-micro-tag text-on-surface-variant">LOGS_V4_CORE</span>
+</div>
+<span class="font-code-terminal text-micro-tag text-on-surface-variant">TTY: S001</span>
+</div>
+<div class="bg-surface-container-lowest p-4 font-code-terminal text-body-sm max-h-48 overflow-y-auto"><div class="text-on-surface-variant mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:03]</span><span class="">NETWORK: Latency spike detected on node US-EAST-1.</span></div><div class="text-terminal-green mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:07]</span><span class="">AUTH: User ROOT_01 session extended.</span></div><div class="text-tertiary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:11]</span><span class="">AUTH: User ROOT_01 session extended.</span></div><div class="text-primary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:15]</span><span class="">STATE_CHANGE: Commerce order ORD_2211 moved to SHIPPED.</span></div><div class="text-on-surface-variant mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:19]</span><span class="">AUTH: User ROOT_01 session extended.</span></div><div class="text-tertiary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:23]</span><span class="">HEARTBEAT: System integrity check passed.</span></div><div class="text-primary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:27]</span><span class="">AUTH: User ROOT_01 session extended.</span></div><div class="text-primary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:31]</span><span class="">AUTH: User ROOT_01 session extended.</span></div><div class="text-terminal-green mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:35]</span><span class="">HEARTBEAT: System integrity check passed.</span></div><div class="text-on-surface-variant mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:39]</span><span class="">SYNC: Database clusters synchronized.</span></div><div class="text-primary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:43]</span><span class="">SYNC: Database clusters synchronized.</span></div><div class="text-on-surface-variant mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:47]</span><span class="">STATE_CHANGE: Commerce order ORD_2211 moved to SHIPPED.</span></div><div class="text-terminal-green mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:51]</span><span class="">SYNC: Database clusters synchronized.</span></div><div class="text-primary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:55]</span><span class="">AUTH: User ROOT_01 session extended.</span></div><div class="text-on-surface-variant mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:12:59]</span><span class="">NETWORK: Latency spike detected on node US-EAST-1.</span></div><div class="text-primary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:03]</span><span class="">SYNC: Database clusters synchronized.</span></div><div class="text-primary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:07]</span><span class="">STATE_CHANGE: Commerce order ORD_2211 moved to SHIPPED.</span></div><div class="text-tertiary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:11]</span><span class="">HEARTBEAT: System integrity check passed.</span></div><div class="text-tertiary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:15]</span><span class="">SYNC: Database clusters synchronized.</span></div><div class="text-on-surface-variant mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:19]</span><span class="">HEARTBEAT: System integrity check passed.</span></div><div class="text-primary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:23]</span><span class="">NETWORK: Latency spike detected on node US-EAST-1.</span></div><div class="text-terminal-green mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:27]</span><span class="">STATE_CHANGE: Commerce order ORD_2211 moved to SHIPPED.</span></div><div class="text-primary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:31]</span><span class="">HEARTBEAT: System integrity check passed.</span></div><div class="text-terminal-green mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:35]</span><span class="">AUTH: User ROOT_01 session extended.</span></div><div class="text-terminal-green mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:39]</span><span class="">HEARTBEAT: System integrity check passed.</span></div><div class="text-tertiary mb-1 flex items-start gap-4 animate-pulse"><span class="opacity-50">[14:13:43]</span><span class="">STATE_CHANGE: Commerce order ORD_2211 moved to SHIPPED.</span></div></div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-between items-center px-container-padding py-2 z-50">
+<div class="font-code-terminal text-micro-tag text-terminal-green">
+            © 2024 NAIJADEALS SYSTEM AUTH. PROTOCOL v4.0.2
+        </div>
+<div class="flex gap-4">
+<a class="font-code-terminal text-micro-tag text-outline hover:text-primary transition-colors" href="#">API_DOCS</a>
+<a class="font-code-terminal text-micro-tag text-outline hover:text-primary transition-colors" href="#">SSH_MANUAL</a>
+<a class="font-code-terminal text-micro-tag text-outline hover:text-primary transition-colors" href="#">LOG_ARCHIVE</a>
+</div>
+</footer>
+<script>
+        // Micro-interaction for hover states
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.classList.add('scale-95');
+                setTimeout(() => card.classList.remove('scale-95'), 100);
+            });
+        });
+
+        // Real-time terminal simulator
+        const logContainer = document.querySelector('.overflow-y-auto');
+        const logColors = ['text-terminal-green', 'text-primary', 'text-tertiary', 'text-on-surface-variant'];
+        const logMsgs = [
+            'HEARTBEAT: System integrity check passed.',
+            'STATE_CHANGE: Commerce order ORD_2211 moved to SHIPPED.',
+            'NETWORK: Latency spike detected on node US-EAST-1.',
+            'AUTH: User ROOT_01 session extended.',
+            'SYNC: Database clusters synchronized.'
+        ];
+
+        setInterval(() => {
+            const time = new Date().toLocaleTimeString([], { hour12: false });
+            const color = logColors[Math.floor(Math.random() * logColors.length)];
+            const msg = logMsgs[Math.floor(Math.random() * logMsgs.length)];
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `${color} mb-1 flex items-start gap-4 animate-pulse`;
+            logEntry.innerHTML = `<span class="opacity-50">[${time}]</span><span>${msg}</span>`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            if (logContainer.children.length > 20) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }, 4000);
+    </script>
+
+
+</body></html>
