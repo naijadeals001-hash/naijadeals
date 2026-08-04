@@ -32,3 +32,5 @@ export class NoopEventBus implements EventBus {
     return Promise.resolve();
   }
 }
+
+export * from './identity-events.js';

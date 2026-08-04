@@ -16,3 +16,5 @@ export interface ReadRepository<TEntity, TFilters = Record<string, unknown>> {
 export interface UnitOfWork {
   runInTransaction<T>(handler: () => Promise<T>): Promise<T>;
 }
+
+export * from './identity.js';
