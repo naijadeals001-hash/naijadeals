@@ -31,4 +31,32 @@ The NaijaDeals Stitch super-ecosystem repository was reorganized into an approve
 
 ---
 
+## 2026-08-04 — AI Engineering Constitution Adopted
+
+- **Branch:** `feature/m1-phase1-identity`
+
+### Summary
+
+The `AI_ENGINEERING_CONSTITUTION.md` has been adopted as the third-tier engineering authority for the NaijaDeals Super Ecosystem. It governs every AI coding assistant, human developer, contractor, freelancer, and automation tool contributing to the project.
+
+### Details
+
+- **Governance hierarchy established:** `ARCHITECTURE.md` → `PROJECT_RULES.md` → `AI_ENGINEERING_CONSTITUTION.md` → Implementation Plans → Module Specifications → Code → Tests.
+- **Thirty sections defined:** Project vision, engineering philosophy, AI development rules, architecture authority, documentation authority, context loading, token optimization, coding standards, component standards, database standards, API standards, event standards, integration gateway, security standards, performance standards, frontend standards, design system, testing standards, Git standards, session workflow, stop conditions, reporting standards, feature governance, quality gates, definition of done, AI memory rules, repository rules, Stitch policy, AI behavior, and the final principle.
+- **Stitch policy clarified:** Stitch is the official UI reference library, not the production frontend. Production implementations may improve, modernize, consolidate, and redesign while preserving business intent.
+- **Integration gateway mandated:** No direct provider SDK calls from application code. All integrations must flow through Application → Integration Gateway → Adapters → Provider.
+- **Stop conditions formalized:** The AI must stop and generate a blocker for architecture changes, schema changes, new APIs, scope creep, documentation conflicts, security issues, unknown requirements, and conflicts with prior approvals.
+- **No implementation code modified:** This update is purely governance and documentation.
+
+### Files Added
+
+- `AI_ENGINEERING_CONSTITUTION.md`
+
+### Files Updated
+
+- `DEVELOPMENT_STATE.md`
+- `CHANGE_HISTORY.md`
+
+---
+
 *End of change history entry.*

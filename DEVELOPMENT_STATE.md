@@ -37,4 +37,5 @@ Continue Phase 1.1 Implementation
 - The Stitch repository reorganization has been completed and approved.
 - The `stitch-baseline-v1.0` tag marks the official UI reference baseline.
 - The repository is frozen for structural changes.
+- The `AI_ENGINEERING_CONSTITUTION.md` has been adopted as the third-tier engineering authority after `ARCHITECTURE.md` and `PROJECT_RULES.md`.
 - Phase 1.1 implementation may proceed on the `feature/m1-phase1-identity` branch.
