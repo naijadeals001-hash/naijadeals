@@ -95,4 +95,60 @@ The local governance-only commits (Stitch baseline finalization + AI Engineering
 
 ---
 
+## 2026-08-05 — Engineering Playbooks, ADRs, and Roadmap Created
+
+- **Branch:** `feature/m1-phase1-identity`
+
+### Summary
+
+The strategic pivot from governance creation to engineering asset creation was executed. Ten permanent engineering playbooks, three Architecture Decision Records (ADRs), and a product roadmap were added to the repository root and `docs/ADR/`. These documents become the permanent operational memory for developers, AI assistants, and contributors.
+
+### Details
+
+- **Playbooks created:**
+  - `DEVELOPER_PLAYBOOK.md` — handbook for all developers and AI assistants
+  - `COMPONENT_PLAYBOOK.md` — reusable UI component catalog and rules
+  - `SHARED_SERVICES_PLAYBOOK.md` — shared services catalog and usage rules
+  - `DATABASE_PLAYBOOK.md` — database philosophy and discipline
+  - `API_PLAYBOOK.md` — API conventions and standards
+  - `FRONTEND_PLAYBOOK.md` — frontend engineering handbook, explicitly stating Stitch is reference only
+  - `BACKEND_PLAYBOOK.md` — backend module, service, and event rules
+  - `AI_PLAYBOOK.md` — Aura AI engineering guide
+  - `DEVOPS_PLAYBOOK.md` — DevOps, CI/CD, and operations handbook
+  - `RELEASE_PLAYBOOK.md` — release, rollback, and hotfix process
+- **Architecture Decision Records created:**
+  - `docs/ADR/ADR-0001.md` — Prisma as the ORM
+  - `docs/ADR/ADR-0002.md` — Modular monolith with selective microservice split
+  - `docs/ADR/ADR-0003.md` — Adapter-mediated Integration Gateway for all external providers
+- **Roadmap created:**
+  - `ROADMAP.md` — Versions 1.0, 2.0, and 3.0 with milestones, phases, features, dependencies, and release criteria
+- **Platform mission statement embedded:** The guiding paragraph from Pat was placed in `DEVELOPER_PLAYBOOK.md` Section 1, making it the first rule every developer reads: the repository is a governed software platform, Stitch is design intent not implementation constraint, and engineering is expected to build superior production-ready solutions within approved architecture and governance.
+- **Consistency verified:** All new documents cross-reference `ARCHITECTURE.md`, `PROJECT_RULES.md`, `AI_ENGINEERING_CONSTITUTION.md`, and existing standards.
+- **Governance hierarchy reinforced:** Playbooks sit below the constitution and above implementation plans and code in the authority chain.
+- **No implementation code modified:** This update is purely documentation and engineering process.
+
+### Files Added
+
+- `DEVELOPER_PLAYBOOK.md`
+- `COMPONENT_PLAYBOOK.md`
+- `SHARED_SERVICES_PLAYBOOK.md`
+- `DATABASE_PLAYBOOK.md`
+- `API_PLAYBOOK.md`
+- `FRONTEND_PLAYBOOK.md`
+- `BACKEND_PLAYBOOK.md`
+- `AI_PLAYBOOK.md`
+- `DEVOPS_PLAYBOOK.md`
+- `RELEASE_PLAYBOOK.md`
+- `ROADMAP.md`
+- `docs/ADR/ADR-0001.md`
+- `docs/ADR/ADR-0002.md`
+- `docs/ADR/ADR-0003.md`
+
+### Files Updated
+
+- `DEVELOPMENT_STATE.md`
+- `CHANGE_HISTORY.md`
+
+---
+
 *End of change history entry.*
