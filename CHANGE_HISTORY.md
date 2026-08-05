@@ -200,4 +200,62 @@ Implemented the concrete Prisma-backed repository layer fulfilling the 10 existi
 
 ---
 
+## 2026-08-05 — Task 3B: Security & Cryptography Foundation Implemented
+
+- **Branch:** `feature/m1-phase1-identity`
+- **Task:** Task 3B — Security & Cryptography Foundation (Phase 1.1 authorized increment)
+
+### Summary
+
+Implemented a reusable, dependency-free cryptography layer in a new `@naijadeals/security` shared package. This layer provides the hashing, token, and comparison primitives that all subsequent identity services will use, while containing no business logic, HTTP routes, or authentication workflows.
+
+### Details
+
+- **Package created:** `packages/security` with TypeScript, Vitest, and standard build/lint/typecheck/test scripts.
+- **Password Service:** `Argon2idPasswordService` using `argon2` with configurable Argon2id parameters, custom random salt generation, verification with safe error handling, and `needsRehash` detection.
+- **Token Service:** `SecureTokenService` generating cryptographically secure, URL-safe base64url tokens; produces SHA-256 hashes and short fingerprints; supports timing-safe verification and configurable token length.
+- **Hash Utilities:** SHA-256, token fingerprint, timing-safe string/buffer comparison, base64url encoding/decoding, and random byte generation helpers.
+- **Crypto Configuration:** Environment-driven config loader with secure defaults (Argon2id: 64 MiB memory, 3 iterations, parallelism 4, 32-byte hash, 16-byte salt; tokens: 32 random bytes; SHA-256 fingerprint prefix: 8 characters). Enforces minimums and rejects non-SHA-256 algorithms.
+- **Type fixes:** Aligned `argon2` option types with the actual `argon2` v0.41.1 API; raised the enforced minimum iterations to 2 because the `argon2` runtime rejects `timeCost < 2`.
+- **Unit tests added:** 64 security tests across config, hash utilities, password service, and token service.
+- **Quality gates passed:** Build, Lint, Typecheck, and Tests pass at both the package and root levels.
+- **Scope honored:** No login, registration, JWT, refresh tokens, session management, email verification, password reset, OAuth, Fastify routes, controllers, validation, DI wiring, event publishing, notifications, middleware, or business logic were implemented.
+
+### Files Added
+
+- `packages/security/package.json`
+- `packages/security/tsconfig.json`
+- `packages/security/vitest.config.ts`
+- `packages/security/src/index.ts`
+- `packages/security/src/config/types.ts`
+- `packages/security/src/config/crypto-config.ts`
+- `packages/security/src/config/index.ts`
+- `packages/security/src/hash/hash-utils.ts`
+- `packages/security/src/hash/index.ts`
+- `packages/security/src/password/password-service.ts`
+- `packages/security/src/password/index.ts`
+- `packages/security/src/token/token-service.ts`
+- `packages/security/src/token/index.ts`
+- `packages/security/tests/crypto-config.test.ts`
+- `packages/security/tests/hash-utils.test.ts`
+- `packages/security/tests/password-service.test.ts`
+- `packages/security/tests/token-service.test.ts`
+
+### Files Updated
+
+- `tsconfig.base.json` — added `@naijadeals/security` path mapping
+- `DEVELOPMENT_STATE.md`
+- `CHANGE_HISTORY.md`
+
+### Quality Gate Results
+
+| Gate | Package | Root |
+|------|---------|------|
+| Build | Pass | Pass |
+| Lint | Pass | Pass |
+| Typecheck | Pass | Pass |
+| Tests | 64/64 pass | 14 packages pass |
+
+---
+
 *End of change history entry.*
