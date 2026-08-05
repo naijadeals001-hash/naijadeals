@@ -258,4 +258,79 @@ Implemented a reusable, dependency-free cryptography layer in a new `@naijadeals
 
 ---
 
+---
+
+## 2026-08-05 — Task 3C: Identity Domain Services Implemented
+
+- **Branch:** `feature/m1-phase1-identity`
+- **Task:** Task 3C — Identity Domain Services (Phase 1.1 authorized increment)
+
+### Summary
+
+Implemented the pure domain layer for the Identity module in a new `@naijadeals/identity` package. This layer contains only business logic and orchestrates the repository layer (Task 3A) and the security layer (Task 3B). It contains no HTTP, Fastify, REST, JWT, OAuth, dependency injection, events, notifications, email/SMS delivery, Redis, sessions, message queues, DTOs, or request validation.
+
+### Details
+
+- **Package created:** `packages/identity` with TypeScript, Vitest, and standard build/lint/typecheck/test scripts; depends on `@naijadeals/errors`, `@naijadeals/repository`, `@naijadeals/security`, and `@naijadeals/types`.
+- **Domain contracts defined:** `IdentityContext`, `RegisteredUser`, `LoginValidationResult`, `EmailVerificationResult`, `PasswordResetRequestResult`, `PasswordResetCompletionResult`, `ProfileUpdateResult`, `RoleAssignmentResult`, and `IdentityServiceOptions` in `src/contracts.ts`.
+- **Domain options defined:** Default allowed status transitions and token TTLs (24-hour email verification token, 1-hour password reset token) in `src/options.ts`.
+- **Policy helpers implemented:**
+  - `src/policy/email-policy.ts` — email normalization, RFC 5322-style email validation, and display-name validation.
+  - `src/policy/password-policy.ts` — 12–128 character password policy with whitespace-only rejection.
+  - `src/policy/status-policy.ts` — status transition validation and authentication eligibility checks (`PENDING`, `LOCKED`, `SUSPENDED`, `BANNED`, `ARCHIVED` cannot authenticate).
+- **Domain services implemented (7):**
+  1. `src/services/registration-service.ts` — transactional registration; validates email uniqueness, password policy, display name, hashes credential via `PasswordService`, creates `EMAIL_UNVERIFIED` user and credential inside `UnitOfWork.runInTransaction`.
+  2. `src/services/login-validation-service.ts` — password login validation; locates credential by email, verifies status eligibility, compares hash via `PasswordService`, returns `needsRehash` flag.
+  3. `src/services/email-verification-service.ts` — email verification request and confirm; generates/hashes URL-safe tokens, manages `EmailVerificationTokenEntity` lifecycle, transitions user from `EMAIL_UNVERIFIED` to `ACTIVE`, rejects already-active or non-`EMAIL_UNVERIFIED` users with typed errors.
+  4. `src/services/password-reset-request-service.ts` — password reset token issuance; creates `PasswordResetTokenEntity` with hashed token and expiry inside a transaction.
+  5. `src/services/password-reset-completion-service.ts` — password reset completion; verifies raw token against stored hash, validates password policy, updates credential hash via `PasswordService`, deletes consumed token.
+  6. `src/services/profile-update-service.ts` — user profile update; validates display name, enforces allowed status transitions (e.g., `ACTIVE` → `BANNED` is allowed; `ACTIVE` → `PENDING` is rejected), updates user entity.
+  7. `src/services/role-assignment-service.ts` — user-to-role assignment; resolves role by slug, delegates persistence to `UserRoleRepository`, returns the assigned role entity.
+- **Package barrel created:** `src/index.ts` exports public domain contracts, options, policies, and services.
+- **Unit tests added:** 50 comprehensive unit tests in `packages/identity/tests/services.test.ts` using in-memory mocks for all repositories, `UnitOfWork`, `PasswordService`, and `TokenService`. No database, no Fastify, no HTTP.
+- **Tooling fixes applied:**
+  - Added `vite-tsconfig-paths` to `packages/identity/vitest.config.ts` to resolve workspace package imports during tests.
+  - Updated root `eslint.config.mjs` to ignore underscore-prefixed unused variables and parameters.
+  - Updated `package-lock.json` to include the new `packages/identity` workspace package.
+- **Quality gates passed:** Build, Lint, Typecheck, and Tests pass at both the identity package level and the root workspace level.
+- **Scope honored:** No HTTP, Fastify, REST, JWT, OAuth, dependency injection, events, notifications, email/SMS delivery, Redis, sessions, message queues, DTOs, or request validation were implemented. Domain services remain framework and transport independent.
+
+### Files Added
+
+- `packages/identity/package.json`
+- `packages/identity/tsconfig.json`
+- `packages/identity/vitest.config.ts`
+- `packages/identity/src/contracts.ts`
+- `packages/identity/src/options.ts`
+- `packages/identity/src/policy/email-policy.ts`
+- `packages/identity/src/policy/password-policy.ts`
+- `packages/identity/src/policy/status-policy.ts`
+- `packages/identity/src/services/registration-service.ts`
+- `packages/identity/src/services/login-validation-service.ts`
+- `packages/identity/src/services/email-verification-service.ts`
+- `packages/identity/src/services/password-reset-request-service.ts`
+- `packages/identity/src/services/password-reset-completion-service.ts`
+- `packages/identity/src/services/profile-update-service.ts`
+- `packages/identity/src/services/role-assignment-service.ts`
+- `packages/identity/src/index.ts`
+- `packages/identity/tests/services.test.ts`
+
+### Files Updated
+
+- `eslint.config.mjs` — added `@typescript-eslint/no-unused-vars` override for `^_` prefixes
+- `package-lock.json` — included new workspace package
+- `DEVELOPMENT_STATE.md`
+- `CHANGE_HISTORY.md`
+
+### Quality Gate Results
+
+| Gate | Package | Root |
+|------|---------|------|
+| Build | Pass | Pass |
+| Lint | Pass | Pass |
+| Typecheck | Pass | Pass |
+| Tests | 50/50 pass | 15 packages pass |
+
+---
+
 *End of change history entry.*
