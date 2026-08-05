@@ -18,3 +18,4 @@ export interface UnitOfWork {
 }
 
 export * from './identity.js';
+export * from './prisma/index.js';
