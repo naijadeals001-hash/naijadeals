@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaShop | System Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 65, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(0, 255, 65, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(0, 255, 65, 0.2); }
+        }
+        .pulse-node { animation: pulse-glow 2s infinite; }
+        
+        .glass-panel {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+
+        .hud-scanline {
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 65, 0.05) 50%);
+            background-size: 100% 4px;
+        }
+
+        .scroll-hide::-webkit-scrollbar { display: none; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#dce1ff",
+                        "on-primary": "#1f2d5e",
+                        "outline-variant": "#45464f",
+                        "on-background": "#e4e1e6",
+                        "on-primary-container": "#435083",
+                        "surface-dim": "#131317",
+                        "tertiary-fixed-dim": "#ffb4a2",
+                        "on-secondary-fixed": "#0b1c2f",
+                        "tertiary-container": "#ffb5a2",
+                        "surface-bright": "#39393d",
+                        "outline": "#90909a",
+                        "secondary-container": "#38485d",
+                        "on-tertiary-fixed": "#360e05",
+                        "on-secondary": "#213145",
+                        "inverse-surface": "#e4e1e6",
+                        "background": "#11131c",
+                        "on-tertiary-container": "#7b4436",
+                        "surface-container-highest": "#343438",
+                        "primary": "#dde1ff",
+                        "on-surface": "#e4e1e6",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "surface-tint": "#b7c4ff",
+                        "surface-container": "#1f1f23",
+                        "surface-container-high": "#292a2d",
+                        "error-container": "#93000a",
+                        "on-surface-variant": "#c6c5d0",
+                        "surface-variant": "#32343f",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-primary-fixed-variant": "#374476",
+                        "on-primary-fixed": "#071749",
+                        "inverse-on-surface": "#303034",
+                        "surface-container-lowest": "#0d0e11",
+                        "error": "#ffb4ab",
+                        "secondary": "#b7c8e1",
+                        "glass-bg": "rgba(29, 31, 41, 0.8)",
+                        "on-secondary-container": "#a6b6cf",
+                        "on-tertiary-fixed-variant": "#6c382b",
+                        "terminal-green": "#00ff41",
+                        "tertiary": "#ffdbd2",
+                        "surface": "#131317",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#512317",
+                        "tertiary-fixed": "#ffdbd2",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#690005",
+                        "primary-container": "#b7c4ff",
+                        "auth-error": "#ffb4ab",
+                        "surface-container-low": "#1b1b1f",
+                        "inverse-primary": "#4f5c90"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sidebar-width": "288px",
+                        "unit": "4px",
+                        "gutter": "12px",
+                        "stack-tight": "0.5rem",
+                        "stack-default": "1rem",
+                        "header-height": "64px",
+                        "container-padding": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "micro-tag": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "body-base": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "code-terminal": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-base overflow-hidden">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-gutter h-header-height bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">grid_view</span>
+<h1 class="text-headline-md font-headline-md font-extrabold text-terminal-green uppercase tracking-tighter">NaijaShop</h1>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<nav class="flex gap-6">
+<a class="text-terminal-green font-bold text-label-caps font-label-caps" href="#">How It Works</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 transition-colors text-label-caps font-label-caps p-2 rounded" href="#">Marketplace</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 transition-colors text-label-caps font-label-caps p-2 rounded" href="#">Analytics</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">help_outline</span>
+</div>
+</header>
+<div class="flex h-screen pt-header-height">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex flex-col h-full py-6 bg-surface-container-highest border-r border-outline-variant w-sidebar-width shrink-0">
+<div class="px-6 mb-8">
+<h2 class="text-label-caps font-label-caps text-on-surface-variant opacity-50">SYSTEM MODULES</h2>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-4 px-6 py-3 bg-primary-container text-on-primary-container border-l-4 border-terminal-green transition-transform active:translate-x-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_bag</span>
+<span class="text-label-caps font-label-caps">NaijaShop</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant/30" href="#">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="text-label-caps font-label-caps">NaijaEats</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant/30" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-label-caps font-label-caps">NaijaPay</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant/30" href="#">
+<span class="material-symbols-outlined">local_post_office</span>
+<span class="text-label-caps font-label-caps">NaijaSend</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:bg-surface-variant/30" href="#">
+<span class="material-symbols-outlined">directions_car</span>
+<span class="text-label-caps font-label-caps">NaijaDrive</span>
+</a>
+</nav>
+<div class="px-6 pt-4 mt-auto border-t border-outline-variant/30">
+<div class="flex items-center gap-3 p-3 rounded bg-surface-container-lowest">
+<div class="w-2 h-2 rounded-full bg-terminal-green pulse-node"></div>
+<span class="text-micro-tag font-micro-tag text-terminal-green">CORE SYSTEM ONLINE</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 relative overflow-y-auto p-gutter lg:p-container-padding scroll-hide pb-24 lg:pb-8">
+<!-- Background Visual -->
+
+<div class="relative z-10 max-w-6xl mx-auto space-y-12">
+<!-- Header HUD Section -->
+<section class="flex flex-col md:flex-row justify-between items-end gap-4 border-l-2 border-terminal-green pl-6 py-2">
+<div>
+<span class="text-micro-tag font-micro-tag text-terminal-green block mb-1">PROTO_V.0.4.2 // DOCUMENTATION</span>
+<h2 class="text-display-lg font-display-lg text-on-surface tracking-tight">ECOSYSTEM FLOWS</h2>
+</div>
+<div class="flex gap-4">
+<div class="text-right">
+<span class="text-micro-tag font-micro-tag text-on-surface-variant block uppercase">Integrated Protocols</span>
+<div class="flex gap-2 mt-1">
+<span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-micro-tag font-micro-tag border border-primary/20">PAY_ESCROW</span>
+<span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-micro-tag font-micro-tag border border-primary/20">SEND_LOGISTICS</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Journey -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Buyer Journey Card -->
+<div class="lg:col-span-7 glass-panel rounded-lg overflow-hidden border-t-4 border-primary">
+<div class="p-6 border-b border-outline-variant bg-surface-variant/20 flex justify-between items-center">
+<h3 class="text-headline-md font-headline-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">person</span>
+                                BUYER_PROTOCOL
+                            </h3>
+<span class="text-micro-tag font-micro-tag text-on-surface-variant">ID: BY-8829-X</span>
+</div>
+<div class="p-8 space-y-8 relative">
+<div class="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none"></div>
+<!-- Buyer Step Flow -->
+<div class="flex flex-col gap-6">
+<!-- Step 1 -->
+<div class="flex items-start gap-4 group">
+<div class="w-8 h-8 rounded bg-surface-variant border border-outline-variant flex items-center justify-center shrink-0 group-hover:border-primary transition-colors">
+<span class="text-label-caps font-label-caps text-primary">01</span>
+</div>
+<div>
+<h4 class="text-label-caps font-label-caps text-on-surface">DISCOVERY &amp; SEARCH</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant max-w-sm">Access the NaijaShop decentralized marketplace. Filter by location, price, and merchant rating using the Core Search API.</p>
+</div>
+</div>
+<!-- Step 2 (Integrated) -->
+<div class="flex items-start gap-4 group relative">
+<div class="absolute -left-3 top-0 bottom-0 w-px bg-outline-variant"></div>
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(221,225,255,0.3)]">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</div>
+<div>
+<h4 class="text-label-caps font-label-caps text-terminal-green">NAIJAPAY ESCROW LOCK</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant max-w-sm">Funds are committed to the Escrow Smart Contract. Money is held securely; the merchant is notified that payment is confirmed but locked.</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex items-start gap-4 group">
+<div class="w-8 h-8 rounded bg-surface-variant border border-outline-variant flex items-center justify-center shrink-0">
+<span class="text-label-caps font-label-caps text-primary">03</span>
+</div>
+<div>
+<h4 class="text-label-caps font-label-caps text-on-surface">DELIVERY &amp; VERIFICATION</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant max-w-sm">Real-time tracking via NaijaSend integration. Inspect the product upon arrival before finalizing the handshake.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Stats/HUD Card -->
+<div class="lg:col-span-5 grid grid-rows-2 gap-gutter">
+<div class="glass-panel rounded-lg p-6 flex flex-col justify-between border-t-4 border-terminal-green">
+<div class="flex justify-between items-start">
+<span class="text-label-caps font-label-caps text-terminal-green">SYSTEM STATUS</span>
+<span class="material-symbols-outlined text-terminal-green text-[16px] animate-pulse">sensors</span>
+</div>
+<div class="space-y-4">
+<div class="h-24 w-full relative bg-surface-container-lowest overflow-hidden">
+<div class="hud-scanline absolute inset-0 opacity-20"></div>
+
+</div>
+<div class="flex justify-between text-micro-tag font-micro-tag text-on-surface-variant">
+<span>ESCROW_UPTIME: 99.98%</span>
+<span>LOAD: 12.4ms</span>
+</div>
+</div>
+</div>
+<div class="glass-panel rounded-lg overflow-hidden border-t-4 border-error">
+<div class="p-4 bg-error/10 border-b border-outline-variant">
+<span class="text-label-caps font-label-caps text-error">CRITICAL_LAYER: SECURITY</span>
+</div>
+<div class="p-4 space-y-3">
+<p class="text-body-sm font-body-sm text-on-surface-variant">Anti-fraud mesh active. Every transaction is signed with a unique biometric-verified key through NaijaPay ID.</p>
+<div class="flex items-center gap-2 text-micro-tag font-micro-tag text-on-surface-variant bg-surface-container-low p-2 rounded">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+                                    ENCRYPTION: AES-256-GCM
+                                </div>
+</div>
+</div>
+</div>
+<!-- Merchant Journey Card -->
+<div class="lg:col-span-12 glass-panel rounded-lg overflow-hidden border-t-4 border-secondary">
+<div class="p-6 border-b border-outline-variant bg-surface-variant/20 flex justify-between items-center">
+<h3 class="text-headline-md font-headline-md text-secondary flex items-center gap-2">
+<span class="material-symbols-outlined">storefront</span>
+                                MERCHANT_PROTOCOL
+                            </h3>
+<div class="flex gap-6">
+<div class="text-right">
+<span class="text-micro-tag font-micro-tag block opacity-50 uppercase">Payout Type</span>
+<span class="text-label-caps font-label-caps text-secondary">INSTANT_SETTLEMENT</span>
+</div>
+</div>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-5 gap-4">
+<!-- Merchant Step 1 -->
+<div class="p-4 bg-surface-container-low rounded border border-outline-variant hover:border-secondary transition-all">
+<span class="text-micro-tag font-micro-tag text-on-surface-variant mb-2 block">STEP_01</span>
+<h4 class="text-label-caps font-label-caps text-secondary mb-2">LIST PRODUCT</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Sync inventory via Dashboard or API.</p>
+</div>
+<!-- Merchant Step 2 -->
+<div class="p-4 bg-surface-container-low rounded border border-outline-variant hover:border-secondary transition-all">
+<span class="text-micro-tag font-micro-tag text-on-surface-variant mb-2 block">STEP_02</span>
+<h4 class="text-label-caps font-label-caps text-secondary mb-2">RECEIVE ORDER</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Instant push alert when escrow is locked.</p>
+</div>
+<!-- Merchant Step 3 -->
+<div class="p-4 bg-surface-container-low rounded border border-outline-variant hover:border-secondary transition-all relative">
+<div class="absolute -top-2 -right-2 bg-terminal-green text-surface px-2 py-0.5 text-micro-tag font-micro-tag rounded-full pulse-node">NAIJASEND</div>
+<span class="text-micro-tag font-micro-tag text-on-surface-variant mb-2 block">STEP_03</span>
+<h4 class="text-label-caps font-label-caps text-secondary mb-2">SHIPMENT</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Request NaijaSend pickup with 1-click.</p>
+</div>
+<!-- Merchant Step 4 -->
+<div class="p-4 bg-surface-container-low rounded border border-outline-variant hover:border-secondary transition-all">
+<span class="text-micro-tag font-micro-tag text-on-surface-variant mb-2 block">STEP_04</span>
+<h4 class="text-label-caps font-label-caps text-secondary mb-2">TRANSIT</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Real-time status updates for both parties.</p>
+</div>
+<!-- Merchant Step 5 -->
+<div class="p-4 bg-secondary-container/30 rounded border border-secondary shadow-[inset_0_0_15px_rgba(183,200,225,0.1)] transition-all">
+<span class="text-micro-tag font-micro-tag text-on-surface-variant mb-2 block">FINAL_HANDSHAKE</span>
+<h4 class="text-label-caps font-label-caps text-terminal-green mb-2">SETTLEMENT</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Escrow released to NaijaPay Wallet instantly.</p>
+</div>
+</div>
+</div>
+<!-- Integration Visual Block -->
+<div class="lg:col-span-12 glass-panel rounded-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-gradient-to-br from-surface to-surface-container-lowest">
+<div class="space-y-6">
+<h3 class="text-display-lg font-display-lg text-on-surface">GLOBAL AUTHORITY SYNC</h3>
+<p class="text-body-base font-body-base text-on-surface-variant">NaijaShop isn't just a store; it's a node in the <strong>Unified Nigerian Commerce Network</strong>. We bridge the gap between digital trust and physical logistics.</p>
+<div class="flex flex-wrap gap-4">
+<button class="bg-primary-container text-on-primary-container px-6 py-3 rounded text-label-caps font-label-caps hover:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+                                    OPEN_MERCHANT_PORTAL
+                                </button>
+<button class="bg-surface-variant text-on-surface px-6 py-3 rounded border border-outline-variant text-label-caps font-label-caps hover:bg-surface-variant/50 transition-all">
+                                    VIEW_API_DOCS
+                                </button>
+</div>
+</div>
+<div class="relative h-64 w-full">
+<div class="absolute inset-0 bg-surface-container rounded-lg border border-outline-variant/30 flex items-center justify-center overflow-hidden">
+
+<div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+<div class="bg-glass-bg border border-terminal-green/50 px-4 py-2 rounded-full backdrop-blur-md">
+<span class="text-terminal-green text-label-caps font-label-caps tracking-widest">ACTIVE_NODE_MESH</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Mobile Bottom Navigation -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-glass-bg border-t border-outline-variant backdrop-blur-8 shadow-lg">
+<a class="flex flex-col items-center justify-center text-terminal-green font-bold group" href="#">
+<span class="material-symbols-outlined group-active:scale-90 duration-200" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="text-micro-tag font-micro-tag uppercase">Ecosystem</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined group-active:scale-90 duration-200">account_tree</span>
+<span class="text-micro-tag font-micro-tag uppercase">Flows</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined group-active:scale-90 duration-200">shield_person</span>
+<span class="text-micro-tag font-micro-tag uppercase">Security</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined group-active:scale-90 duration-200">local_shipping</span>
+<span class="text-micro-tag font-micro-tag uppercase">Logistics</span>
+</a>
+</nav>
+<!-- Floating Terminal Console Overlay (Interactive Element) -->
+<div class="fixed bottom-24 right-8 z-50 cursor-pointer hidden lg:flex items-center gap-2 bg-surface-container border border-terminal-green/30 p-2 rounded-lg hover:border-terminal-green transition-all shadow-xl group" id="terminal-trigger">
+<div class="w-2 h-2 rounded-full bg-terminal-green animate-pulse"></div>
+<span class="text-micro-tag font-micro-tag text-terminal-green">SYS_LOGS</span>
+</div>
+<script>
+        // Micro-interaction for the "Terminal Log" feel
+        const terminalTrigger = document.getElementById('terminal-trigger');
+        terminalTrigger.addEventListener('click', () => {
+            console.log('System Status: All protocols nominal.');
+            alert('SYSTEM LOGS: \n[INFO] NaijaPay Escrow Handshake Active\n[INFO] NaijaSend Tracking Mesh Synchronized\n[INFO] Marketplace Grid V.2 Online');
+        });
+
+        // Simple hover effect for cards
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'scale(1.005)';
+                card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

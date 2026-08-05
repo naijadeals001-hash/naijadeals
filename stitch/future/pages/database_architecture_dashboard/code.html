@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ND-OPERATIONS-HUB | Database Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .pulse-glow {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px rgba(0, 255, 65, 0.8)); }
+            50% { opacity: 0.5; filter: drop-shadow(0 0 2px rgba(0, 255, 65, 0.2)); }
+        }
+        .glass-panel {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #11131c;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #343438;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 12px;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#b7c4ff",
+                    "surface-variant": "#343438",
+                    "secondary": "#b7c8e1",
+                    "primary": "#dde1ff",
+                    "on-background": "#e4e1e6",
+                    "secondary-container": "#38485d",
+                    "on-primary-container": "#435083",
+                    "on-primary-fixed-variant": "#374476",
+                    "glass-bg": "rgba(29, 31, 41, 0.8)",
+                    "surface-container-highest": "#343438",
+                    "tertiary-container": "#ffb5a2",
+                    "outline-variant": "#45464f",
+                    "surface-container": "#1d1f29",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "on-tertiary-fixed-variant": "#6c382b",
+                    "tertiary": "#ffdbd2",
+                    "on-primary": "#1f2d5e",
+                    "inverse-primary": "#4f5c90",
+                    "on-secondary": "#213145",
+                    "on-surface": "#e4e1e6",
+                    "error": "#ffb4ab",
+                    "primary-container": "#b7c4ff",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-container": "#a6b6cf",
+                    "outline": "#90909a",
+                    "on-tertiary": "#512317",
+                    "surface-bright": "#39393d",
+                    "tertiary-fixed": "#ffdbd2",
+                    "auth-error": "#ffb4ab",
+                    "on-tertiary-container": "#7b4436",
+                    "surface-container-low": "#1b1b1f",
+                    "surface-dim": "#131317",
+                    "surface-container-lowest": "#0d0e11",
+                    "inverse-on-surface": "#303034",
+                    "on-primary-fixed": "#071749",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-secondary-fixed": "#0b1c2f",
+                    "on-tertiary-fixed": "#360e05",
+                    "inverse-surface": "#e4e1e6",
+                    "on-surface-variant": "#c3c5d9",
+                    "error-container": "#93000a",
+                    "background": "#11131c",
+                    "surface": "#131317",
+                    "primary-fixed": "#dce1ff",
+                    "tertiary-fixed-dim": "#ffb4a2",
+                    "terminal-green": "#00ff41",
+                    "surface-container-high": "#292a2d",
+                    "surface-tint": "#b7c4ff",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "on-error": "#690005"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "stack-tight": "0.5rem",
+                    "sidebar-width": "288px",
+                    "stack-default": "1rem",
+                    "header-height": "64px",
+                    "unit": "4px",
+                    "container-padding": "1.5rem",
+                    "gutter": "12px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "micro-tag": ["Inter"],
+                    "body-base": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "code-terminal": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                    "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-base antialiased overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full h-header-height z-50 bg-background dark:bg-background border-b border-outline-variant flex items-center justify-between px-gutter">
+<div class="flex items-center gap-stack-tight">
+<span class="material-symbols-outlined text-primary text-headline-md">terminal</span>
+<h1 class="font-code-terminal text-headline-md font-bold tracking-tighter text-terminal-green">ND-OPERATIONS-HUB</h1>
+</div>
+<div class="flex items-center gap-stack-default">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-variant/30 border border-outline-variant rounded">
+<div class="w-2 h-2 rounded-full bg-terminal-green pulse-glow"></div>
+<span class="font-code-terminal text-micro-tag text-terminal-green">SYSTEM_STABLE: 99.98%</span>
+</div>
+<button class="font-label-caps text-label-caps bg-primary-container text-on-primary px-4 py-2 rounded-lg hover:brightness-110 transition-all duration-100 active:scale-95">ROOT_ACCESS</button>
+</div>
+</header>
+<!-- Sidebar / NavigationDrawer -->
+<aside class="fixed left-0 top-header-height h-[calc(100vh-64px)] w-sidebar-width bg-surface-container dark:bg-surface-container border-r border-outline-variant flex flex-col py-stack-default hidden md:flex">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-primary/30 p-0.5">
+<img class="w-full h-full rounded-full object-cover" data-alt="A futuristic professional headshot of a female CTO with neon blue circuit-like reflections on her face, wearing a sleek black technical bodysuit, set against a dark architectural background with subtle orange and blue light flares, cybernetic aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkoRBShF6yclsBb9sz-aahpn15K1UrIGDfr4RXBuBJNA-o3c1jNFrIwU8pnxgkd42n0fSl1Ku1mtFPTLVJPnSd6Q_e6UWZOEOVZkZNXWj7unbgp-xeDTLRRq_iR77Wynga-uK7RjmXlKbO4Wx0DAb3UpGGtonDqJM-bkPqgpX2YlN1fEb8aviSdC11qnyUZXkBNkNqRAXbR_Nf8kJkJpz_F4LNWoLbmg2H9OgEgndWLB7nET802LGc2NKkExgKE8k0SOJ-9YHxRX8"/>
+</div>
+<div>
+<h3 class="font-headline-md text-body-base font-bold text-primary">Lead Architect</h3>
+<p class="font-code-terminal text-micro-tag text-on-surface-variant">ND-ECOSYSTEM-SUPERUSER</p>
+</div>
+</div>
+<div class="mt-4 p-2 bg-surface-container-low border border-outline-variant rounded">
+<p class="font-code-terminal text-[10px] text-on-surface-variant/70">ACTIVE_SESSION:04:12:01</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="bg-secondary-container/30 border-l-4 border-primary-container text-primary-container font-bold px-4 py-3 flex items-center gap-3 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Registry</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 flex items-center gap-3 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="font-label-caps text-label-caps">API Monitor</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 flex items-center gap-3 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Dependency Map</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 flex items-center gap-3 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Health Metrics</span>
+</a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 flex items-center gap-3 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-caps text-label-caps">Admin Terminal</span>
+</a>
+</nav>
+<div class="mt-auto px-4 py-4 border-t border-outline-variant">
+<div class="glass-panel p-3 rounded border-primary/20">
+<div class="flex justify-between items-center mb-2">
+<span class="font-code-terminal text-micro-tag text-on-surface-variant">BACKUP STATUS</span>
+<span class="font-code-terminal text-micro-tag text-terminal-green">SYNCED</span>
+</div>
+<p class="font-code-terminal text-micro-tag text-on-surface-variant/60">Last sync: 4 mins ago</p>
+<div class="w-full bg-surface-variant h-1 mt-2 overflow-hidden">
+<div class="bg-primary h-full w-3/4"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-sidebar-width pt-header-height h-screen flex flex-col overflow-y-auto pb-20 md:pb-0">
+<!-- Dashboard Header -->
+<div class="p-container-padding flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-display-lg text-display-lg text-primary">Registry_v4.0.1</h2>
+<p class="font-code-terminal text-body-sm text-on-surface-variant">DISTRIBUTED ARCHITECTURE VISUALIZER &amp; DOMAIN MANAGER</p>
+</div>
+<div class="flex gap-2">
+<div class="flex flex-col items-end">
+<span class="font-code-terminal text-micro-tag text-on-surface-variant">TOTAL ENTITIES</span>
+<span class="font-headline-md text-headline-md text-primary">1,402,994</span>
+</div>
+<div class="w-px h-10 bg-outline-variant"></div>
+<div class="flex flex-col items-end">
+<span class="font-code-terminal text-micro-tag text-on-surface-variant">IO_THROUGHPUT</span>
+<span class="font-headline-md text-headline-md text-tertiary">24.8 GB/s</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid for Domains -->
+<div class="px-container-padding grid grid-cols-1 md:grid-cols-12 gap-gutter pb-8">
+<!-- Central Core (Large) -->
+<div class="md:col-span-8 bento-grid gap-gutter">
+<!-- User Core -->
+<div class="col-span-12 md:col-span-6 glass-panel p-4 rounded-xl relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary shadow-[0_0_10px_rgba(221,225,255,0.5)]"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">person</span>
+<h4 class="font-label-caps text-label-caps text-on-surface">USERS</h4>
+</div>
+<span class="font-code-terminal text-micro-tag text-terminal-green">READ_WRITE</span>
+</div>
+<div class="space-y-2 font-code-terminal text-micro-tag text-on-surface-variant/80">
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>id (PK)</span>
+<span class="text-secondary">UUID</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>org_id (FK)</span>
+<span class="text-secondary">UUID</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-1">
+<span>auth_hash</span>
+<span class="text-secondary">STRING(64)</span>
+</div>
+</div>
+</div>
+<!-- Organizations -->
+<div class="col-span-12 md:col-span-6 glass-panel p-4 rounded-xl border-t-4 border-tertiary">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary">corporate_fare</span>
+<h4 class="font-label-caps text-label-caps text-on-surface">ORGANIZATIONS</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-sm">link</span>
+</div>
+<div class="space-y-2 font-code-terminal text-micro-tag text-on-surface-variant/80">
+<p>Total Nodes: 45.2k</p>
+<p>Scaling: Auto-Horizontal</p>
+<div class="h-8 w-full bg-surface-variant/50 rounded flex items-end gap-0.5 p-1">
+<div class="bg-tertiary w-full h-1/2"></div>
+<div class="bg-tertiary w-full h-2/3"></div>
+<div class="bg-tertiary w-full h-3/4"></div>
+<div class="bg-tertiary w-full h-1/2"></div>
+<div class="bg-tertiary w-full h-5/6"></div>
+</div>
+</div>
+</div>
+<!-- Transaction Hub -->
+<div class="col-span-12 glass-panel p-4 rounded-xl relative">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container">account_balance_wallet</span>
+<div>
+<h4 class="font-label-caps text-label-caps text-on-surface">FINANCIAL_FABRIC</h4>
+<p class="font-code-terminal text-[9px] text-on-surface-variant">WALLETS | ESCROW | TRANSACTIONS</p>
+</div>
+</div>
+<div class="flex gap-2">
+<div class="px-2 py-0.5 bg-error/10 border border-error/30 text-error text-[10px] font-code-terminal">HIGH_TRAFFIC</div>
+<div class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary text-[10px] font-code-terminal">ENCRYPTED</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded">
+<span class="font-code-terminal text-[10px] text-on-surface-variant block mb-1">WALLETS</span>
+<div class="flex justify-between items-baseline">
+<span class="font-headline-md text-primary">8.2M</span>
+<span class="text-[10px] text-terminal-green">↑ 12%</span>
+</div>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded">
+<span class="font-code-terminal text-[10px] text-on-surface-variant block mb-1">ESCROW_LOCKED</span>
+<div class="flex justify-between items-baseline">
+<span class="font-headline-md text-secondary">₦4.1B</span>
+<span class="text-[10px] text-on-surface-variant">STABLE</span>
+</div>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded">
+<span class="font-code-terminal text-[10px] text-on-surface-variant block mb-1">TX_THROUGHPUT</span>
+<div class="flex justify-between items-baseline">
+<span class="font-headline-md text-tertiary">1.2kps</span>
+<span class="text-[10px] text-tertiary-fixed">PEAK</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento: Specialized Verticals -->
+<div class="col-span-12 md:col-span-4 glass-panel p-3 rounded-xl border-t-2 border-primary-container">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-container text-sm">local_shipping</span>
+<h5 class="font-label-caps text-micro-tag">LOGISTICS &amp; MOBILITY</h5>
+</div>
+<div class="font-code-terminal text-[10px] space-y-1 opacity-70">
+<p>&gt; Fleet_Status: ACTIVE</p>
+<p>&gt; Geo_Index: SHARDED</p>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 glass-panel p-3 rounded-xl border-t-2 border-secondary">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-sm">shopping_bag</span>
+<h5 class="font-label-caps text-micro-tag">COMMERCE &amp; WHOLESALE</h5>
+</div>
+<div class="font-code-terminal text-[10px] space-y-1 opacity-70">
+<p>&gt; Catalog: 1.2M SKU</p>
+<p>&gt; Inventory: REAL_TIME</p>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 glass-panel p-3 rounded-xl border-t-2 border-tertiary">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-tertiary text-sm">agriculture</span>
+<h5 class="font-label-caps text-micro-tag">AGRO &amp; HEALTH</h5>
+</div>
+<div class="font-code-terminal text-[10px] space-y-1 opacity-70">
+<p>&gt; Supply_Chain: TRACED</p>
+<p>&gt; Vital_Stats: SECURE</p>
+</div>
+</div>
+</div>
+<!-- Right Column: Audit Log & Metrics -->
+<div class="md:col-span-4 space-y-gutter">
+<!-- Terminal Log -->
+<div class="bg-surface-container-lowest rounded-xl flex flex-col h-[400px] border border-outline-variant overflow-hidden">
+<div class="bg-surface-variant/50 px-4 py-2 flex justify-between items-center border-b border-outline-variant">
+<span class="font-code-terminal text-micro-tag text-on-surface">LIVE_AUDIT_STREAM</span>
+<div class="flex gap-1">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed"></div>
+<div class="w-2 h-2 rounded-full bg-terminal-green"></div>
+</div>
+</div>
+<div class="p-4 flex-1 font-code-terminal text-micro-tag terminal-scroll overflow-y-auto space-y-1">
+<p class="text-terminal-green">[INFO] 14:42:01 Connection pool increased to 120</p>
+<p class="text-primary">[INFO] 14:41:58 Write successful: User(UUID:..89a) -&gt; Wallet(ID:..22b)</p>
+<p class="text-tertiary-fixed">[WARN] 14:41:45 High latency detected in Stay domain (Region: NG-Lagos)</p>
+<p class="text-error">[FAIL] 14:40:30 Insurance claim verification timed out (External_API)</p>
+<p class="text-terminal-green">[INFO] 14:40:22 Migrated shard 129 to Node_Delta</p>
+<p class="text-primary">[INFO] 14:40:15 Gig_matching_engine initialized</p>
+<p class="text-terminal-green">[INFO] 14:40:01 Periodic backup complete</p>
+<p class="text-on-surface-variant/50">-------------------------------------------</p>
+<p class="text-primary">[INFO] 14:39:45 Transaction commit: #881290 (Amount: ₦25,000)</p>
+<p class="text-terminal-green">[INFO] 14:39:30 Health monitor: ALL_SYSTEMS_GO</p>
+</div>
+</div>
+<!-- Quick Actions / Navigation Mini Grid -->
+<div class="grid grid-cols-2 gap-2">
+<div class="glass-panel p-3 rounded-lg border-primary/20 hover:bg-primary/5 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-primary mb-1">shield</span>
+<p class="font-label-caps text-[10px] text-on-surface">TRUST_GENESIS</p>
+</div>
+<div class="glass-panel p-3 rounded-lg border-primary/20 hover:bg-primary/5 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-primary mb-1">school</span>
+<p class="font-label-caps text-[10px] text-on-surface">LEARN_CENTRAL</p>
+</div>
+<div class="glass-panel p-3 rounded-lg border-primary/20 hover:bg-primary/5 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-primary mb-1">medical_services</span>
+<p class="font-label-caps text-[10px] text-on-surface">HEALTH_CORE</p>
+</div>
+<div class="glass-panel p-3 rounded-lg border-primary/20 hover:bg-primary/5 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-primary mb-1">work</span>
+<p class="font-label-caps text-[10px] text-on-surface">JOBS_ENGINE</p>
+</div>
+</div>
+<!-- Map / Location Node Visualizer -->
+<div class="glass-panel rounded-xl overflow-hidden h-40 relative">
+<div class="absolute inset-0 bg-primary/5 z-0"></div>
+<img class="w-full h-full object-cover grayscale opacity-40 mix-blend-overlay" data-location="Lagos, Nigeria" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAggKUtn4F7FtW4lqW8m7LuplSSV0Sc5d-Ykt4fw9e_H7AEy_X5F_6pScHmTd9Keccxl57mIgL9WOcvXcZsFsDlEdcAGhSGmC_4mwq6T92hfBZDobe5N1TgNRAThOcNC_uNnLjpAKtdaCNXA-4mjF9eybeUrH_MjnYR4Bu4-3nz6Agv7ZT6F6zlLxtNEKSaZPt3dwanNyhsHU0qXMP9u7b6_k-LCKBZ5HSR2RC0HxXLCe2MQOAetwJiGA7trcBPb26Q3pvyx27qWZY"/>
+<div class="absolute inset-0 p-4 flex flex-col justify-end bg-gradient-to-t from-background to-transparent">
+<p class="font-code-terminal text-micro-tag text-on-surface">PRIMARY_SHARD: Lagos_DC_01</p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-terminal-green animate-pulse"></span>
+<span class="font-code-terminal text-[10px] text-terminal-green">LATENCY: 12ms</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full z-50 md:hidden backdrop-blur-md bg-glass-bg border-t border-outline-variant flex justify-around items-center h-16 px-4">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 scale-110" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-micro-tag text-micro-tag">Registry</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary" href="#">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-micro-tag text-micro-tag">Domains</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-micro-tag text-micro-tag">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary" href="#">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-micro-tag text-micro-tag">Admin</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction: Add randomized "latency" updates to terminal
+        const terminalLogs = [
+            "[INFO] Periodic backup complete",
+            "[WARN] High latency in Wholesale shard",
+            "[INFO] Memory optimization routine finished",
+            "[INFO] New Organization registered: UUID-7712",
+            "[FAIL] Failed attempt to bypass Insurance Auth",
+            "[INFO] Transaction Hub scaling: +2 nodes"
+        ];
+        
+        const terminalContainer = document.querySelector('.terminal-scroll');
+        
+        setInterval(() => {
+            const log = terminalLogs[Math.floor(Math.random() * terminalLogs.length)];
+            const time = new Date().toTimeString().split(' ')[0];
+            const p = document.createElement('p');
+            
+            if (log.includes('[INFO]')) p.className = 'text-primary';
+            else if (log.includes('[WARN]')) p.className = 'text-tertiary-fixed';
+            else if (log.includes('[FAIL]')) p.className = 'text-error';
+            
+            p.textContent = `${log.replace('[', `[${time} `)}`;
+            terminalContainer.appendChild(p);
+            terminalContainer.scrollTop = terminalContainer.scrollHeight;
+            
+            if (terminalContainer.children.length > 50) {
+                terminalContainer.removeChild(terminalContainer.firstChild);
+            }
+        }, 3500);
+
+        // Interactive HUD hover effect for cards
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'scale(0.99)';
+                card.style.transition = 'transform 0.2s ease-out';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

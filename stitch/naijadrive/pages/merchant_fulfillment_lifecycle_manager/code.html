@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merchant Fulfillment &amp; Lifecycle Manager</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-bright": "#f8f9fb",
+                      "trust-amber": "#F59E0B",
+                      "on-primary-fixed": "#00210d",
+                      "surface-dim": "#d9dadc",
+                      "tertiary-fixed": "#dbe1ff",
+                      "on-primary-container": "#003317",
+                      "surface-container": "#edeef0",
+                      "primary-fixed-dim": "#59df89",
+                      "primary-container": "#00a859",
+                      "canvas-pure": "#FFFFFF",
+                      "tertiary": "#0053db",
+                      "on-secondary-fixed-variant": "#404758",
+                      "secondary": "#575e70",
+                      "on-tertiary-container": "#00256c",
+                      "inverse-surface": "#2e3132",
+                      "on-primary-fixed-variant": "#005228",
+                      "outline-variant": "#bccabc",
+                      "surface": "#f8f9fb",
+                      "secondary-container": "#d9dff5",
+                      "inverse-primary": "#59df89",
+                      "on-background": "#191c1e",
+                      "on-tertiary": "#ffffff",
+                      "trust-amber-surface": "#FEF3C7",
+                      "on-surface": "#191c1e",
+                      "error": "#ba1a1a",
+                      "on-secondary": "#ffffff",
+                      "tertiary-container": "#638cff",
+                      "on-tertiary-fixed": "#00174b",
+                      "security-crimson-surface": "#FEE2E2",
+                      "on-secondary-fixed": "#141b2b",
+                      "on-primary": "#ffffff",
+                      "surface-container-low": "#f3f4f6",
+                      "on-error": "#ffffff",
+                      "security-crimson": "#EF4444",
+                      "outline": "#6d7b6e",
+                      "surface-tint": "#006d38",
+                      "secondary-fixed": "#dce2f7",
+                      "surface-container-highest": "#e1e2e4",
+                      "primary-fixed": "#77fca3",
+                      "surface-container-high": "#e7e8ea",
+                      "inverse-on-surface": "#f0f1f3",
+                      "surface-variant": "#e1e2e4",
+                      "on-tertiary-fixed-variant": "#003ea8",
+                      "error-container": "#ffdad6",
+                      "tertiary-fixed-dim": "#b4c5ff",
+                      "background": "#f8f9fb",
+                      "on-secondary-container": "#5c6274",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed-dim": "#c0c6db",
+                      "primary": "#006d38",
+                      "on-error-container": "#93000a",
+                      "on-surface-variant": "#3d4a3f",
+                      "text-muted": "#4B5563"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "touch-target-primary": "52px",
+                      "gutter-mobile": "16px",
+                      "sm": "8px",
+                      "md": "16px",
+                      "lg": "24px",
+                      "margin-mobile": "16px",
+                      "xl": "32px",
+                      "xs": "4px",
+                      "touch-target-min": "48px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "display-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-base": ["Inter"],
+                      "price-display": ["Plus Jakarta Sans"],
+                      "label-caps": ["Inter"],
+                      "body-bold": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                      "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                      "display-lg-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                      "body-base": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }],
+                      "price-display": ["20px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "800" }],
+                      "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                      "body-bold": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600" }]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Pulse Animation for Active Stage */
+        @keyframes emerald-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 168, 89, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 168, 89, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 168, 89, 0); }
+        }
+        .animate-emerald-pulse {
+            animation: emerald-pulse 2s infinite;
+        }
+
+        /* Hide scrollbar for cleaner pipeline view */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-base antialiased flex h-screen overflow-hidden">
+<!-- ========================================== -->
+<!-- SIDE NAV BAR (SHARED COMPONENT JSON)       -->
+<!-- ========================================== -->
+<aside class="hidden md:flex bg-surface dark:bg-on-background h-screen w-64 fixed left-0 top-0 border-r border-outline-variant dark:border-outline flex-col py-md z-50">
+<!-- Header -->
+<div class="px-md mb-xl flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline-md text-headline-md">
+                NM
+            </div>
+<div>
+<h1 class="font-display-lg text-display-lg-mobile font-extrabold text-primary dark:text-primary-fixed leading-none tracking-tight">NaijaMarket Admin</h1>
+<p class="font-label-caps text-label-caps text-trust-amber uppercase tracking-widest mt-1 flex items-center gap-xs">
+<span class="material-symbols-outlined filled text-[14px]">verified</span>
+                    Verified Merchant
+                </p>
+</div>
+</div>
+<!-- Main Navigation Tabs -->
+<nav class="flex-1 px-sm space-y-1">
+<!-- Dashboard (Inactive) -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg font-body-base text-body-base text-text-muted dark:text-secondary-fixed-dim hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-on-secondary-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Orders (ACTIVE - Based on context of Fulfillment Manager) -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg font-body-base text-body-base text-primary dark:text-primary-fixed-dim font-bold border-r-4 border-primary dark:border-primary-fixed-dim bg-primary-container/10 transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span>Orders</span>
+</a>
+<!-- Products (Inactive) -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg font-body-base text-body-base text-text-muted dark:text-secondary-fixed-dim hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-on-secondary-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Products</span>
+</a>
+<!-- Inventory (Inactive) -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg font-body-base text-body-base text-text-muted dark:text-secondary-fixed-dim hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-on-secondary-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">warehouse</span>
+<span>Inventory</span>
+</a>
+<!-- Payments (Inactive) -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg font-body-base text-body-base text-text-muted dark:text-secondary-fixed-dim hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-on-secondary-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Payments</span>
+</a>
+<!-- Analytics (Inactive) -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg font-body-base text-body-base text-text-muted dark:text-secondary-fixed-dim hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-on-secondary-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span>Analytics</span>
+</a>
+<!-- Settings (Inactive) -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg font-body-base text-body-base text-text-muted dark:text-secondary-fixed-dim hover:text-on-surface dark:hover:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-on-secondary-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<!-- CTA & Footer Tabs -->
+<div class="px-md mt-auto space-y-md">
+<button class="w-full h-touch-target-min bg-secondary text-on-secondary font-body-bold text-body-bold rounded-lg flex items-center justify-center gap-sm hover:opacity-90 transition-opacity">
+                Go to Marketplace
+                <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+<div class="space-y-1">
+<a class="flex items-center gap-md px-md py-sm rounded-lg font-body-base text-body-base text-text-muted hover:text-on-surface hover:bg-surface-container-low transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">help_center</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg font-body-base text-body-base text-text-muted hover:text-on-surface hover:bg-surface-container-low transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">translate</span>
+<span>Pidgin Mode</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- ========================================== -->
+<!-- MAIN CONTENT CANVAS                        -->
+<!-- ========================================== -->
+<div class="flex-1 flex flex-col md:ml-64 relative w-full">
+<!-- ========================================== -->
+<!-- TOP NAV BAR (SHARED COMPONENT JSON)        -->
+<!-- ========================================== -->
+<header class="bg-canvas-pure dark:bg-on-background fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-lg z-40">
+<!-- Left: Branding / Product Name -->
+<div class="flex items-center gap-md">
+<!-- Mobile menu toggle (visible only on small screens) -->
+<button class="md:hidden text-on-surface-variant cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim font-black">Vendor Central</span>
+</div>
+<!-- Right: Search & Actions -->
+<div class="flex items-center gap-md">
+<!-- Search representation (on_left configuration from JSON, adapting to header constraints) -->
+<div class="hidden sm:flex items-center bg-surface-container-low rounded-full px-md py-sm border border-outline-variant mr-md">
+<span class="material-symbols-outlined text-text-muted mr-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-base font-body-base p-0 w-48 placeholder:text-text-muted" placeholder="Search orders..." type="text"/>
+</div>
+<!-- Trailing Icons -->
+<button class="text-on-surface-variant dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed cursor-pointer active:scale-95 transition-transform relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="text-on-surface-variant dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined">verified_user</span>
+</button>
+<button class="text-on-surface-variant dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- ========================================== -->
+<!-- SCROLLABLE WORKSPACE                       -->
+<!-- ========================================== -->
+<main class="flex-1 overflow-y-auto pt-24 pb-xl px-margin-mobile md:px-lg bg-background">
+<!-- Page Header / Context -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-lg gap-md">
+<div>
+<div class="flex items-center gap-sm mb-xs">
+<span class="px-sm py-xs bg-tertiary-container text-on-tertiary-container font-label-caps text-label-caps rounded-sm">NAIJAEATS</span>
+<span class="font-body-bold text-body-bold text-text-muted">Order #992-FX-11</span>
+</div>
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">Lifecycle Manager</h2>
+</div>
+<div class="flex gap-sm w-full md:w-auto">
+<button class="flex-1 md:flex-none h-touch-target-min px-lg border-2 border-outline rounded-lg font-body-bold text-body-bold text-on-surface hover:bg-surface-container-low transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[20px]">support_agent</span> Help
+                    </button>
+<button class="flex-1 md:flex-none h-touch-target-min px-lg bg-primary text-on-primary rounded-lg font-body-bold text-body-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[20px]">check_circle</span> Update Status
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+<!-- ========================================== -->
+<!-- 1. ACTIVE MISSION PIPELINE (Full Width)    -->
+<!-- ========================================== -->
+<section class="lg:col-span-12 bg-canvas-pure border border-outline-variant rounded-xl p-md md:p-lg shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-md">Active Mission Pipeline</h3>
+<div class="relative w-full overflow-x-auto no-scrollbar pb-sm">
+<div class="flex items-center min-w-[1000px] justify-between relative px-sm">
+<!-- Connecting Background Line -->
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-surface-variant z-0 rounded-full"></div>
+<!-- Active Progress Line (up to Picked Up - 40% width approx) -->
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-[44%] h-1 bg-primary z-0 rounded-full"></div>
+<!-- Steps Generation -->
+<!-- Array of steps: Created, Accepted, Preparing, Ready, Picked Up (ACTIVE), In-Transit, Delivered, Confirmed, Escrow Released, Closed -->
+<!-- Step 1: Created (Completed) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[16px] filled">check</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant text-center leading-tight">Created</span>
+</div>
+<!-- Step 2: Accepted (Completed) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[16px] filled">check</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant text-center leading-tight">Accepted</span>
+</div>
+<!-- Step 3: Preparing (Completed) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[16px] filled">check</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant text-center leading-tight">Preparing</span>
+</div>
+<!-- Step 4: Ready (Completed) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[16px] filled">check</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant text-center leading-tight">Ready</span>
+</div>
+<!-- Step 5: Picked Up (ACTIVE - Pulsating Emerald Glow) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-md border-2 border-canvas-pure animate-emerald-pulse">
+<span class="material-symbols-outlined text-[18px]">local_shipping</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary font-bold text-center leading-tight">Picked Up</span>
+</div>
+<!-- Step 6: In-Transit (Pending) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-outline-variant text-text-muted flex items-center justify-center bg-canvas-pure">
+<span class="material-symbols-outlined text-[16px]">route</span>
+</div>
+<span class="font-label-caps text-label-caps text-text-muted text-center leading-tight">In-Transit</span>
+</div>
+<!-- Step 7: Delivered (Pending) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-outline-variant text-text-muted flex items-center justify-center bg-canvas-pure">
+<span class="material-symbols-outlined text-[16px]">where_to_vote</span>
+</div>
+<span class="font-label-caps text-label-caps text-text-muted text-center leading-tight">Delivered</span>
+</div>
+<!-- Step 8: Confirmed (Pending) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-outline-variant text-text-muted flex items-center justify-center bg-canvas-pure">
+<span class="material-symbols-outlined text-[16px]">fact_check</span>
+</div>
+<span class="font-label-caps text-label-caps text-text-muted text-center leading-tight">Confirmed</span>
+</div>
+<!-- Step 9: Escrow Rel. (Pending) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-outline-variant text-text-muted flex items-center justify-center bg-canvas-pure">
+<span class="material-symbols-outlined text-[16px]">lock_open</span>
+</div>
+<span class="font-label-caps text-label-caps text-text-muted text-center leading-tight">Escrow Rel.</span>
+</div>
+<!-- Step 10: Closed (Pending) -->
+<div class="relative z-10 flex flex-col items-center gap-xs w-20">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-outline-variant text-text-muted flex items-center justify-center bg-canvas-pure">
+<span class="material-symbols-outlined text-[16px]">task_alt</span>
+</div>
+<span class="font-label-caps text-label-caps text-text-muted text-center leading-tight">Closed</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- 2. LOGISTICS & SECURITY CENTER             -->
+<!-- ========================================== -->
+<section class="lg:col-span-8 bg-canvas-pure border border-outline-variant rounded-xl p-md md:p-lg shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">security</span>
+                            Logistics &amp; Security
+                        </h3>
+<span class="bg-security-crimson-surface text-security-crimson font-label-caps text-label-caps px-sm py-xs rounded-full flex items-center gap-xs">
+<span class="w-2 h-2 bg-security-crimson rounded-full animate-pulse"></span> LIVE TRACKING
+                        </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md flex-1">
+<!-- Live Map Area -->
+<div class="rounded-lg overflow-hidden border border-outline-variant relative bg-surface-dim min-h-[200px]" data-alt="A highly detailed overhead digital map interface displaying city streets in a modern, clean light-mode style. The map features subtle green accents indicating a route, with a prominent, glowing emerald pin showing a live driver location. The visual style is professional, crisp, and high-tech, fitting a logistics dashboard.">
+<!-- Overlay UI on Map -->
+<div class="absolute top-sm left-sm bg-canvas-pure/90 backdrop-blur-sm px-sm py-xs rounded shadow-sm border border-outline-variant text-xs font-body-bold flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">speed</span> 45 km/h
+                            </div>
+<div class="absolute bottom-sm left-sm right-sm bg-canvas-pure/95 backdrop-blur-md p-sm rounded-lg shadow-sm border border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container font-body-bold">OD</div>
+<div>
+<p class="font-body-bold text-[14px] leading-tight">Oluwaseun D.</p>
+<p class="font-body-base text-[12px] text-text-muted leading-tight">Plate: KJA-992-XD</p>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full border border-outline flex items-center justify-center text-on-surface hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-[18px]">call</span>
+</button>
+</div>
+</div>
+<!-- Security Tools -->
+<div class="flex flex-col gap-md">
+<!-- QR Code Block -->
+<div class="bg-surface-bright rounded-lg p-sm border border-outline-variant flex items-center gap-md">
+<div class="w-16 h-16 bg-canvas-pure border border-outline-variant rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-text-muted">qr_code_2</span>
+</div>
+<div>
+<p class="font-body-bold text-body-bold text-on-surface">Pickup Handshake</p>
+<p class="font-body-base text-[13px] text-text-muted">Driver scanned at 14:02 PM</p>
+</div>
+<span class="material-symbols-outlined text-primary ml-auto">verified</span>
+</div>
+<!-- Evidence Upload -->
+<div class="flex-1 border-2 border-dashed border-outline-variant rounded-lg bg-surface flex flex-col items-center justify-center p-md text-center hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 text-primary flex items-center justify-center mb-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">add_a_photo</span>
+</div>
+<p class="font-body-bold text-body-bold text-on-surface">Upload Evidence</p>
+<p class="font-body-base text-[13px] text-text-muted mt-xs">Add prep photos to protect against disputes</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- 3. FINANCIAL LIQUIDITY TRACKER             -->
+<!-- ========================================== -->
+<section class="lg:col-span-4 bg-canvas-pure border border-outline-variant rounded-xl p-md md:p-lg shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col justify-between">
+<div>
+<h3 class="font-headline-md text-[18px] text-on-surface mb-xs flex items-center gap-sm">
+<span class="material-symbols-outlined text-trust-amber">account_balance</span>
+                            Financial Liquidity
+                        </h3>
+<p class="font-body-base text-[14px] text-text-muted mb-md">Funds locked in smart escrow</p>
+<div class="bg-surface p-md rounded-lg border border-outline-variant mb-md">
+<span class="font-label-caps text-label-caps text-text-muted uppercase">Pending Payout</span>
+<div class="font-price-display text-[32px] font-extrabold text-on-surface mt-xs leading-none tracking-tight">₦ 42,500<span class="text-[18px] text-text-muted font-normal">.00</span></div>
+<div class="flex items-center gap-sm mt-sm pt-sm border-t border-outline-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">event</span>
+<span class="font-body-base text-[14px] text-on-surface-variant">Target: <strong class="text-on-surface">Today, 18:00 PM</strong></span>
+</div>
+</div>
+</div>
+<!-- Fee Breakdown -->
+<div class="space-y-sm">
+<div class="flex justify-between items-center font-body-base text-[14px]">
+<span class="text-text-muted">Gross Order Value</span>
+<span class="text-on-surface font-semibold">₦ 45,000.00</span>
+</div>
+<div class="flex justify-between items-center font-body-base text-[14px]">
+<span class="text-error flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">arrow_downward</span> Platform Fee (5%)</span>
+<span class="text-error">- ₦ 2,250.00</span>
+</div>
+<div class="flex justify-between items-center font-body-base text-[14px]">
+<span class="text-error flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">arrow_downward</span> VAT &amp; Taxes</span>
+<span class="text-error">- ₦ 250.00</span>
+</div>
+<div class="h-px bg-outline-variant my-xs"></div>
+<div class="flex justify-between items-center font-body-bold text-[16px] text-primary">
+<span>Net Earning</span>
+<span>₦ 42,500.00</span>
+</div>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- 4. DISPUTE & RESOLUTION PORTAL             -->
+<!-- ========================================== -->
+<section class="lg:col-span-7 bg-canvas-pure border border-outline-variant rounded-xl flex flex-col shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-bright">
+<h3 class="font-headline-md text-[18px] text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-tertiary">forum</span>
+                            Customer Comms
+                        </h3>
+<div class="flex items-center gap-xs bg-canvas-pure border border-outline-variant px-sm py-xs rounded-full">
+<span class="material-symbols-outlined text-[14px] text-tertiary">psychology</span>
+<span class="font-label-caps text-[10px] text-on-surface font-bold">AURA AI: <span class="text-trust-amber">NEUTRAL</span></span>
+</div>
+</div>
+<!-- Chat Area -->
+<div class="p-md flex-1 bg-canvas-pure overflow-y-auto space-y-md min-h-[240px]">
+<!-- Customer Msg -->
+<div class="flex gap-sm">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-body-bold text-[12px] flex-shrink-0">CO</div>
+<div class="bg-surface p-sm rounded-lg rounded-tl-none border border-outline-variant max-w-[80%]">
+<p class="font-body-base text-[14px] text-on-surface">Hi, driver seems to be taking a different route. Is everything okay with the food?</p>
+<span class="font-label-caps text-[10px] text-text-muted mt-1 block">14:15 PM</span>
+</div>
+</div>
+<!-- System Note -->
+<div class="flex justify-center">
+<span class="bg-surface-container-low px-sm py-xs rounded font-label-caps text-[10px] text-text-muted border border-outline-variant">Aura AI suggests re-assuring the customer about traffic diversion.</span>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-md border-t border-outline-variant bg-surface-bright">
+<!-- Suggested Responses -->
+<div class="flex gap-sm overflow-x-auto no-scrollbar mb-sm pb-xs">
+<button class="whitespace-nowrap px-sm py-xs border border-primary text-primary rounded-full font-body-base text-[13px] hover:bg-primary-container/10 transition-colors">
+                                "Yes, taking a faster route to avoid traffic."
+                            </button>
+<button class="whitespace-nowrap px-sm py-xs border border-outline text-text-muted rounded-full font-body-base text-[13px] hover:bg-surface-container-low transition-colors">
+                                "Let me check with the driver."
+                            </button>
+</div>
+<!-- Input Box -->
+<div class="flex gap-sm">
+<input class="flex-1 bg-canvas-pure border border-outline-variant rounded-lg px-sm py-xs font-body-base text-[14px] focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Type message..." type="text"/>
+<button class="w-touch-target-min h-touch-target-min bg-secondary text-on-secondary rounded-lg flex items-center justify-center hover:bg-secondary/90 transition-colors">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- 5. IMMUTABLE AUDIT LOG                     -->
+<!-- ========================================== -->
+<section class="lg:col-span-5 bg-canvas-pure border border-outline-variant rounded-xl p-md md:p-lg shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col max-h-[400px]">
+<h3 class="font-headline-md text-[18px] text-on-surface mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary">history</span>
+                        Immutable Audit Log
+                    </h3>
+<div class="flex-1 overflow-y-auto no-scrollbar pr-xs relative">
+<!-- Timeline Vertical Line -->
+<div class="absolute left-[15px] top-2 bottom-0 w-px bg-outline-variant"></div>
+<div class="space-y-lg relative">
+<!-- Event 1 (Most Recent) -->
+<div class="flex gap-md relative">
+<div class="w-8 h-8 rounded-full bg-primary-container/20 text-primary flex items-center justify-center flex-shrink-0 z-10 ring-4 ring-canvas-pure">
+<span class="material-symbols-outlined text-[16px]">local_shipping</span>
+</div>
+<div>
+<p class="font-body-bold text-[14px] text-on-surface">Order Picked Up</p>
+<p class="font-body-base text-[13px] text-text-muted">Biometric handshake verified. Driver #882 in possession.</p>
+<p class="font-label-caps text-[11px] text-text-muted mt-xs">TODAY, 14:02 PM • HASH: 0x9f...a1</p>
+</div>
+</div>
+<!-- Event 2 -->
+<div class="flex gap-md relative">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant text-text-muted flex items-center justify-center flex-shrink-0 z-10 ring-4 ring-canvas-pure">
+<span class="material-symbols-outlined text-[16px]">check_box</span>
+</div>
+<div>
+<p class="font-body-bold text-[14px] text-on-surface">Preparation Complete</p>
+<p class="font-body-base text-[13px] text-text-muted">Vendor flagged order as ready for pickup. Video evidence uploaded.</p>
+<p class="font-label-caps text-[11px] text-text-muted mt-xs">TODAY, 13:45 PM • HASH: 0x3b...7c</p>
+</div>
+</div>
+<!-- Event 3 -->
+<div class="flex gap-md relative">
+<div class="w-8 h-8 rounded-full bg-trust-amber-surface text-trust-amber border border-trust-amber/30 flex items-center justify-center flex-shrink-0 z-10 ring-4 ring-canvas-pure">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+<div>
+<p class="font-body-bold text-[14px] text-on-surface">Funds Secured in Escrow</p>
+<p class="font-body-base text-[13px] text-text-muted">Customer payment of ₦45,000 verified and locked via Smart Contract.</p>
+<p class="font-label-caps text-[11px] text-text-muted mt-xs">TODAY, 13:12 PM • HASH: 0x1e...ff</p>
+</div>
+</div>
+<!-- Event 4 -->
+<div class="flex gap-md relative">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant text-text-muted flex items-center justify-center flex-shrink-0 z-10 ring-4 ring-canvas-pure">
+<span class="material-symbols-outlined text-[16px]">receipt_long</span>
+</div>
+<div>
+<p class="font-body-bold text-[14px] text-on-surface">Order Created</p>
+<p class="font-body-base text-[13px] text-text-muted">Digital invoice generated. Awaiting vendor acceptance.</p>
+<p class="font-label-caps text-[11px] text-text-muted mt-xs">TODAY, 13:10 PM • HASH: 0x00...00</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>

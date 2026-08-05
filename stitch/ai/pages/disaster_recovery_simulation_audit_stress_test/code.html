@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Disaster Recovery Simulation &amp; Stress Test Console</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Custom range slider styling for an institutional look */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #064e3b; /* primary-container */
+            cursor: pointer;
+            margin-top: -6px;
+            border: 2px solid #ffffff;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #bfc9c3; /* outline-variant */
+            border-radius: 2px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]:focus::-webkit-slider-thumb {
+            box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.2);
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#80bea6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#002114",
+                        "background": "#f8f9ff",
+                        "secondary": "#515f74",
+                        "inverse-primary": "#95d3ba",
+                        "primary-fixed": "#b0f0d6",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#d5e3fd",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#95d3ba",
+                        "on-secondary-container": "#57657b",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "on-surface": "#0b1c30",
+                        "on-primary-fixed-variant": "#0b513d",
+                        "inverse-surface": "#213145",
+                        "surface-container-highest": "#d3e4fe",
+                        "outline": "#707974",
+                        "on-surface-variant": "#404944",
+                        "primary": "#003527",
+                        "tertiary": "#003623",
+                        "on-tertiary-container": "#51c695",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#064e3b",
+                        "tertiary-fixed-dim": "#68dba9",
+                        "on-background": "#0b1c30",
+                        "surface-tint": "#2b6954",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary-fixed-variant": "#005137",
+                        "tertiary-fixed": "#85f8c4",
+                        "surface": "#f8f9ff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "tertiary-container": "#004f35",
+                        "surface-container-low": "#eff4ff",
+                        "outline-variant": "#bfc9c3",
+                        "surface-container": "#e5eeff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#dce9ff",
+                        "secondary-container": "#d5e3fd",
+                        "on-primary-fixed": "#002117"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md h-screen flex overflow-hidden">
+<!-- SideNavBar (Shared Component) -->
+<nav class="bg-inverse-surface border-r border-outline-variant h-screen w-72 flex-shrink-0 fixed left-0 top-0 h-full flex flex-col z-20">
+<!-- Header -->
+<div class="px-6 py-8 flex flex-col gap-4 border-b border-outline-variant/30">
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">admin_panel_settings</span>
+</div>
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-primary tracking-tight">NaijaDeals Admin</h2>
+<p class="font-label-sm text-label-sm text-on-primary/70 mt-1">Tier-1 Clearance</p>
+</div>
+<button class="w-full bg-primary-container text-on-primary py-2 rounded font-label-sm text-label-sm mt-2 hover:bg-primary transition-colors">
+                Initiate Protocol
+            </button>
+</div>
+<!-- Main Nav Tabs -->
+<div class="flex-1 overflow-y-auto py-4">
+<a class="text-on-primary/70 hover:text-primary-fixed hover:bg-primary-container/10 px-6 py-3 flex items-center gap-3 transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm">Operations Center</span>
+</a>
+<a class="text-on-primary/70 hover:text-primary-fixed hover:bg-primary-container/10 px-6 py-3 flex items-center gap-3 transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-sm text-label-sm">Asset Management</span>
+</a>
+<a class="text-on-primary/70 hover:text-primary-fixed hover:bg-primary-container/10 px-6 py-3 flex items-center gap-3 transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-sm text-label-sm">Audit Logs</span>
+</a>
+<!-- Active Tab -->
+<a class="text-primary-fixed border-l-4 border-primary-fixed bg-primary-container/30 px-6 py-3 flex items-center gap-3 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<span class="font-label-sm text-label-sm text-primary-fixed">Risk Assessment</span>
+</a>
+<a class="text-on-primary/70 hover:text-primary-fixed hover:bg-primary-container/10 px-6 py-3 flex items-center gap-3 transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-sm text-label-sm">Policy Editor</span>
+</a>
+<a class="text-on-primary/70 hover:text-primary-fixed hover:bg-primary-container/10 px-6 py-3 flex items-center gap-3 transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">System Settings</span>
+</a>
+</div>
+<!-- Footer Nav -->
+<div class="p-4 border-t border-outline-variant/30">
+<a class="text-on-primary/70 hover:text-primary-fixed hover:bg-primary-container/10 px-6 py-3 flex items-center gap-3 transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">help_center</span>
+<span class="font-label-sm text-label-sm">Support</span>
+</a>
+<a class="text-on-primary/70 hover:text-primary-fixed hover:bg-primary-container/10 px-6 py-3 flex items-center gap-3 transition-colors transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-sm text-label-sm">Sign Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col min-w-0 ml-72 bg-surface">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-surface-container-lowest border-b border-outline-variant full-width top-0 h-16 flex items-center justify-between px-margin-desktop w-full z-10">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-on-surface tracking-tight">Operational Gateway</span>
+</div>
+<div class="flex items-center gap-6">
+<!-- Trailing Icon Actions -->
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">sync</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">verified_user</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded font-label-sm text-label-sm hover:bg-primary-container transition-colors">
+                    Execute Audit
+                </button>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border border-outline">
+<span class="material-symbols-outlined text-on-secondary-container">person</span>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 overflow-y-auto p-margin-desktop">
+<!-- Authority Level Header -->
+<div class="bg-inverse-surface rounded-lg p-6 mb-gutter shadow-sm border border-outline-variant flex justify-between items-center">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-primary">Audit Protocol Stress Test</h1>
+<div class="flex items-center gap-3 mt-2 text-on-primary/80">
+<span class="font-label-sm text-label-sm bg-primary px-2 py-1 rounded border border-primary-fixed">CLEARANCE: TIER-1</span>
+<span class="font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                            Last Audited: 2023-10-27 14:02:11 UTC
+                        </span>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-on-primary-fixed-variant px-4 py-2 rounded border border-outline-variant/30 text-on-primary">
+<span class="material-symbols-outlined text-tertiary-fixed">shield</span>
+<span class="font-label-sm text-label-sm">SYSTEM ARMED</span>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-12 gap-gutter mb-gutter">
+<!-- Left Panel: Simulation Parameters -->
+<div class="col-span-12 md:col-span-3 bg-surface-container-lowest rounded-lg border border-outline-variant p-6 shadow-sm flex flex-col gap-6">
+<h3 class="font-headline-md text-headline-md border-b border-outline-variant pb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">tune</span>
+                        Parameters
+                    </h3>
+<div class="flex flex-col gap-5">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Cryptographic Load</label>
+<span class="font-label-sm text-label-sm text-primary font-bold">85%</span>
+</div>
+<input max="100" min="0" type="range" value="85"/>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Audit Log Latency</label>
+<span class="font-label-sm text-label-sm text-primary font-bold">120ms</span>
+</div>
+<input max="500" min="0" type="range" value="120"/>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Session Intensity</label>
+<span class="font-label-sm text-label-sm text-error font-bold">4.2k/s</span>
+</div>
+<input max="10000" min="0" type="range" value="4200"/>
+</div>
+</div>
+<div class="mt-auto pt-4">
+<button class="w-full bg-surface text-primary border border-primary py-2 rounded font-label-sm text-label-sm hover:bg-surface-container transition-colors flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                            Run Simulation
+                        </button>
+</div>
+</div>
+<!-- Center Panel: Live Graph -->
+<div class="col-span-12 md:col-span-6 bg-surface-container-lowest rounded-lg border border-outline-variant p-6 shadow-sm flex flex-col">
+<div class="flex justify-between items-center border-b border-outline-variant pb-3 mb-6">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">monitoring</span>
+                            Protocol Integrity vs. Load
+                        </h3>
+<span class="font-label-sm text-label-sm bg-error-container text-on-error-container px-2 py-1 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                            STRESS INDUCED
+                        </span>
+</div>
+<!-- Simulated Graph Area using pure CSS -->
+<div class="flex-1 relative bg-surface border border-outline-variant rounded p-4 flex items-end gap-1 h-64 overflow-hidden">
+<!-- Grid lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none p-4">
+<div class="w-full border-t border-outline-variant/30 h-0"></div>
+<div class="w-full border-t border-outline-variant/30 h-0"></div>
+<div class="w-full border-t border-outline-variant/30 h-0"></div>
+<div class="w-full border-t border-outline-variant/30 h-0"></div>
+</div>
+<!-- Bars -->
+<div class="w-full flex items-end justify-between gap-1 h-full z-10">
+<div class="w-full bg-primary/20 h-[90%] rounded-t relative group"><div class="absolute top-0 w-full h-[2px] bg-primary"></div></div>
+<div class="w-full bg-primary/20 h-[88%] rounded-t relative"><div class="absolute top-0 w-full h-[2px] bg-primary"></div></div>
+<div class="w-full bg-primary/20 h-[92%] rounded-t relative"><div class="absolute top-0 w-full h-[2px] bg-primary"></div></div>
+<div class="w-full bg-primary/20 h-[85%] rounded-t relative"><div class="absolute top-0 w-full h-[2px] bg-primary"></div></div>
+<div class="w-full bg-primary/20 h-[75%] rounded-t relative"><div class="absolute top-0 w-full h-[2px] bg-primary"></div></div>
+<div class="w-full bg-secondary-container h-[60%] rounded-t relative"><div class="absolute top-0 w-full h-[2px] bg-secondary"></div></div>
+<div class="w-full bg-secondary-container h-[55%] rounded-t relative"><div class="absolute top-0 w-full h-[2px] bg-secondary"></div></div>
+<div class="w-full bg-error-container h-[30%] rounded-t relative"><div class="absolute top-0 w-full h-[2px] bg-error"></div></div>
+<div class="w-full bg-error-container h-[25%] rounded-t relative"><div class="absolute top-0 w-full h-[2px] bg-error"></div></div>
+<div class="w-full bg-error-container h-[15%] rounded-t relative animate-pulse"><div class="absolute top-0 w-full h-[2px] bg-error"></div></div>
+</div>
+</div>
+<div class="flex justify-between mt-2 text-on-surface-variant font-label-sm text-label-sm">
+<span>T-10s</span>
+<span>Current</span>
+</div>
+</div>
+<!-- Right Panel: Aura AI Briefing -->
+<div class="col-span-12 md:col-span-3 bg-surface-container-highest rounded-lg border border-outline-variant p-6 shadow-sm flex flex-col relative overflow-hidden">
+<!-- Decorative background element -->
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]">smart_toy</span>
+</div>
+<h3 class="font-headline-md text-headline-md border-b border-outline-variant pb-3 mb-4 flex items-center gap-2 relative z-10">
+<span class="material-symbols-outlined text-primary">psychology</span>
+                        Aura AI Briefing
+                    </h3>
+<div class="flex-1 relative z-10 space-y-4">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                            Simulation analysis complete. Current audit protocols exhibit robust resilience under sustained cryptographic load.
+                        </p>
+<div class="bg-surface p-4 rounded border border-primary-fixed border-l-4">
+<p class="font-body-md text-body-md text-on-surface font-semibold">
+                                "Current audit protocols can withstand a 400% surge in high-privilege sessions before integrity scores degrade."
+                            </p>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mt-4">
+                            Recommendation: Allocate additional node resources if Session Intensity exceeds 5.0k/s to maintain 99.99% log fidelity.
+                        </p>
+</div>
+</div>
+</div>
+<!-- Bottom Table: Logs -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm overflow-hidden flex flex-col">
+<div class="p-4 border-b border-outline-variant bg-surface flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">list_alt</span>
+                        Simulated Failures &amp; Recoveries
+                    </h3>
+<button class="text-primary font-label-sm text-label-sm hover:underline">Export CSV</button>
+</div>
+<!-- Dense Data Table -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="py-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-32">Timestamp</th>
+<th class="py-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-40">Event Type</th>
+<th class="py-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Validation Tag (SHA-256)</th>
+<th class="py-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-32 text-right">Status</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md divide-y divide-outline-variant/50">
+<tr class="hover:bg-surface-container-low transition-colors h-10">
+<td class="py-2 px-3 text-on-surface-variant font-label-sm">14:02:15.112</td>
+<td class="py-2 px-3 font-medium">Node Sync Timeout</td>
+<td class="py-2 px-3 font-label-sm text-on-surface-variant truncate max-w-xs">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</td>
+<td class="py-2 px-3 text-right">
+<span class="inline-flex items-center gap-1 bg-tertiary-container/20 text-tertiary px-2 py-0.5 rounded font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Recovered
+                                    </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors h-10">
+<td class="py-2 px-3 text-on-surface-variant font-label-sm">14:02:18.401</td>
+<td class="py-2 px-3 font-medium">Crypto Load Spike</td>
+<td class="py-2 px-3 font-label-sm text-on-surface-variant truncate max-w-xs">8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92</td>
+<td class="py-2 px-3 text-right">
+<span class="inline-flex items-center gap-1 bg-tertiary-container/20 text-tertiary px-2 py-0.5 rounded font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Recovered
+                                    </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors h-10 bg-error-container/10">
+<td class="py-2 px-3 text-on-surface-variant font-label-sm">14:02:22.095</td>
+<td class="py-2 px-3 font-medium text-error">Integrity Drop (T-1)</td>
+<td class="py-2 px-3 font-label-sm text-on-surface-variant truncate max-w-xs">ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb</td>
+<td class="py-2 px-3 text-right">
+<span class="inline-flex items-center gap-1 bg-error-container text-on-error-container px-2 py-0.5 rounded font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">error</span> Sim Fault
+                                    </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors h-10">
+<td class="py-2 px-3 text-on-surface-variant font-label-sm">14:02:25.771</td>
+<td class="py-2 px-3 font-medium">Auto-Scale Trigger</td>
+<td class="py-2 px-3 font-label-sm text-on-surface-variant truncate max-w-xs">ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad</td>
+<td class="py-2 px-3 text-right">
+<span class="inline-flex items-center gap-1 bg-surface border border-outline px-2 py-0.5 rounded font-label-sm text-label-sm text-on-surface">
+<span class="material-symbols-outlined text-[14px]">pending</span> Executing
+                                    </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaDeals Brain | Biometric Enrollment Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "tertiary-fixed": "#85f8c4",
+                        "on-surface-variant": "#404944",
+                        "surface-container-low": "#eff4ff",
+                        "on-tertiary-fixed-variant": "#005137",
+                        "inverse-surface": "#213145",
+                        "surface": "#f8f9ff",
+                        "secondary": "#515f74",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#68dba9",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-background": "#0b1c30",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#0b513d",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#d5e3fd",
+                        "secondary-container": "#d5e3fd",
+                        "primary-container": "#064e3b",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-fixed": "#002114",
+                        "on-secondary-container": "#57657b",
+                        "surface-variant": "#d3e4fe",
+                        "surface-tint": "#2b6954",
+                        "tertiary-container": "#004f35",
+                        "primary-fixed": "#b0f0d6",
+                        "outline-variant": "#bfc9c3",
+                        "surface-dim": "#cbdbf5",
+                        "outline": "#707974",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#95d3ba",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#003623",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-container": "#80bea6",
+                        "on-surface": "#0b1c30",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#95d3ba",
+                        "surface-container-high": "#dce9ff",
+                        "on-tertiary-container": "#51c695",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "primary": "#003527",
+                        "background": "#f8f9ff",
+                        "surface-container": "#e5eeff",
+                        "on-primary-fixed": "#002117"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to bottom, transparent, #85f8c4, transparent);
+            position: absolute;
+            top: 0;
+            animation: scan 3s linear infinite;
+            z-index: 20;
+        }
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .biometric-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #85f8c4;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #85f8c4;
+        }
+        .face-grid {
+            mask-image: radial-gradient(circle, black 40%, transparent 80%);
+        }
+        .aura-glow {
+            animation: pulse-aura 4s ease-in-out infinite;
+        }
+        @keyframes pulse-aura {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="flex justify-between items-center w-full px-margin-desktop h-16 z-50 bg-inverse-surface border-b border-outline-variant docked full-width top-0">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-inverse-on-surface">NaijaDeals Brain</span>
+<div class="h-6 w-px bg-outline-variant"></div>
+<span class="font-label-sm text-label-sm text-primary-fixed uppercase tracking-widest">Biometric Enrollment Protocol</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-8">
+<a class="text-primary-fixed border-b-2 border-primary-fixed pb-1 font-body-md" href="#">Enrollment</a>
+<a class="text-surface-variant hover:bg-on-secondary-fixed-variant transition-colors duration-200 px-2 rounded-sm font-body-md" href="#">Architecture</a>
+<a class="text-surface-variant hover:bg-on-secondary-fixed-variant transition-colors duration-200 px-2 rounded-sm font-body-md" href="#">Compliance</a>
+</div>
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined text-primary-fixed hover:bg-on-secondary-fixed-variant p-2 rounded-full transition-colors">security</button>
+<button class="material-symbols-outlined text-primary-fixed hover:bg-on-secondary-fixed-variant p-2 rounded-full transition-colors">notifications</button>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs">SA</div>
+</div>
+</div>
+</nav>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 bg-surface-container-low border-r border-outline-variant w-64 z-40">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-6">
+<img class="w-12 h-12 rounded bg-surface-dim object-cover border border-outline-variant" data-alt="Professional portrait of a high-ranking government official in a sharp charcoal suit. The lighting is dramatic and corporate, with a clean office background. The color palette is composed of deep blues and professional grays, conveying institutional trust and surgical precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq1fOcaknVJG_A9K6aFNMs3JvR1k_-zcqtnY2KNP-cwGKWrtEJkUNA7WSv4TzTG7LTPmHX25rTDjsk56QsOHyZYCCh9n8XOqecHuLdzdS_Xr7obkMjJlhOj2RvB7wkkLref2_G9MI93tHb_DWGq_alH5rDBhjtjXAlRGESOjTUmVFP4X-5PjIVOpe2JtsGvF_XISG05u7qBGhtP8W89zifkKihcBgqiHJpP8cHzXJOUME-wDKzI4h_2G_Qw43aOymMfULCqjtQFA5Q"/>
+<div>
+<p class="font-headline-md text-[16px] font-bold text-on-surface">System Admin</p>
+<p class="font-label-sm text-[10px] text-on-surface-variant uppercase">Clearance Level: Tier-1</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container border-l-4 border-primary font-bold transition-transform duration-200 translate-x-1" href="#">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">leaderboard</span>
+<span class="font-label-sm">Ranking Engine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-label-sm">Matching Logic</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-sm">Pricing Models</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="font-label-sm">Reputation Score</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-sm">Search Core</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-label-sm">Dispatch Ops</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">gpp_bad</span>
+<span class="font-label-sm">Fraud Sentry</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6 space-y-2 border-t border-outline-variant">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-sm">Audit Logs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-sm">AI Settings</span>
+</a>
+<button class="w-full mt-4 bg-primary text-on-primary py-3 rounded-sm font-label-sm uppercase tracking-widest active:scale-95 transition-transform">
+                    System Reboot
+                </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 overflow-y-auto bg-surface-bright pt-6">
+<!-- Authority Level Header -->
+<div class="mx-margin-desktop mb-8">
+<div class="bg-primary text-on-primary p-6 border-l-4 border-tertiary-fixed shadow-sm">
+<div class="flex justify-between items-start">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span class="font-label-sm uppercase tracking-tighter">Identity Authorization Protocol v.4.0</span>
+</div>
+<h1 class="font-display-lg text-display-lg leading-none">Biometric Enrollment</h1>
+<p class="font-body-md opacity-80 mt-2">Executive-level verification session for Tier-5 Continental Access.</p>
+</div>
+<div class="text-right">
+<div class="font-label-sm opacity-60 uppercase mb-1">Last Audited Timestamp</div>
+<div class="font-label-sm text-[14px]">2023-11-24 // 14:22:10 UTC</div>
+<div class="mt-3 inline-flex items-center gap-2 bg-on-primary-fixed-variant px-3 py-1 text-tertiary-fixed rounded-full">
+<span class="w-2 h-2 bg-tertiary-fixed rounded-full animate-pulse"></span>
+<span class="font-label-sm">SECURE CHANNEL ACTIVE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Clearance Progress Bar -->
+<div class="mt-6">
+<div class="flex justify-between items-end mb-2">
+<span class="font-label-sm text-on-surface-variant uppercase">Current Status: Tier-3 Elevated Authorization</span>
+<span class="font-label-sm text-primary font-bold">60% COMPLETE</span>
+</div>
+<div class="h-4 w-full bg-surface-container flex gap-1">
+<div class="h-full w-1/5 bg-primary relative overflow-hidden">
+<div class="absolute inset-0 bg-white/10 flex items-center justify-center font-label-sm text-[8px] text-on-primary">TIER-1</div>
+</div>
+<div class="h-full w-1/5 bg-primary relative">
+<div class="absolute inset-0 bg-white/10 flex items-center justify-center font-label-sm text-[8px] text-on-primary">TIER-2</div>
+</div>
+<div class="h-full w-1/5 bg-primary relative animate-pulse">
+<div class="absolute inset-0 bg-white/20 flex items-center justify-center font-label-sm text-[8px] text-on-primary">TIER-3</div>
+</div>
+<div class="h-full w-1/5 bg-surface-container-highest relative">
+<div class="absolute inset-0 flex items-center justify-center font-label-sm text-[8px] text-on-surface-variant">TIER-4</div>
+</div>
+<div class="h-full w-1/5 bg-surface-container-highest relative">
+<div class="absolute inset-0 flex items-center justify-center font-label-sm text-[8px] text-on-surface-variant">TIER-5</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="px-margin-desktop pb-12 grid grid-cols-12 gap-gutter">
+<!-- Left Column: Video Feed & Liveness -->
+<div class="col-span-12 lg:col-span-7 space-y-gutter">
+<div class="relative bg-black aspect-video border border-outline-variant overflow-hidden group">
+<!-- Real-time Video Simulation -->
+<img class="w-full h-full object-cover opacity-80 grayscale-[0.3]" data-alt="A futuristic video KYC scene showing a person being scanned by a digital interface. The subject is a professional woman in business attire. Transparent holographic UI elements are overlaid on the video, including facial recognition points, pulse monitors, and biometric data streams. The lighting is cool-toned and surgical, utilizing the primary emerald green for the UI accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP2NgT-P4gSP0RFqtSrNF2ID7txtcAPmbJ7zRPRJSA1NzGRp2GgUP0sVzPARhvw7uYPso0sUsXa4QxeDVDwDAE03_N35hxKmAJa6RXJYjMeks81m-OrBl7XXG0kVMq0z_d9sUDalZ6fB_eNq-x0fE0B1rK1xWxqYprqpyzL6UjL1TToHUmZAb4sG1hcG6NUsSLsw4HES1kgnw1jGroGho8YTVL2g0X5_qRFpE33hxUjvP0uN9iQ_vnXjAo_tJ_Ppmx3ZpqNLkZquzB"/>
+<!-- HUD Overlays -->
+<div class="absolute inset-0 pointer-events-none">
+<div class="scanline"></div>
+<!-- Facial Mapping Points -->
+<div class="biometric-dot" style="top: 40%; left: 45%;"></div>
+<div class="biometric-dot" style="top: 40%; left: 55%;"></div>
+<div class="biometric-dot" style="top: 50%; left: 50%;"></div>
+<div class="biometric-dot" style="top: 60%; left: 40%;"></div>
+<div class="biometric-dot" style="top: 60%; left: 60%;"></div>
+<div class="biometric-dot" style="top: 70%; left: 50%;"></div>
+<!-- Corner Accents -->
+<div class="absolute top-4 left-4 border-t-2 border-l-2 border-primary-fixed w-12 h-12"></div>
+<div class="absolute top-4 right-4 border-t-2 border-r-2 border-primary-fixed w-12 h-12"></div>
+<div class="absolute bottom-4 left-4 border-b-2 border-l-2 border-primary-fixed w-12 h-12"></div>
+<div class="absolute bottom-4 right-4 border-b-2 border-r-2 border-primary-fixed w-12 h-12"></div>
+<!-- Status Badges -->
+<div class="absolute top-8 left-8 space-y-2">
+<div class="bg-primary/90 text-on-primary px-3 py-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] animate-spin">sync</span>
+<span class="font-label-sm uppercase tracking-widest text-[10px]">Liveness Analysis Active</span>
+</div>
+<div class="bg-black/50 text-tertiary-fixed px-3 py-1 border border-tertiary-fixed/30 backdrop-blur-md">
+<span class="font-label-sm text-[10px]">FPS: 60.0 // LATENCY: 12ms</span>
+</div>
+</div>
+</div>
+<!-- Video Controls -->
+<div class="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black to-transparent flex justify-between items-center">
+<div class="flex gap-4">
+<button class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20">
+<span class="material-symbols-outlined text-white">videocam</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20">
+<span class="material-symbols-outlined text-white">mic</span>
+</button>
+</div>
+<div class="font-label-sm text-white bg-error px-4 py-1 animate-pulse">RECORDING ACTIVE</div>
+</div>
+</div>
+<!-- Biometric Indicators Row -->
+<div class="grid grid-cols-3 gap-4">
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">fingerprint</span>
+<span class="text-primary material-symbols-outlined">check_circle</span>
+</div>
+<p class="font-label-sm uppercase text-[10px] text-on-surface-variant">Fingerprint Scan</p>
+<p class="font-headline-md text-primary">MATCHED</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">visibility</span>
+<span class="text-primary material-symbols-outlined">check_circle</span>
+</div>
+<p class="font-label-sm uppercase text-[10px] text-on-surface-variant">Iris Integrity</p>
+<p class="font-headline-md text-primary">MATCHED</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 relative overflow-hidden">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-on-surface-variant">face_6</span>
+<div class="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+</div>
+<p class="font-label-sm uppercase text-[10px] text-on-surface-variant">Facial Mapping</p>
+<p class="font-headline-md text-on-surface">ANALYZING...</p>
+</div>
+</div>
+</div>
+<!-- Right Column: Aura AI & Uploads -->
+<div class="col-span-12 lg:col-span-5 space-y-gutter">
+<!-- Aura AI Security Assistant -->
+<div class="bg-inverse-surface text-inverse-on-surface p-6 relative overflow-hidden">
+<!-- AI Decorative Glow -->
+<div class="aura-glow absolute -right-20 -top-20 w-64 h-64 rounded-full bg-primary-fixed/20 blur-[80px] pointer-events-none"></div>
+<div class="flex items-start gap-4 mb-6 relative z-10">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(176,240,214,0.4)]">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div>
+<h3 class="font-headline-md text-primary-fixed">Aura AI Security</h3>
+<p class="font-label-sm opacity-60">Cognitive Session Assistant</p>
+</div>
+</div>
+<div class="bg-white/5 border-l-2 border-primary-fixed p-4 mb-6 relative z-10">
+<p class="font-body-md text-primary-fixed italic">"Please hold your head still for the 3D depth map. Ensure your gaze remains fixed on the green indicator for iris validation."</p>
+</div>
+<div class="space-y-3 relative z-10">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed"></div>
+<span class="font-label-sm text-[11px] uppercase tracking-wider">Lighting: OPTIMAL</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed"></div>
+<span class="font-label-sm text-[11px] uppercase tracking-wider">Background: SECURE</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed"></div>
+<span class="font-label-sm text-[11px] uppercase tracking-wider">Voice Print: VERIFIED</span>
+</div>
+</div>
+</div>
+<!-- Secure Document Area -->
+<div class="bg-white border border-outline-variant p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline-md text-on-surface">Credentials Vault</h3>
+<span class="material-symbols-outlined text-on-surface-variant">lock</span>
+</div>
+<div class="space-y-3">
+<!-- Document Item -->
+<div class="flex items-center justify-between p-3 bg-surface-container-lowest border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">description</span>
+<div>
+<p class="font-label-sm text-[12px] font-bold">Government ID (Primary)</p>
+<p class="font-label-sm text-[10px] text-on-surface-variant">VERIFIED // REF: ID-8829</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary">task_alt</span>
+</div>
+<!-- Document Item -->
+<div class="flex items-center justify-between p-3 bg-surface-container-lowest border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">fingerprint</span>
+<div>
+<p class="font-label-sm text-[12px] font-bold">Biometric Data Token</p>
+<p class="font-label-sm text-[10px] text-on-surface-variant">VERIFIED // REF: BIO-001</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary">task_alt</span>
+</div>
+<!-- Empty Slot / Upload -->
+<div class="border-2 border-dashed border-outline-variant p-8 flex flex-col items-center justify-center gap-2 hover:bg-surface-container transition-all group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:scale-110 transition-transform">cloud_upload</span>
+<p class="font-label-sm text-[11px] text-on-surface-variant uppercase text-center">Drag &amp; Drop Supplemental Documents<br/><span class="opacity-50">(Tax Clearances, Proof of Assets)</span></p>
+</div>
+</div>
+<div class="mt-8 flex gap-3">
+<button class="flex-1 border border-primary text-primary font-label-sm uppercase tracking-widest py-3 hover:bg-primary/5 active:scale-95 transition-all">
+                                Cancel Session
+                            </button>
+<button class="flex-1 bg-primary text-on-primary font-label-sm uppercase tracking-widest py-3 shadow-lg shadow-primary/20 active:scale-95 transition-all">
+                                Finalize Tier-5
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Table Section for Audit Purposes -->
+<div class="px-margin-desktop pb-24">
+<div class="bg-white border border-outline-variant overflow-hidden">
+<div class="bg-surface-container-highest px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-label-sm uppercase tracking-widest font-bold">Session Integrity Log</h3>
+<div class="flex gap-2">
+<button class="material-symbols-outlined text-on-surface-variant text-[18px]">download</button>
+<button class="material-symbols-outlined text-on-surface-variant text-[18px]">print</button>
+</div>
+</div>
+<table class="w-full">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="px-6 py-3 text-left font-label-sm text-on-surface-variant uppercase">Time (UTC)</th>
+<th class="px-6 py-3 text-left font-label-sm text-on-surface-variant uppercase">Event Type</th>
+<th class="px-6 py-3 text-left font-label-sm text-on-surface-variant uppercase">Cryptographic Proof</th>
+<th class="px-6 py-3 text-right font-label-sm text-on-surface-variant uppercase">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-primary-fixed/10 transition-colors">
+<td class="px-6 py-3 font-label-sm">14:22:10</td>
+<td class="px-6 py-3 font-body-md font-bold">Handshake Protocol</td>
+<td class="px-6 py-3 font-label-sm opacity-50 truncate max-w-[200px]">SHA-256: 8f9a...c2e1</td>
+<td class="px-6 py-3 text-right">
+<span class="inline-flex items-center gap-1 bg-tertiary-fixed/30 text-on-tertiary-fixed-variant px-2 py-0.5 rounded-full font-label-sm text-[10px]">VERIFIED</span>
+</td>
+</tr>
+<tr class="hover:bg-primary-fixed/10 transition-colors">
+<td class="px-6 py-3 font-label-sm">14:23:45</td>
+<td class="px-6 py-3 font-body-md font-bold">Liveness Confirmation</td>
+<td class="px-6 py-3 font-label-sm opacity-50 truncate max-w-[200px]">ECDSA: 42aa...99b2</td>
+<td class="px-6 py-3 text-right">
+<span class="inline-flex items-center gap-1 bg-tertiary-fixed/30 text-on-tertiary-fixed-variant px-2 py-0.5 rounded-full font-label-sm text-[10px]">VERIFIED</span>
+</td>
+</tr>
+<tr class="hover:bg-primary-fixed/10 transition-colors">
+<td class="px-6 py-3 font-label-sm">14:25:12</td>
+<td class="px-6 py-3 font-body-md font-bold">Iris Map Capture</td>
+<td class="px-6 py-3 font-label-sm opacity-50 truncate max-w-[200px]">RSA: 12de...f822</td>
+<td class="px-6 py-3 text-right">
+<span class="inline-flex items-center gap-1 bg-tertiary-fixed/30 text-on-tertiary-fixed-variant px-2 py-0.5 rounded-full font-label-sm text-[10px]">VERIFIED</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Security Banner (Footer Overlay) -->
+<div class="fixed bottom-0 inset-x-0 h-10 bg-primary-container text-on-primary-container flex items-center justify-between px-margin-desktop z-50 border-t border-primary">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] animate-pulse">encrypted</span>
+<span class="font-label-sm text-[10px] tracking-widest uppercase">Encryption: Quantum-Resistant AES-256 // Tunnel: OMEGA-7</span>
+</div>
+<div class="font-label-sm text-[10px]">SESSION ID: KYCX-992-BETA-003</div>
+</div>
+<script>
+        // Micro-interactions for the scanning effect
+        setInterval(() => {
+            const dots = document.querySelectorAll('.biometric-dot');
+            dots.forEach(dot => {
+                const x = Math.random() * 2 - 1;
+                const y = Math.random() * 2 - 1;
+                dot.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        }, 100);
+
+        // Simple button active state visual feedback
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.95)';
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

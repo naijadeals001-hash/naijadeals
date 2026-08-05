@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaDeals Payout | Admin Liquidity &amp; Settlement Engine</title>
+<!-- Google Fonts: Plus Jakarta Sans for high-stakes precision -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        
+        .glass-overlay {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+
+        /* Custom scrollbar for data density */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #bccac0;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#131b2e",
+                        "primary": "#006948",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-fixed": "#002114",
+                        "secondary": "#565e74",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#5c647a",
+                        "surface": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "primary-container": "#00855d",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#bccac0",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-fixed": "#dae2fd",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#ba5551",
+                        "on-background": "#0b1c30",
+                        "surface-container-low": "#eff4ff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-variant": "#d3e4fe",
+                        "on-tertiary-fixed": "#410004",
+                        "on-primary-fixed-variant": "#005137",
+                        "inverse-surface": "#213145",
+                        "on-surface": "#0b1c30",
+                        "surface-container-high": "#dce9ff",
+                        "surface-bright": "#f8f9ff",
+                        "background": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#9b3e3b",
+                        "primary-fixed": "#85f8c4",
+                        "on-tertiary-fixed-variant": "#7f2928",
+                        "secondary-container": "#dae2fd",
+                        "tertiary-fixed-dim": "#ffb3ae",
+                        "primary-fixed-dim": "#68dba9",
+                        "on-error": "#ffffff",
+                        "surface-container": "#e5eeff",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#006c4a",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#68dba9",
+                        "on-surface-variant": "#3d4a42",
+                        "on-primary-container": "#f5fff7",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdad7",
+                        "outline": "#6d7a72",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "max-width": "1440px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "numeric-data": ["Plus Jakarta Sans"],
+                        "mono-label": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "numeric-data": ["15px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "mono-label": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed antialiased">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-8">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">NaijaDeals Payout</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary font-bold border-b-2 border-primary py-5 font-mono-label text-mono-label" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors py-5 font-mono-label text-mono-label" href="#">Escrow</a>
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors py-5 font-mono-label text-mono-label" href="#">Vaults</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full cursor-pointer transition-colors">account_balance_wallet</span>
+</div>
+<span class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full cursor-pointer transition-colors">notifications</span>
+<span class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full cursor-pointer transition-colors">settings</span>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Administrator Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a senior financial systems administrator in a modern high-tech office. He is a West African man in his early 40s wearing a crisp white dress shirt and a silver-framed smartwatch. The background is softly blurred showing high-end server racks and a glowing digital ticker wall. The lighting is sophisticated, emphasizing a corporate and trustworthy aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPU2qcfQL8jISyqHCh-NBiH_ZnZlVhDchZ4XrlNYiU8Shh7FFFT6cUaOZZNJhk4FN2l91npo-xqexzLN2zlTpyAHISbc1i8H_Y5d2HyKqqEvmXAyWmx2Waa6cLfmrXnS6c2m_qXKcfcf6_tK0pud-2183fbl4ujy9xmK5_1WvjK_TR7pGb2Ok9UL_PN0dXd9z0DMv5islgdv97wBILsiQ32-W60hSO5DgYBYrllQAD2dAaKhjphpC31v0TMt-W3VO1LiQapGORQvLh"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Execution from JSON) -->
+<aside class="fixed left-0 top-16 bottom-0 w-[280px] flex flex-col py-6 px-4 bg-surface border-r border-outline-variant z-40">
+<div class="mb-8 px-2">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-10 h-10 bg-primary-container/20 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-weight="fill">dashboard</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-[16px] font-bold text-primary uppercase tracking-wider">Liquidity Engine</h2>
+<p class="font-body-sm text-[11px] text-on-surface-variant uppercase font-semibold">Institutional Grade</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-primary font-bold bg-primary-container/10 rounded transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-mono-label text-mono-label">Earnings Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all" href="#">
+<span class="material-symbols-outlined">hourglass_empty</span>
+<span class="font-mono-label text-mono-label">Settlement Queue</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span class="font-mono-label text-mono-label">Bank Accounts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-mono-label text-mono-label">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="font-mono-label text-mono-label">Tax &amp; Compliance</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-mono-label text-mono-label">Audit Logs</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant pt-4 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest rounded" href="#">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+<span class="font-body-sm text-body-sm">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest rounded" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span class="font-body-sm text-body-sm">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-[280px] mt-16 p-8 min-h-screen">
+<div class="max-w-max-width mx-auto">
+<!-- Global Metrics Bar -->
+<header class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface mb-1">Root Terminal Dashboard</h1>
+<p class="font-body-md text-on-surface-variant">Real-time ecosystem settlement &amp; liquidity monitoring</p>
+</div>
+<div class="flex gap-3">
+<button class="bg-error hover:bg-error/90 text-white px-4 py-2 font-mono-label text-mono-label uppercase tracking-widest flex items-center gap-2 rounded transition-all">
+<span class="material-symbols-outlined text-[18px]">report</span>
+                        Execute Emergency Halt
+                    </button>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 font-mono-label text-mono-label uppercase tracking-widest flex items-center gap-2 rounded transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px]">rule</span>
+                        Approve Batch
+                    </button>
+</div>
+</header>
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Metrics Grid -->
+<div class="col-span-12 grid grid-cols-1 md:grid-cols-4 gap- gutter mb-2">
+<div class="bg-white border border-outline-variant p-5 rounded-lg flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-on-surface-variant text-[11px] uppercase tracking-tighter">Total Payout Volume</span>
+<span class="material-symbols-outlined text-primary opacity-50">payments</span>
+</div>
+<div class="font-headline-md text-[28px] font-bold text-on-surface">₦14.2B</div>
+<div class="flex items-center gap-1 mt-2 text-[12px] font-semibold text-primary">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+12.4% vs last 24h</span>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-5 rounded-lg flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-on-surface-variant text-[11px] uppercase tracking-tighter">Avg Settlement Time</span>
+<span class="material-symbols-outlined text-primary opacity-50">timer</span>
+</div>
+<div class="font-headline-md text-[28px] font-bold text-on-surface">1.2s</div>
+<div class="flex items-center gap-1 mt-2 text-[12px] font-semibold text-primary">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Optimal Velocity</span>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-5 rounded-lg flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-on-surface-variant text-[11px] uppercase tracking-tighter">Failed Payout Rate</span>
+<span class="material-symbols-outlined text-error opacity-50">error_outline</span>
+</div>
+<div class="font-headline-md text-[28px] font-bold text-on-surface">0.4%</div>
+<div class="flex items-center gap-1 mt-2 text-[12px] font-semibold text-secondary">
+<span class="material-symbols-outlined text-[16px]">info</span>
+<span>Standard range: 0.5%</span>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-5 rounded-lg flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono-label text-on-surface-variant text-[11px] uppercase tracking-tighter">Gateway Health</span>
+<span class="material-symbols-outlined text-primary opacity-50">hub</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex flex-col items-center">
+<div class="w-2 h-2 rounded-full bg-primary mb-1 status-pulse"></div>
+<span class="text-[10px] font-bold uppercase">PS</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-2 h-2 rounded-full bg-primary mb-1 status-pulse"></div>
+<span class="text-[10px] font-bold uppercase">FW</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-2 h-2 rounded-full bg-primary mb-1 status-pulse"></div>
+<span class="text-[10px] font-bold uppercase">SW</span>
+</div>
+<div class="ml-auto">
+<span class="font-mono-label text-[12px] text-primary">ALL NODES ONLINE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Settlement Queue (High-Density Table) -->
+<div class="col-span-12 lg:col-span-9">
+<div class="bg-white border border-outline-variant rounded-lg overflow-hidden flex flex-col h-[540px]">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<div class="flex items-center gap-3">
+<h3 class="font-headline-sm text-[16px] font-bold">Active Settlement Queue</h3>
+<span class="bg-primary/10 text-primary text-[11px] font-bold px-2 py-0.5 rounded-full">42 PENDING</span>
+</div>
+<div class="flex gap-2">
+<button class="p-1.5 border border-outline-variant rounded hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+<button class="p-1.5 border border-outline-variant rounded hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-white shadow-sm z-10">
+<tr class="border-b border-outline-variant">
+<th class="px-4 py-3 font-mono-label text-[11px] uppercase text-on-surface-variant">Entity ID</th>
+<th class="px-4 py-3 font-mono-label text-[11px] uppercase text-on-surface-variant">Vertical</th>
+<th class="px-4 py-3 font-mono-label text-[11px] uppercase text-on-surface-variant">Recipient</th>
+<th class="px-4 py-3 font-mono-label text-[11px] uppercase text-on-surface-variant">Currency</th>
+<th class="px-4 py-3 font-mono-label text-[11px] uppercase text-on-surface-variant text-right">Amount</th>
+<th class="px-4 py-3 font-mono-label text-[11px] uppercase text-on-surface-variant">Gateway</th>
+<th class="px-4 py-3 font-mono-label text-[11px] uppercase text-on-surface-variant">Risk</th>
+<th class="px-4 py-3 font-mono-label text-[11px] uppercase text-on-surface-variant">Action</th>
+</tr>
+</thead>
+<tbody class="font-body-sm">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="px-4 py-3 font-mono-label text-[12px]">#NS-8842-NG</td>
+<td class="px-4 py-3">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                                NaijaShop
+                                            </span>
+</td>
+<td class="px-4 py-3">
+<div class="flex flex-col">
+<span class="font-bold">Lagos Gadget Hub</span>
+<span class="text-[11px] text-on-surface-variant">GTBank • 0124...882</span>
+</div>
+</td>
+<td class="px-4 py-3"><span class="font-semibold">NGN</span></td>
+<td class="px-4 py-3 text-right font-numeric-data">4,250,000.00</td>
+<td class="px-4 py-3"><span class="text-[12px] opacity-70">Paystack</span></td>
+<td class="px-4 py-3">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase">Low</span>
+</td>
+<td class="px-4 py-3 text-right">
+<button class="text-primary hover:underline font-bold text-[12px]">Verify</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="px-4 py-3 font-mono-label text-[12px]">#ND-2210-GB</td>
+<td class="px-4 py-3">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                                                NaijaDrive
+                                            </span>
+</td>
+<td class="px-4 py-3">
+<div class="flex flex-col">
+<span class="font-bold">Pierre M. (Driver)</span>
+<span class="text-[11px] text-on-surface-variant">BGFIBank • CFA7...992</span>
+</div>
+</td>
+<td class="px-4 py-3"><span class="font-semibold">XAF</span></td>
+<td class="px-4 py-3 text-right font-numeric-data">185,400.00</td>
+<td class="px-4 py-3"><span class="text-[12px] opacity-70">Flutterwave</span></td>
+<td class="px-4 py-3">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase">Low</span>
+</td>
+<td class="px-4 py-3 text-right">
+<button class="text-primary hover:underline font-bold text-[12px]">Verify</button>
+</td>
+</tr>
+<!-- Row 3 (Flagged) -->
+<tr class="border-b border-outline-variant bg-error/5 hover:bg-error/10 transition-colors">
+<td class="px-4 py-3 font-mono-label text-[12px]">#NE-0041-US</td>
+<td class="px-4 py-3">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                                NaijaEats
+                                            </span>
+</td>
+<td class="px-4 py-3">
+<div class="flex flex-col">
+<span class="font-bold">Unknown Merchant</span>
+<span class="text-[11px] text-error font-medium">Unverified Account • USD Node</span>
+</div>
+</td>
+<td class="px-4 py-3"><span class="font-semibold">USD</span></td>
+<td class="px-4 py-3 text-right font-numeric-data">12,500.00</td>
+<td class="px-4 py-3"><span class="text-[12px] opacity-70">SWIFT</span></td>
+<td class="px-4 py-3">
+<span class="text-[10px] font-bold text-error bg-error/10 px-2 py-0.5 rounded-full uppercase">Critical</span>
+</td>
+<td class="px-4 py-3 text-right">
+<button class="text-error hover:underline font-bold text-[12px]">Halt</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="px-4 py-3 font-mono-label text-[12px]">#NS-8899-NG</td>
+<td class="px-4 py-3">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                                NaijaShop
+                                            </span>
+</td>
+<td class="px-4 py-3">
+<div class="flex flex-col">
+<span class="font-bold">Abuja Wellness</span>
+<span class="text-[11px] text-on-surface-variant">Access Bank • 0031...112</span>
+</div>
+</td>
+<td class="px-4 py-3"><span class="font-semibold">NGN</span></td>
+<td class="px-4 py-3 text-right font-numeric-data">890,200.00</td>
+<td class="px-4 py-3"><span class="text-[12px] opacity-70">Paystack</span></td>
+<td class="px-4 py-3">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase">Low</span>
+</td>
+<td class="px-4 py-3 text-right">
+<button class="text-primary hover:underline font-bold text-[12px]">Verify</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="px-4 py-3 font-mono-label text-[12px]">#ND-2215-NG</td>
+<td class="px-4 py-3">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                                                NaijaDrive
+                                            </span>
+</td>
+<td class="px-4 py-3">
+<div class="flex flex-col">
+<span class="font-bold">David O. (Courier)</span>
+<span class="text-[11px] text-on-surface-variant">Kuda MFB • 2011...552</span>
+</div>
+</td>
+<td class="px-4 py-3"><span class="font-semibold">NGN</span></td>
+<td class="px-4 py-3 text-right font-numeric-data">42,000.00</td>
+<td class="px-4 py-3"><span class="text-[12px] opacity-70">Flutterwave</span></td>
+<td class="px-4 py-3">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase">Low</span>
+</td>
+<td class="px-4 py-3 text-right">
+<button class="text-primary hover:underline font-bold text-[12px]">Verify</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- AI Sentry Sidebar -->
+<aside class="col-span-12 lg:col-span-3 flex flex-col gap-gutter">
+<!-- AI Sentry Integration -->
+<div class="bg-on-background text-white p-6 rounded-lg border-l-4 border-primary shadow-xl relative overflow-hidden">
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed" data-weight="fill">security</span>
+<h3 class="font-headline-sm text-[16px] font-bold uppercase tracking-widest text-primary-fixed">AI Sentry v4.0</h3>
+</div>
+<div class="space-y-4">
+<div class="bg-white/5 border border-white/10 p-3 rounded">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[11px] uppercase font-mono-label opacity-60">Fraud Risk Score</span>
+<span class="text-[11px] font-bold text-error">94/100</span>
+</div>
+<div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+<div class="bg-error h-full w-[94%]"></div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-error text-[20px] mt-0.5">warning</span>
+<div>
+<p class="text-[13px] font-bold">Velocity Limit Exceeded</p>
+<p class="text-[11px] text-white/60">12 withdrawals to same beneficiary in 30 mins.</p>
+</div>
+</div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-primary-fixed text-[20px] mt-0.5">verified</span>
+<div>
+<p class="text-[13px] font-bold">IBAN Match Error</p>
+<p class="text-[11px] text-white/60">Recipient name differs from bank record.</p>
+</div>
+</div>
+</div>
+<div class="pt-4 flex flex-col gap-2">
+<button class="w-full py-2 bg-error text-white font-mono-label text-[12px] rounded font-bold uppercase tracking-widest">Freeze Payouts</button>
+<button class="w-full py-2 border border-white/20 text-white font-mono-label text-[12px] rounded font-bold uppercase tracking-widest hover:bg-white/5">Approve Manual</button>
+</div>
+</div>
+</div>
+<!-- Background decoration -->
+<div class="absolute -bottom-8 -right-8 opacity-10">
+<span class="material-symbols-outlined text-[120px]">psychology</span>
+</div>
+</div>
+<!-- Vertical Breakdown (Bento Style) -->
+<div class="bg-white border border-outline-variant p-6 rounded-lg">
+<h4 class="font-mono-label text-[12px] uppercase text-on-surface-variant mb-6 flex justify-between items-center">
+                            Vertical Distribution
+                            <span class="material-symbols-outlined text-[16px]">pie_chart</span>
+</h4>
+<div class="space-y-5">
+<div class="space-y-1">
+<div class="flex justify-between text-[13px]">
+<span class="font-bold">NaijaShop</span>
+<span class="font-numeric-data">₦8.2B</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-blue-500 h-full w-[58%]"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[13px]">
+<span class="font-bold">NaijaDrive</span>
+<span class="font-numeric-data">₦3.4B</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-orange-500 h-full w-[24%]"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[13px]">
+<span class="font-bold">NaijaEats</span>
+<span class="font-numeric-data">₦2.6B</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full w-[18%]"></div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Settlement Timeline & Batch View -->
+<section class="mt-gutter grid grid-cols-1 md:grid-cols-3 gap-gutter pb-12">
+<div class="md:col-span-2 bg-white border border-outline-variant p-6 rounded-lg relative">
+<h3 class="font-headline-sm text-[18px] font-bold mb-8">Active Batch Cycle #44921</h3>
+<div class="flex items-center justify-between relative px-4">
+<!-- Connecting Line -->
+<div class="absolute top-1/2 left-0 w-full h-0.5 bg-outline-variant -translate-y-1/2 -z-1"></div>
+<!-- Node 1: Escrow -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[20px]">lock_clock</span>
+</div>
+<div class="text-center">
+<p class="text-[12px] font-bold">Escrow</p>
+<p class="text-[10px] text-on-surface-variant font-mono-label">COMPLETED</p>
+</div>
+</div>
+<!-- Node 2: Clearing -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white ring-4 ring-primary-container/30">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</div>
+<div class="text-center">
+<p class="text-[12px] font-bold">Clearing</p>
+<p class="text-[10px] text-primary font-bold font-mono-label status-pulse">PROCESSING</p>
+</div>
+</div>
+<!-- Node 3: Bank Payout -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface border-2 border-outline-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+</div>
+<div class="text-center">
+<p class="text-[12px] font-bold text-on-surface-variant">Bank Payout</p>
+<p class="text-[10px] text-on-surface-variant font-mono-label">PENDING</p>
+</div>
+</div>
+<!-- Node 4: Settlement Success -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface border-2 border-outline-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">task_alt</span>
+</div>
+<div class="text-center">
+<p class="text-[12px] font-bold text-on-surface-variant">Success</p>
+<p class="text-[10px] text-on-surface-variant font-mono-label">QUEUED</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-6 rounded-lg">
+<h3 class="font-headline-sm text-[16px] font-bold mb-4">Direct SWIFT Node Control</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-3 border border-outline-variant rounded">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">dns</span>
+<div>
+<p class="text-[13px] font-bold">Node Abuja-01</p>
+<p class="text-[11px] text-on-surface-variant">Primary Liquidity Hub</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase">Active</span>
+</div>
+<div class="flex items-center justify-between p-3 border border-outline-variant rounded">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">dns</span>
+<div>
+<p class="text-[13px] font-bold">Node Libre-04</p>
+<p class="text-[11px] text-on-surface-variant">Central CFA Bridge</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase">Active</span>
+</div>
+<button class="w-full py-2.5 border-2 border-dashed border-outline-variant text-on-surface-variant font-mono-label text-[11px] rounded font-bold uppercase tracking-widest hover:border-primary hover:text-primary transition-all">
+                            Initialize Secondary Node
+                        </button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Interactive script for demo purposes -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Log for verification
+            console.log("NaijaDeals Payout Terminal: Online");
+
+            // Simple row hover effect simulation
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('click', () => {
+                    // Visual feedback for row selection
+                    rows.forEach(r => r.classList.remove('bg-primary-container/5'));
+                    row.classList.add('bg-primary-container/5');
+                });
+            });
+
+            // Status randomizer for gateway health to simulate real-time
+            setInterval(() => {
+                const pulses = document.querySelectorAll('.status-pulse');
+                pulses.forEach(p => {
+                    p.style.opacity = Math.random() > 0.1 ? '1' : '0.5';
+                });
+            }, 3000);
+        });
+    </script>
+</body></html>

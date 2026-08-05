@@ -1,555 +1,76 @@
-# NAIJADEALS SUPER ECOSYSTEM
-# PROJECT_RULES.md
+# PROJECT RULES
 
-Version: 1.0
+This document defines mandatory engineering law for the NaijaDeals Super Ecosystem. Future contributors must treat these rules as binding, not optional decoration.
 
-This document governs every human developer, AI coding assistant, contractor, freelancer, and automation tool contributing to the NaijaDeals Super Ecosystem.
+## 1. Delivery Standard
 
-Failure to follow these rules is considered a violation of the engineering standards of this repository.
+- Build only production-grade systems once implementation begins.
+- No fake services, mock-only production paths, placeholder APIs, or pretend integrations in mainline code.
+- If a dependency is not ready, isolate the feature behind a feature flag or documented roadmap item instead of shipping fiction.
 
----
+## 2. Shared Platform First
 
-# 1. PROJECT VISION
+- Authentication, RBAC, wallet, escrow, trust, messaging, notifications, search, analytics, audit, and Aura AI are platform services, not duplicated module concerns.
+- No module may fork or locally redefine shared domain concepts.
+- Shared concerns must be implemented once and consumed through governed contracts.
 
-NaijaDeals is NOT:
+## 3. Integration Gateway Law
 
-- a demo
-- an MVP
-- a prototype
-- a landing page
-- a proof of concept
+- Business logic must never call third-party SDKs or remote APIs directly.
+- All provider access must route through the Integration Gateway and adapter layer.
+- Adapters must be replaceable, observable, testable, and provider-agnostic from the perspective of domain services.
 
-NaijaDeals is a production-ready enterprise software platform.
+## 4. Event-Driven Architecture Law
 
-Every implementation must support long-term scalability.
+- Cross-service workflow coordination must use governed events and owned authoritative state.
+- Producers own event truth; consumers own idempotent handling.
+- Financial, privileged, and user-impacting asynchronous workflows must support replay-safe processing, DLQ governance, and audit evidence.
+- No team may invent one-off event naming, retry behavior, or replay tooling outside the architecture baseline.
 
----
+## 5. Documentation Discipline
 
-# 2. ECOSYSTEM PHILOSOPHY
+- Architecture and standards documents are permanent project memory.
+- Every material engineering decision must update the relevant governing document before or with the implementation change.
+- Never create duplicate standards files for the same concern unless explicitly approved.
 
-NaijaDeals is ONE platform.
+## 6. Milestone Discipline
 
-It is NOT multiple independent applications.
+- Phase boundaries are strict.
+- No implementation starts because a document exists; implementation starts only after final milestone authorization.
+- Future-reference modules remain excluded until scope change approval is recorded.
 
-Every module shares:
+## 7. Privileged Action Law
 
-- Identity
-- Wallet
-- Escrow
-- Trust
-- Search
-- Notifications
-- Messaging
-- Audit
-- AI
-- Analytics
+- Any privileged action listed in `docs/MASTER_PERMISSION_MATRIX.md` must obey required role, approval, maker-checker, audit, notification, and emergency-override rules.
+- No developer or operator may bypass privileged-action governance because “it was urgent.” Urgency is a reason to follow emergency rules, not ignore them.
+- Emergency access must be time-bound, attributable, and post-reviewed.
 
-Never duplicate these systems.
+## 8. Security
 
----
+- Least privilege, defense in depth, zero hardcoded secrets, encrypted sensitive data, and comprehensive audit trails are mandatory.
+- Role-based and permission-based access must be enforced at API, service, worker, job, and admin-action level.
 
-# 3. OFFICIAL IMPLEMENTATION REFERENCES
+## 9. Testing
 
-The following documents are contractual engineering references.
+- Required future layers: unit, integration, contract, end-to-end, security, performance, observability, and regression testing.
+- High-risk domains (payments, escrow, trust, moderation, identity, AI actions, privileged actions, notification replay) require extra scenario coverage and replay-safe validation.
 
-They MUST be followed.
+## 10. Route and Scope Law
 
-- Google Stitch UI/UX Atlas
-- Workflow Atlas
-- Architecture Atlas
-- Operations Atlas
-- AI Atlas
-- Prompt Library
-- PROJECT_RULES.md
-- ARCHITECTURE.md
+- Every route must belong to Current Approved Scope or Future Reference Only.
+- No Future Reference Only module may receive active delivery scope, production route activation, or acceptance criteria unless change control reclassifies it.
 
----
+## 11. AI Policy
 
-# 4. STITCH RULE
+- AI is an assistive, governed platform capability, not an unbounded decision authority.
+- Any AI action that changes money, trust, moderation state, permissions, compliance posture, or contractual outcome must support human approval where policy requires it.
+- AI memory, prompt versioning, rate limits, cost budgets, fallback, and audit logging are mandatory governed concerns.
 
-Google Stitch is the official UI/UX reference.
+## 12. No Duplicate Systems
 
-However:
+- One wallet platform, one escrow platform, one notification platform, one messaging platform, one trust engine, one route taxonomy, one canonical component system.
+- Variants may exist only as configuration, not architecture forks.
 
-DO NOT blindly copy Stitch.
+## 13. Enforcement
 
-Instead:
-
-Review every screen.
-
-Identify:
-
-- Missing screens
-- Missing dashboards
-- Missing workflows
-- Missing APIs
-- Missing automation
-- Missing AI
-- Missing permissions
-- Missing database entities
-
-Improve Stitch where necessary.
-
-Never reduce functionality because Stitch omitted something.
-
----
-
-# 5. FOUNDATION FIRST
-
-Build in this order:
-
-Identity
-
-↓
-
-Wallet
-
-↓
-
-Escrow
-
-↓
-
-Trust
-
-↓
-
-Notifications
-
-↓
-
-Messaging
-
-↓
-
-Search
-
-↓
-
-Audit
-
-↓
-
-Analytics
-
-↓
-
-Aura AI
-
-↓
-
-Commerce
-
-↓
-
-Logistics
-
-↓
-
-Marketplace Modules
-
----
-
-# 6. SHARED SERVICES
-
-Every module MUST reuse:
-
-Authentication
-
-Authorization
-
-Wallet
-
-Escrow
-
-Trust
-
-Messaging
-
-Notifications
-
-AI
-
-Search
-
-Support
-
-Audit
-
-Analytics
-
-Never create duplicates.
-
----
-
-# 7. TECHNOLOGY STACK
-
-Frontend
-
-Next.js
-
-TypeScript
-
-TailwindCSS
-
-Backend
-
-Node.js
-
-TypeScript
-
-REST APIs
-
-Database
-
-PostgreSQL
-
-Caching
-
-Redis
-
-Automation
-
-n8n
-
-Containers
-
-Docker
-
-Infrastructure
-
-KVM2
-
-KVM4
-
-Google Cloud (where beneficial)
-
-Maps
-
-Google Maps Platform
-
-AI
-
-OpenAI (Primary)
-
-Google Gemini (Secondary)
-
-Claude (Optional Fallback)
-
-Never hardcode a single AI provider.
-
-Always use provider abstraction.
-
----
-
-# 8. DEVELOPMENT STANDARD
-
-Every feature must be:
-
-Production Ready
-
-Database Connected
-
-API Connected
-
-Authenticated
-
-Authorized
-
-Documented
-
-Tested
-
-Audited
-
-No fake implementations.
-
----
-
-# 9. ABSOLUTELY PROHIBITED
-
-Do NOT create:
-
-Fake dashboards
-
-Hardcoded JSON pretending to be backend
-
-Fake wallet balances
-
-Fake shipment tracking
-
-Fake analytics
-
-Placeholder APIs
-
-Temporary production code
-
-Business logic in frontend
-
-Secrets inside repository
-
-Duplicate authentication systems
-
-Duplicate wallet systems
-
-Duplicate AI systems
-
----
-
-# 10. EVERY SCREEN MUST WORK
-
-Every screen must:
-
-Save data
-
-Retrieve data
-
-Validate data
-
-Call APIs
-
-Enforce permissions
-
-Generate audit logs
-
-Use shared services
-
----
-
-# 11. SECURITY
-
-Never:
-
-Commit secrets
-
-Commit API keys
-
-Commit passwords
-
-Commit JWT secrets
-
-Store secrets in frontend
-
-Always:
-
-Use .env
-
-Use secret management
-
-Use RBAC
-
-Use audit logs
-
----
-
-# 12. GITHUB
-
-Every feature:
-
-Commit
-
-Push
-
-Document
-
-Never leave work only on local machine.
-
----
-
-# 13. DATABASE
-
-Every change requires:
-
-Migration
-
-Indexes
-
-Relationships
-
-Constraints
-
-Documentation
-
----
-
-# 14. APIs
-
-Every endpoint must have:
-
-Authentication
-
-Authorization
-
-Validation
-
-Error handling
-
-Logging
-
-Documentation
-
----
-
-# 15. AI
-
-Aura AI controls all AI.
-
-Never directly connect frontend to OpenAI.
-
-Always:
-
-Frontend
-
-↓
-
-Backend
-
-↓
-
-Aura AI
-
-↓
-
-Provider Router
-
-↓
-
-AI Provider
-
----
-
-# 16. N8N
-
-Automation belongs inside n8n.
-
-Business logic belongs inside backend.
-
-Never place core business logic exclusively inside n8n.
-
----
-
-# 17. GOOGLE SERVICES
-
-Google services are encouraged for:
-
-Maps
-
-GPS
-
-Navigation
-
-Firebase
-
-Gemini
-
-Cloud Monitoring
-
-Cloud Logging
-
-OAuth
-
-But:
-
-Core application remains deployable without Google Cloud.
-
-Avoid vendor lock-in.
-
----
-
-# 18. CODE QUALITY
-
-Every pull request should improve:
-
-Performance
-
-Security
-
-Readability
-
-Scalability
-
-Maintainability
-
-Documentation
-
-Never reduce code quality.
-
----
-
-# 19. DOCUMENTATION
-
-Every completed feature requires documentation.
-
-Minimum:
-
-README updates
-
-API documentation
-
-Database documentation
-
-Deployment notes
-
----
-
-# 20. DEVELOPER DUTY
-
-Every developer has a professional obligation to identify:
-
-Missing workflows
-
-Missing dashboards
-
-Missing APIs
-
-Missing AI
-
-Missing automation
-
-Security weaknesses
-
-Performance issues
-
-Scalability risks
-
-Do NOT silently ignore these issues.
-
-Document them.
-
-Recommend improvements.
-
----
-
-# 21. FUTURE MODULES
-
-The architecture must support:
-
-NaijaWholesale
-
-NaijaAgro
-
-NaijaStay
-
-NaijaGigs
-
-NaijaStream
-
-NaijaHealth
-
-NaijaJobs
-
-NaijaLearn
-
-NaijaInsurance
-
-without architectural redesign.
-
----
-
-# 22. FINAL RULE
-
-Every commit should make NaijaDeals closer to becoming Africa's most trusted digital super ecosystem.
-
-If a change makes the architecture worse,
-
-DO NOT MERGE IT.
+- Any contribution that violates these rules must be rejected or reworked before merge.

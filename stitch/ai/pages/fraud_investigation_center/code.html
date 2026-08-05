@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aura AI | Fraud Investigation Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px rgba(221, 225, 255, 0.2); opacity: 0.8; }
+            50% { box-shadow: 0 0 20px rgba(221, 225, 255, 0.5); opacity: 1; }
+            100% { box-shadow: 0 0 5px rgba(221, 225, 255, 0.2); opacity: 0.8; }
+        }
+        .status-pulse { animation: pulse-glow 2s infinite ease-in-out; }
+        .glass-panel { backdrop-filter: blur(8px); border: 1px solid #434656; }
+        .terminal-scroll::-webkit-scrollbar { width: 4px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: #11131c; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #343438; }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(221, 225, 255, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "glass-bg": "rgba(29, 31, 41, 0.8)",
+                        "on-tertiary-container": "#7b4436",
+                        "on-surface-variant": "#c6c5d0",
+                        "surface-container-highest": "#343438",
+                        "surface": "#131317",
+                        "on-surface": "#e4e1e6",
+                        "on-primary-fixed": "#071749",
+                        "primary-container": "#b7c4ff",
+                        "surface-tint": "#b7c4ff",
+                        "on-tertiary-fixed-variant": "#6c382b",
+                        "surface-variant": "#343438",
+                        "secondary-container": "#38485d",
+                        "outline-variant": "#45464f",
+                        "on-primary": "#1f2d5e",
+                        "error": "#ffb4ab",
+                        "secondary": "#b7c8e1",
+                        "on-tertiary": "#512317",
+                        "on-secondary-container": "#a6b6cf",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "inverse-on-surface": "#303034",
+                        "outline": "#90909a",
+                        "surface-container-low": "#1b1b1f",
+                        "on-background": "#e4e1e6",
+                        "primary": "#dde1ff",
+                        "on-primary-container": "#435083",
+                        "tertiary-fixed": "#ffdbd2",
+                        "surface-container-high": "#292a2d",
+                        "inverse-surface": "#e4e1e6",
+                        "surface-bright": "#39393d",
+                        "terminal-green": "#00ff41",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#ffb5a2",
+                        "surface-container": "#1d1f29",
+                        "on-secondary-fixed": "#0b1c2f",
+                        "secondary-fixed": "#d3e4fe",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "primary-fixed": "#dce1ff",
+                        "tertiary": "#ffdbd2",
+                        "auth-error": "#ffb4ab",
+                        "inverse-primary": "#4f5c90",
+                        "tertiary-fixed-dim": "#ffb4a2",
+                        "error-container": "#93000a",
+                        "surface-dim": "#131317",
+                        "on-tertiary-fixed": "#360e05",
+                        "on-primary-fixed-variant": "#374476",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-secondary": "#213145",
+                        "surface-container-lowest": "#0d0e11",
+                        "background": "#11131c",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-tight": "0.5rem",
+                        "sidebar-width": "288px",
+                        "container-padding": "1.5rem",
+                        "gutter": "12px",
+                        "unit": "4px",
+                        "header-height": "64px",
+                        "stack-default": "1rem"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["Inter"],
+                        "micro-tag": ["Inter"],
+                        "body-base": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "code-terminal": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                        "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-base selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full h-header-height bg-glass-bg dark:bg-glass-bg border-b border-outline-variant backdrop-blur-md z-50 flex items-center justify-between px-container-padding">
+<div class="flex items-center gap-stack-tight">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<h1 class="text-headline-md font-display-lg font-bold tracking-tighter text-primary uppercase">CORE OPERATIONS</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4">
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors">SYSTEM_LOGS</button>
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors">NETWORK_STATUS</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="sensors">sensors</span>
+<div class="h-2 w-2 rounded-full bg-terminal-green status-pulse"></div>
+</div>
+</div>
+</header>
+<!-- NavigationDrawer (Desktop) -->
+<aside class="fixed left-0 top-header-height w-sidebar-width h-[calc(100vh-64px)] bg-surface-container dark:bg-surface-container border-r border-outline-variant hidden md:flex flex-col py-stack-default gap-unit">
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-secondary-container flex items-center justify-center border border-outline">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-primary font-bold">OP-7 ROOT</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Institutional Admin</p>
+</div>
+<div class="ml-auto">
+<span class="text-[9px] px-1 bg-terminal-green/20 text-terminal-green border border-terminal-green/30 rounded">ACTIVE</span>
+</div>
+</div>
+<nav class="flex flex-col gap-1 px-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-caps text-label-caps uppercase">Command Center</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg border-l-2 border-primary bg-secondary-container/30 text-primary font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="emergency_home">emergency_home</span>
+<span class="font-label-caps text-label-caps uppercase">Incidents</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+<span class="font-label-caps text-label-caps uppercase">Disputes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="policy">policy</span>
+<span class="font-label-caps text-label-caps uppercase">Compliance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-label-caps text-label-caps uppercase">Fraud</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="font-label-caps text-label-caps uppercase">Emergency</span>
+</a>
+</nav>
+<div class="mt-auto px-6 py-4">
+<div class="p-3 bg-surface-variant/30 border border-outline-variant rounded-lg">
+<p class="font-code-terminal text-code-terminal text-primary mb-2">AURA_AI_LOAD: 12%</p>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[12%]"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-20 md:pb-8 md:pl-[304px] pr-6 min-h-screen">
+<div class="flex flex-col gap-8 max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-primary font-code-terminal text-code-terminal">MODULE // FRAUD_INVESTIGATION_CENTER</span>
+<span class="h-px w-8 bg-outline-variant"></span>
+<span class="text-on-surface-variant font-code-terminal text-code-terminal">AURA ENGINE v4.2</span>
+</div>
+<h2 class="font-display-lg text-display-lg uppercase tracking-tight">Active Threat Landscape</h2>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-variant px-4 py-2 rounded-lg font-label-caps text-label-caps flex items-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="refresh">refresh</span>
+                        SYNC_DATA
+                    </button>
+<button class="bg-primary px-4 py-2 rounded-lg font-label-caps text-label-caps text-on-primary flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="bolt">bolt</span>
+                        RUN_HEURISTICS
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Dashboard -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Risk Heatmap (Large) -->
+<div class="md:col-span-8 h-96 glass-panel rounded-xl relative overflow-hidden bg-surface-container p-6 group">
+<div class="scanline"></div>
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-label-caps text-label-caps text-on-surface tracking-widest">Global Transaction Graph</h3>
+<div class="flex gap-2">
+<span class="flex items-center gap-1 text-[9px] font-bold text-terminal-green">
+<span class="h-1.5 w-1.5 rounded-full bg-terminal-green"></span> SECURE
+                            </span>
+<span class="flex items-center gap-1 text-[9px] font-bold text-error">
+<span class="h-1.5 w-1.5 rounded-full bg-error status-pulse"></span> ANOMALY
+                            </span>
+</div>
+</div>
+<div class="relative w-full h-64 border border-outline-variant/30 rounded flex items-center justify-center">
+
+<!-- Interaction Overlay -->
+<div class="z-10 text-center">
+<p class="font-code-terminal text-code-terminal text-on-surface-variant">INTERACTIVE_NODE_MAPPING_LIVE</p>
+<p class="text-[10px] text-outline">Click nodes to investigate specific clusters</p>
+</div>
+</div>
+<div class="mt-4 grid grid-cols-4 gap-4 border-t border-outline-variant pt-4">
+<div>
+<p class="text-[9px] text-outline uppercase font-bold">Latency</p>
+<p class="font-code-terminal text-primary">12ms</p>
+</div>
+<div>
+<p class="text-[9px] text-outline uppercase font-bold">Flow_Rate</p>
+<p class="font-code-terminal text-primary">4.2k/s</p>
+</div>
+<div>
+<p class="text-[9px] text-outline uppercase font-bold">Active_Nodes</p>
+<p class="font-code-terminal text-primary">102,491</p>
+</div>
+<div>
+<p class="text-[9px] text-outline uppercase font-bold">Threat_Level</p>
+<p class="font-code-terminal text-error">CRITICAL</p>
+</div>
+</div>
+</div>
+<!-- Alert Feed (Medium Vertical) -->
+<div class="md:col-span-4 h-96 glass-panel rounded-xl bg-surface-container overflow-hidden flex flex-col border-t-4 border-error">
+<div class="p-4 bg-error/10 flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-error">PRIORITY_ALERTS</span>
+<span class="bg-error text-on-error px-2 py-0.5 text-[9px] font-bold rounded">12 NEW</span>
+</div>
+<div class="flex-1 overflow-y-auto terminal-scroll p-4 space-y-4 font-code-terminal text-[11px]">
+<div class="p-2 border-l-2 border-error bg-error/5 hover:bg-error/10 cursor-pointer transition-colors">
+<p class="text-error mb-1">[!] MULTI_ENTITY_COLLUSION</p>
+<p class="text-on-surface-variant">Escrow Node #8821 triggered cluster detection. Patterns match "NaijaDeals-2023-V" breach.</p>
+<p class="text-outline mt-1 text-[9px]">T-MINUS: 00:04:12</p>
+</div>
+<div class="p-2 border-l-2 border-tertiary-fixed bg-tertiary-fixed/5 hover:bg-tertiary-fixed/10 cursor-pointer transition-colors">
+<p class="text-tertiary-fixed mb-1">[?] UNUSUAL_LOGISTICS_DELAY</p>
+<p class="text-on-surface-variant">Shipment 9A2-Z flagged. Rerouting outside designated zone.</p>
+<p class="text-outline mt-1 text-[9px]">T-MINUS: 00:12:44</p>
+</div>
+<div class="p-2 border-l-2 border-error bg-error/5 hover:bg-error/10 cursor-pointer transition-colors">
+<p class="text-error mb-1">[!] WALLET_DRAIN_PATTERN</p>
+<p class="text-on-surface-variant">Wallet 0x442...FE rapidly offboarding to 12 distinct KYC-tier-0 accounts.</p>
+<p class="text-outline mt-1 text-[9px]">T-MINUS: 00:15:02</p>
+</div>
+<div class="p-2 border-l-2 border-primary bg-primary/5 hover:bg-primary/10 cursor-pointer transition-colors">
+<p class="text-primary mb-1">[i] ID_VERIFICATION_MISMATCH</p>
+<p class="text-on-surface-variant">High-value claim for User_901. FaceID variance &gt; 12%.</p>
+<p class="text-outline mt-1 text-[9px]">T-MINUS: 00:22:31</p>
+</div>
+</div>
+</div>
+<!-- Risk Score Card (Small) -->
+<div class="md:col-span-3 h-48 glass-panel rounded-xl bg-surface-container p-5 flex flex-col justify-between hover:scale-[0.98] transition-transform">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="account_balance_wallet">account_balance_wallet</span>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant">WALLET RISK</h4>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-terminal-green">24</span>
+<span class="text-[10px] text-outline uppercase">Very Low</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full">
+<div class="bg-terminal-green h-full w-[24%]"></div>
+</div>
+</div>
+<!-- Escrow Risk (Small) -->
+<div class="md:col-span-3 h-48 glass-panel rounded-xl bg-surface-container p-5 flex flex-col justify-between hover:scale-[0.98] transition-transform">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[20px]" data-icon="vpn_key">vpn_key</span>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant">ESCROW DRIFT</h4>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-tertiary">68</span>
+<span class="text-[10px] text-outline uppercase">Elevated</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full">
+<div class="bg-tertiary h-full w-[68%]"></div>
+</div>
+</div>
+<!-- Logistics Risk (Small) -->
+<div class="md:col-span-3 h-48 glass-panel rounded-xl bg-surface-container p-5 flex flex-col justify-between hover:scale-[0.98] transition-transform">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="local_shipping">local_shipping</span>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant">LOGISTICS INTEGRITY</h4>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-primary">12</span>
+<span class="text-[10px] text-outline uppercase">Optimal</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full">
+<div class="bg-primary h-full w-[12%]"></div>
+</div>
+</div>
+<!-- Claims Risk (Small) -->
+<div class="md:col-span-3 h-48 glass-panel rounded-xl bg-surface-container p-5 flex flex-col justify-between hover:scale-[0.98] transition-transform">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-[20px]" data-icon="report">report</span>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant">CLAIMS VOLATILITY</h4>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-error">91</span>
+<span class="text-[10px] text-outline uppercase">Critical</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full">
+<div class="bg-error h-full w-[91%] shadow-[0_0_10px_rgba(255,180,171,0.5)]"></div>
+</div>
+</div>
+<!-- Investigation Focus (Wide) -->
+<div class="md:col-span-12 glass-panel rounded-xl bg-surface-container overflow-hidden">
+<div class="p-6 flex flex-col md:flex-row gap-8">
+<div class="md:w-1/3 flex flex-col gap-4">
+<div class="bg-surface-variant/30 p-4 rounded-lg border border-outline-variant">
+<p class="text-[10px] text-primary uppercase font-bold tracking-widest mb-4">Subject Profile</p>
+<div class="flex items-center gap-4 mb-4">
+<div class="w-16 h-16 rounded bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" data-alt="A portrait of a mysterious tech operator, illuminated by neon blue and red lights, wearing tactical streetwear and futuristic glasses, set against a background of scrolling code and data streams in a dark cyberpunk environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU9zJRpliwi56sToPqE1CO6p-1bNbNaJOgBC7L0tVZsrr820qu_AU9TJwXbApgfA2N8Z3t1pXlpZvL4eWeorqoOyw6Gj4BqFqR8DgiraDxhk76gWpNl9_ENfpUCdaiXxfKWwAqGbQuYgSusptHTspstpKOwbLPBz4z-KUjDU5Su3_mLFbkbC3H7AqXgTxeG6oa3_BpaC1bDAKb7B_F8G54BbSS0lTr6u0MNvmC0VReyxBXn7da2m_5jugcimEXbWlG4y2tg9blc0Q"/>
+</div>
+<div>
+<p class="font-bold text-on-surface">ENTITY_ID: NX-721</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[9px] bg-primary/20 text-primary px-1.5 rounded">TRUST: 890</span>
+<span class="text-[9px] bg-error/20 text-error px-1.5 rounded">FLAGGED</span>
+</div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-[11px]">
+<span class="text-outline">NaijaDeals Rank:</span>
+<span class="text-primary font-bold">Top 2% (Legacy)</span>
+</div>
+<div class="flex justify-between text-[11px]">
+<span class="text-outline">Verified Identity:</span>
+<span class="text-terminal-green">CONFIRMED_L3</span>
+</div>
+<div class="flex justify-between text-[11px]">
+<span class="text-outline">Historical Integrity:</span>
+<span class="text-primary">99.8%</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<button class="bg-error text-on-error py-3 rounded font-label-caps text-label-caps flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="block">block</span>
+                                    FREEZE_ACC
+                                </button>
+<button class="bg-surface-variant text-on-surface py-3 rounded font-label-caps text-label-caps flex items-center justify-center gap-2 hover:bg-outline-variant transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="flag">flag</span>
+                                    FLAG_NODE
+                                </button>
+</div>
+</div>
+<div class="md:w-2/3">
+<h5 class="font-label-caps text-label-caps text-on-surface-variant mb-4 uppercase tracking-widest">Aura AI Anomaly Deduction</h5>
+<div class="bg-background/80 p-6 rounded-lg font-code-terminal text-code-terminal relative border border-primary/20">
+<div class="absolute top-2 right-2 flex gap-1">
+<span class="h-1.5 w-1.5 rounded-full bg-primary/40"></span>
+<span class="h-1.5 w-1.5 rounded-full bg-primary/40"></span>
+<span class="h-1.5 w-1.5 rounded-full bg-primary/40"></span>
+</div>
+<p class="text-primary mb-4 leading-relaxed">
+<span class="text-outline font-bold">DEDUCTION &gt; </span> High-probability account takeover. Subject <span class="text-on-surface">NX-721</span> exhibits atypical behavior patterns. Signature mismatch detected in Logistics module (Lat: 6.52, Long: 3.37). Wallet offloading commenced at 03:02 UTC. 
+                                </p>
+<p class="text-primary mb-4 leading-relaxed">
+<span class="text-outline font-bold">CORRELATION &gt; </span> 82% match with 'Shadow-Pulse' exploit vector. Cross-referencing NaijaDeals historical trust metrics suggests this entity was compromised via a session-hijack rather than credential failure.
+                                </p>
+<div class="flex flex-wrap gap-2 mt-6">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant rounded text-[10px] text-on-surface-variant">#SESSION_HIJACK</span>
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant rounded text-[10px] text-on-surface-variant">#LOGISTICS_ANOMALY</span>
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant rounded text-[10px] text-on-surface-variant">#PRIORITY_ALPHA</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 md:hidden bg-surface-container-highest border-t border-primary/20 backdrop-blur-lg flex justify-around items-center px-4 py-2 rounded-t-xl shadow-[0_-4px_20px_rgba(221,225,255,0.1)]">
+<a class="flex flex-col items-center justify-center text-outline p-2 hover:text-primary transition-transform active:scale-90 duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</a>
+<a class="flex flex-col items-center justify-center text-outline p-2 hover:text-primary transition-transform active:scale-90 duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+</a>
+<div class="relative -top-4">
+<button class="bg-primary text-on-primary w-14 h-14 rounded-full flex items-center justify-center shadow-lg status-pulse active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[28px]" data-icon="security">security</span>
+</button>
+</div>
+<a class="flex flex-col items-center justify-center text-outline p-2 hover:text-primary transition-transform active:scale-90 duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-lg p-2 scale-110 active:scale-90 duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions and real-time feel
+        document.addEventListener('DOMContentLoaded', () => {
+            const riskCards = document.querySelectorAll('.glass-panel');
+            riskCards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                });
+            });
+
+            // Simulate terminal logs periodically
+            const logContainer = document.querySelector('.terminal-scroll');
+            const addLog = (text, type = 'INFO') => {
+                const log = document.createElement('div');
+                log.className = 'p-2 border-l-2 border-primary/30 bg-primary/5 hover:bg-primary/10 cursor-pointer transition-colors';
+                const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+                log.innerHTML = `<p class="text-primary mb-1">[${time}] ${type}</p><p class="text-on-surface-variant">${text}</p>`;
+                logContainer.prepend(log);
+                if (logContainer.children.length > 10) logContainer.lastElementChild.remove();
+            };
+
+            setInterval(() => {
+                const logs = [
+                    "Checking Escrow #8821 verification tokens...",
+                    "Cross-referencing NaijaDeals score for NX-721.",
+                    "Heuristics engine scan complete. No new threats.",
+                    "Logistics node update: Lagos Port clearance confirmed.",
+                    "Incoming API call from Identity Service L3."
+                ];
+                addLog(logs[Math.floor(Math.random() * logs.length)]);
+            }, 8000);
+        });
+    </script>
+</body></html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaDrive | Operational Protocol</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(144, 144, 154, 0.2);
+        }
+        .pulse-status {
+            box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 255, 65, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); }
+        }
+        .flow-line {
+            background: linear-gradient(90deg, transparent, #00ff41, transparent);
+            background-size: 200% 100%;
+            animation: flow 2.5s linear infinite;
+        }
+        @keyframes flow {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .terminal-scroll::-webkit-scrollbar { width: 3px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #32343f; }
+        
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 255, 65, 0.1);
+            position: absolute;
+            animation: scan 4s linear infinite;
+            z-index: 20;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#dde1ff",
+                        "on-primary": "#1f2d5e",
+                        "primary-container": "#b7c4ff",
+                        "on-primary-container": "#435083",
+                        "secondary": "#b7c8e1",
+                        "on-secondary": "#213145",
+                        "tertiary": "#ffdbd2",
+                        "on-tertiary": "#512317",
+                        "surface": "#131317",
+                        "surface-dim": "#131317",
+                        "surface-bright": "#39393d",
+                        "surface-container-lowest": "#0d0e11",
+                        "surface-container-low": "#1b1b1f",
+                        "surface-container": "#1d1f29",
+                        "surface-container-high": "#292a2d",
+                        "surface-container-highest": "#343438",
+                        "background": "#11131c",
+                        "on-background": "#e4e1e6",
+                        "on-surface": "#e4e1e6",
+                        "on-surface-variant": "#c6c5d0",
+                        "outline": "#90909a",
+                        "outline-variant": "#45464f",
+                        "terminal-green": "#00ff41",
+                        "glass-bg": "rgba(29, 31, 41, 0.8)"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sidebar-width": "288px",
+                        "header-height": "64px",
+                        "unit": "4px",
+                        "gutter": "12px",
+                        "container-padding": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-base": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "code-terminal": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-base selection:bg-terminal-green/30 selection:text-terminal-green overflow-hidden h-screen flex">
+<!-- Sidebar (Desktop) -->
+<aside class="hidden lg:flex flex-col h-full w-sidebar-width bg-surface-container-lowest border-r border-outline-variant py-6 shrink-0 z-50">
+<div class="px-6 mb-8">
+<h2 class="text-[11px] font-code-terminal text-terminal-green uppercase tracking-[0.2em] opacity-60">System Registry</h2>
+</div>
+<nav class="flex-1 space-y-1 overflow-y-auto px-3">
+<a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-variant/20 group transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">NaijaShop</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 bg-terminal-green/5 text-terminal-green border-r-2 border-terminal-green" href="#">
+<span class="material-symbols-outlined text-[20px]">directions_car</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">NaijaDrive</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-variant/20 group transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">NaijaPay</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-variant/20 group transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">NaijaTrust</span>
+</a>
+</nav>
+<div class="px-6 pt-6 border-t border-outline-variant/30 mt-auto">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-1.5 h-1.5 rounded-full bg-terminal-green pulse-status"></div>
+<span class="text-[9px] font-code-terminal text-terminal-green uppercase">Encrypted Connection</span>
+</div>
+<p class="text-[8px] font-code-terminal text-on-surface-variant/40">SEC-ID: 882-NJA-CORE</p>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden">
+<!-- Header -->
+<header class="fixed top-0 w-full lg:w-[calc(100%-288px)] lg:left-[288px] z-50 flex items-center justify-between px-6 h-header-height bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/30">
+<div class="flex items-center gap-4">
+<button class="lg:hidden p-2 text-on-surface-variant">
+<span class="material-symbols-outlined">menu_open</span>
+</button>
+<div class="flex flex-col">
+<h1 class="text-[14px] font-bold text-terminal-green uppercase tracking-widest font-display-lg">Protocol: NaijaDrive.sys</h1>
+<p class="text-[9px] font-code-terminal text-on-surface-variant/60 -mt-0.5">CORE OPERATIONAL FRAMEWORK V4.2</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex flex-col items-end mr-4">
+<span class="text-[9px] font-code-terminal text-terminal-green">LATENCY: 12ms</span>
+<span class="text-[9px] font-code-terminal text-on-surface-variant">UPTIME: 99.998%</span>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant/30 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">settings_input_component</span>
+</button>
+</div>
+</header>
+<!-- Scrollable Body -->
+<div class="flex-1 overflow-y-auto pt-header-height pb-20 lg:pb-8 px-container-padding">
+<div class="max-w-7xl mx-auto py-8 space-y-6">
+<!-- Hero Telemetry -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+<div class="lg:col-span-3 glass-panel p-6 border-l-2 border-l-terminal-green relative overflow-hidden group">
+<div class="scanline opacity-10"></div>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 relative z-10">
+<div>
+<span class="text-[10px] font-code-terminal text-terminal-green bg-terminal-green/10 px-2 py-0.5 rounded uppercase mb-2 inline-block">Security Clearance: ALPHA</span>
+<h2 class="text-2xl font-bold font-display-lg tracking-tight">Hyper-Connected Mobility Logic</h2>
+</div>
+<div class="flex gap-4">
+<div class="text-center px-4 py-2 bg-surface-container-highest/30 border border-outline-variant/30 rounded">
+<p class="text-[18px] font-code-terminal text-terminal-green">14,202</p>
+<p class="text-[8px] font-code-terminal uppercase opacity-60">Active Nodes</p>
+</div>
+<div class="text-center px-4 py-2 bg-surface-container-highest/30 border border-outline-variant/30 rounded">
+<p class="text-[18px] font-code-terminal text-primary">99.8%</p>
+<p class="text-[8px] font-code-terminal uppercase opacity-60">Safety Score</p>
+</div>
+</div>
+</div>
+<p class="text-[13px] text-on-surface-variant leading-relaxed max-w-3xl font-body-base">
+                        Executing automated transit orchestration. This protocol visualizes the high-frequency handshake between the <span class="text-terminal-green">Rider Terminal</span>, <span class="text-secondary">Node Operator</span>, and the <span class="text-primary">NaijaDeals Decentralized Core</span>.
+                    </p>
+</div>
+<div class="glass-panel p-6 bg-terminal-green/5 border border-terminal-green/20 flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-4xl text-terminal-green mb-2">radar</span>
+<p class="text-[10px] font-code-terminal uppercase text-terminal-green mb-1">Grid Status</p>
+<p class="text-lg font-bold font-display-lg">OPERATIONAL</p>
+<div class="w-full h-1 bg-surface-container-highest rounded-full mt-4 overflow-hidden">
+<div class="h-full bg-terminal-green w-[88%] animate-pulse"></div>
+</div>
+</div>
+</div>
+<!-- Operational Flow Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Rider Protocol (Request-to-Drop) -->
+<div class="glass-panel border-t-2 border-t-primary p-6">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">login</span>
+<h3 class="text-[13px] font-bold uppercase tracking-widest text-primary">Rider Interaction Layer</h3>
+</div>
+<span class="text-[9px] font-code-terminal text-on-surface-variant/60">ID: RP_770-X</span>
+</div>
+<div class="space-y-0 relative">
+<!-- Vertical line -->
+<div class="absolute left-[15px] top-4 bottom-4 w-px bg-outline-variant/30"></div>
+<!-- Step 1 -->
+<div class="relative pl-10 pb-8">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center z-10">
+<span class="text-[10px] font-code-terminal text-primary">01</span>
+</div>
+<div class="p-3 bg-surface-container-low/50 border border-outline-variant/30 rounded">
+<p class="text-[11px] font-bold uppercase mb-1">Initialize Request</p>
+<p class="text-[12px] text-on-surface-variant mb-2">Geo-fenced node identification triggered via AI mesh.</p>
+<div class="flex gap-2">
+<span class="text-[8px] font-code-terminal bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20 uppercase">Auth Verifying</span>
+</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="relative pl-10 pb-8">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center z-10">
+<span class="text-[10px] font-code-terminal text-primary">02</span>
+</div>
+<div class="p-3 bg-surface-container-low/50 border border-outline-variant/30 rounded">
+<p class="text-[11px] font-bold uppercase mb-1">Escrow Commitment</p>
+<p class="text-[12px] text-on-surface-variant">Funds locked in secure escrow via <span class="text-primary font-bold">NaijaPay</span> ledger before dispatch.</p>
+<div class="mt-2 h-1 bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-2/3"></div>
+</div>
+</div>
+</div>
+<!-- Step 3 (Active) -->
+<div class="relative pl-10 pb-8">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center z-10 shadow-[0_0_15px_rgba(221,225,255,0.4)]">
+<span class="material-symbols-outlined text-[16px]">qr_code_2</span>
+</div>
+<div class="p-4 bg-primary/5 border border-primary/40 rounded-lg">
+<div class="flex justify-between items-start mb-2">
+<p class="text-[11px] font-bold uppercase text-primary">Failsafe Boarding</p>
+<span class="text-[8px] font-code-terminal bg-terminal-green/20 text-terminal-green px-1.5 py-0.5 rounded">ENCRYPTED</span>
+</div>
+<p class="text-[12px] text-on-surface-variant leading-tight">Mutual OTP verification. GPS lock established. Ride active.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Driver Protocol (Online-to-Payout) -->
+<div class="glass-panel border-t-2 border-t-secondary p-6">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">sensors</span>
+<h3 class="text-[13px] font-bold uppercase tracking-widest text-secondary">Node Operator Layer</h3>
+</div>
+<span class="text-[9px] font-code-terminal text-on-surface-variant/60">ID: DP_992-K</span>
+</div>
+<div class="space-y-0 relative">
+<div class="absolute left-[15px] top-4 bottom-4 w-px bg-outline-variant/30"></div>
+<div class="relative pl-10 pb-8">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center z-10">
+<span class="text-[10px] font-code-terminal text-secondary">A</span>
+</div>
+<div class="p-3 bg-surface-container-low/50 border border-outline-variant/30 rounded">
+<p class="text-[11px] font-bold uppercase mb-1">Registry Heartbeat</p>
+<p class="text-[12px] text-on-surface-variant">Biometric identity sync with <span class="text-secondary font-bold">NaijaDeals Identity</span> core.</p>
+</div>
+</div>
+<div class="relative pl-10 pb-8">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center z-10">
+<span class="text-[10px] font-code-terminal text-secondary">B</span>
+</div>
+<div class="p-3 bg-surface-container-low/50 border border-outline-variant/30 rounded">
+<p class="text-[11px] font-bold uppercase mb-1">Optimal Matching</p>
+<p class="text-[12px] text-on-surface-variant">System evaluates trust rating &amp; proximity. Dispatch packet delivered.</p>
+</div>
+</div>
+<div class="relative pl-10 pb-8">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center z-10 shadow-[0_0_15px_rgba(183,200,225,0.4)]">
+<span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+</div>
+<div class="p-4 bg-secondary/5 border border-secondary/40 rounded-lg">
+<div class="flex justify-between items-start mb-2">
+<p class="text-[11px] font-bold uppercase text-secondary">Instant Settlement</p>
+<span class="text-[8px] font-code-terminal bg-terminal-green text-surface-container-lowest px-1.5 py-0.5 rounded font-bold">AUTO-PAY</span>
+</div>
+<p class="text-[12px] text-on-surface-variant leading-tight">Escrow release triggered upon drop-off geo-fence confirmation.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Infrastructure Core Integration -->
+<div class="glass-panel bg-surface-container-low border-t-2 border-t-terminal-green p-8">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+<div>
+<h3 class="text-lg font-bold font-display-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-terminal-green">dns</span>
+                            Infrastructure Layer: NaijaDeals Core
+                        </h3>
+<p class="text-[11px] text-on-surface-variant/60 font-code-terminal mt-1 uppercase tracking-wider">Foundation architecture for the mobility ecosystem</p>
+</div>
+<div class="flex gap-4">
+<div class="px-3 py-1 bg-terminal-green/10 border border-terminal-green/30 rounded flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-terminal-green"></div>
+<span class="text-[9px] font-code-terminal text-terminal-green uppercase">Sync-Core 01</span>
+</div>
+<div class="px-3 py-1 bg-terminal-green/10 border border-terminal-green/30 rounded flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-terminal-green"></div>
+<span class="text-[9px] font-code-terminal text-terminal-green uppercase">Sync-Core 02</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+<!-- Connectors (Hidden on Mobile) -->
+<div class="hidden md:block absolute top-[40px] left-[20%] right-[20%] h-0.5 bg-outline-variant/20 z-0">
+<div class="absolute inset-0 flow-line"></div>
+</div>
+<!-- Core Module: Identity -->
+<div class="flex flex-col items-center text-center group z-10">
+<div class="w-20 h-20 rounded-2xl glass-panel flex items-center justify-center border-secondary group-hover:bg-secondary/10 transition-colors mb-4">
+<span class="material-symbols-outlined text-3xl text-secondary">fingerprint</span>
+</div>
+<p class="text-[12px] font-bold uppercase tracking-widest mb-1">Universal ID</p>
+<p class="text-[10px] text-on-surface-variant max-w-[150px]">Encrypted biometric verified across all services.</p>
+</div>
+<!-- Core Module: Trust -->
+<div class="flex flex-col items-center text-center group z-10">
+<div class="w-24 h-24 rounded-full glass-panel flex items-center justify-center border-terminal-green bg-terminal-green/5 shadow-[0_0_30px_rgba(0,255,65,0.1)] mb-4">
+<span class="material-symbols-outlined text-4xl text-terminal-green">verified_user</span>
+</div>
+<p class="text-[12px] font-bold uppercase tracking-[0.2em] text-terminal-green mb-1">Trust Engine</p>
+<p class="text-[10px] text-on-surface-variant max-w-[180px]">Dynamic safety scores calculating mutual risk in real-time.</p>
+</div>
+<!-- Core Module: Pay -->
+<div class="flex flex-col items-center text-center group z-10">
+<div class="w-20 h-20 rounded-2xl glass-panel flex items-center justify-center border-primary group-hover:bg-primary/10 transition-colors mb-4">
+<span class="material-symbols-outlined text-3xl text-primary">token</span>
+</div>
+<p class="text-[12px] font-bold uppercase tracking-widest mb-1">NaijaPay</p>
+<p class="text-[10px] text-on-surface-variant max-w-[150px]">Unified wallet &amp; smart-contract escrow engine.</p>
+</div>
+</div>
+</div>
+<!-- System Log (Real-time Handshake Simulator) -->
+<div class="glass-panel bg-surface-container-lowest border-none overflow-hidden h-44 flex flex-col">
+<div class="bg-surface-container-high px-4 py-2 border-b border-outline-variant/30 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-error animate-pulse"></div>
+<span class="text-[10px] font-code-terminal uppercase">System Terminal — Monitoring Active</span>
+</div>
+<span class="text-[10px] font-code-terminal text-on-surface-variant/40">HOST: CORE-OS-LGS-01</span>
+</div>
+<div class="p-4 flex-1 overflow-y-auto terminal-scroll font-code-terminal text-[11px] leading-relaxed text-terminal-green/70">
+<p><span class="text-on-surface-variant/40">[09:41:02]</span> <span class="text-primary">INIT:</span> BROADCAST_RIDE_REQUEST_MESH (UID: 8229)</p>
+<p><span class="text-on-surface-variant/40">[09:41:02]</span> <span class="text-terminal-green">PING:</span> NEARBY_NODES (COUNT: 24) — AVG_LATENCY: 12ms</p>
+<p><span class="text-on-surface-variant/40">[09:41:03]</span> <span class="text-secondary">QUERY:</span> IDENTITY_VAULT_DECRYPT (STATUS: SUCCESS)</p>
+<p><span class="text-on-surface-variant/40">[09:41:03]</span> <span class="text-primary">PAY:</span> ESCROW_LOCK_FUNDS (AMT: 2,400.00 NJA)</p>
+<p><span class="text-on-surface-variant/40">[09:41:04]</span> <span class="text-terminal-green">MATCH:</span> NODE_ID_DRV_442 (SCORE: 0.998) — DISPATCHED</p>
+<p><span class="text-on-surface-variant/40">[09:41:05]</span> <span class="text-terminal-green">SYNC:</span> REALTIME_TRACKING_BUFFER_ACTIVE</p>
+<p><span class="text-on-surface-variant/40">[09:41:05]</span> <span class="text-on-surface">STATUS:</span> OPERATIONAL_PROTOCOL_EXECUTION_STABLE</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile Bottom Nav -->
+<nav class="lg:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface-container-lowest/90 border-t border-outline-variant/30 backdrop-blur-md h-16">
+<button class="flex flex-col items-center justify-center text-on-surface-variant group">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="text-[8px] font-bold uppercase tracking-tight">System</span>
+</button>
+<button class="flex flex-col items-center justify-center text-terminal-green">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-[8px] font-bold uppercase tracking-tight">Protocol</span>
+</button>
+<button class="w-12 h-12 bg-terminal-green text-surface-container-lowest rounded-full -mt-8 flex items-center justify-center shadow-lg border-4 border-background active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[24px]">directions_car</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">security</span>
+<span class="text-[8px] font-bold uppercase tracking-tight">Security</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">monitoring</span>
+<span class="text-[8px] font-bold uppercase tracking-tight">Data</span>
+</button>
+</nav>
+<script>
+    // Simple auto-scrolling terminal simulation
+    const terminal = document.querySelector('.terminal-scroll');
+    if (terminal) {
+        setInterval(() => {
+            terminal.scrollTop = terminal.scrollHeight;
+        }, 2000);
+    }
+
+    // Interactive Hover Effect
+    document.querySelectorAll('.glass-panel').forEach(panel => {
+        panel.addEventListener('mousemove', (e) => {
+            const rect = panel.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            panel.style.setProperty('--mouse-x', `${x}px`);
+            panel.style.setProperty('--mouse-y', `${y}px`);
+        });
+    });
+</script>
+</body></html>

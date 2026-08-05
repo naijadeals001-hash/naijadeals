@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Trust Engine Architecture | Cyber-Authority HUD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-tertiary-fixed": "#360e05",
+                "surface-dim": "#131317",
+                "error": "#ffb4ab",
+                "secondary": "#b7c8e1",
+                "on-tertiary": "#512317",
+                "inverse-primary": "#4f5c90",
+                "tertiary-fixed": "#ffdbd2",
+                "primary-container": "#b7c4ff",
+                "on-surface-variant": "#c6c5d0",
+                "glass-bg": "rgba(29, 31, 41, 0.8)",
+                "secondary-fixed": "#d3e4fe",
+                "surface-container": "#1d1f29",
+                "on-secondary-fixed-variant": "#38485d",
+                "on-primary-fixed-variant": "#374476",
+                "secondary-fixed-dim": "#b7c8e1",
+                "outline-variant": "#45464f",
+                "tertiary": "#ffdbd2",
+                "on-secondary": "#213145",
+                "on-primary": "#1f2d5e",
+                "tertiary-fixed-dim": "#ffb4a2",
+                "tertiary-container": "#ffb5a2",
+                "inverse-surface": "#e4e1e6",
+                "surface-tint": "#b7c4ff",
+                "on-secondary-fixed": "#0b1c2f",
+                "on-error": "#690005",
+                "on-tertiary-container": "#7b4436",
+                "on-surface": "#e4e1e6",
+                "outline": "#90909a",
+                "surface-container-highest": "#343438",
+                "error-container": "#93000a",
+                "on-primary-container": "#435083",
+                "primary": "#dde1ff",
+                "on-secondary-container": "#a6b6cf",
+                "surface-variant": "#343438",
+                "primary-fixed": "#dce1ff",
+                "on-tertiary-fixed-variant": "#6c382b",
+                "on-primary-fixed": "#071749",
+                "surface-bright": "#39393d",
+                "inverse-on-surface": "#303034",
+                "on-background": "#e4e1e6",
+                "surface-container-high": "#292a2d",
+                "surface": "#131317",
+                "secondary-container": "#38485d",
+                "on-error-container": "#ffdad6",
+                "primary-fixed-dim": "#b7c4ff",
+                "background": "#11131c",
+                "surface-container-low": "#1b1b1f",
+                "terminal-green": "#00ff41",
+                "surface-container-lowest": "#0d0e11",
+                "auth-error": "#ffb4ab"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+        },
+        "spacing": {
+                "sidebar-width": "288px",
+                "header-height": "64px",
+                "unit": "4px",
+                "stack-default": "1rem",
+                "gutter": "12px",
+                "stack-tight": "0.5rem",
+                "container-padding": "1.5rem"
+        },
+        "fontFamily": {
+                "display-lg": ["Plus Jakarta Sans"],
+                "body-base": ["Inter"],
+                "label-caps": ["Inter"],
+                "body-sm": ["Inter"],
+                "headline-md": ["Plus Jakarta Sans"],
+                "code-terminal": ["JetBrains Mono"],
+                "micro-tag": ["Inter"]
+        },
+        "fontSize": {
+                "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}]
+        }
+      },
+    },
+  }
+</script>
+<style>
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; filter: blur(8px); }
+            50% { opacity: 1; filter: blur(12px); }
+        }
+        .glow-pulse { animation: pulse-glow 2s infinite ease-in-out; }
+        
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline {
+            position: absolute; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.2), transparent);
+            animation: scanline 4s linear infinite;
+        }
+
+        .glass-panel {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #11131c; }
+        ::-webkit-scrollbar-thumb { background: #434656; border-radius: 2px; }
+
+        .module-dot { transition: all 0.3s ease; }
+        .module-dot:hover { filter: brightness(1.5); transform: scale(1.1); }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-base selection:bg-terminal-green selection:text-background overflow-hidden">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-gutter h-header-height bg-surface dark:bg-surface-dim border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<h1 class="text-headline-md font-headline-md font-extrabold text-terminal-green uppercase tracking-tighter">Trust Engine Architecture</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6">
+<a class="text-terminal-green font-bold text-label-caps font-label-caps hover:bg-surface-variant/50 transition-colors px-3 py-2" href="#">Architecture</a>
+<a class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-variant/50 transition-colors px-3 py-2" href="#">Live Nodes</a>
+<a class="text-on-surface-variant text-label-caps font-label-caps hover:bg-surface-variant/50 transition-colors px-3 py-2" href="#">Audit Logs</a>
+</nav>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">terminal</span>
+</div>
+</header>
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex flex-col fixed left-0 h-full w-sidebar-width py-6 bg-surface-container-lowest border-r border-outline-variant mt-header-height z-40">
+<div class="px-6 mb-6">
+<p class="text-label-caps font-label-caps text-on-surface-variant opacity-60 uppercase">SYSTEM MODULES (13/13)</p>
+</div>
+<nav class="flex flex-col gap-1 px-3 overflow-y-auto">
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+<span class="text-label-caps font-label-caps">NaijaShop</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">8ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">restaurant</span>
+<span class="text-label-caps font-label-caps">NaijaEats</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">12ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded bg-primary-container/20 text-on-primary-container border-l-2 border-terminal-green">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-terminal-green">hub</span>
+<span class="text-label-caps font-label-caps font-bold">Engine Core</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">0ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+<span class="text-label-caps font-label-caps">NaijaPay</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">15ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">local_post_office</span>
+<span class="text-label-caps font-label-caps">NaijaSend</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">22ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">agriculture</span>
+<span class="text-label-caps font-label-caps">NaijaAgro</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">31ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">work</span>
+<span class="text-label-caps font-label-caps">NaijaGigs</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">14ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">home</span>
+<span class="text-label-caps font-label-caps">NaijaStay</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">19ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">school</span>
+<span class="text-label-caps font-label-caps">NaijaLearn</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">25ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">health_and_safety</span>
+<span class="text-label-caps font-label-caps">NaijaHealth</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">9ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">shield</span>
+<span class="text-label-caps font-label-caps">Insurance</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">4ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">local_shipping</span>
+<span class="text-label-caps font-label-caps">Wholesale</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">11ms</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 rounded text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px]">commute</span>
+<span class="text-label-caps font-label-caps">NaijaDrive</span>
+</div>
+<span class="font-code-terminal text-[10px] text-terminal-green">13ms</span>
+</div>
+</nav>
+<div class="mt-auto px-6 py-4 border-t border-outline-variant/30">
+<div class="flex items-center gap-3 text-terminal-green mb-2">
+<div class="w-2 h-2 rounded-full bg-terminal-green glow-pulse"></div>
+<span class="font-code-terminal text-micro-tag">PROPAGATION_ENGINE: ACTIVE</span>
+</div>
+<p class="font-code-terminal text-micro-tag text-on-surface-variant/50">AVG_DELAY: 14.8ms</p>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-sidebar-width mt-header-height h-[calc(100vh-64px)] overflow-hidden relative">
+<div class="scanline"></div>
+<div class="relative z-10 p-6 h-full flex flex-col gap-gutter">
+<!-- Top Dashboard Header -->
+<div class="grid grid-cols-12 gap-4">
+<div class="col-span-12 lg:col-span-8 flex flex-col justify-center">
+<h2 class="font-display-lg text-display-lg text-on-background">Engine Pipeline <span class="text-terminal-green">v4.0.2</span></h2>
+<p class="text-body-sm font-code-terminal text-on-surface-variant/70 uppercase">Decentralized Trust Calculation &amp; Cross-Module Propagation</p>
+</div>
+<div class="col-span-12 lg:col-span-4 glass-panel p-3 rounded grid grid-cols-2 gap-4 border-l-4 border-l-terminal-green">
+<div>
+<p class="text-micro-tag font-label-caps text-on-surface-variant opacity-60">THROUGHPUT</p>
+<p class="font-code-terminal text-headline-md text-terminal-green">1.2k req/s</p>
+</div>
+<div>
+<p class="text-micro-tag font-label-caps text-on-surface-variant opacity-60">LATENCY (P99)</p>
+<p class="font-code-terminal text-headline-md text-primary">42ms</p>
+</div>
+</div>
+</div>
+<!-- High Density Layout -->
+<div class="flex-1 grid grid-cols-12 gap-gutter overflow-hidden">
+<!-- 1. Accumulation Pipeline -->
+<div class="col-span-12 md:col-span-4 glass-panel rounded flex flex-col overflow-hidden">
+<div class="bg-surface-container-highest px-4 py-2 border-b border-outline-variant flex justify-between items-center">
+<h3 class="text-label-caps font-label-caps text-on-surface-variant">ACCUMULATION PIPELINE</h3>
+<span class="material-symbols-outlined text-[16px] text-terminal-green">input</span>
+</div>
+<div class="flex-1 p-4 overflow-y-auto font-code-terminal space-y-3">
+<!-- Entry Points -->
+<div class="p-2 border border-outline-variant bg-surface-container-low rounded-sm relative">
+<div class="flex justify-between items-start mb-1">
+<span class="text-micro-tag text-primary">IDENTITY_MESH</span>
+<span class="text-micro-tag text-terminal-green">ACTIVE</span>
+</div>
+<p class="text-body-sm text-on-surface">Biometric Hash Verification</p>
+<div class="mt-1 h-1 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[88%]"></div>
+</div>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low rounded-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-micro-tag text-primary">TRANS_VELOCITY</span>
+<span class="text-micro-tag text-terminal-green">87ms</span>
+</div>
+<p class="text-body-sm text-on-surface">Financial Pattern Analysis</p>
+<div class="mt-1 h-1 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%]"></div>
+</div>
+</div>
+<div class="p-2 border border-outline-variant bg-surface-container-low rounded-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-micro-tag text-primary">PEER_VERDICT</span>
+<span class="text-micro-tag text-terminal-green">14ms</span>
+</div>
+<p class="text-body-sm text-on-surface">Cross-Module Consensus</p>
+<div class="mt-1 h-1 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[72%]"></div>
+</div>
+</div>
+<!-- Accumulator Core -->
+<div class="flex flex-col items-center py-4">
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+<div class="w-full h-16 glass-panel flex items-center justify-center border-dashed border-2 border-outline-variant my-2">
+<span class="text-micro-tag font-bold tracking-widest text-on-surface-variant">AGGREGATOR_CORE</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+<!-- Result -->
+<div class="bg-surface-variant/30 p-4 border border-terminal-green/30 rounded text-center">
+<p class="text-micro-tag text-terminal-green uppercase">Computed Global Score</p>
+<h4 class="text-display-lg text-white font-code-terminal">942.08</h4>
+<div class="flex justify-between text-[10px] mt-2 opacity-60">
+<span>MIN: 0.00</span>
+<span>DELTA: +0.12</span>
+<span>MAX: 1000.00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 2. Trust Mechanics (Boosters/Drainers) -->
+<div class="col-span-12 md:col-span-5 glass-panel rounded flex flex-col overflow-hidden">
+<div class="bg-surface-container-highest px-4 py-2 border-b border-outline-variant">
+<h3 class="text-label-caps font-label-caps text-on-surface-variant">TRUST DYNAMICS ENGINE</h3>
+</div>
+<div class="flex-1 p-4 grid grid-rows-2 gap-4 font-code-terminal">
+<!-- Boosters -->
+<div class="border border-terminal-green/20 bg-terminal-green/5 p-3 rounded flex flex-col">
+<div class="flex items-center gap-2 mb-3 text-terminal-green">
+<span class="material-symbols-outlined text-[18px]">keyboard_double_arrow_up</span>
+<span class="text-label-caps font-bold">TRUST BOOSTERS (POSITIVE DELTA)</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">On-time Wholesale Repay</span>
+<span class="text-terminal-green font-bold">+15.4</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">5-Star Gig Execution</span>
+<span class="text-terminal-green font-bold">+8.2</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Identity Shield Verified</span>
+<span class="text-terminal-green font-bold">+25.0</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Consistent Shop Settlement</span>
+<span class="text-terminal-green font-bold">+12.1</span>
+</div>
+</div>
+</div>
+<!-- Drainers -->
+<div class="border border-error/20 bg-error/5 p-3 rounded flex flex-col">
+<div class="flex items-center gap-2 mb-3 text-error">
+<span class="material-symbols-outlined text-[18px]">keyboard_double_arrow_down</span>
+<span class="text-label-caps font-bold">TRUST DRAINERS (NEGATIVE DELTA)</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Late Payment (NaijaPay)</span>
+<span class="text-error font-bold">-45.2</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Disputed Gig Completion</span>
+<span class="text-error font-bold">-22.5</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Order Cancellation Velocity</span>
+<span class="text-error font-bold">-14.8</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Unverified Health Claim</span>
+<span class="text-error font-bold">-18.0</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. Propagation & Terminal -->
+<div class="col-span-12 md:col-span-3 flex flex-col gap-gutter">
+<!-- Propagation Card -->
+<div class="flex-1 glass-panel rounded overflow-hidden flex flex-col">
+<div class="bg-surface-container-highest px-4 py-2 border-b border-outline-variant flex justify-between items-center">
+<h3 class="text-label-caps font-label-caps text-on-surface-variant">PROPAGATION STATUS</h3>
+<span class="material-symbols-outlined text-[16px] text-primary">sync</span>
+</div>
+<div class="flex-1 p-4 font-code-terminal overflow-y-auto">
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-micro-tag text-on-surface-variant">SHOP</span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1 bg-surface-variant rounded-full"><div class="h-full bg-terminal-green w-[95%]"></div></div>
+<span class="text-micro-tag text-terminal-green">8ms</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-micro-tag text-on-surface-variant">PAY</span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1 bg-surface-variant rounded-full"><div class="h-full bg-terminal-green w-[85%]"></div></div>
+<span class="text-micro-tag text-terminal-green">15ms</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-micro-tag text-on-surface-variant">INSURE</span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1 bg-surface-variant rounded-full"><div class="h-full bg-terminal-green w-[99%]"></div></div>
+<span class="text-micro-tag text-terminal-green">4ms</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-micro-tag text-on-surface-variant">GIGS</span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1 bg-surface-variant rounded-full"><div class="h-full bg-terminal-green w-[88%]"></div></div>
+<span class="text-micro-tag text-terminal-green">14ms</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-micro-tag text-on-surface-variant">AGRO</span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1 bg-surface-variant rounded-full"><div class="h-full bg-terminal-green w-[70%]"></div></div>
+<span class="text-micro-tag text-terminal-green">31ms</span>
+</div>
+</div>
+<div class="flex items-center justify-between border-t border-outline-variant pt-2 mt-2">
+<span class="text-micro-tag font-bold text-primary">AVG DELAY</span>
+<span class="text-micro-tag font-bold text-primary">14.4ms</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Logs (Small) -->
+<div class="h-1/3 glass-panel rounded overflow-hidden flex flex-col border-t-0">
+<div class="bg-surface-container-highest px-3 py-1 flex justify-between items-center border-b border-outline-variant">
+<span class="text-micro-tag text-on-surface-variant font-code-terminal">CORE_ARCH.LOG</span>
+<div class="flex gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-terminal-green"></div>
+</div>
+</div>
+<div class="flex-1 p-3 font-code-terminal text-[9px] overflow-y-auto bg-black/40">
+<p class="text-terminal-green">SYNC: UID_829 Score updated</p>
+<p class="text-on-surface-variant/50">PROP: Dispatched to 13 nodes</p>
+<p class="text-primary">ACK: Insurance Module (4ms)</p>
+<p class="text-on-surface-variant/50">ACK: Shop Module (8ms)</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<footer class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-glass-bg border-t border-outline-variant backdrop-blur-8 shadow-lg">
+<div class="flex flex-col items-center justify-center text-terminal-green font-bold">
+<span class="material-symbols-outlined text-[20px]">architecture</span>
+<span class="text-[9px] font-micro-tag uppercase">Engine</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">pipeline</span>
+<span class="text-[9px] font-micro-tag uppercase">Pipeline</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-[9px] font-micro-tag uppercase">Audit</span>
+</div>
+</footer>
+<script>
+    // Visual Pulse for Propagation
+    setInterval(() => {
+        const delays = document.querySelectorAll('.font-code-terminal.text-terminal-green');
+        const randomIndex = Math.floor(Math.random() * delays.length);
+        const el = delays[randomIndex];
+        if(el) {
+            el.classList.add('brightness-200');
+            setTimeout(() => el.classList.remove('brightness-200'), 500);
+        }
+    }, 2000);
+</script>
+</body></html>

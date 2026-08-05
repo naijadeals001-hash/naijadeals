@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ND-OPERATIONS-HUB | Security Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+        .pulse-red {
+            box-shadow: 0 0 0 0 rgba(255, 180, 171, 0.7);
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 180, 171, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 180, 171, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 180, 171, 0); }
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 255, 65, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: scan 4s linear infinite;
+            z-index: 10;
+            pointer-events: none;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #11131c; }
+        ::-webkit-scrollbar-thumb { background: #45464f; border-radius: 10px; }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#b7c4ff",
+                    "surface-variant": "#343438",
+                    "secondary": "#b7c8e1",
+                    "primary": "#dde1ff",
+                    "on-background": "#e4e1e6",
+                    "secondary-container": "#38485d",
+                    "on-primary-container": "#435083",
+                    "on-primary-fixed-variant": "#374476",
+                    "glass-bg": "rgba(29, 31, 41, 0.8)",
+                    "surface-container-highest": "#343438",
+                    "tertiary-container": "#ffb5a2",
+                    "outline-variant": "#45464f",
+                    "surface-container": "#1d1f29",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "on-tertiary-fixed-variant": "#6c382b",
+                    "tertiary": "#ffdbd2",
+                    "on-primary": "#1f2d5e",
+                    "inverse-primary": "#4f5c90",
+                    "on-secondary": "#213145",
+                    "on-surface": "#e4e1e6",
+                    "error": "#ffb4ab",
+                    "primary-container": "#b7c4ff",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-container": "#a6b6cf",
+                    "outline": "#90909a",
+                    "on-tertiary": "#512317",
+                    "surface-bright": "#39393d",
+                    "tertiary-fixed": "#ffdbd2",
+                    "auth-error": "#ffb4ab",
+                    "on-tertiary-container": "#7b4436",
+                    "surface-container-low": "#1b1b1f",
+                    "surface-dim": "#131317",
+                    "surface-container-lowest": "#0d0e11",
+                    "inverse-on-surface": "#303034",
+                    "on-primary-fixed": "#071749",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-secondary-fixed": "#0b1c2f",
+                    "on-tertiary-fixed": "#360e05",
+                    "inverse-surface": "#e4e1e6",
+                    "on-surface-variant": "#c3c5d9",
+                    "error-container": "#93000a",
+                    "background": "#11131c",
+                    "surface": "#131317",
+                    "primary-fixed": "#dce1ff",
+                    "tertiary-fixed-dim": "#ffb4a2",
+                    "terminal-green": "#00ff41",
+                    "surface-container-high": "#292a2d",
+                    "surface-tint": "#b7c4ff",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "on-error": "#690005"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "stack-tight": "0.5rem",
+                    "sidebar-width": "288px",
+                    "stack-default": "1rem",
+                    "header-height": "64px",
+                    "unit": "4px",
+                    "container-padding": "1.5rem",
+                    "gutter": "12px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "micro-tag": ["Inter"],
+                    "body-base": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "code-terminal": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                    "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-base overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full h-header-height z-50 bg-background border-b border-outline-variant flex items-center justify-between px-gutter">
+<div class="flex items-center gap-stack-tight">
+<span class="material-symbols-outlined text-terminal-green">terminal</span>
+<h1 class="font-code-terminal text-headline-md font-bold tracking-tighter text-terminal-green">ND-OPERATIONS-HUB</h1>
+</div>
+<div class="flex items-center gap-gutter">
+<button class="px-4 py-1.5 bg-error-container text-error font-label-caps border border-error/30 hover:bg-error hover:text-on-error transition-all active:scale-95 duration-100">
+                EMERGENCY_LOCKDOWN
+            </button>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-variant/50 border border-outline-variant rounded">
+<span class="w-2 h-2 bg-terminal-green rounded-full animate-pulse"></span>
+<span class="font-code-terminal text-code-terminal text-primary">ROOT_ACCESS</span>
+</div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-header-height h-[calc(100vh-64px)] w-sidebar-width bg-surface-container border-r border-outline-variant hidden md:flex flex-col py-stack-default">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container">shield_person</span>
+</div>
+<div>
+<p class="font-label-caps text-on-surface">Lead Architect</p>
+<p class="font-code-terminal text-[10px] text-on-surface-variant">ND-ECOSYSTEM-SUPERUSER</p>
+</div>
+</div>
+<div class="mt-4 p-2 bg-surface-container-low border border-outline-variant">
+<p class="font-code-terminal text-[10px] text-terminal-green">ACTIVE_SESSION:04:12:01</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps">Registry</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="font-label-caps">API Monitor</span>
+</a>
+<a class="flex items-center gap-3 bg-secondary-container/30 border-l-4 border-primary-container text-primary-container font-bold px-4 py-3" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps">Dependency Map</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps">Health Metrics</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/20 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-caps">Admin Terminal</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="md:ml-sidebar-width pt-header-height h-screen p-stack-default overflow-y-auto bg-background relative">
+<!-- Background Ambient Shader Placeholder -->
+
+<div class="relative z-10 grid grid-cols-12 gap-gutter max-w-7xl mx-auto">
+<!-- Global Threat Monitor (Bento Large) -->
+<section class="col-span-12 lg:col-span-8 glass-card p-6 rounded relative overflow-hidden group">
+<div class="scanline"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="font-headline-md text-primary">GLOBAL THREAT MONITOR</h2>
+<p class="font-code-terminal text-on-surface-variant">Real-time geospatial security vectors</p>
+</div>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-surface-variant text-on-surface-variant font-micro-tag rounded">LIVE_FEED</span>
+<span class="px-2 py-1 bg-primary/10 text-primary border border-primary/20 font-micro-tag rounded">ENCRYPTED</span>
+</div>
+</div>
+<div class="aspect-video bg-surface-container-low rounded border border-outline-variant relative">
+<!-- Map Placeholder -->
+<div class="w-full h-full bg-cover bg-center opacity-80 mix-blend-screen" data-alt="A futuristic cybersecurity map of the world with glowing data lines connecting major global hubs. The aesthetic is dark HUD style with electric blue data streams and red alert nodes pulsing over West Africa and Lagos. Monospaced coordinates and network telemetry data are overlaid in a clean digital interface." data-location="Lagos, Nigeria" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB3EWr5Svu66nvg5eRCmZBxkJDvjTMQf4huAYdWYv8ib_6o2DrRUpWKYR74axnEyGbYtQRu5q675lJuNAPvDFQUnAT8QzN61utacCQTybvsBXZWwQ1DAqV1Mh0rkzZJ-Gb_7ujm8gJWMwjhJ-jwvGQn6rv54rsgExCXB6bUQInpWEw0PXsiFw0i5F2T4Ds93IKXOX7qeOnR2755-v9tIlyTr6PSETb5O-xpK-TROjTh9Rlp-VowUB-Nxrgfi2O9VzrRQrMjvjr1tS4')"></div>
+<!-- Overlay Metrics -->
+<div class="absolute bottom-4 left-4 grid grid-cols-2 gap-4">
+<div class="glass-card p-3 border-l-4 border-primary">
+<p class="font-label-caps text-on-surface-variant">MFA_AUTH_RATE</p>
+<p class="font-display-lg text-primary">94.2%</p>
+</div>
+<div class="glass-card p-3 border-l-4 border-tertiary">
+<p class="font-label-caps text-on-surface-variant">LATENCY_MS</p>
+<p class="font-display-lg text-tertiary">12ms</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Fraud Detection Alerts (Bento Vertical) -->
+<section class="col-span-12 lg:col-span-4 glass-card p-6 rounded border-t-4 border-error">
+<div class="flex items-center justify-between mb-4">
+<h2 class="font-label-caps text-error">FRAUD_DETECTION_ALERTS</h2>
+<span class="material-symbols-outlined text-error animate-pulse">warning</span>
+</div>
+<div class="space-y-stack-tight">
+<div class="p-4 bg-error-container/10 border border-error/20 rounded group hover:bg-error-container/20 transition-colors">
+<div class="flex justify-between mb-1">
+<span class="font-code-terminal text-error text-[10px]">CRITICAL</span>
+<span class="font-code-terminal text-on-surface-variant text-[10px]">14:22:01</span>
+</div>
+<p class="font-body-sm text-on-surface">Multiple failed login attempts from IP: 192.168.0.104</p>
+<div class="mt-2 flex gap-2">
+<button class="font-micro-tag text-error border border-error/30 px-2 py-0.5 rounded">BLOCK_IP</button>
+<button class="font-micro-tag text-on-surface-variant border border-outline-variant px-2 py-0.5 rounded">IGNORE</button>
+</div>
+</div>
+<div class="p-4 bg-surface-variant/20 border border-outline-variant rounded">
+<div class="flex justify-between mb-1">
+<span class="font-code-terminal text-tertiary text-[10px]">WARNING</span>
+<span class="font-code-terminal text-on-surface-variant text-[10px]">14:18:45</span>
+</div>
+<p class="font-body-sm text-on-surface">Unusual API traffic spike on endpoint /v1/auth/exchange</p>
+</div>
+<div class="p-4 bg-surface-variant/20 border border-outline-variant rounded">
+<div class="flex justify-between mb-1">
+<span class="font-code-terminal text-primary text-[10px]">INFO</span>
+<span class="font-code-terminal text-on-surface-variant text-[10px]">14:15:30</span>
+</div>
+<p class="font-body-sm text-on-surface">MFA challenge bypassed via trusted device - User_8829</p>
+</div>
+</div>
+</section>
+<!-- API Abuse Patterns (Bento Medium) -->
+<section class="col-span-12 lg:col-span-4 glass-card p-6 rounded border-t-4 border-primary">
+<h2 class="font-label-caps text-primary mb-4">API_ABUSE_PATTERNS</h2>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-body-sm text-on-surface-variant">Rate Limit Violations</span>
+<span class="font-code-terminal text-primary">12/min</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-body-sm text-on-surface-variant">Header Manipulation</span>
+<span class="font-code-terminal text-primary">03/min</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[12%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-body-sm text-on-surface-variant">Credential Stuffing</span>
+<span class="font-code-terminal text-error">HIGH</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-error w-[82%]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Real-time Security Stream (Bento Large) -->
+<section class="col-span-12 lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded overflow-hidden flex flex-col h-64">
+<div class="bg-surface-variant px-4 py-2 flex items-center justify-between">
+<div class="flex gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary/40"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-terminal-green/40"></div>
+</div>
+<span class="font-code-terminal text-[10px] text-on-surface-variant">SEC_OPERATIONS_TERMINAL_V2.0</span>
+</div>
+<div class="p-4 flex-1 font-code-terminal text-code-terminal overflow-y-auto space-y-1" id="terminal-stream">
+<p class="text-terminal-green">[INFO] Boot sequence complete. Kernel verified.</p>
+<p class="text-terminal-green">[INFO] Network handshake established with LAG-SEC-01.</p>
+<p class="text-primary">[MFA] Session start: user_5592_nd - Method: SMS_PUSH</p>
+<p class="text-on-surface-variant">[LOG] Heartbeat signal sent to secondary failover.</p>
+<p class="text-error">[FAIL] API POST /v1/vault failed 403 Forbidden (Insecure Token)</p>
+<p class="text-terminal-green">[INFO] Auto-blocking IP 202.12.19.4 for repeat violations.</p>
+<p class="text-primary">[MFA] Verification successful: user_1120_nd</p>
+<p class="text-tertiary">[WARN] Latency drift detected in region NGA-WEST-1</p>
+<p class="text-on-surface-variant">[LOG] Rotating session keys for group ADMIN_PROX</p>
+</div>
+</section>
+<!-- Admin Access Logs -->
+<section class="col-span-12 glass-card p-6 rounded">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-label-caps text-on-surface">ADMIN_ACCESS_LOGS</h2>
+<button class="text-primary font-label-caps hover:underline">EXPORT_AUDIT_CSV</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="pb-3 font-label-caps text-on-surface-variant">TIMESTAMP</th>
+<th class="pb-3 font-label-caps text-on-surface-variant">OPERATOR</th>
+<th class="pb-3 font-label-caps text-on-surface-variant">ACTION</th>
+<th class="pb-3 font-label-caps text-on-surface-variant">STATUS</th>
+<th class="pb-3 font-label-caps text-on-surface-variant text-right">IP_ORIGIN</th>
+</tr>
+</thead>
+<tbody class="font-code-terminal text-[12px]">
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/10 transition-colors">
+<td class="py-4 text-on-surface-variant">2023-10-24 14:31:02</td>
+<td class="py-4 text-primary">J.DOKU [ARCHITECT]</td>
+<td class="py-4 text-on-surface">REVOKE_API_KEY:ND_3910</td>
+<td class="py-4"><span class="px-2 py-0.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded text-[9px]">SUCCESS</span></td>
+<td class="py-4 text-right text-on-surface-variant">10.0.42.11</td>
+</tr>
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/10 transition-colors">
+<td class="py-4 text-on-surface-variant">2023-10-24 14:28:44</td>
+<td class="py-4 text-primary">S.ADE [SEC_OP]</td>
+<td class="py-4 text-on-surface">FLUSH_CACHE:AUTH_REGISTRY</td>
+<td class="py-4"><span class="px-2 py-0.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/30 rounded text-[9px]">SUCCESS</span></td>
+<td class="py-4 text-right text-on-surface-variant">10.0.12.89</td>
+</tr>
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/10 transition-colors">
+<td class="py-4 text-on-surface-variant">2023-10-24 14:25:11</td>
+<td class="py-4 text-primary">ROOT_SYS</td>
+<td class="py-4 text-on-surface">AUTO_BLOCK:88.2.1.200</td>
+<td class="py-4"><span class="px-2 py-0.5 bg-tertiary/10 text-tertiary border border-tertiary/30 rounded text-[9px]">SYSTEM_RULE</span></td>
+<td class="py-4 text-right text-on-surface-variant">127.0.0.1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Bottom Nav Spacer for Mobile -->
+<div class="h-20 md:hidden"></div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full h-16 px-4 bg-glass-bg backdrop-blur-md border-t border-outline-variant flex justify-around items-center z-50 md:hidden shadow-lg">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 scale-110">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-micro-tag">DASHBOARD</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-micro-tag">STACKS</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-micro-tag">NETWORK</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-micro-tag">SYSTEM</span>
+</button>
+</nav>
+<script>
+        // Terminal Mock Interaction
+        const terminal = document.getElementById('terminal-stream');
+        const messages = [
+            { text: '[INFO] Verifying checksum for incoming package ND-049...', color: 'text-terminal-green' },
+            { text: '[MFA] User session challenge initiated: id_9921', color: 'text-primary' },
+            { text: '[WARN] Unusual packet fragmentation from region AF-WEST', color: 'text-tertiary' },
+            { text: '[LOG] Audit log sync in progress...', color: 'text-on-surface-variant' },
+            { text: '[FAIL] Unauthorized header found in request /api/v2/secure', color: 'text-error' }
+        ];
+
+        setInterval(() => {
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+            const p = document.createElement('p');
+            p.className = `${msg.color} opacity-0 transition-opacity duration-500`;
+            p.innerText = msg.text;
+            terminal.appendChild(p);
+            
+            // Auto scroll
+            terminal.scrollTop = terminal.scrollHeight;
+            
+            // Fade in effect
+            setTimeout(() => p.classList.remove('opacity-0'), 10);
+            
+            // Limit terminal lines
+            if (terminal.children.length > 30) {
+                terminal.removeChild(terminal.firstChild);
+            }
+        }, 2500);
+
+        // Lockdown Interaction
+        const lockdownBtn = document.querySelector('button:contains("EMERGENCY_LOCKDOWN")');
+        // Simple manual selector since :contains isn't vanilla
+        document.querySelectorAll('button').forEach(btn => {
+            if (btn.innerText === "EMERGENCY_LOCKDOWN") {
+                btn.onclick = () => {
+                    const confirm = window.confirm("INITIATE GLOBAL LOCKDOWN PROTOCOL?\nThis will sever all active API connections.");
+                    if(confirm) {
+                        document.body.style.filter = "invert(1) hue-rotate(180deg)";
+                        setTimeout(() => {
+                            alert("LOCKDOWN ENGAGED. ENCRYPTING REMAINING DATASTORES.");
+                        }, 500);
+                    }
+                }
+            }
+        });
+    </script>
+</body></html>

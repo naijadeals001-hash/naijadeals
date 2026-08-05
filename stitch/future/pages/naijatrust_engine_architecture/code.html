@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaTrust Engine Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#b7c4ff",
+                        "surface-variant": "#343438",
+                        "secondary": "#b7c8e1",
+                        "primary": "#dde1ff",
+                        "on-background": "#e4e1e6",
+                        "secondary-container": "#38485d",
+                        "on-primary-container": "#435083",
+                        "on-primary-fixed-variant": "#374476",
+                        "glass-bg": "rgba(29, 31, 41, 0.8)",
+                        "surface-container-highest": "#343438",
+                        "tertiary-container": "#ffb5a2",
+                        "outline-variant": "#45464f",
+                        "surface-container": "#1d1f29",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-tertiary-fixed-variant": "#6c382b",
+                        "tertiary": "#ffdbd2",
+                        "on-primary": "#1f2d5e",
+                        "inverse-primary": "#4f5c90",
+                        "on-secondary": "#213145",
+                        "on-surface": "#e4e1e6",
+                        "error": "#ffb4ab",
+                        "primary-container": "#b7c4ff",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-container": "#a6b6cf",
+                        "outline": "#90909a",
+                        "on-tertiary": "#512317",
+                        "surface-bright": "#39393d",
+                        "tertiary-fixed": "#ffdbd2",
+                        "auth-error": "#ffb4ab",
+                        "on-tertiary-container": "#7b4436",
+                        "surface-container-low": "#1b1b1f",
+                        "surface-dim": "#131317",
+                        "surface-container-lowest": "#0d0e11",
+                        "inverse-on-surface": "#303034",
+                        "on-primary-fixed": "#071749",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-secondary-fixed": "#0b1c2f",
+                        "on-tertiary-fixed": "#360e05",
+                        "inverse-surface": "#e4e1e6",
+                        "on-surface-variant": "#c3c5d9",
+                        "error-container": "#93000a",
+                        "background": "#11131c",
+                        "surface": "#131317",
+                        "primary-fixed": "#dce1ff",
+                        "tertiary-fixed-dim": "#ffb4a2",
+                        "terminal-green": "#00ff41",
+                        "surface-container-high": "#292a2d",
+                        "surface-tint": "#b7c4ff",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-tight": "0.5rem",
+                        "sidebar-width": "288px",
+                        "stack-default": "1rem",
+                        "header-height": "64px",
+                        "unit": "4px",
+                        "container-padding": "1.5rem",
+                        "gutter": "12px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "micro-tag": ["Inter"],
+                        "body-base": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "code-terminal": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "micro-tag": ["9px", {"lineHeight": "12px", "fontWeight": "700"}],
+                        "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "code-terminal": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #11131c;
+            color: #e4e1e6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(29, 31, 41, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #434656;
+        }
+        .pulse-glow {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.4); }
+            70% { transform: scale(1.05); opacity: 0.8; box-shadow: 0 0 0 10px rgba(0, 255, 65, 0); }
+            100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); }
+        }
+        .neural-line {
+            stroke-dasharray: 5;
+            animation: flow 10s linear infinite;
+        }
+        @keyframes flow {
+            to { stroke-dashoffset: -100; }
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #11131c; }
+        ::-webkit-scrollbar-thumb { background: #45464f; border-radius: 10px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full h-header-height z-50 bg-background border-b border-outline-variant flex items-center justify-between px-gutter">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-terminal-green" data-icon="terminal">terminal</span>
+<span class="font-code-terminal text-headline-md font-bold tracking-tighter text-terminal-green">ND-OPERATIONS-HUB</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4">
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors">DOCS_V2.1</button>
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors">LATENCY: 14MS</button>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-1 rounded-lg font-label-caps text-label-caps hover:brightness-110 active:scale-95 transition-all">
+                ROOT_ACCESS
+            </button>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-header-height h-[calc(100vh-64px)] w-sidebar-width bg-surface-container border-r border-outline-variant hidden md:flex flex-col py-stack-default">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 p-3 bg-surface-variant/20 rounded-lg">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="shield_person">shield_person</span>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-primary">Lead Architect</p>
+<p class="font-code-terminal text-[10px] text-on-surface-variant">ND-ECOSYSTEM-SUPERUSER</p>
+</div>
+</div>
+<p class="font-code-terminal text-[9px] mt-2 text-terminal-green/60">ACTIVE_SESSION:04:12:01</p>
+</div>
+<nav class="flex flex-col flex-1">
+<a class="text-on-surface-variant px-6 py-3 hover:bg-surface-variant/20 transition-all font-label-caps text-label-caps flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span> Registry
+            </a>
+<a class="bg-secondary-container/30 border-l-4 border-primary-container text-primary-container font-bold px-6 py-3 transition-all font-label-caps text-label-caps flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="monitor_heart">monitor_heart</span> API Monitor
+            </a>
+<a class="text-on-surface-variant px-6 py-3 hover:bg-surface-variant/20 transition-all font-label-caps text-label-caps flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span> Dependency Map
+            </a>
+<a class="text-on-surface-variant px-6 py-3 hover:bg-surface-variant/20 transition-all font-label-caps text-label-caps flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span> Health Metrics
+            </a>
+<a class="text-on-surface-variant px-6 py-3 hover:bg-surface-variant/20 transition-all font-label-caps text-label-caps flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span> Admin Terminal
+            </a>
+</nav>
+<div class="px-6 mt-auto">
+<div class="p-3 bg-error/10 border border-error/20 rounded-lg">
+<p class="font-label-caps text-micro-tag text-error">SYSTEM_LOAD: HIGH</p>
+<div class="w-full bg-surface-variant h-1 mt-1 rounded-full overflow-hidden">
+<div class="bg-error w-4/5 h-full"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 md:ml-sidebar-width mt-header-height p-6 mb-16 md:mb-0">
+<div class="max-w-[1400px] mx-auto">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+<div>
+<h1 class="font-display-lg text-display-lg text-primary">NaijaTrust Engine Architecture</h1>
+<p class="font-body-base text-on-surface-variant max-w-2xl">Neural processing core for mapping decentralized trust vectors into actionable risk scoring outputs for the NaijaDeals ecosystem.</p>
+</div>
+<div class="flex gap-2">
+<div class="px-3 py-1 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green rounded font-code-terminal text-micro-tag flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-terminal-green pulse-glow"></div>
+                        CORE_SYNC_ACTIVE
+                    </div>
+</div>
+</div>
+<!-- Bento Grid Section -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Trust Neural Net Visualization (Major Bento) -->
+<div class="col-span-12 lg:col-span-8 glass-card rounded-xl p-6 relative overflow-hidden min-h-[450px] flex flex-col">
+<div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-headline-md text-headline-md text-primary">Trust Neural Net</h3>
+<p class="font-label-caps text-micro-tag text-on-surface-variant">REAL-TIME DATA FLOW MAPPING</p>
+</div>
+<div class="flex gap-2">
+<span class="bg-surface-variant text-on-surface-variant px-2 py-1 rounded text-[10px] font-code-terminal">INPUT_NODES: 7</span>
+<span class="bg-surface-variant text-on-surface-variant px-2 py-1 rounded text-[10px] font-code-terminal">OUTPUT_CORES: 4</span>
+</div>
+</div>
+<!-- SVG Neural Network -->
+<div class="flex-1 relative flex items-center justify-center">
+<svg class="w-full h-full" viewbox="0 0 800 350">
+<defs>
+<lineargradient id="lineGrad" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" style="stop-color:#b7c4ff;stop-opacity:0.2"></stop>
+<stop offset="50%" style="stop-color:#b7c4ff;stop-opacity:0.8"></stop>
+<stop offset="100%" style="stop-color:#b7c4ff;stop-opacity:0.2"></stop>
+</lineargradient>
+</defs>
+<!-- Lines from Inputs to Middle -->
+<g class="neural-lines opacity-40">
+<line class="neural-line" stroke="url(#lineGrad)" stroke-width="1.5" x1="50" x2="400" y1="50" y2="175"></line>
+<line class="neural-line" stroke="url(#lineGrad)" stroke-width="1.5" x1="50" x2="400" y1="100" y2="175"></line>
+<line class="neural-line" stroke="url(#lineGrad)" stroke-width="1.5" x1="50" x2="400" y1="150" y2="175"></line>
+<line class="neural-line" stroke="url(#lineGrad)" stroke-width="1.5" x1="50" x2="400" y1="200" y2="175"></line>
+<line class="neural-line" stroke="url(#lineGrad)" stroke-width="1.5" x1="50" x2="400" y1="250" y2="175"></line>
+<line class="neural-line" stroke="url(#lineGrad)" stroke-width="1.5" x1="50" x2="400" y1="300" y2="175"></line>
+</g>
+<!-- Lines from Middle to Outputs -->
+<g class="neural-lines opacity-60">
+<line class="neural-line" stroke="#00ff41" stroke-width="2" x1="400" x2="750" y1="175" y2="70"></line>
+<line class="neural-line" stroke="#ffb4ab" stroke-width="2" x1="400" x2="750" y1="175" y2="140"></line>
+<line class="neural-line" stroke="#b7c8e1" stroke-width="2" x1="400" x2="750" y1="175" y2="210"></line>
+<line class="neural-line" stroke="#ffdbd2" stroke-width="2" x1="400" x2="750" y1="175" y2="280"></line>
+</g>
+<!-- Input Nodes -->
+<circle cx="50" cy="50" fill="#1d1f29" r="8" stroke="#b7c4ff" stroke-width="2"></circle>
+<circle cx="50" cy="100" fill="#1d1f29" r="8" stroke="#b7c4ff" stroke-width="2"></circle>
+<circle cx="50" cy="150" fill="#1d1f29" r="8" stroke="#b7c4ff" stroke-width="2"></circle>
+<circle cx="50" cy="200" fill="#1d1f29" r="8" stroke="#b7c4ff" stroke-width="2"></circle>
+<circle cx="50" cy="250" fill="#1d1f29" r="8" stroke="#b7c4ff" stroke-width="2"></circle>
+<circle cx="50" cy="300" fill="#1d1f29" r="8" stroke="#b7c4ff" stroke-width="2"></circle>
+<!-- Central Processing -->
+<circle cx="400" cy="175" fill="#1d1f29" r="40" stroke="#b7c4ff" stroke-width="3"></circle>
+<text fill="#b7c4ff" font-family="JetBrains Mono" font-size="10" font-weight="bold" text-anchor="middle" x="400" y="180">ENGINE</text>
+<!-- Output Cores -->
+<rect fill="#1d1f29" height="30" rx="4" stroke="#00ff41" stroke-width="2" width="40" x="730" y="55"></rect>
+<rect fill="#1d1f29" height="30" rx="4" stroke="#ffb4ab" stroke-width="2" width="40" x="730" y="125"></rect>
+<rect fill="#1d1f29" height="30" rx="4" stroke="#b7c8e1" stroke-width="2" width="40" x="730" y="195"></rect>
+<rect fill="#1d1f29" height="30" rx="4" stroke="#ffdbd2" stroke-width="2" width="40" x="730" y="265"></rect>
+</svg>
+<!-- Labels for Inputs -->
+<div class="absolute left-10 top-[40px] font-code-terminal text-[10px] text-on-surface-variant transform -translate-x-full pr-4 text-right">KYC_VERIF</div>
+<div class="absolute left-10 top-[90px] font-code-terminal text-[10px] text-on-surface-variant transform -translate-x-full pr-4 text-right">USER_REVIEWS</div>
+<div class="absolute left-10 top-[140px] font-code-terminal text-[10px] text-on-surface-variant transform -translate-x-full pr-4 text-right">TXN_HISTORY</div>
+<div class="absolute left-10 top-[190px] font-code-terminal text-[10px] text-on-surface-variant transform -translate-x-full pr-4 text-right">CERTIFICATIONS</div>
+<div class="absolute left-10 top-[240px] font-code-terminal text-[10px] text-on-surface-variant transform -translate-x-full pr-4 text-right">CLAIM_DATA</div>
+<div class="absolute left-10 top-[290px] font-code-terminal text-[10px] text-on-surface-variant transform -translate-x-full pr-4 text-right">COMPLIANCE</div>
+<!-- Labels for Outputs -->
+<div class="absolute right-10 top-[60px] font-code-terminal text-[10px] text-terminal-green pl-12">TRUST_SCORE</div>
+<div class="absolute right-10 top-[130px] font-code-terminal text-[10px] text-error pl-12">RISK_SCORE</div>
+<div class="absolute right-10 top-[200px] font-code-terminal text-[10px] text-secondary pl-12">REPUTATION</div>
+<div class="absolute right-10 top-[270px] font-code-terminal text-[10px] text-tertiary pl-12">FRAUD_PROB</div>
+</div>
+</div>
+<!-- Probability Distribution (Small Bento) -->
+<div class="col-span-12 md:col-span-6 lg:col-span-4 glass-card rounded-xl p-6 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-headline-md text-headline-md text-primary">Prob. Distribution</h3>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="bar_chart">bar_chart</span>
+</div>
+<div class="flex-1 bg-surface-container-lowest/50 rounded p-4 relative flex items-end gap-1 overflow-hidden">
+<!-- Histogram Bars -->
+<div class="flex-1 bg-primary/20 h-[20%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/30 h-[35%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/40 h-[55%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/60 h-[85%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary h-[95%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/70 h-[65%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/40 h-[40%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[15%] rounded-t-sm"></div>
+<!-- Peak Indicator -->
+<div class="absolute top-4 right-4 flex items-center gap-2">
+<span class="font-code-terminal text-[10px] text-primary">μ = 0.842</span>
+<span class="font-code-terminal text-[10px] text-secondary">σ = 0.05</span>
+</div>
+</div>
+<p class="mt-4 font-body-sm text-body-sm text-on-surface-variant">Global trust distribution curve updated every 120s.</p>
+</div>
+<!-- Risk Weightings (Small Bento) -->
+<div class="col-span-12 md:col-span-6 lg:col-span-4 glass-card rounded-xl p-6">
+<h3 class="font-headline-md text-headline-md text-primary mb-4">Risk Weightings</h3>
+<div class="space-y-4">
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-label-caps">
+<span class="text-on-surface-variant">KYC AUTHENTICITY</span>
+<span class="text-primary">45%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary w-[45%] h-full"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-label-caps">
+<span class="text-on-surface-variant">TXN VOLUME STABILITY</span>
+<span class="text-primary">25%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary w-[25%] h-full"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-label-caps">
+<span class="text-on-surface-variant">DISPUTE RESOLUTION RATE</span>
+<span class="text-primary">20%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary w-[20%] h-full"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-label-caps">
+<span class="text-on-surface-variant">PEER ENDORSEMENTS</span>
+<span class="text-primary">10%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary w-[10%] h-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Input Stream Console (Small Bento) -->
+<div class="col-span-12 lg:col-span-8 glass-card rounded-xl overflow-hidden flex flex-col">
+<div class="bg-surface-variant/40 px-4 py-2 border-b border-outline-variant flex justify-between items-center">
+<div class="flex gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-error"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-terminal-green"></div>
+</div>
+<span class="font-code-terminal text-micro-tag text-on-surface-variant">LIVE_INGESTION_LOG</span>
+</div>
+<div class="p-4 bg-background font-code-terminal text-[11px] h-48 overflow-y-auto space-y-1">
+<p class="text-terminal-green">[INFO] Node_772: Received KYC packet from Lagos_DC_4</p>
+<p class="text-terminal-green">[INFO] Weight_Matrix: Recalculating vector 0xFA2... OK</p>
+<p class="text-primary">[DATA] Latency check: 12ms. Connection stable.</p>
+<p class="text-tertiary">[WARN] Dispute_Cluster: Unusual activity detected in 'Electronics' category.</p>
+<p class="text-terminal-green">[INFO] Score_Calc: User_ID: 9942 updated to Trust: 0.92</p>
+<p class="text-error">[FAIL] API_Hook: Certification provider 'CertNGA' timeout. Using cached data.</p>
+<p class="text-terminal-green">[INFO] Reputation_Sync: Pushing updates to Global Registry...</p>
+<p class="text-terminal-green">[INFO] Engine: Heartbeat 0x442 detected.</p>
+</div>
+</div>
+<!-- Real-time Summary Cards (Grid) -->
+<div class="col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div class="glass-card rounded-xl p-4 border-l-4 border-terminal-green">
+<p class="font-label-caps text-micro-tag text-on-surface-variant">AVG TRUST SCORE</p>
+<h4 class="font-display-lg text-display-lg text-terminal-green">0.88</h4>
+<div class="flex items-center gap-1 text-[10px] text-terminal-green/80 font-code-terminal">
+<span class="material-symbols-outlined text-[12px]" data-icon="trending_up">trending_up</span> +0.02
+                        </div>
+</div>
+<div class="glass-card rounded-xl p-4 border-l-4 border-error">
+<p class="font-label-caps text-micro-tag text-on-surface-variant">RISK EXPOSURE</p>
+<h4 class="font-display-lg text-display-lg text-error">12.4%</h4>
+<div class="flex items-center gap-1 text-[10px] text-error/80 font-code-terminal">
+<span class="material-symbols-outlined text-[12px]" data-icon="trending_down">trending_down</span> -1.2%
+                        </div>
+</div>
+<div class="glass-card rounded-xl p-4 border-l-4 border-primary">
+<p class="font-label-caps text-micro-tag text-on-surface-variant">ACTIVE ENTITIES</p>
+<h4 class="font-display-lg text-display-lg text-primary">1.2M</h4>
+<div class="flex items-center gap-1 text-[10px] text-primary/80 font-code-terminal">
+                            SYNCED_NODES: 42
+                        </div>
+</div>
+<div class="glass-card rounded-xl p-4 border-l-4 border-secondary">
+<p class="font-label-caps text-micro-tag text-on-surface-variant">COMPLIANCE ADH.</p>
+<h4 class="font-display-lg text-display-lg text-secondary">99.2%</h4>
+<div class="flex items-center gap-1 text-[10px] text-secondary/80 font-code-terminal">
+                            SLA: MAINTAINED
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="fixed bottom-0 w-full h-16 bg-glass-bg backdrop-blur-md border-t border-outline-variant flex justify-around items-center px-4 md:hidden z-50">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 scale-110">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:text-primary">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for log console
+        const consoleEl = document.querySelector('.overflow-y-auto');
+        setInterval(() => {
+            const logs = [
+                "[INFO] Delta_Check: Processing node 0x88...",
+                "[DATA] Network throughput at 88% capacity.",
+                "[INFO] Neural_Sync: Weights updated.",
+                "[WARN] Node_Latency: Abuja_DC slightly elevated."
+            ];
+            const log = document.createElement('p');
+            log.className = "text-on-surface-variant/80";
+            log.textContent = logs[Math.floor(Math.random() * logs.length)];
+            consoleEl.appendChild(log);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            if(consoleEl.children.length > 20) consoleEl.removeChild(consoleEl.firstChild);
+        }, 3000);
+    </script>
+</body></html>

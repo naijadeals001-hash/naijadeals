@@ -1,36 +1,28 @@
-# NaijaDeals Development State
+# Development State
 
-## Current Milestone
+> This file is the live project snapshot. Refresh it at session startup and after every completed task. The Git commit recorded here is the latest committed baseline known at the time this file was updated.
 
-1
-
-## Current Phase
-
-Repository Preparation Complete
-
-## Current Task
-
-Stitch Baseline Finalized
-
-## Repository Status
-
-Ready for Implementation
-
-## Current Branch
-
-feature/m1-phase1-identity
-
-## Current Tag
-
-stitch-baseline-v1.0
-
-## Next Authorized Task
-
-Continue Phase 1.1 Implementation
-
-## Last Updated
-
-2026-08-04
+- **Current Milestone:** Milestone 1
+- **Current Phase:** Phase 1.1 — Identity & Authentication Foundation
+- **Current Task:** Branch reconciliation complete; awaiting next authorized implementation task
+- **Current Branch:** feature/m1-phase1-identity
+- **Latest Commit:** Pending reconciliation commit
+- **Current Tag:** stitch-baseline-v1.0
+- **Last Approved Task:** Repository bootstrap, Stitch baseline finalization, and AI Engineering Constitution adoption
+- **Next Authorized Task:** Awaiting authorization
+- **Runtime Validation Status:** Code-only quality gates available; PostgreSQL, Redis, and Docker runtime validation remain pending where infrastructure-dependent verification is required
+- **Active Blockers:** None open; see `docs/BLOCKER_LOG.md` for history
+- **Pending Decisions:** Next implementation task authorization; any architecture/documentation conflicts discovered in future work must go through change control
+- **Current Repository Status:** GitHub repository is the canonical source of truth; governance bootstrap documents are in place, the Stitch baseline is preserved, the AI Engineering Constitution has been adopted, dependencies are installed in the workspace, and quality gates are run on every update
+- **Governance Authority:**
+  1. `ARCHITECTURE.md`
+  2. `PROJECT_RULES.md`
+  3. `AI_ENGINEERING_CONSTITUTION.md`
+  4. Implementation plans
+  5. Module specifications
+  6. Code
+- **Stitch Policy:** `stitch/` is the official UI reference library, not the production frontend. Production implementations may improve, modernize, consolidate, and redesign while preserving business intent.
+- **Last Updated:** 2026-08-05
 
 ## Notes
 
@@ -38,4 +30,4 @@ Continue Phase 1.1 Implementation
 - The `stitch-baseline-v1.0` tag marks the official UI reference baseline.
 - The repository is frozen for structural changes.
 - The `AI_ENGINEERING_CONSTITUTION.md` has been adopted as the third-tier engineering authority after `ARCHITECTURE.md` and `PROJECT_RULES.md`.
-- Phase 1.1 implementation may proceed on the `feature/m1-phase1-identity` branch.
+- Phase 1.1 implementation may proceed on the `feature/m1-phase1-identity` branch after authorization.

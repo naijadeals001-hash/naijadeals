@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaSend: Cross-Border Pipeline &amp; Handoffs</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        .pipeline-gradient {
+            background: linear-gradient(90deg, #006d38 0%, #00a859 100%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#191c1e",
+                        "surface-dim": "#d9dadc",
+                        "tertiary-container": "#638cff",
+                        "surface-container": "#edeef0",
+                        "outline-variant": "#bccabc",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#e1e2e4",
+                        "on-tertiary-fixed-variant": "#003ea8",
+                        "surface-bright": "#f8f9fb",
+                        "tertiary": "#0053db",
+                        "surface-container-high": "#e7e8ea",
+                        "inverse-primary": "#59df89",
+                        "on-secondary-fixed": "#141b2b",
+                        "on-error": "#ffffff",
+                        "primary-container": "#00a859",
+                        "security-crimson": "#EF4444",
+                        "on-secondary-fixed-variant": "#404758",
+                        "surface-container-lowest": "#ffffff",
+                        "text-muted": "#4B5563",
+                        "on-primary-fixed-variant": "#005228",
+                        "on-secondary-container": "#5c6274",
+                        "on-tertiary-fixed": "#00174b",
+                        "surface-container-low": "#f3f4f6",
+                        "background": "#f8f9fb",
+                        "secondary-fixed-dim": "#c0c6db",
+                        "primary": "#006d38",
+                        "inverse-surface": "#2e3132",
+                        "secondary-fixed": "#dce2f7",
+                        "on-primary-container": "#003317",
+                        "primary-fixed-dim": "#59df89",
+                        "on-background": "#191c1e",
+                        "inverse-on-surface": "#f0f1f3",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#dbe1ff",
+                        "security-crimson-surface": "#FEE2E2",
+                        "on-primary-fixed": "#00210d",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#00256c",
+                        "secondary": "#575e70",
+                        "canvas-pure": "#FFFFFF",
+                        "trust-amber": "#F59E0B",
+                        "outline": "#6d7b6e",
+                        "on-surface-variant": "#3d4a3f",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e1e2e4",
+                        "trust-amber-surface": "#FEF3C7",
+                        "secondary-container": "#d9dff5",
+                        "surface": "#f8f9fb",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#006d38",
+                        "primary-fixed": "#77fca3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "gutter-mobile": "16px",
+                        "margin-mobile": "16px",
+                        "touch-target-primary": "52px",
+                        "unit": "4px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "touch-target-min": "48px",
+                        "lg": "24px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-bold": ["Inter"],
+                        "body-base": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "price-display": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-bold": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "price-display": ["20px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "800"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface">
+<!-- Sidebar Navigation -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-outline-variant bg-surface-container-lowest flex flex-col p-md z-50">
+<div class="mb-xl px-4">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">NaijaSuperApp</h1>
+<p class="text-on-surface-variant text-sm">System Administrator</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-body-base" href="#">
+<span class="material-symbols-outlined">hub</span> Ecosystem
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-body-base" href="#">
+<span class="material-symbols-outlined">shopping_bag</span> Shop
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-body-base" href="#">
+<span class="material-symbols-outlined">restaurant</span> Eats
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-body-base" href="#">
+<span class="material-symbols-outlined">work</span> Gigs
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-body-base" href="#">
+<span class="material-symbols-outlined">home_work</span> Stay
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-body-bold" href="#">
+<span class="material-symbols-outlined">local_shipping</span> Logistics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-body-base" href="#">
+<span class="material-symbols-outlined">analytics</span> Analytics
+            </a>
+</nav>
+<div class="border-t border-outline-variant pt-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-body-base" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg font-body-base" href="#">
+<span class="material-symbols-outlined">help_outline</span> Support
+            </a>
+<div class="mt-4 px-4 py-3 bg-primary-container/10 rounded-lg">
+<div class="flex items-center gap-2 mb-1">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-xs font-bold text-primary">SYSTEM HEALTH</span>
+</div>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">All Nodes Operational</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="ml-64 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 right-0 left-64 z-40 flex justify-between items-center px-lg h-touch-target-primary bg-canvas-pure/80 backdrop-blur-md border-b border-outline-variant shadow-sm">
+<div class="flex items-center gap-lg">
+<h2 class="font-headline-md text-headline-md font-extrabold text-primary">Admin Console</h2>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container rounded-full border-none focus:ring-2 focus:ring-primary text-sm w-80" placeholder="Search corridors, AWB, or partners..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined">dns</span>
+</button>
+<div class="h-8 w-px bg-outline-variant mx-2"></div>
+<div class="flex items-center gap-3 pl-2">
+<div class="text-right">
+<p class="text-xs font-bold leading-none">Adesina O.</p>
+<p class="text-[10px] text-on-surface-variant">Global Logistics Lead</p>
+</div>
+<img alt="Admin Profile" class="w-8 h-8 rounded-full border border-outline-variant" data-alt="A professional headshot of a Nigerian male executive in his 40s, wearing a sharp charcoal suit and white shirt. He is smiling confidently against a soft-focus office background. The lighting is bright and clean, typical of a high-end corporate portrait in a modern, light-mode UI design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc7KqElS9S_dfrLCV2kbLjpIhXXwc6EmNV_oB-DLI9dS-KFNFdA17bwPsZujUVNuMEkXiLddLsBbStWSj8ClgXzcxVYJ9qEGNM4sxxToZOwZJys5sqrhLk3Hr-NniLGFChkNz2j4X47KPs2gnqOoayA-xoW0h5m5BOdPHz1EPPsetomAmq3xP0FItbGRZ2iGoj_Hyd4oceyJLZzrCcWNWpu6ghTrcCl5Lf0TvkQ8py6LdLvJZBUrQukyZxyHZ-xTi7qQQiMPw7vi2c"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="pt-24 px-lg pb-xl max-w-[1600px] mx-auto">
+<div class="flex justify-between items-end mb-xl">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface">NaijaSend: Cross-Border Pipeline &amp; Handoffs</h1>
+<p class="text-on-surface-variant mt-1">Real-time oversight of international cargo flows and multi-modal transitions.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-md py-2 border-2 border-primary text-primary font-bold rounded-lg hover:bg-primary/5 transition-all">
+<span class="material-symbols-outlined">download</span> Export Report
+                    </button>
+<button class="flex items-center gap-2 px-lg py-2 bg-primary text-on-primary font-bold rounded-lg shadow-md hover:shadow-lg transition-all active:scale-95">
+<span class="material-symbols-outlined">add</span> Create Manifest
+                    </button>
+</div>
+</div>
+<!-- Dashboard Bento Grid -->
+<div class="grid grid-cols-12 gap-xl">
+<!-- 1. International Corridor Pipeline (Large Central) -->
+<section class="col-span-12 lg:col-span-8 bg-canvas-pure rounded-xl border border-outline-variant p-lg shadow-sm">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">route</span> Active Corridor Pipeline
+                        </h3>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant font-bold">
+<span class="w-3 h-3 rounded-full bg-primary"></span> On Time
+                            <span class="w-3 h-3 rounded-full bg-trust-amber ml-2"></span> Delay Warning
+                            <span class="w-3 h-3 rounded-full bg-error ml-2"></span> Critical
+                        </div>
+</div>
+<div class="space-y-xl">
+<!-- Pipeline Row 1: London -> Lagos -->
+<div class="relative">
+<div class="flex justify-between mb-sm items-center">
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold bg-surface-container px-3 py-1 rounded-full">LHR → LOS</span>
+<span class="text-sm text-on-surface-variant">London Heathrow to Lagos Murtala Muhammed</span>
+</div>
+<span class="text-price-display font-price-display text-primary">82% <span class="text-xs font-normal text-on-surface-variant">Volume Cap</span></span>
+</div>
+<div class="h-12 w-full bg-surface-container rounded-xl flex items-center px-4 relative overflow-hidden">
+<div class="absolute inset-y-0 left-0 bg-primary/20 w-[65%] border-r-2 border-primary"></div>
+<div class="relative z-10 flex w-full justify-between items-center">
+<div class="flex gap-8">
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-on-surface-variant">AIR UPLIFT</span>
+<span class="text-xs font-bold">14 Flights Active</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-on-surface-variant">CLEARANCE</span>
+<span class="text-xs font-bold">2,140 Manifests</span>
+</div>
+</div>
+<div class="flex -space-x-2">
+<img class="w-6 h-6 rounded-full border-2 border-canvas-pure" data-alt="A macro photograph of a white cargo plane tail with a blue bird logo against a clear blue sky. High-contrast, bright, and professional aviation photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOQ7pJ4ZPaHSycedCfEPl9wKsZEIFSeN3Lc2VCLWDlAtQItzEdUdvWBo5FRgnRUCHGB5NSE07zqQCkfQNnOBM0vQx3VSLmR9kcLZOWzYC3xCPNUZ_oCP4CMXx4EK1CYdXpkwbjniMzIGabsRj1p1nB0mqZKQBMGAiYCs4vFp62KkHvFFuNNy9TOiFkw3AIEHxr8N5jvzX1tHGHkJ--iORFoqW070gutbODtcRYYcFaM0LT9aIRtfSAobONCwnmHLli_q9EcErP_DL4"/>
+<img class="w-6 h-6 rounded-full border-2 border-canvas-pure" data-alt="A clean, modern logistics truck seen from the side, painted in vibrant green and white. The lighting is bright morning sun, highlighting the metallic surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBExSJ_e4EbuYO9gkuNWZL8FLaTpjFkPFu7u6BdaJoFPWpeQIqtt-B_IcEy1Al9qDVYZSRMqS9OJwGbA7rr5zgI7EboaqQ4eHi2xTE0P04PgB9dZIIs6Dh_38wgC85VB4m7Z9t6wWYyOU3RokFDs7F5k5gvr1QMESZwv_LvmoRAwzLeaVVdAD4FlRzF-UD7XQm4gcHadZWUdEpTEgCOF-xV_efyJbiIq2FYfpuFmiES7pDXA2E3bxdl80pyTPimReiR5eUGOLm48aJE"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Pipeline Row 2: Guangzhou -> Kano -->
+<div class="relative">
+<div class="flex justify-between mb-sm items-center">
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold bg-surface-container px-3 py-1 rounded-full">CAN → KAN</span>
+<span class="text-sm text-on-surface-variant">Guangzhou Baiyun to Kano Mallam Aminu</span>
+</div>
+<span class="text-price-display font-price-display text-trust-amber">45% <span class="text-xs font-normal text-on-surface-variant">Congestion Risk</span></span>
+</div>
+<div class="h-12 w-full bg-surface-container rounded-xl flex items-center px-4 relative overflow-hidden">
+<div class="absolute inset-y-0 left-0 bg-trust-amber/20 w-[45%] border-r-2 border-trust-amber"></div>
+<div class="relative z-10 flex w-full justify-between items-center">
+<div class="flex gap-8">
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-on-surface-variant">PORT TRANSIT</span>
+<span class="text-xs font-bold">In-Transit: 42 Teu</span>
+</div>
+<div class="flex flex-col text-trust-amber">
+<span class="text-[10px] font-label-caps">DELAY ALERT</span>
+<span class="text-xs font-bold">Harbor Pilot Queue</span>
+</div>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 bg-trust-amber-surface text-trust-amber rounded-full text-[10px] font-bold">
+<span class="material-symbols-outlined text-sm">warning</span> 2H DELAY
+                                    </div>
+</div>
+</div>
+</div>
+<!-- Pipeline Row 3: Dubai -> Abuja -->
+<div class="relative">
+<div class="flex justify-between mb-sm items-center">
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold bg-surface-container px-3 py-1 rounded-full">DXB → ABV</span>
+<span class="text-sm text-on-surface-variant">Dubai International to Abuja Nnamdi Azikiwe</span>
+</div>
+<span class="text-price-display font-price-display text-primary">94% <span class="text-xs font-normal text-on-surface-variant">On Time</span></span>
+</div>
+<div class="h-12 w-full bg-surface-container rounded-xl flex items-center px-4 relative overflow-hidden">
+<div class="absolute inset-y-0 left-0 bg-primary/20 w-[94%] border-r-2 border-primary"></div>
+<div class="relative z-10 flex w-full justify-between items-center">
+<div class="flex gap-8">
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-on-surface-variant">LAST MILE</span>
+<span class="text-xs font-bold">Abuja Hub Distribution</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Carrier Handoff Audit (Metrics) -->
+<section class="col-span-12 lg:col-span-4 flex flex-col gap-xl">
+<div class="bg-on-surface text-white rounded-xl p-lg shadow-xl flex-1 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-lg opacity-10">
+<span class="material-symbols-outlined text-[80px]">airplane_ticket</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-md relative z-10">Carrier Performance</h3>
+<div class="space-y-6 relative z-10">
+<div class="flex justify-between items-center">
+<div>
+<p class="text-sm text-surface-dim">Emirates SkyCargo</p>
+<div class="flex items-center gap-1 mt-1">
+<div class="h-1 w-24 bg-white/20 rounded-full">
+<div class="h-full bg-primary-fixed w-[98%] rounded-full"></div>
+</div>
+<span class="text-xs font-bold ml-2">98.2%</span>
+</div>
+</div>
+<span class="text-[10px] font-label-caps bg-primary/20 text-primary-fixed border border-primary-fixed/30 px-2 py-1 rounded">SLA A+</span>
+</div>
+<div class="flex justify-between items-center">
+<div>
+<p class="text-sm text-surface-dim">British Airways</p>
+<div class="flex items-center gap-1 mt-1">
+<div class="h-1 w-24 bg-white/20 rounded-full">
+<div class="h-full bg-primary-fixed w-[92%] rounded-full"></div>
+</div>
+<span class="text-xs font-bold ml-2">91.5%</span>
+</div>
+</div>
+<span class="text-[10px] font-label-caps bg-primary/20 text-primary-fixed border border-primary-fixed/30 px-2 py-1 rounded">SLA A</span>
+</div>
+<div class="flex justify-between items-center">
+<div>
+<p class="text-sm text-surface-dim">NaijaPost Express</p>
+<div class="flex items-center gap-1 mt-1">
+<div class="h-1 w-24 bg-white/20 rounded-full">
+<div class="h-full bg-trust-amber w-[74%] rounded-full"></div>
+</div>
+<span class="text-xs font-bold ml-2">74.8%</span>
+</div>
+</div>
+<span class="text-[10px] font-label-caps bg-trust-amber/20 text-trust-amber border border-trust-amber/30 px-2 py-1 rounded">SLA B-</span>
+</div>
+</div>
+<button class="w-full mt-lg py-3 rounded-lg bg-surface-container-highest/20 hover:bg-surface-container-highest/30 transition-all font-bold text-sm">
+                            Audit Partner SLAs
+                        </button>
+</div>
+<div class="bg-canvas-pure rounded-xl border border-outline-variant p-lg shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-bold">Handoff Efficiency</h3>
+<span class="text-xs text-primary font-bold">+12% vs LY</span>
+</div>
+<div class="flex items-end gap-2 h-24">
+<div class="flex-1 bg-surface-container rounded-t-sm h-[40%]"></div>
+<div class="flex-1 bg-surface-container rounded-t-sm h-[60%]"></div>
+<div class="flex-1 bg-surface-container rounded-t-sm h-[55%]"></div>
+<div class="flex-1 bg-surface-container rounded-t-sm h-[80%]"></div>
+<div class="flex-1 bg-primary rounded-t-sm h-[95%]"></div>
+<div class="flex-1 bg-primary rounded-t-sm h-[85%]"></div>
+<div class="flex-1 bg-primary rounded-t-sm h-[100%]"></div>
+</div>
+<div class="flex justify-between mt-2 text-[10px] font-label-caps text-on-surface-variant">
+<span>MON</span><span>WED</span><span>FRI</span><span>SUN</span>
+</div>
+</div>
+</section>
+<!-- 3. Customs & Duty Management (Tabular Section) -->
+<section class="col-span-12 lg:col-span-7 bg-canvas-pure rounded-xl border border-outline-variant p-lg shadow-sm">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-trust-amber">description</span> Customs Clearance Queue
+                        </h3>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-security-crimson-surface text-security-crimson text-xs font-bold rounded-full">14 Documentation Holds</span>
+<span class="px-3 py-1 bg-surface-container text-on-surface-variant text-xs font-bold rounded-full">All Pending (42)</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-4 py-3 text-[10px] font-label-caps text-on-surface-variant">MANIFEST ID</th>
+<th class="px-4 py-3 text-[10px] font-label-caps text-on-surface-variant">CONSORTIUM</th>
+<th class="px-4 py-3 text-[10px] font-label-caps text-on-surface-variant">DUTY ESTIMATE</th>
+<th class="px-4 py-3 text-[10px] font-label-caps text-on-surface-variant">STATUS</th>
+<th class="px-4 py-3 text-[10px] font-label-caps text-on-surface-variant">ACTION</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-4 py-4 font-bold text-sm">NS-LHR-8291</td>
+<td class="px-4 py-4 text-sm">
+<div class="flex flex-col">
+<span>MedLine Supplies</span>
+<span class="text-xs text-on-surface-variant">Pharma/High-Priority</span>
+</div>
+</td>
+<td class="px-4 py-4 text-sm font-price-display">₦1,240,500</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-trust-amber-surface text-trust-amber border border-trust-amber/20 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-trust-amber"></span>
+<span class="text-[10px] font-bold">VALUATION HOLD</span>
+</div>
+</td>
+<td class="px-4 py-4">
+<button class="text-primary font-bold text-sm hover:underline">Approve Duty</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-4 py-4 font-bold text-sm">NS-CAN-0034</td>
+<td class="px-4 py-4 text-sm">
+<div class="flex flex-col">
+<span>GZ Tech Retail</span>
+<span class="text-xs text-on-surface-variant">Consumer Electronics</span>
+</div>
+</td>
+<td class="px-4 py-4 text-sm font-price-display">₦4,810,000</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-security-crimson-surface text-security-crimson border border-security-crimson/20 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-security-crimson"></span>
+<span class="text-[10px] font-bold">HS CODE ERROR</span>
+</div>
+</td>
+<td class="px-4 py-4">
+<button class="text-primary font-bold text-sm hover:underline">Edit Tariff</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-4 py-4 font-bold text-sm">NS-DXB-9122</td>
+<td class="px-4 py-4 text-sm">
+<div class="flex flex-col">
+<span>Al-Futtaim Heavy</span>
+<span class="text-xs text-on-surface-variant">Industrial Parts</span>
+</div>
+</td>
+<td class="px-4 py-4 text-sm font-price-display">₦890,200</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="text-[10px] font-bold">READY TO RELEASE</span>
+</div>
+</td>
+<td class="px-4 py-4">
+<button class="text-primary font-bold text-sm hover:underline">Release Cargo</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- 4. AI Routing Suggestions (Side Actionable) -->
+<section class="col-span-12 lg:col-span-5 bg-tertiary-container text-white rounded-xl p-lg shadow-lg flex flex-col">
+<div class="flex items-center gap-3 mb-lg">
+<div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white">psychology</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md leading-tight">AI Routing Intelligence</h3>
+<p class="text-xs text-white/80">Autonomous resolution for corridor blocks</p>
+</div>
+</div>
+<div class="space-y-4 flex-1">
+<!-- Suggestion Card 1 -->
+<div class="bg-white/10 rounded-lg p-4 border border-white/10">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-label-caps bg-white text-tertiary px-2 py-0.5 rounded">REROUTE SUGGESTION</span>
+<span class="text-xs font-bold text-white/60">94% Confidence</span>
+</div>
+<p class="text-sm font-bold mb-1">Apapa Port Bottleneck detected.</p>
+<p class="text-xs text-white/80 leading-relaxed">Divert Guangdong 40ft containers to Lekki Deep Sea Port via Barge-Link to save 12 days in dwell time.</p>
+<div class="mt-4 flex gap-2">
+<button class="flex-1 py-2 bg-white text-tertiary font-bold text-xs rounded-lg hover:bg-white/90 transition-all">Execute Shift</button>
+<button class="px-3 py-2 border border-white/30 text-white font-bold text-xs rounded-lg hover:bg-white/10">Dismiss</button>
+</div>
+</div>
+<!-- Suggestion Card 2 -->
+<div class="bg-white/10 rounded-lg p-4 border border-white/10">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-label-caps bg-white text-tertiary px-2 py-0.5 rounded">TARIFF OPTIMIZATION</span>
+<span class="text-xs font-bold text-white/60">AI Analysis</span>
+</div>
+<p class="text-sm font-bold mb-1">Bulk Electronics Re-classification.</p>
+<p class="text-xs text-white/80 leading-relaxed">Update 12 manifests to new ECOWAS trade agreement codes to reduce total duty by ₦4.2M.</p>
+<div class="mt-4 flex gap-2">
+<button class="flex-1 py-2 bg-white text-tertiary font-bold text-xs rounded-lg hover:bg-white/90 transition-all">Apply All</button>
+<button class="px-3 py-2 border border-white/30 text-white font-bold text-xs rounded-lg hover:bg-white/10">Review</button>
+</div>
+</div>
+</div>
+<div class="mt-lg pt-lg border-t border-white/10">
+<div class="flex items-center justify-between text-[10px] font-label-caps">
+<span>ALGORITHM STATUS: OPTIMAL</span>
+<span>LAST UPDATE: 2M AGO</span>
+</div>
+</div>
+</section>
+<!-- Trust Indicator Badges Row -->
+<div class="col-span-12 flex flex-wrap gap-md">
+<div class="bg-trust-amber-surface border border-trust-amber/30 px-lg py-4 rounded-xl flex items-center gap-4 flex-1 min-w-[250px]">
+<div class="w-12 h-12 rounded-full bg-trust-amber flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div>
+<p class="text-xs font-label-caps text-trust-amber">SECURITY SCORE</p>
+<h4 class="text-2xl font-price-display text-on-surface">9.8/10 <span class="text-sm font-body-base text-on-surface-variant font-normal">System Integrity</span></h4>
+</div>
+</div>
+<div class="bg-primary-container/10 border border-primary/30 px-lg py-4 rounded-xl flex items-center gap-4 flex-1 min-w-[250px]">
+<div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<div>
+<p class="text-xs font-label-caps text-primary">COMPLIANCE</p>
+<h4 class="text-2xl font-price-display text-on-surface">100% <span class="text-sm font-body-base text-on-surface-variant font-normal">Audit Ready</span></h4>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant px-lg py-4 rounded-xl flex items-center gap-4 flex-1 min-w-[250px]">
+<div class="w-12 h-12 rounded-full bg-on-surface-variant flex items-center justify-center text-white">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<div>
+<p class="text-xs font-label-caps text-on-surface-variant">DAILY REVENUE</p>
+<h4 class="text-2xl font-price-display text-on-surface">₦42.5M <span class="text-sm font-body-base text-on-surface-variant font-normal">Gross Flow</span></h4>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Interactive Micro-Interactions Script -->
+<script>
+        // Simple scale effect for interactive elements
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mousedown', () => button.classList.add('scale-95'));
+            button.addEventListener('mouseup', () => button.classList.remove('scale-95'));
+            button.addEventListener('mouseleave', () => button.classList.remove('scale-95'));
+        });
+
+        // Hover effect for corridor pipeline rows
+        const pipelineRows = document.querySelectorAll('.pipeline-gradient-container');
+        pipelineRows.forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                row.classList.add('border-primary');
+            });
+            row.addEventListener('mouseleave', () => {
+                row.classList.remove('border-primary');
+            });
+        });
+    </script>
+</body></html>

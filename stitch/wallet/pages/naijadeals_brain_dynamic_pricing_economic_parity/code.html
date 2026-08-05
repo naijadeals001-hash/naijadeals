@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NaijaDeals Brain | Dynamic Pricing Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #bfc9c3; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #707974; }
+        
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #bfc9c3;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #d3e4fe;
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #003527;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 4px rgba(0, 53, 39, 0.1);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#515f74",
+                        "secondary-container": "#d5e3fd",
+                        "inverse-primary": "#95d3ba",
+                        "on-secondary-container": "#57657b",
+                        "tertiary-fixed": "#85f8c4",
+                        "background": "#f8f9ff",
+                        "tertiary-container": "#004f35",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "surface-container": "#e5eeff",
+                        "surface-dim": "#cbdbf5",
+                        "primary": "#003527",
+                        "on-tertiary-container": "#51c695",
+                        "on-primary-container": "#80bea6",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#2b6954",
+                        "secondary-fixed": "#d5e3fd",
+                        "surface-container-low": "#eff4ff",
+                        "primary-container": "#064e3b",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed": "#002117",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed": "#002114",
+                        "on-error-container": "#93000a",
+                        "outline": "#707974",
+                        "on-tertiary-fixed-variant": "#005137",
+                        "primary-fixed-dim": "#95d3ba",
+                        "tertiary": "#003623",
+                        "on-primary-fixed-variant": "#0b513d",
+                        "inverse-surface": "#213145",
+                        "on-background": "#0b1c30",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface": "#f8f9ff",
+                        "tertiary-fixed-dim": "#68dba9",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "surface-bright": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#404944",
+                        "outline-variant": "#bfc9c3",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#b0f0d6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden">
+<!-- TopNavBar -->
+<nav class="flex justify-between items-center w-full px-margin-desktop h-16 z-50 bg-inverse-surface dark:bg-inverse-surface border-b border-outline-variant fixed top-0">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-inverse-on-surface dark:text-inverse-on-surface">NaijaDeals Brain</span>
+<div class="hidden md:flex gap-6">
+<a class="text-primary-fixed border-b-2 border-primary-fixed pb-1 font-body-md" href="#">Pricing Engine</a>
+<a class="text-surface-variant hover:bg-on-secondary-fixed-variant transition-colors duration-200 font-body-md" href="#">Marketplace</a>
+<a class="text-surface-variant hover:bg-on-secondary-fixed-variant transition-colors duration-200 font-body-md" href="#">Settlements</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<input class="bg-on-secondary-fixed-variant text-inverse-on-surface px-4 py-1.5 rounded-lg border-none focus:ring-1 focus:ring-primary-fixed text-body-md w-64" placeholder="Search parameters..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="material-symbols-outlined text-primary-fixed p-2 hover:bg-on-secondary-fixed-variant rounded-full transition-colors">security</button>
+<button class="material-symbols-outlined text-primary-fixed p-2 hover:bg-on-secondary-fixed-variant rounded-full transition-colors">notifications</button>
+<button class="material-symbols-outlined text-primary-fixed p-2 hover:bg-on-secondary-fixed-variant rounded-full transition-colors">account_circle</button>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-16 bg-surface-container-low dark:bg-surface-dim border-r border-outline-variant w-64 z-40">
+<div class="p-6 border-b border-outline-variant mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">shield_person</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">System Admin</p>
+<p class="font-body-md text-body-md font-bold text-on-surface">Tier-1 Clearance</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-secondary-container text-on-secondary-container border-l-4 border-primary font-bold transition-transform duration-200 translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-label-sm text-label-sm">Pricing Models</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-label-sm text-label-sm">Ranking Engine</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="Hub">hub</span>
+<span class="font-label-sm text-label-sm">Matching Logic</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-label-sm text-label-sm">Reputation Score</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-label-sm text-label-sm">Search Core</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+<span class="font-label-sm text-label-sm">Dispatch Ops</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-error" href="#">
+<span class="material-symbols-outlined" data-icon="gpp_bad">gpp_bad</span>
+<span class="font-label-sm text-label-sm">Fraud Sentry</span>
+</a>
+</nav>
+<div class="p-4 bg-surface-container mt-auto border-t border-outline-variant">
+<button class="w-full bg-primary text-white py-2 rounded font-label-sm text-label-sm hover:opacity-90 transition-opacity">System Reboot</button>
+<div class="mt-4 flex flex-col gap-2">
+<a class="flex items-center gap-2 text-on-surface-variant hover:text-primary" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="history_edu">history_edu</span>
+<span class="text-xs">Audit Logs</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant hover:text-primary" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="psychology">psychology</span>
+<span class="text-xs">AI Settings</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 h-screen overflow-y-auto bg-background">
+<!-- Authority Level Header -->
+<div class="bg-primary text-white px-margin-desktop py-6 flex justify-between items-end">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm uppercase tracking-widest opacity-80">Pricing Authority Unit</span>
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] font-bold">LEVEL-1 SECURE</span>
+</div>
+<h1 class="font-display-lg text-display-lg">Dynamic Pricing Engine</h1>
+<nav class="flex gap-2 mt-2 opacity-70 font-label-sm text-label-sm">
+<span>NaijaDeals Brain</span> / <span>Regional Economy</span> / <span class="text-primary-fixed">Pricing Engine</span>
+</nav>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm opacity-60">LAST AUDITED</p>
+<p class="font-label-sm text-label-sm font-bold">2023-10-27 14:02:11 GMT</p>
+<div class="mt-2 inline-flex items-center gap-2 bg-on-primary/10 px-3 py-1 rounded-full border border-on-primary/20">
+<span class="material-symbols-outlined text-sm">verified</span>
+<span class="text-xs font-label-sm">Crypto-Proof Active</span>
+</div>
+</div>
+</div>
+<div class="p-margin-desktop">
+<div class="bento-grid">
+<!-- 1. Economic Parity Tuner -->
+<section class="col-span-12 lg:col-span-5 glass-card p-6 flex flex-col gap-6">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">tune</span>
+                            Economic Parity Tuner
+                        </h2>
+<span class="material-symbols-outlined text-outline cursor-help" title="Adjust coefficients for regional parity models">info</span>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between text-on-surface-variant font-label-sm uppercase">
+<span>Local Currency Volatility</span>
+<span class="font-bold text-primary">±12.4%</span>
+</div>
+<input class="cursor-pointer" max="20" min="-20" type="range" value="12"/>
+<p class="text-[10px] text-outline leading-tight">Adjusts markup buffer based on NGN/USD real-time delta.</p>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-on-surface-variant font-label-sm uppercase">
+<span>Regional Purchasing Power</span>
+<span class="font-bold text-primary">0.85x</span>
+</div>
+<input class="cursor-pointer" max="1.5" min="0.5" step="0.01" type="range" value="0.85"/>
+<p class="text-[10px] text-outline leading-tight">Scales base fare against the regional average monthly income index.</p>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-on-surface-variant font-label-sm uppercase">
+<span>Infrastructure Cost Offset</span>
+<span class="font-bold text-primary">+18%</span>
+</div>
+<input class="cursor-pointer" max="40" min="0" type="range" value="18"/>
+<p class="text-[10px] text-outline leading-tight">Surcharge for high-latency or high-fuel cost logistics zones.</p>
+</div>
+</div>
+<button class="mt-auto bg-primary text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined">save</span>
+                        Commit Changes to Ledger
+                    </button>
+</section>
+<!-- 2. Multi-Currency Ledger -->
+<section class="col-span-12 lg:col-span-7 glass-card overflow-hidden flex flex-col">
+<div class="p-6 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+                            Internal Settlement Engine
+                        </h2>
+<div class="px-3 py-1 bg-primary text-white rounded text-[10px] font-bold tracking-widest">REAL-TIME SYNC</div>
+</div>
+<div class="flex-1 overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container border-b border-outline-variant">
+<tr>
+<th class="px-6 py-3 font-label-sm text-label-sm uppercase text-outline">Pair</th>
+<th class="px-6 py-3 font-label-sm text-label-sm uppercase text-outline">Rate</th>
+<th class="px-6 py-3 font-label-sm text-label-sm uppercase text-outline">24h Change</th>
+<th class="px-6 py-3 font-label-sm text-label-sm uppercase text-outline">Spread %</th>
+<th class="px-6 py-3 font-label-sm text-label-sm uppercase text-outline">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4 font-bold text-on-surface">NGN / XAF</td>
+<td class="px-6 py-4 font-label-sm">0.7812</td>
+<td class="px-6 py-4 text-error font-bold">-0.12%</td>
+<td class="px-6 py-4">0.02%</td>
+<td class="px-6 py-4"><span class="flex items-center gap-2 text-primary text-xs font-bold"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE</span></td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4 font-bold text-on-surface">NGN / GHS</td>
+<td class="px-6 py-4 font-label-sm">0.0124</td>
+<td class="px-6 py-4 text-primary font-bold">+1.45%</td>
+<td class="px-6 py-4">0.04%</td>
+<td class="px-6 py-4"><span class="flex items-center gap-2 text-primary text-xs font-bold"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE</span></td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4 font-bold text-on-surface">KES / NGN</td>
+<td class="px-6 py-4 font-label-sm">5.6721</td>
+<td class="px-6 py-4 text-primary font-bold">+0.08%</td>
+<td class="px-6 py-4">0.01%</td>
+<td class="px-6 py-4"><span class="flex items-center gap-2 text-primary text-xs font-bold"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE</span></td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4 font-bold text-on-surface">ZAR / NGN</td>
+<td class="px-6 py-4 font-label-sm">42.193</td>
+<td class="px-6 py-4 text-error font-bold">-2.11%</td>
+<td class="px-6 py-4">0.05%</td>
+<td class="px-6 py-4"><span class="flex items-center gap-2 text-primary text-xs font-bold"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- 3. Surge Pricing Controller -->
+<section class="col-span-12 lg:col-span-4 glass-card p-6 border-l-4 border-error flex flex-col gap-4">
+<h2 class="font-headline-md text-headline-md flex items-center justify-between">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error">bolt</span>
+                            Surge Triggers
+                        </span>
+<button class="material-symbols-outlined text-outline">add_circle</button>
+</h2>
+<div class="space-y-3">
+<!-- Trigger Card -->
+<div class="bg-surface-container p-4 rounded-lg border border-outline-variant hover:border-error transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold bg-error text-white px-2 py-0.5 rounded">METEOROLOGICAL</span>
+<span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-100">edit</span>
+</div>
+<h3 class="font-bold text-body-lg">Lagos Precipitation Spike</h3>
+<p class="text-xs text-on-surface-variant mt-1">IF (Rainfall &gt; 5mm) THEN (Multiplier = 1.8x)</p>
+<div class="mt-4 flex items-center justify-between text-[10px] font-bold text-outline">
+<span>ACTIVE IN: Ikeja, Lekki, Victoria Island</span>
+<span class="text-error">EST. IMPACT +44% GMV</span>
+</div>
+</div>
+<!-- Trigger Card -->
+<div class="bg-surface-container p-4 rounded-lg border border-outline-variant hover:border-error transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold bg-primary text-white px-2 py-0.5 rounded">CONGESTION</span>
+<span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-100">edit</span>
+</div>
+<h3 class="font-bold text-body-lg">Market Day Congestion</h3>
+<p class="text-xs text-on-surface-variant mt-1">IF (Traffic_Index &gt; 0.8) THEN (Offset = +₦500)</p>
+<div class="mt-4 flex items-center justify-between text-[10px] font-bold text-outline">
+<span>ACTIVE IN: Onitsha, Lagos, Kano</span>
+<span class="text-primary">EST. RELIABILITY +12%</span>
+</div>
+</div>
+</div>
+<p class="text-[10px] text-outline italic text-center mt-auto">Surge overrides require Tier-1 cryptographic sign-off.</p>
+</section>
+<!-- 4. Price Elasticity Heatmap -->
+<section class="col-span-12 lg:col-span-8 glass-card flex flex-col min-h-[400px]">
+<div class="p-6 border-b border-outline-variant flex justify-between items-center">
+<div>
+<h2 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">analytics</span>
+                                Price Elasticity Heatmap
+                            </h2>
+<p class="text-xs text-on-surface-variant">Sensitivity of Order Volume to Price Increments by Hub</p>
+</div>
+<div class="flex gap-2">
+<select class="bg-surface-container border-outline-variant rounded text-xs font-bold px-3 py-1">
+<option>Lagos vs Libreville</option>
+<option>Nairobi vs Accra</option>
+<option>Cairo vs Johannesburg</option>
+</select>
+<button class="bg-surface-container p-1 rounded border border-outline-variant material-symbols-outlined">download</button>
+</div>
+</div>
+<div class="flex-1 relative bg-surface-container-lowest p-6 grid grid-cols-5 grid-rows-4 gap-2">
+<!-- Simulated Heatmap Grid -->
+<div class="col-span-1 row-span-1 rounded bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">2.1%</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/40 flex items-center justify-center text-[10px] font-bold text-primary">4.5%</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/80 flex items-center justify-center text-[10px] font-bold text-white">8.9%</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/50 flex items-center justify-center text-[10px] font-bold text-primary">5.2%</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">1.2%</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/60 flex items-center justify-center text-[10px] font-bold text-white">6.7%</div>
+<div class="col-span-3 row-span-2 rounded border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
+<img class="w-full h-full object-cover opacity-20 grayscale" data-alt="A sophisticated data visualization dashboard showing interconnected nodes and neural network lines over a dark map of Africa. The style is modern, cinematic, and technical with deep emerald and teal glowing accents, representing high-frequency financial transactions and logistics routes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrY_jviz6xUCyWXvvN3efk4km8jR_WTywQiRfoPdwAV4Cv-DrklrmuQjHAj5YwNriXCBK8m_iu0T1tGRDEHpOmpfWzHZNX6RBH0mzSb4lxRNQebzMOogJGTe3CGAtxVbloFVXYKV9HhK-mncHUDCMNYIWVze0Caqt-7WeDpwESoo8OzG1w9ZF6wdjZG7hnPm92-MIGVkwXhWP4tYledStNFoTWRDADaIn60H4442Ev0FIXvIDeMKaCwq1Df4WdzkW1PEwvN-URvsLV"/>
+<p class="relative z-10 font-bold text-primary uppercase text-xs">Dynamic Cluster Analysis</p>
+<p class="relative z-10 text-[10px] text-on-surface-variant">Libreville Corridor Sensitive Zone</p>
+</div>
+<div class="col-span-1 row-span-1 rounded bg-error/20 flex items-center justify-center text-[10px] font-bold text-error">CHURN RISK</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/30 flex items-center justify-center text-[10px] font-bold text-primary">3.1%</div>
+<div class="col-span-1 row-span-1 rounded bg-error/40 flex items-center justify-center text-[10px] font-bold text-error">-12.4%</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/90 flex items-center justify-center text-[10px] font-bold text-white">MAX YIELD</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/70 flex items-center justify-center text-[10px] font-bold text-white">7.4%</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">2.5%</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">1.1%</div>
+<div class="col-span-1 row-span-1 rounded bg-primary/05 flex items-center justify-center text-[10px] font-bold text-primary">0.4%</div>
+</div>
+</section>
+<!-- 5. Activity Log / Audit Trail (Technical Detail) -->
+<section class="col-span-12 glass-card p-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="font-label-sm text-label-sm uppercase font-bold text-outline">System Audit Trail :: pricing_engine_01</h2>
+<span class="text-[10px] text-outline font-mono">HASH: 8e21a_bf9c_2201</span>
+</div>
+<div class="space-y-2 font-label-sm text-[11px] text-on-surface-variant font-mono">
+<div class="flex gap-4 border-l-2 border-primary pl-3 py-1 hover:bg-surface-container transition-colors">
+<span class="text-primary">[14:02:11]</span>
+<span class="font-bold">ADMIN_OFFICER_04</span>
+<span>REQUESTED ADJUSTMENT: "Regional Purchasing Power" from 0.82 to 0.85 (Libreville Segment)</span>
+<span class="ml-auto flex items-center gap-1 text-primary"><span class="material-symbols-outlined text-[12px]">done_all</span> SIGNED</span>
+</div>
+<div class="flex gap-4 border-l-2 border-error pl-3 py-1 hover:bg-surface-container transition-colors">
+<span class="text-error">[13:45:02]</span>
+<span class="font-bold">SYSTEM_AUTO</span>
+<span>TRIGGERED: Lagos Rain Surge 1.8x. High traffic density detected at Mainland Hub.</span>
+<span class="ml-auto flex items-center gap-1 text-error"><span class="material-symbols-outlined text-[12px]">warning</span> BROADCASTING</span>
+</div>
+<div class="flex gap-4 border-l-2 border-outline-variant pl-3 py-1 hover:bg-surface-container transition-colors">
+<span class="text-outline">[13:12:55]</span>
+<span class="font-bold">CURRENCY_ORACLE</span>
+<span>UPDATED: NGN/USD - Rate volatility breached threshold. Markup buffer updated to 12.4%.</span>
+<span class="ml-auto flex items-center gap-1 text-outline"><span class="material-symbols-outlined text-[12px]">sync</span> LOGGED</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Contextual FAB for Pricing Engine -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all group z-50">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform">bolt</span>
+<span class="absolute right-full mr-4 bg-inverse-surface text-white px-3 py-1.5 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Instant Global Surge (Emergency)</span>
+</button>
+<script>
+        // Micro-interactions for range inputs
+        const sliders = document.querySelectorAll('input[type="range"]');
+        sliders.forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                const valueDisplay = e.target.previousElementSibling.querySelector('span');
+                if (valueDisplay) {
+                    // Simple logic to format based on slider context
+                    if (e.target.step === '0.01') {
+                        valueDisplay.textContent = e.target.value + 'x';
+                    } else if (e.target.min === '-20') {
+                        const val = parseFloat(e.target.value);
+                        valueDisplay.textContent = (val > 0 ? '+' : '') + val + '%';
+                    } else {
+                        valueDisplay.textContent = '+' + e.target.value + '%';
+                    }
+                }
+            });
+        });
+
+        // Simple mock for "System Reboot"
+        const rebootBtn = document.querySelector('button:contains("System Reboot")') || document.querySelectorAll('button')[2]; 
+        rebootBtn.addEventListener('click', () => {
+            const confirmed = confirm('CRITICAL: Initiating Tier-1 System Reboot will temporarily pause dynamic recalculations. Proceed?');
+            if (confirmed) {
+                document.body.classList.add('opacity-50', 'pointer-events-none');
+                setTimeout(() => window.location.reload(), 2000);
+            }
+        });
+    </script>
+</body></html>
